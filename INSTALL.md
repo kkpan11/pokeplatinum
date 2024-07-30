@@ -31,17 +31,18 @@ You now have the choice between two different environments to use to build the p
 3. Reopen an MSYS terminal (pink icon) and enter the following commands to install the necessary packages:
 
     ```
-    echo 'export MINGW_PACKAGE_PREFIX=mingw-w64-x86_64-' >> ~/.bashrc
     echo 'export PATH=${PATH}:/mingw64/bin' >> ~/.bashrc
     source ~/.bashrc
-    pacman -S git meson gcc "${MINGW_PACKAGE_PREFIX}arm-none-eabi-binutils"
+    pacman -S git meson gcc mingw-w64-x86_64-arm-none-eabi-{binutils,gcc}
     ```
 
     Press 'Y' when prompted to confirm the installation.
 
-4. Continue with the [building instructions](#Downloading_the_repository). Make sure to always use the plain MSYS environment, other environments will not work.
+4. Continue with the [building instructions](#2-downloading-the-repository). Make sure to always use the plain MSYS environment, other environments will not work.
 
 ### Windows Subsystem for Linux
+
+***NOTE***: These instructions are written for WSL version 1; if you are using WSL version 2, follow the instructions below for [Linux](#linux).
 
 1. Open [Windows Powershell **as Administrator**](https://i.imgur.com/QKmVbP9.png), and run the following command (Right Click or Shift+Insert is paste in the Powershell).
 
@@ -77,7 +78,7 @@ You now have the choice between two different environments to use to build the p
 7. Certain packages are required to build the repository. Install these packages by running the following command:
 
     ```bash
-    sudo apt install git build-essential binutils-arm-none-eabi
+    sudo apt install git build-essential binutils-arm-none-eabi gcc-arm-none-eabi ninja-build
     ```
 
     We are not done yet, the 'meson' package is also necessary, but the version provided by apt is too outdated. To get the most recent meson version, run:
@@ -87,14 +88,24 @@ You now have the choice between two different environments to use to build the p
     pip install --user meson
     ```
 
-8. Change to a directory accessible from Windows where you'll store the files, for example:
+    You may see `pip` respond with a warning saying `"The script meson is installed in '/home/<YOUR_USER>/.local/bin', which is not on PATH."` To resolve
+    such an issue, run the following commands:
+
+    ```bash
+    echo 'export PATH="<path/to/install/directory>:$PATH"' >> ~/.bashrc
+    source ~/.bashrc
+    ```
+
+    Replacing `<path/to/install/directory>` with the path mentioned above in the `pip` warning.
+
+9. Change to a directory accessible from Windows where you'll store the files, for example:
     ```bash
     cd /mnt/c/Users/$USER/Desktop
     ```
 
-Continue with the [building instructions](#Downloading_the_repository)
+Continue with the [building instructions](#2-downloading-the-repository).
 
-## Mac OSX (<= 10.14)
+## macOS
 
 Apple bundles a number of the requisite utilities into Xcode Command Line Tools; to install these, run:
 
@@ -114,13 +125,20 @@ These can be installed using Homebrew; if you do not have Homebrew installed, re
 
 ```
 brew update
-brew install gcc@14 meson libpng pkg-config arm-none-eabi-binutils
+brew install gcc@14 meson libpng pkg-config arm-none-eabi-binutils arm-none-eabi-gcc
 brew install --cask wine-stable
 ```
 
 On macOS Monterey (12) or earlier, you may also need GNU Coreutils installed to run the build script.
 ```
 brew install coreutils
+```
+
+Finally, export the variable `LM_LICENSE_FILE` with value `/path/to/pokeplatinum/tools/cw/license.dat`, e.g.:
+
+```bash
+echo 'export LM_LICENSE_FILE="/path/to/pokeplatinum/tools/cw/license.dat"' >> ~/.zshrc
+source ~/.zshrc
 ```
 
 ## Linux
@@ -131,6 +149,7 @@ Building the ROM requires the following packages. If you cannot find one or more
 * meson (>= 1.3.0)
 * build-essentials (build-essential on Ubuntu)
 * binutils-arm-none-eabi (arm-none-eabi-binutils on Arch Linux)
+* gcc-arm-none-eabi (arm-none-eabi-gcc on Arch Linux)
 * wine (to run the mwcc executables)
 * pkg-config
 
@@ -140,7 +159,14 @@ NOTE: On some distros, the meson package provided by the package manager will be
 meson --version
 ```
 
-If your mesion version is older than 1.2.0, follow the instructions at: https://mesonbuild.com/Getting-meson.html to get the most recent version of Meson
+If your mesion version is older than 1.2.0, follow the instructions at: https://mesonbuild.com/Getting-meson.html to get the most recent version of Meson.
+
+Finally, export the variable `LM_LICENSE_FILE` with value `/path/to/pokeplatinum/tools/cw/license.dat`, e.g.:
+
+```bash
+echo 'export LM_LICENSE_FILE="/path/to/pokeplatinum/tools/cw/license.dat"' >> ~/.bashrc
+source ~/.bashrc
+```
 
 # 2. Downloading the repository
 
