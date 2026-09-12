@@ -1,56 +1,55 @@
-    .include "macros/scrcmd.inc"
+#include "macros/scrcmd.inc"
 
-    .data
 
-    ScriptEntry _0006
-    .short 0xFD13
+    ScriptEntry HearthomeCitySoutheastHouseElevator_OnFrame_Init
+    ScriptEntryEnd
 
-_0006:
+HearthomeCitySoutheastHouseElevator_OnFrame_Init:
     LockAll
-    ApplyMovement 0xFF, _00B8
+    ApplyMovement LOCALID_PLAYER, HearthomeCitySoutheastHouseElevator_Movement_PlayerWalkIn
     WaitMovement
-    ScrCmd_11C 0x40CE
-    SetVar 0x8008, 0x40CE
-    GoToIfEq 0x8008, 1, _0038
-    GoToIfEq 0x8008, 0, _006A
+    GetFloorsAbove VAR_ELEVATOR_FLOORS_ABOVE
+    SetVar VAR_0x8008, VAR_ELEVATOR_FLOORS_ABOVE
+    GoToIfEq VAR_0x8008, 1, HearthomeCitySoutheastHouseElevator_ElevatorUp
+    GoToIfEq VAR_0x8008, 0, HearthomeCitySoutheastHouseElevator_ElevatorDown
     End
 
-_0038:
-    SetVar 0x8004, 0
-    Call _009C
-    FadeScreen 6, 1, 0, 0
+HearthomeCitySoutheastHouseElevator_ElevatorUp:
+    SetVar VAR_0x8004, ELEVATOR_DIR_UP
+    Call HearthomeCitySoutheastHouseElevator_ElevatorAnimation
+    FadeScreenOut
     WaitFadeScreen
-    ScrCmd_0BE 104, 0, 18, 3, 1
-    FadeScreen 6, 1, 1, 0
-    WaitFadeScreen
-    End
-
-_006A:
-    SetVar 0x8004, 1
-    Call _009C
-    FadeScreen 6, 1, 0, 0
-    WaitFadeScreen
-    ScrCmd_0BE 103, 0, 18, 3, 1
-    FadeScreen 6, 1, 1, 0
+    Warp MAP_HEADER_HEARTHOME_CITY_SOUTHEAST_HOUSE_2F, 18, 3, DIR_SOUTH
+    FadeScreenIn
     WaitFadeScreen
     End
 
-_009C:
-    ScrCmd_04B 0x5DC
-    ScrCmd_23C 0x8004, 4
-    ApplyMovement 0xFF, _00C4
+HearthomeCitySoutheastHouseElevator_ElevatorDown:
+    SetVar VAR_0x8004, ELEVATOR_DIR_DOWN
+    Call HearthomeCitySoutheastHouseElevator_ElevatorAnimation
+    FadeScreenOut
+    WaitFadeScreen
+    Warp MAP_HEADER_HEARTHOME_CITY_SOUTHEAST_HOUSE_1F, 18, 3, DIR_SOUTH
+    FadeScreenIn
+    WaitFadeScreen
+    End
+
+HearthomeCitySoutheastHouseElevator_ElevatorAnimation:
+    WaitSE SE_CONFIRM_sseq_3
+    PlayElevatorAnimation VAR_0x8004, 4
+    ApplyMovement LOCALID_PLAYER, HearthomeCitySoutheastHouseElevator_Movement_PlayerWalkOut
     WaitMovement
-    PlayFanfare SEQ_SE_DP_KAIDAN2
+    PlaySE SEQ_SE_DP_KAIDAN2_sseq
     Return
 
     .balign 4, 0
-_00B8:
-    MoveAction_00C 2
-    MoveAction_021
+HearthomeCitySoutheastHouseElevator_Movement_PlayerWalkIn:
+    WalkNormalNorth 2
+    WalkOnSpotNormalSouth
     EndMovement
 
     .balign 4, 0
-_00C4:
-    MoveAction_00D 2
-    MoveAction_021
+HearthomeCitySoutheastHouseElevator_Movement_PlayerWalkOut:
+    WalkNormalSouth 2
+    WalkOnSpotNormalSouth
     EndMovement

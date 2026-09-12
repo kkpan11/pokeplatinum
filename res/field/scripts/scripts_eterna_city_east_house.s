@@ -1,56 +1,43 @@
-    .include "macros/scrcmd.inc"
+#include "macros/scrcmd.inc"
+#include "res/text/bank/eterna_city_east_house.h"
 
-    .data
 
-    ScriptEntry _000E
-    ScriptEntry _0021
-    ScriptEntry _0034
-    .short 0xFD13
+    ScriptEntry EternaCityEastHouse_ExpertM
+    ScriptEntry EternaCityEastHouse_ExpertF
+    ScriptEntry EternaCityEastHouse_PokemonBreederM
+    ScriptEntryEnd
 
-_000E:
-    PlayFanfare SEQ_SE_CONFIRM
+EternaCityEastHouse_ExpertM:
+    NPCMessage EternaCityEastHouse_Text_EternaCameToBeLongAgo
+    End
+
+EternaCityEastHouse_ExpertF:
+    NPCMessage EternaCityEastHouse_Text_HaveYouSeenStatue
+    End
+
+EternaCityEastHouse_PokemonBreederM:
+    PlaySE SE_CONFIRM_sseq_3
     LockAll
     FacePlayer
-    Message 0
-    WaitABXPadPress
+    Message EternaCityEastHouse_Text_WantToKnowWhatPlateSaid
+    ShowYesNoMenu VAR_RESULT
+    GoToIfEq VAR_RESULT, MENU_NO, EternaCityEastHouse_DontFeelObligated
+    Message EternaCityEastHouse_Text_FirstInscriptionLikeThisHearOther
+    ShowYesNoMenu VAR_RESULT
+    GoToIfEq VAR_RESULT, MENU_NO, EternaCityEastHouse_DontFeelObligated
+    Message EternaCityEastHouse_Text_SecondInscriptionWentLikeThis
+    GoTo EternaCityEastHouse_PokemonBreederMEnd
+    End
+
+EternaCityEastHouse_DontFeelObligated:
+    Message EternaCityEastHouse_Text_DontFeelObligated
+    GoTo EternaCityEastHouse_PokemonBreederMEnd
+    End
+
+EternaCityEastHouse_PokemonBreederMEnd:
+    WaitButton
     CloseMessage
     ReleaseAll
     End
 
-_0021:
-    PlayFanfare SEQ_SE_CONFIRM
-    LockAll
-    FacePlayer
-    Message 1
-    WaitABXPadPress
-    CloseMessage
-    ReleaseAll
-    End
-
-_0034:
-    PlayFanfare SEQ_SE_CONFIRM
-    LockAll
-    FacePlayer
-    Message 2
-    ScrCmd_03E 0x800C
-    GoToIfEq 0x800C, 1, _006F
-    Message 3
-    ScrCmd_03E 0x800C
-    GoToIfEq 0x800C, 1, _006F
-    Message 4
-    GoTo _007A
-    End
-
-_006F:
-    Message 5
-    GoTo _007A
-    End
-
-_007A:
-    WaitABXPadPress
-    CloseMessage
-    ReleaseAll
-    End
-
-    .byte 0
-    .byte 0
+    .balign 4, 0

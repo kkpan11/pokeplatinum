@@ -3,80 +3,82 @@
 #include <nitro.h>
 #include <string.h>
 
-#include "struct_decls/struct_party_decl.h"
+#include "constants/battle/condition.h"
+#include "constants/field_poison.h"
+#include "constants/heap.h"
+#include "constants/items.h"
 
-#include "overlay005/ov5_021E622C.h"
+#include "overlay005/daycare.h"
 
 #include "heap.h"
 #include "party.h"
 #include "pokemon.h"
+#include "save_catchrecords.h"
 #include "save_player.h"
 #include "savedata.h"
 #include "trainer_info.h"
 #include "unk_02017038.h"
-#include "unk_0202F180.h"
 
 BOOL Pokemon_CanBattle(Pokemon *mon)
 {
     // this can be simplified further, but it won't match
-    if (Pokemon_GetValue(mon, MON_DATA_CURRENT_HP, NULL) == 0) {
+    if (Pokemon_GetValue(mon, MON_DATA_HP, NULL) == 0) {
         return FALSE;
     }
 
     return !Pokemon_GetValue(mon, MON_DATA_IS_EGG, NULL);
 }
 
-BOOL sub_020548B0(int param0, SaveData *param1, u16 param2, u8 param3, u16 param4, int param5, int param6)
+BOOL Pokemon_GiveMonFromScript(enum HeapID heapID, SaveData *saveData, u16 species, u8 level, u16 heldItem, int metLocation, int metTerrain)
 {
-    BOOL v0;
-    Pokemon *v1;
-    u32 v2;
-    Party *v3;
-    TrainerInfo *v4;
+    BOOL result;
+    Pokemon *mon;
+    u32 item;
+    Party *party;
+    TrainerInfo *trainerInfo = SaveData_GetTrainerInfo(saveData);
 
-    v4 = SaveData_GetTrainerInfo(param1);
-    v3 = Party_GetFromSavedata(param1);
-    v1 = Pokemon_New(param0);
+    party = SaveData_GetParty(saveData);
+    mon = Pokemon_New(heapID);
 
-    Pokemon_Init(v1);
-    Pokemon_InitWith(v1, param2, param3, 32, 0, 0, 0, 0);
-    Pokemon_SetCatchData(v1, v4, 4, param5, param6, param0);
+    Pokemon_Init(mon);
+    Pokemon_InitWith(mon, species, level, INIT_IVS_RANDOM, FALSE, 0, OTID_NOT_SET, 0);
+    Pokemon_SetCatchData(mon, trainerInfo, ITEM_POKE_BALL, metLocation, metTerrain, heapID);
 
-    v2 = param4;
-    Pokemon_SetValue(v1, 6, &v2);
-    v0 = Party_AddPokemon(v3, v1);
+    item = heldItem;
+    Pokemon_SetValue(mon, MON_DATA_HELD_ITEM, &item);
+    result = Party_AddPokemon(party, mon);
 
-    if (v0) {
-        sub_0202F180(param1, v1);
+    if (result) {
+        SaveData_UpdateCatchRecords(saveData, mon);
     }
 
-    Heap_FreeToHeap(v1);
+    Heap_Free(mon);
 
-    return v0;
+    return result;
 }
 
-BOOL sub_02054930(int param0, SaveData *param1, u16 param2, u8 param3, int param4, int param5)
+BOOL sub_02054930(int unused, SaveData *saveData, u16 param2, u8 param3, int param4, int param5)
 {
     int v0;
-    BOOL v1;
-    TrainerInfo *v2 = SaveData_GetTrainerInfo(param1);
-    Party *v3 = Party_GetFromSavedata(param1);
-    Pokemon *v4 = Pokemon_New(32);
+    BOOL result;
+    TrainerInfo *trainerInfo = SaveData_GetTrainerInfo(saveData);
+    Party *party = SaveData_GetParty(saveData);
+    Pokemon *mon = Pokemon_New(HEAP_ID_FIELD3);
 
-    Pokemon_Init(v4);
+    Pokemon_Init(mon);
 
-    v0 = sub_02017070(param4, param5);
-    ov5_021E6CF0(v4, param2, param3, v2, 4, v0);
+    v0 = SpecialMetLoc_GetId(param4, param5);
+    Egg_CreateEgg(mon, param2, param3, trainerInfo, 4, v0);
 
-    v1 = Party_AddPokemon(v3, v4);
-    Heap_FreeToHeap(v4);
+    result = Party_AddPokemon(party, mon);
+    Heap_Free(mon);
 
-    return v1;
+    return result;
 }
 
-void sub_02054988(Party *param0, int param1, int param2, u16 param3)
+void Party_ResetMonMoveSlot(Party *party, int partySlot, int moveSlot, u16 moveID)
 {
-    Pokemon_ResetMoveSlot(Party_GetPokemonBySlotIndex(param0, param1), param3, param2);
+    Pokemon_ResetMoveSlot(Party_GetPokemonBySlotIndex(party, partySlot), moveID, moveSlot);
 }
 
 // In many of the functions below, C99-style iterator declaration doesn't match
@@ -172,55 +174,53 @@ void Party_GiveChampionRibbons(Party *party)
     }
 }
 
-int sub_02054B04(Party *param0, u16 param1)
+int Pokemon_DoPoisonDamage(Party *party, u16 mapLabelTextID)
 {
-    int v0 = 0;
-    int v1 = 0;
-    int v2, v3;
-    Pokemon *v4;
+    int numPoisoned = 0;
+    int numFainted = 0;
+    int i, partyCount = Party_GetCurrentCount(party);
+    Pokemon *mon;
 
-    v3 = Party_GetCurrentCount(param0);
+    for (i = 0; i < partyCount; i++) {
+        mon = Party_GetPokemonBySlotIndex(party, i);
 
-    for (v2 = 0; v2 < v3; v2++) {
-        v4 = Party_GetPokemonBySlotIndex(param0, v2);
+        if (Pokemon_CanBattle(mon)
+            && (Pokemon_GetValue(mon, MON_DATA_STATUS, NULL) & (MON_CONDITION_TOXIC | MON_CONDITION_POISON))) {
+            u32 hp = Pokemon_GetValue(mon, MON_DATA_HP, NULL);
 
-        if (Pokemon_CanBattle(v4)) {
-            if (Pokemon_GetValue(v4, MON_DATA_STATUS_CONDITION, NULL) & (0x80 | 0x8)) {
-                u32 v5 = Pokemon_GetValue(v4, MON_DATA_CURRENT_HP, NULL);
-
-                if (v5 > 1) {
-                    v5--;
-                }
-
-                Pokemon_SetValue(v4, 163, &v5);
-
-                if (v5 == 1) {
-                    v1++;
-                    Pokemon_UpdateFriendship(v4, 7, param1);
-                }
-
-                v0++;
+            if (hp > 1) {
+                hp--;
             }
+
+            Pokemon_SetValue(mon, MON_DATA_HP, &hp);
+
+            if (hp == 1) {
+                numFainted++;
+                Pokemon_UpdateFriendship(mon, FRIENDSHIP_EVENT_POISON_SURVIVE, mapLabelTextID);
+            }
+
+            numPoisoned++;
         }
     }
 
-    if (v1) {
-        return 2;
-    } else if (v0) {
-        return 1;
+    if (numFainted) {
+        return FLDPSN_FAINTED;
+    } else if (numPoisoned) {
+        return FLDPSN_POISONED;
     } else {
-        return 0;
+        return FLDPSN_NONE;
     }
 }
 
-BOOL sub_02054B94(Pokemon *param0)
+BOOL Pokemon_TrySurvivePoison(Pokemon *mon)
 {
-    if ((Pokemon_GetValue(param0, MON_DATA_STATUS_CONDITION, NULL) & (0x80 | 0x8)) && (Pokemon_GetValue(param0, MON_DATA_CURRENT_HP, NULL) == 1)) {
-        u32 v0 = 0;
+    if (Pokemon_GetValue(mon, MON_DATA_STATUS, NULL) & (MON_CONDITION_TOXIC | MON_CONDITION_POISON)
+        && Pokemon_GetValue(mon, MON_DATA_HP, NULL) == 1) {
+        u32 condition = MON_CONDITION_NONE;
 
-        Pokemon_SetValue(param0, 160, &v0);
-        return 1;
+        Pokemon_SetValue(mon, MON_DATA_STATUS, &condition);
+        return TRUE;
     }
 
-    return 0;
+    return FALSE;
 }

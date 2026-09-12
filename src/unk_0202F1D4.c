@@ -3,9 +3,10 @@
 #include <nitro.h>
 #include <string.h>
 
+#include "constants/battle.h"
 #include "constants/species.h"
 
-#include "struct_defs/struct_0202F264.h"
+#include "struct_defs/battle_recording.h"
 #include "struct_defs/struct_0202F298.h"
 #include "struct_defs/struct_0202F298_sub1.h"
 #include "struct_defs/struct_0202F41C.h"
@@ -13,33 +14,32 @@
 #include "struct_defs/struct_0202FD30.h"
 #include "struct_defs/struct_02030A80.h"
 #include "struct_defs/struct_02078B40.h"
-#include "struct_defs/struct_party.h"
 
-#include "overlay006/battle_params.h"
 #include "savedata/save_table.h"
 
+#include "battle_regulation.h"
 #include "enums.h"
+#include "field_battle_data_transfer.h"
 #include "game_options.h"
 #include "heap.h"
+#include "math_util.h"
 #include "party.h"
+#include "pokedex.h"
 #include "pokemon.h"
 #include "save_player.h"
 #include "savedata.h"
+#include "sound_chatot.h"
+#include "system.h"
 #include "trainer_info.h"
-#include "unk_02006224.h"
-#include "unk_02017728.h"
-#include "unk_0201D15C.h"
-#include "unk_02026150.h"
-#include "unk_0202631C.h"
 
-BattleRecording *Unk_021C07A4 = NULL;
+BattleRecording *gBattleRecording = NULL;
 
 static void sub_0202FCE8(const Party *param0, UnkStruct_0202FD30 *param1);
 static void sub_0202FD30(UnkStruct_0202FD30 *param0, Party *param1);
-static BOOL sub_0202F75C(SaveData *param0, BattleRecording *param1);
-static BOOL sub_0202F794(SaveData *param0, const BattleRecording *param1);
+static BOOL sub_0202F75C(SaveData *saveData, BattleRecording *battleRecording);
+static BOOL sub_0202F794(SaveData *saveData, const BattleRecording *battleRecording);
 static void sub_0202F860(void *param0, u32 param1, u32 param2);
-static void sub_0202F510(SaveData *param0, UnkStruct_0202F41C *param1, const UnkStruct_0202F298 *param2, int param3, int param4);
+static void sub_0202F510(SaveData *saveData, UnkStruct_0202F41C *param1, const UnkStruct_0202F298 *param2, int param3, int param4);
 
 int BattleRecording_SaveSize(void)
 {
@@ -48,103 +48,101 @@ int BattleRecording_SaveSize(void)
     return sizeof(BattleRecording);
 }
 
-void BattleRecording_Init(BattleRecording *param0)
+void BattleRecording_Init(BattleRecording *battleRecording)
 {
-    MI_CpuClear32(param0, sizeof(BattleRecording));
-    param0->unk_00 = 0xffffffff;
+    MI_CpuClear32(battleRecording, sizeof(BattleRecording));
+    battleRecording->unk_00 = 0xFFFFFFFF;
 }
 
-void sub_0202F1F8(SaveData *param0, int param1, int *param2)
+void BattleRecording_New(SaveData *saveData, enum HeapID heapID, int *resultCode)
 {
-    if (Unk_021C07A4 != NULL) {
-        Heap_FreeToHeap(Unk_021C07A4);
-        Unk_021C07A4 = NULL;
+    if (gBattleRecording != NULL) {
+        Heap_Free(gBattleRecording);
+        gBattleRecording = NULL;
     }
 
-    Unk_021C07A4 = SaveData_BattleRecording(param0, param1, param2, 0);
-    BattleRecording_Init(Unk_021C07A4);
+    gBattleRecording = SaveData_GetBattleRecording(saveData, heapID, resultCode, 0);
+    BattleRecording_Init(gBattleRecording);
 }
 
-void sub_0202F22C(void)
+void BattleRecording_Free(void)
 {
-    GF_ASSERT(Unk_021C07A4);
+    GF_ASSERT(gBattleRecording);
 
-    Heap_FreeToHeap(Unk_021C07A4);
-    Unk_021C07A4 = NULL;
+    Heap_Free(gBattleRecording);
+    gBattleRecording = NULL;
 }
 
-BOOL sub_0202F250(void)
+BOOL BattleRecording_Exists(void)
 {
-    return Unk_021C07A4 != NULL;
+    return gBattleRecording != NULL;
 }
 
-BattleRecording *sub_0202F264(void)
+BattleRecording *BattleRecording_Get(void)
 {
-    GF_ASSERT(Unk_021C07A4);
-    return Unk_021C07A4;
+    GF_ASSERT(gBattleRecording);
+    return gBattleRecording;
 }
 
 void *sub_0202F27C(void)
 {
     u8 *v0;
 
-    GF_ASSERT(Unk_021C07A4);
+    GF_ASSERT(gBattleRecording);
 
-    v0 = (u8 *)Unk_021C07A4;
+    v0 = (u8 *)gBattleRecording;
     return &v0[sizeof(u32)];
 }
 
-BOOL sub_0202F298(SaveData *param0, int param1, int *param2, BattleParams *param3, int param4)
+BOOL sub_0202F298(SaveData *saveData, int param1, int *param2, FieldBattleDTO *param3, int param4)
 {
     UnkStruct_0202F298 *v0;
     UnkStruct_0202F41C *v1;
 
-    if (Unk_021C07A4) {
-        Heap_FreeToHeap(Unk_021C07A4);
-        Unk_021C07A4 = NULL;
+    if (gBattleRecording) {
+        Heap_Free(gBattleRecording);
+        gBattleRecording = NULL;
     }
 
-    Unk_021C07A4 = SaveData_BattleRecording(param0, param1, param2, param4);
+    gBattleRecording = SaveData_GetBattleRecording(saveData, param1, param2, param4);
 
     if (*param2 != 1) {
         *param2 = 3;
         return 1;
     }
 
-    v0 = &Unk_021C07A4->unk_E8;
-    v1 = &Unk_021C07A4->unk_84;
+    v0 = &gBattleRecording->unk_E8;
+    v1 = &gBattleRecording->unk_84;
 
     sub_0202F860(v0, sizeof(UnkStruct_0202F298) - (sizeof(UnkStruct_0202F298_sub1)), v0->unk_1BEC.unk_00 + ((v0->unk_1BEC.unk_00 ^ 0xffff) << 16));
 
-    if (sub_0202F75C(param0, Unk_021C07A4) == 1) {
+    if (sub_0202F75C(saveData, gBattleRecording) == 1) {
         *param2 = 0;
         return 1;
     }
 
-    if (sub_0202F794(param0, Unk_021C07A4) == 0) {
+    if (sub_0202F794(saveData, gBattleRecording) == 0) {
         *param2 = 2;
         return 1;
     }
 
     if (param3) {
-        sub_0202FAFC(param3, param0);
+        sub_0202FAFC(param3, saveData);
     }
 
     *param2 = 1;
     return 1;
 }
 
-BOOL sub_0202F330(SaveData *param0, int param1, int *param2, int param3)
+BOOL sub_0202F330(SaveData *saveData, int param1, int *param2, int param3)
 {
     UnkStruct_0202F298 *v0;
     UnkStruct_0202F41C *v1;
-    BattleRecording *v2;
-
-    v2 = SaveData_BattleRecording(param0, param1, param2, param3);
+    BattleRecording *v2 = SaveData_GetBattleRecording(saveData, param1, param2, param3);
 
     if (*param2 != 1) {
         *param2 = 3;
-        Heap_FreeToHeap(v2);
+        Heap_Free(v2);
         return 0;
     }
 
@@ -153,49 +151,49 @@ BOOL sub_0202F330(SaveData *param0, int param1, int *param2, int param3)
 
     sub_0202F860(v0, sizeof(UnkStruct_0202F298) - (sizeof(UnkStruct_0202F298_sub1)), v0->unk_1BEC.unk_00 + ((v0->unk_1BEC.unk_00 ^ 0xffff) << 16));
 
-    if (sub_0202F75C(param0, v2) == 1) {
+    if (sub_0202F75C(saveData, v2) == 1) {
         *param2 = 0;
-        Heap_FreeToHeap(v2);
+        Heap_Free(v2);
         return 0;
     }
 
-    if (sub_0202F794(param0, v2) == 0) {
+    if (sub_0202F794(saveData, v2) == 0) {
         *param2 = 2;
-        Heap_FreeToHeap(v2);
+        Heap_Free(v2);
         return 0;
     }
 
     *param2 = 1;
-    Heap_FreeToHeap(v2);
+    Heap_Free(v2);
     return 1;
 }
 
-int sub_0202F3AC(SaveData *param0, BattleRecording *param1, int param2, u16 *param3)
+int sub_0202F3AC(SaveData *saveData, BattleRecording *param1, int param2, u16 *param3)
 {
     int v0;
 
     switch (*param3) {
     case 0:
-        ResetLock(8);
+        ResetLock(RESET_LOCK_0x8);
         InitHeapCanary(11);
 
-        v0 = SaveData_SaveBattleRecording(param0, param1, param2);
+        v0 = SaveData_SaveBattleRecording(saveData, param1, param2);
 
         if (v0 == 2) {
-            SaveData_SaveStateInit(param0, 2);
+            SaveData_SaveStateInit(saveData, 2);
             (*param3)++;
             return 0;
         }
 
-        ResetUnlock(8);
+        ResetUnlock(RESET_LOCK_0x8);
         return v0;
     case 1:
-        v0 = SaveData_SaveStateMain(param0);
+        v0 = SaveData_SaveStateMain(saveData);
 
         if ((v0 == 2) || (v0 == 3)) {
             (*param3) = 0;
             FreeHeapCanary();
-            ResetUnlock(8);
+            ResetUnlock(RESET_LOCK_0x8);
         }
 
         return v0;
@@ -204,7 +202,7 @@ int sub_0202F3AC(SaveData *param0, BattleRecording *param1, int param2, u16 *par
     return 0;
 }
 
-int sub_0202F41C(SaveData *param0, int param1, int param2, int param3, u16 *param4, u16 *param5)
+int sub_0202F41C(SaveData *saveData, int param1, int param2, int param3, u16 *param4, u16 *param5)
 {
     UnkStruct_0202F41C *v0;
     UnkStruct_0202F298 *v1;
@@ -213,19 +211,19 @@ int sub_0202F41C(SaveData *param0, int param1, int param2, int param3, u16 *para
     switch (*param4) {
     case 0:
 
-        if (Unk_021C07A4 == NULL) {
+        if (gBattleRecording == NULL) {
             return 3;
         }
 
-        v0 = &Unk_021C07A4->unk_84;
-        v1 = &Unk_021C07A4->unk_E8;
+        v0 = &gBattleRecording->unk_84;
+        v1 = &gBattleRecording->unk_E8;
 
-        sub_0202F510(param0, v0, v1, param1, param2);
+        sub_0202F510(saveData, v0, v1, param1, param2);
 
         v0->unk_48 = 0xe281;
-        v0->unk_60.unk_00 = SaveData_CalculateChecksum(param0, v0, sizeof(UnkStruct_0202F41C) - (sizeof(UnkStruct_0202F298_sub1)) - (sizeof(u64)));
+        v0->unk_60.unk_00 = SaveData_CalculateChecksum(saveData, v0, sizeof(UnkStruct_0202F41C) - (sizeof(UnkStruct_0202F298_sub1)) - (sizeof(u64)));
         v1->unk_1BEA = 0xe281;
-        v1->unk_1BEC.unk_00 = SaveData_CalculateChecksum(param0, v1, sizeof(UnkStruct_0202F298) - (sizeof(UnkStruct_0202F298_sub1)));
+        v1->unk_1BEC.unk_00 = SaveData_CalculateChecksum(saveData, v1, sizeof(UnkStruct_0202F298) - (sizeof(UnkStruct_0202F298_sub1)));
 
         sub_0202F858(v1, sizeof(UnkStruct_0202F298) - (sizeof(UnkStruct_0202F298_sub1)), v1->unk_1BEC.unk_00 + ((v1->unk_1BEC.unk_00 ^ 0xffff) << 16));
 
@@ -233,7 +231,7 @@ int sub_0202F41C(SaveData *param0, int param1, int param2, int param3, u16 *para
         (*param4)++;
         break;
     case 1:
-        v2 = sub_0202F3AC(param0, Unk_021C07A4, param3, param5);
+        v2 = sub_0202F3AC(saveData, gBattleRecording, param3, param5);
         return v2;
     }
 
@@ -260,7 +258,7 @@ void sub_0202F4C0(int param0, int *param1, int *param2)
     }
 }
 
-static void sub_0202F510(SaveData *param0, UnkStruct_0202F41C *param1, const UnkStruct_0202F298 *param2, int param3, int param4)
+static void sub_0202F510(SaveData *saveData, UnkStruct_0202F41C *param1, const UnkStruct_0202F298 *param2, int param3, int param4)
 {
     int v0, v1, v2, v3, v4, v5, v6;
     const UnkStruct_02078B40 *v7;
@@ -305,7 +303,7 @@ static void sub_0202F510(SaveData *param0, UnkStruct_0202F41C *param1, const Unk
         for (v1 = 0; v1 < v3; v1++) {
             v7 = &(param2->unk_1150[v5].unk_04[v1]);
 
-            if ((v7->isEgg == 0) && (v7->invalidData == 0)) {
+            if ((v7->isEgg == 0) && (v7->checksumFailed == 0)) {
                 param1->unk_00[v4] = v7->species;
                 param1->unk_18[v4] = v7->form;
             }
@@ -317,32 +315,32 @@ static void sub_0202F510(SaveData *param0, UnkStruct_0202F41C *param1, const Unk
     switch (param3) {
     case (UnkEnum_0202F510_01):
     case (UnkEnum_0202F510_08):
-        param1->unk_28 = *(sub_02026150(param0, 0));
+        param1->battleRegulation = *(BattleRegulation_GetByIndex(saveData, 0));
         break;
     case (UnkEnum_0202F510_02):
     case (UnkEnum_0202F510_09):
-        param1->unk_28 = *(sub_02026150(param0, 1));
+        param1->battleRegulation = *(BattleRegulation_GetByIndex(saveData, 1));
         break;
     case (UnkEnum_0202F510_03):
     case (UnkEnum_0202F510_10):
-        param1->unk_28 = *(sub_02026150(param0, 2));
+        param1->battleRegulation = *(BattleRegulation_GetByIndex(saveData, 2));
         break;
     case (UnkEnum_0202F510_04):
     case (UnkEnum_0202F510_11):
-        param1->unk_28 = *(sub_02026150(param0, 3));
+        param1->battleRegulation = *(BattleRegulation_GetByIndex(saveData, 3));
         break;
     case (UnkEnum_0202F510_05):
     case (UnkEnum_0202F510_12):
-        param1->unk_28 = *(sub_02026150(param0, 4));
+        param1->battleRegulation = *(BattleRegulation_GetByIndex(saveData, 4));
         break;
     case (UnkEnum_0202F510_06):
     case (UnkEnum_0202F510_13):
-        param1->unk_28 = *(sub_02026150(param0, 5));
+        param1->battleRegulation = *(BattleRegulation_GetByIndex(saveData, 5));
         break;
     case (UnkEnum_0202F510_00):
     case (UnkEnum_0202F510_07):
     default:
-        param1->unk_28 = *(sub_020261A8());
+        param1->battleRegulation = *(BattleRegulation_GetDefault());
         break;
     }
 
@@ -350,12 +348,12 @@ static void sub_0202F510(SaveData *param0, UnkStruct_0202F41C *param1, const Unk
     param1->unk_26 = param3;
 }
 
-static BOOL sub_0202F75C(SaveData *param0, BattleRecording *param1)
+static BOOL sub_0202F75C(SaveData *saveData, BattleRecording *battleRecording)
 {
-    UnkStruct_0202F298 *v0 = &param1->unk_E8;
-    UnkStruct_0202F41C *v1 = &param1->unk_84;
+    UnkStruct_0202F298 *v0 = &battleRecording->unk_E8;
+    UnkStruct_0202F41C *v1 = &battleRecording->unk_84;
 
-    if (SaveData_MiscSaveBlock_InitFlag(param0) == 0) {
+    if (SaveData_MiscSaveBlock_InitFlag(saveData) == 0) {
         return 1;
     }
 
@@ -366,23 +364,23 @@ static BOOL sub_0202F75C(SaveData *param0, BattleRecording *param1)
     return 0;
 }
 
-static BOOL sub_0202F794(SaveData *param0, const BattleRecording *param1)
+static BOOL sub_0202F794(SaveData *saveData, const BattleRecording *battleRecording)
 {
-    const UnkStruct_0202F298 *v0 = &param1->unk_E8;
-    const UnkStruct_0202F41C *v1 = &param1->unk_84;
+    const UnkStruct_0202F298 *v0 = &battleRecording->unk_E8;
+    const UnkStruct_0202F41C *v1 = &battleRecording->unk_84;
     u16 v2;
 
     if ((v0->unk_1BEA != 0xe281) || (v1->unk_48 != 0xe281)) {
         return 0;
     }
 
-    v2 = SaveData_CalculateChecksum(param0, v1, sizeof(UnkStruct_0202F41C) - (sizeof(UnkStruct_0202F298_sub1)) - (sizeof(u64)));
+    v2 = SaveData_CalculateChecksum(saveData, v1, sizeof(UnkStruct_0202F41C) - (sizeof(UnkStruct_0202F298_sub1)) - (sizeof(u64)));
 
     if (v2 != v1->unk_60.unk_00) {
         return 0;
     }
 
-    v2 = SaveData_CalculateChecksum(param0, v0, sizeof(UnkStruct_0202F298) - (sizeof(UnkStruct_0202F298_sub1)));
+    v2 = SaveData_CalculateChecksum(saveData, v0, sizeof(UnkStruct_0202F298) - (sizeof(UnkStruct_0202F298_sub1)));
 
     if (v2 != v0->unk_1BEC.unk_00) {
         return 0;
@@ -428,75 +426,75 @@ static void sub_0202F860(void *param0, u32 param1, u32 param2)
 
 void sub_0202F868(int param0, int param1, u8 param2)
 {
-    if (Unk_021C07A4 == NULL) {
+    if (gBattleRecording == NULL) {
         return;
     }
 
-    Unk_021C07A4->unk_E8.unk_150.unk_00[param0][param1] = param2;
+    gBattleRecording->unk_E8.unk_150.unk_00[param0][param1] = param2;
 }
 
 u8 sub_0202F884(int param0, int param1)
 {
-    GF_ASSERT(Unk_021C07A4 != NULL);
-    return Unk_021C07A4->unk_E8.unk_150.unk_00[param0][param1];
+    GF_ASSERT(gBattleRecording != NULL);
+    return gBattleRecording->unk_E8.unk_150.unk_00[param0][param1];
 }
 
-void sub_0202F8AC(BattleParams *param0)
+void sub_0202F8AC(FieldBattleDTO *param0)
 {
     int v0;
     UnkStruct_0202F298 *v1;
     UnkStruct_0202FAA8 *v2;
 
-    if (Unk_021C07A4 == NULL) {
+    if (gBattleRecording == NULL) {
         return;
     }
 
-    v1 = &Unk_021C07A4->unk_E8;
+    v1 = &gBattleRecording->unk_E8;
     v2 = &v1->unk_00;
 
     v2->unk_00 = param0->battleType;
-    v2->unk_04 = param0->unk_14;
-    v2->unk_E8 = param0->unk_128;
-    v2->unk_EC = param0->unk_12C;
-    v2->unk_F0 = param0->unk_130;
+    v2->unk_04 = param0->resultMask;
+    v2->unk_E8 = param0->background;
+    v2->unk_EC = param0->terrain;
+    v2->unk_F0 = param0->mapLabelTextID;
     v2->unk_F4 = param0->mapHeaderID;
-    v2->unk_F8 = param0->unk_138;
-    v2->unk_FC = param0->unk_13C;
-    v2->unk_100 = param0->unk_140;
-    v2->unk_104 = param0->unk_144;
-    v2->unk_108 = param0->unk_148;
-    v2->unk_10C = param0->unk_14C;
-    v2->unk_110 = param0->unk_150;
-    v2->unk_124 = param0->unk_164;
-    v2->unk_128 = param0->unk_168;
-    v2->unk_12C = param0->unk_16C;
-    v2->unk_130 = param0->unk_174;
-    v2->unk_144 = param0->unk_188;
-    v2->unk_146 = param0->unk_18B;
-    v2->unk_148 = param0->unk_18C;
+    v2->unk_F8 = param0->timeOfDay;
+    v2->unk_FC = param0->mapEvolutionMethod;
+    v2->unk_100 = param0->visitedContestHall;
+    v2->unk_104 = param0->metBebe;
+    v2->unk_108 = param0->caughtBattlerIdx;
+    v2->unk_10C = param0->fieldWeather;
+    v2->unk_110 = param0->leveledUpMonsMask;
+    v2->unk_124 = param0->battleStatusMask;
+    v2->unk_128 = param0->countSafariBalls;
+    v2->unk_12C = param0->rulesetMask;
+    v2->unk_130 = param0->seed;
+    v2->unk_144 = param0->networkID;
+    v2->unk_146 = param0->dummy18B;
+    v2->unk_148 = param0->totalTurnsElapsed;
 
     for (v0 = 0; v0 < 4; v0++) {
         v2->unk_08[v0] = param0->trainerIDs[v0];
-        v2->unk_18[v0] = param0->trainerData[v0];
+        v2->unk_18[v0] = param0->trainer[v0];
 
-        if (param0->unk_154[v0] == 0) {
+        if (param0->systemVersion[v0] == 0) {
             v2->unk_114[v0] = 0x140;
         } else {
-            v2->unk_114[v0] = param0->unk_154[v0];
+            v2->unk_114[v0] = param0->systemVersion[v0];
         }
 
-        v2->unk_134[v0] = param0->unk_178[v0];
-        v2->unk_14C[v0] = param0->unk_194[v0];
+        v2->unk_134[v0] = param0->linkPlayerPositions[v0];
+        v2->unk_14C[v0] = param0->recordedChatter[v0];
     }
 
     for (v0 = 0; v0 < 4; v0++) {
         sub_0202FCE8(param0->parties[v0], &v1->unk_1150[v0]);
-        TrainerInfo_Copy(param0->unk_D0[v0], &v1->unk_1B68[v0]);
+        TrainerInfo_Copy(param0->trainerInfo[v0], &v1->unk_1B68[v0]);
 
-        v2->unk_14C[v0] = Sound_Chatter(param0->unk_F0[v0]);
+        v2->unk_14C[v0] = Sound_GetChatterActivationParameter(param0->chatotCries[v0]);
     }
 
-    Options_Copy(param0->unk_108, &v1->unk_1BE8);
+    Options_Copy(param0->options, &v1->unk_1BE8);
 }
 
 void sub_0202FAA8(int param0, u32 param1)
@@ -504,11 +502,11 @@ void sub_0202FAA8(int param0, u32 param1)
     UnkStruct_0202F298 *v0;
     UnkStruct_0202FAA8 *v1;
 
-    if (Unk_021C07A4 == NULL) {
+    if (gBattleRecording == NULL) {
         return;
     }
 
-    v0 = &Unk_021C07A4->unk_E8;
+    v0 = &gBattleRecording->unk_E8;
     v1 = &v0->unk_00;
 
     v1->unk_114[param0] = param1;
@@ -520,11 +518,11 @@ BOOL sub_0202FAC0(void)
     UnkStruct_0202F298 *v1;
     UnkStruct_0202FAA8 *v2;
 
-    if (Unk_021C07A4 == NULL) {
+    if (gBattleRecording == NULL) {
         return 1;
     }
 
-    v1 = &Unk_021C07A4->unk_E8;
+    v1 = &gBattleRecording->unk_E8;
     v2 = &v1->unk_00;
 
     for (v0 = 0; v0 < 4; v0++) {
@@ -536,135 +534,135 @@ BOOL sub_0202FAC0(void)
     return 1;
 }
 
-void sub_0202FAFC(BattleParams *param0, SaveData *param1)
+void sub_0202FAFC(FieldBattleDTO *dto, SaveData *saveData)
 {
-    int v0;
-    UnkStruct_0202F298 *v1 = &Unk_021C07A4->unk_E8;
+    int i;
+    UnkStruct_0202F298 *v1 = &gBattleRecording->unk_E8;
 
-    param0->battleType = v1->unk_00.unk_00;
-    param0->unk_128 = v1->unk_00.unk_E8;
-    param0->unk_12C = v1->unk_00.unk_EC;
-    param0->unk_130 = v1->unk_00.unk_F0;
-    param0->mapHeaderID = v1->unk_00.unk_F4;
-    param0->unk_138 = v1->unk_00.unk_F8;
-    param0->unk_13C = v1->unk_00.unk_FC;
-    param0->unk_140 = v1->unk_00.unk_100;
-    param0->unk_144 = v1->unk_00.unk_104;
-    param0->unk_148 = v1->unk_00.unk_108;
-    param0->unk_14C = v1->unk_00.unk_10C;
-    param0->unk_164 = v1->unk_00.unk_124 | 0x10;
-    param0->unk_168 = v1->unk_00.unk_128;
-    param0->unk_16C = v1->unk_00.unk_12C;
-    param0->unk_174 = v1->unk_00.unk_130;
-    param0->unk_188 = v1->unk_00.unk_144;
-    param0->unk_14 = 0;
-    param0->unk_150 = 0;
+    dto->battleType = v1->unk_00.unk_00;
+    dto->background = v1->unk_00.unk_E8;
+    dto->terrain = v1->unk_00.unk_EC;
+    dto->mapLabelTextID = v1->unk_00.unk_F0;
+    dto->mapHeaderID = v1->unk_00.unk_F4;
+    dto->timeOfDay = v1->unk_00.unk_F8;
+    dto->mapEvolutionMethod = v1->unk_00.unk_FC;
+    dto->visitedContestHall = v1->unk_00.unk_100;
+    dto->metBebe = v1->unk_00.unk_104;
+    dto->caughtBattlerIdx = v1->unk_00.unk_108;
+    dto->fieldWeather = v1->unk_00.unk_10C;
+    dto->battleStatusMask = v1->unk_00.unk_124 | BATTLE_STATUS_RECORDING;
+    dto->countSafariBalls = v1->unk_00.unk_128;
+    dto->rulesetMask = v1->unk_00.unk_12C;
+    dto->seed = v1->unk_00.unk_130;
+    dto->networkID = v1->unk_00.unk_144;
+    dto->resultMask = BATTLE_IN_PROGRESS;
+    dto->leveledUpMonsMask = 0;
 
-    sub_02026338(SaveData_Pokedex(param1), param0->unk_E8);
+    Pokedex_Copy(SaveData_GetPokedex(saveData), dto->pokedex);
 
-    for (v0 = 0; v0 < 4; v0++) {
-        param0->trainerIDs[v0] = v1->unk_00.unk_08[v0];
-        param0->trainerData[v0] = v1->unk_00.unk_18[v0];
-        param0->unk_154[v0] = v1->unk_00.unk_114[v0];
-        param0->unk_178[v0] = v1->unk_00.unk_134[v0];
+    for (i = 0; i < 4; i++) {
+        dto->trainerIDs[i] = v1->unk_00.unk_08[i];
+        dto->trainer[i] = v1->unk_00.unk_18[i];
+        dto->systemVersion[i] = v1->unk_00.unk_114[i];
+        dto->linkPlayerPositions[i] = v1->unk_00.unk_134[i];
 
-        sub_0202FD30(&v1->unk_1150[v0], param0->parties[v0]);
-        TrainerInfo_Copy(&v1->unk_1B68[v0], param0->unk_D0[v0]);
+        sub_0202FD30(&v1->unk_1150[i], dto->parties[i]);
+        TrainerInfo_Copy(&v1->unk_1B68[i], dto->trainerInfo[i]);
 
-        param0->unk_194[v0] = v1->unk_00.unk_14C[v0];
+        dto->recordedChatter[i] = v1->unk_00.unk_14C[i];
     }
 
-    Options_Copy(SaveData_Options(param1), param0->unk_108);
-    param0->unk_108->frame = v1->unk_1BE8.frame;
+    Options_Copy(SaveData_GetOptions(saveData), dto->options);
+    dto->options->frame = v1->unk_1BE8.frame;
 
-    if (param0->unk_108->frame >= 20) {
-        param0->unk_108->frame = 0;
+    if (dto->options->frame >= 20) {
+        dto->options->frame = 0;
     }
 }
 
-static void sub_0202FCE8(const Party *param0, UnkStruct_0202FD30 *param1)
+static void sub_0202FCE8(const Party *party, UnkStruct_0202FD30 *param1)
 {
     int v0;
     Pokemon *v1;
 
     MI_CpuClear8(param1, sizeof(UnkStruct_0202FD30));
 
-    param1->unk_00 = Party_GetCapacity(param0);
-    param1->unk_02 = Party_GetCurrentCount(param0);
+    param1->unk_00 = Party_GetCapacity(party);
+    param1->unk_02 = Party_GetCurrentCount(party);
 
     for (v0 = 0; v0 < param1->unk_02; v0++) {
-        v1 = Party_GetPokemonBySlotIndex(param0, v0);
+        v1 = Party_GetPokemonBySlotIndex(party, v0);
         sub_02078B40(v1, &param1->unk_04[v0]);
     }
 }
 
-static void sub_0202FD30(UnkStruct_0202FD30 *param0, Party *param1)
+static void sub_0202FD30(UnkStruct_0202FD30 *param0, Party *party)
 {
     int v0;
     Pokemon *v1;
     u8 v2 = 0;
 
-    v1 = Pokemon_New(11);
+    v1 = Pokemon_New(HEAP_ID_FIELD2);
 
-    Party_InitWithCapacity(param1, param0->unk_00);
+    Party_InitWithCapacity(party, param0->unk_00);
 
     for (v0 = 0; v0 < param0->unk_02; v0++) {
         sub_02078E0C(&param0->unk_04[v0], v1);
-        Pokemon_SetValue(v1, 162, &v2);
-        Party_AddPokemon(param1, v1);
+        Pokemon_SetValue(v1, MON_DATA_BALL_CAPSULE_ID, &v2);
+        Party_AddPokemon(party, v1);
     }
 
-    Heap_FreeToHeap(v1);
+    Heap_Free(v1);
 }
 
-UnkStruct_0202F41C *sub_0202FD88(int param0)
+UnkStruct_0202F41C *sub_0202FD88(enum HeapID heapID)
 {
     UnkStruct_0202F41C *v0;
 
-    GF_ASSERT(Unk_021C07A4 != NULL);
+    GF_ASSERT(gBattleRecording != NULL);
 
-    v0 = Heap_AllocFromHeap(param0, sizeof(UnkStruct_0202F41C));
-    MI_CpuCopy32(&Unk_021C07A4->unk_84, v0, sizeof(UnkStruct_0202F41C));
+    v0 = Heap_Alloc(heapID, sizeof(UnkStruct_0202F41C));
+    MI_CpuCopy32(&gBattleRecording->unk_84, v0, sizeof(UnkStruct_0202F41C));
 
     return v0;
 }
 
-UnkStruct_02030A80 *sub_0202FDB8(int param0)
+UnkStruct_02030A80 *sub_0202FDB8(enum HeapID heapID)
 {
     UnkStruct_02030A80 *v0;
 
-    GF_ASSERT(Unk_021C07A4 != NULL);
+    GF_ASSERT(gBattleRecording != NULL);
 
-    v0 = Heap_AllocFromHeap(param0, sizeof(UnkStruct_02030A80));
-    MI_CpuCopy32(&Unk_021C07A4->unk_04, v0, sizeof(UnkStruct_02030A80));
+    v0 = Heap_Alloc(heapID, sizeof(UnkStruct_02030A80));
+    MI_CpuCopy32(&gBattleRecording->unk_04, v0, sizeof(UnkStruct_02030A80));
 
     return v0;
 }
 
 UnkStruct_02030A80 *sub_0202FDE8(void)
 {
-    GF_ASSERT(Unk_021C07A4 != NULL);
-    return &Unk_021C07A4->unk_04;
+    GF_ASSERT(gBattleRecording != NULL);
+    return &gBattleRecording->unk_04;
 }
 
 UnkStruct_0202F41C *sub_0202FE04(void)
 {
-    GF_ASSERT(Unk_021C07A4 != NULL);
-    return &Unk_021C07A4->unk_84;
+    GF_ASSERT(gBattleRecording != NULL);
+    return &gBattleRecording->unk_84;
 }
 
-void sub_0202FE20(UnkStruct_02030A80 *param0, UnkStruct_0202F41C *param1, UnkStruct_0202F298 *param2, BattleParams *param3, SaveData *param4)
+void sub_0202FE20(UnkStruct_02030A80 *param0, UnkStruct_0202F41C *param1, UnkStruct_0202F298 *param2, FieldBattleDTO *param3, SaveData *saveData)
 {
-    GF_ASSERT(Unk_021C07A4 != NULL);
+    GF_ASSERT(gBattleRecording != NULL);
 
-    MI_CpuCopy8(param1, &Unk_021C07A4->unk_84, sizeof(UnkStruct_0202F41C));
-    MI_CpuCopy8(param2, &Unk_021C07A4->unk_E8, sizeof(UnkStruct_0202F298));
-    MI_CpuCopy8(param0, &Unk_021C07A4->unk_04, sizeof(UnkStruct_02030A80));
+    MI_CpuCopy8(param1, &gBattleRecording->unk_84, sizeof(UnkStruct_0202F41C));
+    MI_CpuCopy8(param2, &gBattleRecording->unk_E8, sizeof(UnkStruct_0202F298));
+    MI_CpuCopy8(param0, &gBattleRecording->unk_04, sizeof(UnkStruct_02030A80));
 
-    sub_0202F860(&Unk_021C07A4->unk_E8, sizeof(UnkStruct_0202F298) - (sizeof(UnkStruct_0202F298_sub1)), Unk_021C07A4->unk_E8.unk_1BEC.unk_00 + ((Unk_021C07A4->unk_E8.unk_1BEC.unk_00 ^ 0xffff) << 16));
+    sub_0202F860(&gBattleRecording->unk_E8, sizeof(UnkStruct_0202F298) - (sizeof(UnkStruct_0202F298_sub1)), gBattleRecording->unk_E8.unk_1BEC.unk_00 + ((gBattleRecording->unk_E8.unk_1BEC.unk_00 ^ 0xffff) << 16));
 
     if (param3 != NULL) {
-        sub_0202FAFC(param3, param4);
+        sub_0202FAFC(param3, saveData);
     }
 }
 
@@ -702,15 +700,13 @@ u64 sub_0202FE98(UnkStruct_0202F41C *param0, int param1, int param2)
         return param0->unk_27;
     }
 
-    GF_ASSERT(0);
+    GF_ASSERT(FALSE);
     return 0;
 }
 
-UnkStruct_0202F41C *sub_0202FF2C(int param0)
+UnkStruct_0202F41C *sub_0202FF2C(enum HeapID heapID)
 {
-    UnkStruct_0202F41C *v0;
-
-    v0 = Heap_AllocFromHeap(param0, sizeof(UnkStruct_0202F41C));
+    UnkStruct_0202F41C *v0 = Heap_Alloc(heapID, sizeof(UnkStruct_0202F41C));
     MI_CpuClear8(v0, sizeof(UnkStruct_0202F41C));
 
     return v0;
@@ -718,5 +714,5 @@ UnkStruct_0202F41C *sub_0202FF2C(int param0)
 
 void sub_0202FF44(UnkStruct_0202F41C *param0)
 {
-    Heap_FreeToHeap(param0);
+    Heap_Free(param0);
 }

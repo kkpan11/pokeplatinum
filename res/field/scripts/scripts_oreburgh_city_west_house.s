@@ -1,43 +1,22 @@
-    .include "macros/scrcmd.inc"
+#include "macros/scrcmd.inc"
+#include "res/text/bank/oreburgh_city_west_house.h"
 
-    .data
 
-    ScriptEntry _000E
-    ScriptEntry _0021
-    ScriptEntry _0034
-    .short 0xFD13
+    ScriptEntry OreburghCityWestHouse_Youngster
+    ScriptEntry OreburghCityWestHouse_PokefanF
+    ScriptEntry OreburghCityWestHouse_Pikachu
+    ScriptEntryEnd
 
-_000E:
-    PlayFanfare SEQ_SE_CONFIRM
-    LockAll
-    FacePlayer
-    Message 0
-    WaitABXPadPress
-    CloseMessage
-    ReleaseAll
+OreburghCityWestHouse_Youngster:
+    NPCMessage OreburghCityWestHouse_Text_HaveYouSeenDifferentlyColoredPokemon
     End
 
-_0021:
-    PlayFanfare SEQ_SE_CONFIRM
-    LockAll
-    FacePlayer
-    Message 1
-    WaitABXPadPress
-    CloseMessage
-    ReleaseAll
+OreburghCityWestHouse_PokefanF:
+    NPCMessage OreburghCityWestHouse_Text_PokemonHaveDifferentNatures
     End
 
-_0034:
-    PlayFanfare SEQ_SE_CONFIRM
-    LockAll
-    FacePlayer
-    ScrCmd_04B 0x5DC
-    ScrCmd_04C 25, 0
-    Message 2
-    ScrCmd_04D
-    WaitABXPadPress
-    CloseMessage
-    ReleaseAll
+OreburghCityWestHouse_Pikachu:
+    PokemonCryAndMessage SPECIES_PIKACHU, OreburghCityWestHouse_Text_PikachuCry
     End
 
-    .byte 0
+    .balign 4, 0

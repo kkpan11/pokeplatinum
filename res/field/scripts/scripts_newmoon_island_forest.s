@@ -1,90 +1,91 @@
-    .include "macros/scrcmd.inc"
+#include "macros/scrcmd.inc"
+#include "generated/distribution_events.h"
+#include "res/text/bank/newmoon_island_forest.h"
+#include "res/field/events/events_newmoon_island_forest.h"
 
-    .data
 
-    ScriptEntry _000E
-    ScriptEntry _005E
-    ScriptEntry _0079
-    .short 0xFD13
+    ScriptEntry NewmoonIslandForest_OnTransition
+    ScriptEntry NewmoonIslandForest_OnLoad
+    ScriptEntry NewmoonIslandForest_Darkrai
+    ScriptEntryEnd
 
-_000E:
-    ScrCmd_22D 2, 0x4000
-    GoToIfEq 0x4000, 0, _0058
-    ScrCmd_07E 0x1C6, 1, 0x4000
-    GoToIfEq 0x4000, 0, _0058
-    ScrCmd_28B 0, 0x4000
-    GoToIfEq 0x4000, 0, _0058
-    GoToIfSet 0x158, _0058
-    ClearFlag 0x240
+NewmoonIslandForest_OnTransition:
+    GetNationalDexEnabled VAR_MAP_LOCAL_0x00
+    GoToIfEq VAR_MAP_LOCAL_0x00, FALSE, NewmoonIslandForest_HideDarkrai
+    CheckItem ITEM_MEMBER_CARD, 1, VAR_MAP_LOCAL_0x00
+    GoToIfEq VAR_MAP_LOCAL_0x00, FALSE, NewmoonIslandForest_HideDarkrai
+    CheckDistributionEvent DISTRIBUTION_EVENT_DARKRAI, VAR_MAP_LOCAL_0x00
+    GoToIfEq VAR_MAP_LOCAL_0x00, FALSE, NewmoonIslandForest_HideDarkrai
+    GoToIfSet FLAG_CAUGHT_DARKRAI, NewmoonIslandForest_HideDarkrai
+    ClearFlag FLAG_HIDE_NEWMOON_ISLAND_FOREST_DARKRAI
     End
 
-_0058:
-    SetFlag 0x240
+NewmoonIslandForest_HideDarkrai:
+    SetFlag FLAG_HIDE_NEWMOON_ISLAND_FOREST_DARKRAI
     End
 
-_005E:
-    GoToIfSet 142, _006B
+NewmoonIslandForest_OnLoad:
+    GoToIfSet FLAG_MAP_LOCAL_REMOVE_OBJECT, NewmoonIslandForest_RemoveDarkrai
     End
 
-_006B:
-    SetFlag 0x240
-    ScrCmd_065 0
-    ClearFlag 142
+NewmoonIslandForest_RemoveDarkrai:
+    SetFlag FLAG_HIDE_NEWMOON_ISLAND_FOREST_DARKRAI
+    RemoveObject LOCALID_DARKRAI
+    ClearFlag FLAG_MAP_LOCAL_REMOVE_OBJECT
     End
 
-_0079:
+NewmoonIslandForest_Darkrai:
     LockAll
-    PlayFanfare SEQ_SE_CONFIRM
-    ScrCmd_04B 0x5DC
-    Message 0
+    PlaySE SE_CONFIRM_sseq_3
+    WaitSE SE_CONFIRM_sseq_3
+    Message NewmoonIslandForest_Text_Ellipses
     CloseMessage
-    SetFlag 142
-    ScrCmd_2BD 0x1EB, 50
-    ClearFlag 142
-    ScrCmd_0EC 0x800C
-    GoToIfEq 0x800C, 0, _014C
-    ScrCmd_2BC 0x800C
-    GoToIfEq 0x800C, 1, _00D8
-    SetFlag 0x158
-_00BC:
-    SetFlag 0x241
-    GoToIfEq 0x40F8, 2, _00E3
-    Message 3
-    WaitABXPadPress
+    SetFlag FLAG_MAP_LOCAL_REMOVE_OBJECT
+    StartLegendaryBattle SPECIES_DARKRAI, 50
+    ClearFlag FLAG_MAP_LOCAL_REMOVE_OBJECT
+    CheckWonBattle VAR_RESULT
+    GoToIfEq VAR_RESULT, FALSE, NewmoonIslandForest_BlackOut
+    CheckDidNotCapture VAR_RESULT
+    GoToIfEq VAR_RESULT, TRUE, NewmoonIslandForest_DidNotCatchDarkrai
+    SetFlag FLAG_CAUGHT_DARKRAI
+NewmoonIslandForest_PostDarkraiBattle:
+    SetFlag FLAG_HIDE_CANALAVE_CITY_HARBOR_INN_GYM_GUIDE
+    GoToIfEq VAR_DARKRAI_EVENT_STATE, 2, NewmoonIslandForest_ReturnToHarborInn
+    Message NewmoonIslandForest_Text_VoiceFromSomewhere2
+    WaitButton
     CloseMessage
     ReleaseAll
     End
 
-_00D8:
-    Message 1
+NewmoonIslandForest_DidNotCatchDarkrai:
+    Message NewmoonIslandForest_Text_DarkraiMeltedAway
     CloseMessage
-    GoTo _00BC
+    GoTo NewmoonIslandForest_PostDarkraiBattle
 
-_00E3:
-    Message 2
+NewmoonIslandForest_ReturnToHarborInn:
+    Message NewmoonIslandForest_Text_VoiceFromSomewhere
     CloseMessage
-    WaitTime 30, 0x800C
-    FadeScreen 6, 3, 0, 0
+    WaitTime 30, VAR_RESULT
+    FadeScreenOut FADE_SCREEN_SPEED_MEDIUM
     WaitFadeScreen
-    FadeScreen 6, 3, 1, 0
+    FadeScreenIn FADE_SCREEN_SPEED_MEDIUM
     WaitFadeScreen
-    FadeScreen 6, 3, 0, 0
+    FadeScreenOut FADE_SCREEN_SPEED_MEDIUM
     WaitFadeScreen
-    FadeScreen 6, 3, 1, 0
+    FadeScreenIn FADE_SCREEN_SPEED_MEDIUM
     WaitFadeScreen
-    FadeScreen 6, 6, 0, 0
+    FadeScreenOut FADE_SCREEN_SPEED_SLOW
     WaitFadeScreen
-    WaitTime 120, 0x800C
-    ScrCmd_0BE 43, 0, 8, 6, 1
-    FadeScreen 6, 6, 1, 0
+    WaitTime 120, VAR_RESULT
+    Warp MAP_HEADER_CANALAVE_CITY_HARBOR_INN, 8, 6, DIR_SOUTH
+    FadeScreenIn FADE_SCREEN_SPEED_SLOW
     WaitFadeScreen
     ReleaseAll
     End
 
-_014C:
-    ScrCmd_0EB
+NewmoonIslandForest_BlackOut:
+    BlackOutFromBattle
     ReleaseAll
     End
 
-    .byte 0
-    .byte 0
+    .balign 4, 0

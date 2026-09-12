@@ -1,46 +1,28 @@
-    .include "macros/scrcmd.inc"
+#include "macros/scrcmd.inc"
+#include "res/text/bank/solaceon_town_pokecenter_1f.h"
+#include "res/field/events/events_solaceon_town_pokecenter_1f.h"
 
-    .data
 
-    ScriptEntry _0012
-    ScriptEntry _001E
-    ScriptEntry _0031
-    ScriptEntry _0044
-    .short 0xFD13
+    ScriptEntry SolaceonTownPokecenter1F_Nurse
+    ScriptEntry SolaceonTownPokecenter1F_OldMan
+    ScriptEntry SolaceonTownPokecenter1F_Lass
+    ScriptEntry SolaceonTownPokecenter1F_RuinManiac
+    ScriptEntryEnd
 
-_0012:
-    SetVar 0x8007, 0
-    CallCommonScript 0x7D2
+SolaceonTownPokecenter1F_Nurse:
+    Common_CallPokecenterNurse LOCALID_SOLACEON_NURSE
     End
 
-_001E:
-    PlayFanfare SEQ_SE_CONFIRM
-    LockAll
-    FacePlayer
-    Message 0
-    WaitABXPadPress
-    CloseMessage
-    ReleaseAll
+SolaceonTownPokecenter1F_OldMan:
+    NPCMessage SolaceonTownPokecenter1F_Text_PokemonGrowAtDifferentRates
     End
 
-_0031:
-    PlayFanfare SEQ_SE_CONFIRM
-    LockAll
-    FacePlayer
-    Message 1
-    WaitABXPadPress
-    CloseMessage
-    ReleaseAll
+SolaceonTownPokecenter1F_Lass:
+    NPCMessage SolaceonTownPokecenter1F_Text_QuiteFarToVeilstoneCity
     End
 
-_0044:
-    PlayFanfare SEQ_SE_CONFIRM
-    LockAll
-    FacePlayer
-    Message 2
-    WaitABXPadPress
-    CloseMessage
-    ReleaseAll
+SolaceonTownPokecenter1F_RuinManiac:
+    NPCMessage SolaceonTownPokecenter1F_Text_HMDefogIsInTheRuins
     End
 
-    .byte 0
+    .balign 4, 0

@@ -1,49 +1,25 @@
-    .include "macros/scrcmd.inc"
+#include "macros/scrcmd.inc"
+#include "res/text/bank/oreburgh_city_mart.h"
 
-    .data
 
-    ScriptEntry _0012
-    ScriptEntry _0028
-    ScriptEntry _003E
-    ScriptEntry _0051
-    .short 0xFD13
+    ScriptEntry OreburghCityMart_CommonVendor
+    ScriptEntry OreburghCityMart_SpecialtyVendor
+    ScriptEntry OreburghCityMart_Hiker
+    ScriptEntry OreburghCityMart_Collector
+    ScriptEntryEnd
 
-_0012:
-    PlayFanfare SEQ_SE_CONFIRM
-    LockAll
-    FacePlayer
-    CallCommonScript 0x7E3
-    ScrCmd_035
-    ScrCmd_147 1
-    ReleaseAll
+OreburghCityMart_CommonVendor:
+    PokeMartCommonWithGreeting
     End
 
-_0028:
-    PlayFanfare SEQ_SE_CONFIRM
-    LockAll
-    FacePlayer
-    CallCommonScript 0x7E3
-    ScrCmd_035
-    ScrCmd_148 1
-    ReleaseAll
+OreburghCityMart_SpecialtyVendor:
+    PokeMartSpecialtiesWithGreeting MART_SPECIALTIES_ID_OREBURGH
     End
 
-_003E:
-    PlayFanfare SEQ_SE_CONFIRM
-    LockAll
-    FacePlayer
-    Message 0
-    WaitABXPadPress
-    CloseMessage
-    ReleaseAll
+OreburghCityMart_Hiker:
+    NPCMessage OreburghCityMart_Text_MoreBadgesMoreItems
     End
 
-_0051:
-    PlayFanfare SEQ_SE_CONFIRM
-    LockAll
-    FacePlayer
-    Message 1
-    WaitABXPadPress
-    CloseMessage
-    ReleaseAll
+OreburghCityMart_Collector:
+    NPCMessage OreburghCityMart_Text_StaffOfferDifferentMerchandise
     End

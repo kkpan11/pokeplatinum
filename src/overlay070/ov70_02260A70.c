@@ -5,7 +5,6 @@
 
 #include "overlay070/ov70_0225C9B4.h"
 #include "overlay070/struct_ov70_0225CC54_decl.h"
-#include "overlay115/camera_angle.h"
 
 #include "camera.h"
 #include "heap.h"
@@ -22,14 +21,14 @@ static const CameraAngle Unk_ov70_0226D904 = {
     0x0
 };
 
-UnkStruct_ov70_02260AD4 *ov70_02260A70(u32 param0)
+UnkStruct_ov70_02260AD4 *ov70_02260A70(u32 heapID)
 {
     UnkStruct_ov70_02260AD4 *v0;
     VecFx32 v1;
 
-    v0 = Heap_AllocFromHeap(param0, sizeof(UnkStruct_ov70_02260AD4));
+    v0 = Heap_Alloc(heapID, sizeof(UnkStruct_ov70_02260AD4));
     memset(v0, 0, sizeof(UnkStruct_ov70_02260AD4));
-    v0->camera = Camera_Alloc(param0);
+    v0->camera = Camera_Alloc(heapID);
 
     Camera_InitWithTarget(&v0->unk_08, 0x29aec1, &Unk_ov70_0226D904, 0x5c1, 0, 1, v0->camera);
     Camera_SetAsActive(v0->camera);
@@ -42,7 +41,7 @@ void ov70_02260AD4(UnkStruct_ov70_02260AD4 *param0)
 {
     Camera_ClearActive();
     Camera_Delete(param0->camera);
-    Heap_FreeToHeap(param0);
+    Heap_Free(param0);
 }
 
 void ov70_02260AEC(UnkStruct_ov70_02260AD4 *param0)

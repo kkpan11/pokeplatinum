@@ -1,15 +1,14 @@
-    .include "macros/scrcmd.inc"
+#include "macros/scrcmd.inc"
 
-    .data
 
-    ScriptEntry _0006
-    .short 0xFD13
+    ScriptEntry RavagedPath_OnTransition
+    ScriptEntryEnd
 
-_0006:
-    SetFlag 0x9CD
+RavagedPath_OnTransition:
+    SetFlag FLAG_FIRST_ARRIVAL_RAVAGED_PATH
     End
 
-    .byte 2
-    .byte 0
-    .byte 0
-    .byte 0
+RavagedPath_Unused:
+    End
+
+    .balign 4, 0

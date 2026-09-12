@@ -1,452 +1,432 @@
-    .include "macros/scrcmd.inc"
+#include "macros/scrcmd.inc"
+#include "res/text/bank/eterna_forest.h"
+#include "res/field/events/events_eterna_forest.h"
 
-    .data
+    ScriptEntry EternaForest_CoordEvent_CherylStartFollowing
+    ScriptEntry EternaForest_CoordEvent_PlayerLeaveCheryl
+    ScriptEntry EternaForest_CoordEvent_CherylLeavePlayer
+    ScriptEntry EternaForest_Dummy4
+    ScriptEntry EternaForest_Dummy5
+    ScriptEntry EternaForest_BugCatcher
+    ScriptEntry EternaForest_Gardenia
+    ScriptEntry EternaForest_SignboardEternaForest
+    ScriptEntry EternaForest_TrainerTipsSignpost
+    ScriptEntry EternaForest_MossRock
+    ScriptEntry EternaForest_OnTransition
+    ScriptEntry EternaForest_OnFrame_CherylOldChateauCutscene
+    ScriptEntryEnd
 
-    ScriptEntry _0047
-    ScriptEntry _0108
-    ScriptEntry _0198
-    ScriptEntry _03EC
-    ScriptEntry _03F5
-    ScriptEntry _03FE
-    ScriptEntry _0411
-    ScriptEntry _04E0
-    ScriptEntry _04F7
-    ScriptEntry _050C
-    ScriptEntry _0032
-    ScriptEntry _051D
-    .short 0xFD13
-
-_0032:
-    GoToIfUnset 227, _003F
+EternaForest_OnTransition:
+    GoToIfUnset FLAG_TRAVELED_WITH_CHERYL, EternaForest_ResetFollowerCherylState
     End
 
-_003F:
-    SetVar 0x40B1, 0
+EternaForest_ResetFollowerCherylState:
+    SetVar VAR_ETERNA_FOREST_FOLLOWER_CHERYL_STATE, 0
     End
 
-_0047:
+EternaForest_CoordEvent_CherylStartFollowing:
     LockAll
-    ScrCmd_0C8 0
-    ScrCmd_069 0x8004, 0x8005
-    GoToIfEq 0x8004, 28, _006E
-    GoToIfEq 0x8004, 29, _007E
+    SetPlayerBike FALSE
+    GetPlayerMapPos VAR_0x8004, VAR_0x8005
+    GoToIfEq VAR_0x8004, 28, EternaForest_CherylNoticeAndWalkToPlayerX28
+    GoToIfEq VAR_0x8004, 29, EternaForest_CherylNoticeAndWalkToPlayerX29
     End
 
-_006E:
-    ApplyMovement 0, _00E8
+EternaForest_CherylNoticeAndWalkToPlayerX28:
+    ApplyMovement LOCALID_CHERYL, EternaForest_Movement_CherylNoticeAndWalkToPlayerX28
     WaitMovement
-    GoTo _008E
+    GoTo EternaForest_CherylStartFollowing
 
-_007E:
-    ApplyMovement 0, _00F4
+EternaForest_CherylNoticeAndWalkToPlayerX29:
+    ApplyMovement LOCALID_CHERYL, EternaForest_Movement_CherylNoticeAndWalkToPlayerX29
     WaitMovement
-    GoTo _008E
+    GoTo EternaForest_CherylStartFollowing
 
-_008E:
-    CallIfUnset 139, _00D8
-    CallIfSet 139, _00E0
-    ScrCmd_0CD 0
-    ScrCmd_04E 0x481
-    Message 1
-    ScrCmd_04F
-    SetFlag 139
-    SetVar 0x40B1, 1
-    Message 2
-    WaitABXPadPress
+EternaForest_CherylStartFollowing:
+    CallIfUnset FLAG_TALKED_TO_ETERNA_FOREST_CHERYL, EternaForest_MayIGoWithYou
+    CallIfSet FLAG_TALKED_TO_ETERNA_FOREST_CHERYL, EternaForest_LetsGetThroughForestTogether
+    BufferPlayerName 0
+    PlayFanfare SEQ_GONIN_sseq
+    Message EternaForest_Text_PlayerDecidedToGoWithCheryl
+    WaitFanfare
+    SetFlag FLAG_TALKED_TO_ETERNA_FOREST_CHERYL
+    SetVar VAR_ETERNA_FOREST_FOLLOWER_CHERYL_STATE, 1
+    Message EternaForest_Text_IllKeepPokemonHealthy
+    WaitButton
     CloseMessage
-    SetVar 0x403F, 0x260
-    ScrCmd_161
-    ScrCmd_06D 0, 48
-    ScrCmd_06C 0, 1
+    SetVar VAR_PARTNER_TRAINER_ID, TRAINER_CHERYL_ETERNA_FOREST
+    SetHasPartner
+    SetMovementType LOCALID_CHERYL, MOVEMENT_TYPE_FOLLOW_PLAYER
+    SetObjectFlagIsPersistent LOCALID_CHERYL, TRUE
     ReleaseAll
     End
 
-_00D8:
-    ScrCmd_0CD 0
-    Message 0
+EternaForest_MayIGoWithYou:
+    BufferPlayerName 0
+    Message EternaForest_Text_MayIGoWithYou
     Return
 
-_00E0:
-    ScrCmd_0CD 0
-    Message 3
+EternaForest_LetsGetThroughForestTogether:
+    BufferPlayerName 0
+    Message EternaForest_Text_LetsGetThroughForestTogether
     Return
 
     .balign 4, 0
-_00E8:
-    MoveAction_099
-    MoveAction_00D
+EternaForest_Movement_CherylNoticeAndWalkToPlayerX28:
+    MoveAction_153
+    WalkNormalSouth
     EndMovement
 
     .balign 4, 0
-_00F4:
-    MoveAction_099
-    MoveAction_00D
-    MoveAction_00F
-    MoveAction_021
+EternaForest_Movement_CherylNoticeAndWalkToPlayerX29:
+    MoveAction_153
+    WalkNormalSouth
+    WalkNormalEast
+    WalkOnSpotNormalSouth
     EndMovement
 
-_0108:
+EternaForest_CoordEvent_PlayerLeaveCheryl:
     LockAll
-    ScrCmd_162
-    ScrCmd_06D 0, 15
-    ScrCmd_06C 0, 0
-    ApplyMovement 0, _0190
+    ClearHasPartner
+    SetMovementType LOCALID_CHERYL, MOVEMENT_TYPE_LOOK_SOUTH
+    SetObjectFlagIsPersistent LOCALID_CHERYL, FALSE
+    ApplyMovement LOCALID_CHERYL, EternaForest_Movement_CherylWalkOnSpotSouth
     WaitMovement
-    Message 4
+    Message EternaForest_Text_IllWaitHereForYouThen
     CloseMessage
-    ScrCmd_069 0x8004, 0x8005
-    GoToIfEq 0x8004, 28, _0148
-    GoToIfEq 0x8004, 29, _0158
+    GetPlayerMapPos VAR_0x8004, VAR_0x8005
+    GoToIfEq VAR_0x8004, 28, EternaForest_CherylWalkBackToOriginalPositionX28
+    GoToIfEq VAR_0x8004, 29, EternaForest_CherylWalkBackToOriginalPositionX29
     End
 
-_0148:
-    ApplyMovement 0, _0174
+EternaForest_CherylWalkBackToOriginalPositionX28:
+    ApplyMovement LOCALID_CHERYL, EternaForest_Movement_CherylWalkBackToOriginalPositionX28
     WaitMovement
-    GoTo _0168
+    GoTo EternaForest_ResetFollowerCherylStateAndRelease
 
-_0158:
-    ApplyMovement 0, _0180
+EternaForest_CherylWalkBackToOriginalPositionX29:
+    ApplyMovement LOCALID_CHERYL, EternaForest_Movement_CherylWalkBackToOriginalPositionX29
     WaitMovement
-    GoTo _0168
+    GoTo EternaForest_ResetFollowerCherylStateAndRelease
 
-_0168:
-    SetVar 0x40B1, 0
+EternaForest_ResetFollowerCherylStateAndRelease:
+    SetVar VAR_ETERNA_FOREST_FOLLOWER_CHERYL_STATE, 0
     ReleaseAll
     End
 
     .balign 4, 0
-_0174:
-    MoveAction_00C 2
-    MoveAction_021
+EternaForest_Movement_CherylWalkBackToOriginalPositionX28:
+    WalkNormalNorth 2
+    WalkOnSpotNormalSouth
     EndMovement
 
     .balign 4, 0
-_0180:
-    MoveAction_00C 2
-    MoveAction_00E
-    MoveAction_021
+EternaForest_Movement_CherylWalkBackToOriginalPositionX29:
+    WalkNormalNorth 2
+    WalkNormalWest
+    WalkOnSpotNormalSouth
     EndMovement
 
     .balign 4, 0
-_0190:
-    MoveAction_021
+EternaForest_Movement_CherylWalkOnSpotSouth:
+    WalkOnSpotNormalSouth
     EndMovement
 
-_0198:
+EternaForest_CoordEvent_CherylLeavePlayer:
     LockAll
-    ApplyMovement 0, _0300
-    ApplyMovement 0xFF, _0368
+    ApplyMovement LOCALID_CHERYL, EternaForest_Movement_CherylExclamationMark
+    ApplyMovement LOCALID_PLAYER, EternaForest_Movement_PlayerWalkOnSpotWest
     WaitMovement
-    ScrCmd_0CD 0
-    Message 5
-    SetVar 0x8004, 218
-    SetVar 0x8005, 1
-    ScrCmd_07D 0x8004, 0x8005, 0x800C
-    GoToIfEq 0x800C, 0, _01EA
-    GoTo _01DB
+    BufferPlayerName 0
+    Message EternaForest_Text_ThankYouSoMuch
+    SetVar VAR_0x8004, ITEM_SOOTHE_BELL
+    SetVar VAR_0x8005, 1
+    GoToIfCannotFitItem VAR_0x8004, VAR_0x8005, VAR_RESULT, EternaForest_CherylWalkToExit
+    GoTo EternaForest_GiveSootheBell
     End
 
-_01DB:
-    Message 6
-    CallCommonScript 0x7E0
-    GoTo _01EA
+EternaForest_GiveSootheBell:
+    Message EternaForest_Text_TokenOfAppreciation
+    Common_GiveItemQuantityNoLineFeed
+    GoTo EternaForest_CherylWalkToExit
     End
 
-_01EA:
+EternaForest_CherylWalkToExit:
     CloseMessage
-    ScrCmd_069 0x8004, 0x8005
-    GoToIfEq 0x8005, 34, _023B
-    GoToIfEq 0x8005, 35, _0253
-    GoToIfEq 0x8005, 36, _026B
-    GoToIfEq 0x8005, 37, _0283
-    GoToIfEq 0x8005, 38, _029B
-    GoTo _02B3
+    GetPlayerMapPos VAR_0x8004, VAR_0x8005
+    GoToIfEq VAR_0x8005, 34, EternaForest_CherylWalkToExitX34
+    GoToIfEq VAR_0x8005, 35, EternaForest_CherylWalkToExitX35
+    GoToIfEq VAR_0x8005, 36, EternaForest_CherylWalkToExitX36
+    GoToIfEq VAR_0x8005, 37, EternaForest_CherylWalkToExitX37
+    GoToIfEq VAR_0x8005, 38, EternaForest_CherylWalkToExitX38
+    GoTo EternaForest_CherylWalkToExitX39
     End
 
-_023B:
-    ApplyMovement 0, _030C
-    ApplyMovement 0xFF, _0374
+EternaForest_CherylWalkToExitX34:
+    ApplyMovement LOCALID_CHERYL, EternaForest_Movement_CherylWalkToExitX34
+    ApplyMovement LOCALID_PLAYER, EternaForest_Movement_PlayerWatchCherylWalkToExitX34
     WaitMovement
-    GoTo _02CB
+    GoTo EternaForest_CherylLeave
 
-_0253:
-    ApplyMovement 0, _0318
-    ApplyMovement 0xFF, _0388
+EternaForest_CherylWalkToExitX35:
+    ApplyMovement LOCALID_CHERYL, EternaForest_Movement_CherylWalkToExitX35
+    ApplyMovement LOCALID_PLAYER, EternaForest_Movement_PlayerWatchCherylWalkToExitX35
     WaitMovement
-    GoTo _02CB
+    GoTo EternaForest_CherylLeave
 
-_026B:
-    ApplyMovement 0, _0324
-    ApplyMovement 0xFF, _039C
+EternaForest_CherylWalkToExitX36:
+    ApplyMovement LOCALID_CHERYL, EternaForest_Movement_CherylWalkToExitX36
+    ApplyMovement LOCALID_PLAYER, EternaForest_Movement_PlayerWatchCherylWalkToExitX36
     WaitMovement
-    GoTo _02CB
+    GoTo EternaForest_CherylLeave
 
-_0283:
-    ApplyMovement 0, _0330
-    ApplyMovement 0xFF, _03B0
+EternaForest_CherylWalkToExitX37:
+    ApplyMovement LOCALID_CHERYL, EternaForest_Movement_CherylWalkToExitX37
+    ApplyMovement LOCALID_PLAYER, EternaForest_Movement_PlayerWatchCherylWalkToExitX37
     WaitMovement
-    GoTo _02CB
+    GoTo EternaForest_CherylLeave
 
-_029B:
-    ApplyMovement 0, _033C
-    ApplyMovement 0xFF, _03C4
+EternaForest_CherylWalkToExitX38:
+    ApplyMovement LOCALID_CHERYL, EternaForest_Movement_CherylWalkToExitX38
+    ApplyMovement LOCALID_PLAYER, EternaForest_Movement_PlayerWatchCherylWalkToExitX38
     WaitMovement
-    GoTo _02CB
+    GoTo EternaForest_CherylLeave
 
-_02B3:
-    ApplyMovement 0, _0348
-    ApplyMovement 0xFF, _03D8
+EternaForest_CherylWalkToExitX39:
+    ApplyMovement LOCALID_CHERYL, EternaForest_Movement_CherylWalkToExitX39
+    ApplyMovement LOCALID_PLAYER, EternaForest_Movement_PlayerWatchCherylWalkToExitX39
     WaitMovement
-    GoTo _02CB
+    GoTo EternaForest_CherylLeave
 
-_02CB:
-    ApplyMovement 0, _0354
+EternaForest_CherylLeave:
+    ApplyMovement LOCALID_CHERYL, EternaForest_Movement_CherylWalkOnSpotWest
     WaitMovement
-    Message 7
+    Message EternaForest_Text_ImSureWellMeetAgain
     CloseMessage
-    ApplyMovement 0, _035C
+    ApplyMovement LOCALID_CHERYL, EternaForest_Movement_CherylLeave
     WaitMovement
-    PlayFanfare SEQ_SE_DP_KAIDAN2
-    ScrCmd_162
-    ScrCmd_065 0
-    ScrCmd_04B 0x603
-    SetFlag 227
-    SetVar 0x40B1, 2
+    PlaySE SEQ_SE_DP_KAIDAN2_sseq
+    ClearHasPartner
+    RemoveObject LOCALID_CHERYL
+    WaitSE SEQ_SE_DP_KAIDAN2_sseq
+    SetFlag FLAG_TRAVELED_WITH_CHERYL
+    SetVar VAR_ETERNA_FOREST_FOLLOWER_CHERYL_STATE, 2
     ReleaseAll
     End
 
     .balign 4, 0
-_0300:
-    MoveAction_023
-    MoveAction_099
+EternaForest_Movement_CherylExclamationMark:
+    WalkOnSpotNormalEast
+    MoveAction_153
     EndMovement
 
     .balign 4, 0
-_030C:
-    MoveAction_00D 2
-    MoveAction_00F 5
+EternaForest_Movement_CherylWalkToExitX34:
+    WalkNormalSouth 2
+    WalkNormalEast 5
     EndMovement
 
     .balign 4, 0
-_0318:
-    MoveAction_00D
-    MoveAction_00F 5
+EternaForest_Movement_CherylWalkToExitX35:
+    WalkNormalSouth
+    WalkNormalEast 5
     EndMovement
 
     .balign 4, 0
-_0324:
-    MoveAction_00D
-    MoveAction_00F 5
+EternaForest_Movement_CherylWalkToExitX36:
+    WalkNormalSouth
+    WalkNormalEast 5
     EndMovement
 
     .balign 4, 0
-_0330:
-    MoveAction_00C
-    MoveAction_00F 5
+EternaForest_Movement_CherylWalkToExitX37:
+    WalkNormalNorth
+    WalkNormalEast 5
     EndMovement
 
     .balign 4, 0
-_033C:
-    MoveAction_00C
-    MoveAction_00F 5
+EternaForest_Movement_CherylWalkToExitX38:
+    WalkNormalNorth
+    WalkNormalEast 5
     EndMovement
 
     .balign 4, 0
-_0348:
-    MoveAction_00C 2
-    MoveAction_00F 5
+EternaForest_Movement_CherylWalkToExitX39:
+    WalkNormalNorth 2
+    WalkNormalEast 5
     EndMovement
 
     .balign 4, 0
-_0354:
-    MoveAction_022
+EternaForest_Movement_CherylWalkOnSpotWest:
+    WalkOnSpotNormalWest
     EndMovement
 
     .balign 4, 0
-_035C:
-    MoveAction_03F
-    MoveAction_023
+EternaForest_Movement_CherylLeave:
+    Delay8
+    WalkOnSpotNormalEast
     EndMovement
 
     .balign 4, 0
-_0368:
-    MoveAction_03F 3
-    MoveAction_022
+EternaForest_Movement_PlayerWalkOnSpotWest:
+    Delay8 3
+    WalkOnSpotNormalWest
     EndMovement
 
     .balign 4, 0
-_0374:
-    MoveAction_03F 2
-    MoveAction_021
-    MoveAction_03F
-    MoveAction_023
+EternaForest_Movement_PlayerWatchCherylWalkToExitX34:
+    Delay8 2
+    WalkOnSpotNormalSouth
+    Delay8
+    WalkOnSpotNormalEast
     EndMovement
 
     .balign 4, 0
-_0388:
-    MoveAction_03F
-    MoveAction_021
-    MoveAction_03F
-    MoveAction_023
+EternaForest_Movement_PlayerWatchCherylWalkToExitX35:
+    Delay8
+    WalkOnSpotNormalSouth
+    Delay8
+    WalkOnSpotNormalEast
     EndMovement
 
     .balign 4, 0
-_039C:
-    MoveAction_03F
-    MoveAction_021
-    MoveAction_03F
-    MoveAction_023
+EternaForest_Movement_PlayerWatchCherylWalkToExitX36:
+    Delay8
+    WalkOnSpotNormalSouth
+    Delay8
+    WalkOnSpotNormalEast
     EndMovement
 
     .balign 4, 0
-_03B0:
-    MoveAction_03F
-    MoveAction_020
-    MoveAction_03F
-    MoveAction_023
+EternaForest_Movement_PlayerWatchCherylWalkToExitX37:
+    Delay8
+    WalkOnSpotNormalNorth
+    Delay8
+    WalkOnSpotNormalEast
     EndMovement
 
     .balign 4, 0
-_03C4:
-    MoveAction_03F
-    MoveAction_020
-    MoveAction_03F
-    MoveAction_023
+EternaForest_Movement_PlayerWatchCherylWalkToExitX38:
+    Delay8
+    WalkOnSpotNormalNorth
+    Delay8
+    WalkOnSpotNormalEast
     EndMovement
 
     .balign 4, 0
-_03D8:
-    MoveAction_03F 2
-    MoveAction_020
-    MoveAction_03F
-    MoveAction_023
+EternaForest_Movement_PlayerWatchCherylWalkToExitX39:
+    Delay8 2
+    WalkOnSpotNormalNorth
+    Delay8
+    WalkOnSpotNormalEast
     EndMovement
 
-_03EC:
+EternaForest_Dummy4:
     LockAll
-    ScrCmd_0CD 0
+    BufferPlayerName 0
     ReleaseAll
     End
 
-_03F5:
+EternaForest_Dummy5:
     LockAll
-    ScrCmd_0CD 0
+    BufferPlayerName 0
     ReleaseAll
     End
 
-_03FE:
-    PlayFanfare SEQ_SE_CONFIRM
-    LockAll
-    FacePlayer
-    Message 9
-    WaitABXPadPress
-    CloseMessage
-    ReleaseAll
+EternaForest_BugCatcher:
+    NPCMessage EternaForest_Text_ImSearchingForBugPokemon
     End
 
-_0411:
-    PlayFanfare SEQ_SE_CONFIRM
+EternaForest_Gardenia:
+    PlaySE SE_CONFIRM_sseq_3
     LockAll
     FacePlayer
-    Message 11
+    Message EternaForest_Text_WereYouIngriguedByRumors
     CloseMessage
-    ApplyMovement 24, _04BC
+    ApplyMovement LOCALID_GARDENIA, EternaForest_Movement_GardeniaWalkOnSpotNorth
     WaitMovement
-    Message 12
+    Message EternaForest_Text_GhostPokemonOfOldChateau
     FacePlayer
-    Message 13
+    Message EternaForest_Text_GoodLuckWithInvestigation
     CloseMessage
-    ScrCmd_1BD 0x800C
-    GoToIfEq 0x800C, 0, _046C
-    GoToIfEq 0x800C, 1, _047E
-    GoToIfEq 0x800C, 2, _0490
-    GoToIfEq 0x800C, 3, _04A2
+    GetPlayerDir VAR_RESULT
+    GoToIfEq VAR_RESULT, DIR_NORTH, EternaForest_GardeniaLeaveNorth
+    GoToIfEq VAR_RESULT, DIR_SOUTH, EternaForest_GardeniaLeaveSouth
+    GoToIfEq VAR_RESULT, DIR_WEST, EternaForest_GardeniaLeaveWest
+    GoToIfEq VAR_RESULT, DIR_EAST, EternaForest_GardeniaLeaveEast
     End
 
-_046C:
-    ApplyMovement 24, _04D0
+EternaForest_GardeniaLeaveNorth:
+    ApplyMovement LOCALID_GARDENIA, EternaForest_Movement_GardeniaLeaveNorth
     WaitMovement
-    GoTo _04B4
+    GoTo EternaForest_RemoveGardenia
     End
 
-_047E:
-    ApplyMovement 24, _04C4
+EternaForest_GardeniaLeaveSouth:
+    ApplyMovement LOCALID_GARDENIA, EternaForest_Movement_GardeniaLeaveSouthWestEast
     WaitMovement
-    GoTo _04B4
+    GoTo EternaForest_RemoveGardenia
     End
 
-_0490:
-    ApplyMovement 24, _04C4
+EternaForest_GardeniaLeaveWest:
+    ApplyMovement LOCALID_GARDENIA, EternaForest_Movement_GardeniaLeaveSouthWestEast
     WaitMovement
-    GoTo _04B4
+    GoTo EternaForest_RemoveGardenia
     End
 
-_04A2:
-    ApplyMovement 24, _04C4
+EternaForest_GardeniaLeaveEast:
+    ApplyMovement LOCALID_GARDENIA, EternaForest_Movement_GardeniaLeaveSouthWestEast
     WaitMovement
-    GoTo _04B4
+    GoTo EternaForest_RemoveGardenia
     End
 
-_04B4:
-    ScrCmd_065 24
+EternaForest_RemoveGardenia:
+    RemoveObject LOCALID_GARDENIA
     ReleaseAll
     End
 
     .balign 4, 0
-_04BC:
-    MoveAction_020
+EternaForest_Movement_GardeniaWalkOnSpotNorth:
+    WalkOnSpotNormalNorth
     EndMovement
 
     .balign 4, 0
-_04C4:
-    MoveAction_00D 2
-    MoveAction_00F 9
+EternaForest_Movement_GardeniaLeaveSouthWestEast:
+    WalkNormalSouth 2
+    WalkNormalEast 9
     EndMovement
 
     .balign 4, 0
-_04D0:
-    MoveAction_00E
-    MoveAction_00D 2
-    MoveAction_00F 10
+EternaForest_Movement_GardeniaLeaveNorth:
+    WalkNormalWest
+    WalkNormalSouth 2
+    WalkNormalEast 10
     EndMovement
 
-_04E0:
-    ScrCmd_036 14, 2, 0, 0x800C
-    ScrCmd_038 3
-    ScrCmd_039
-    ScrCmd_03B 0x800C
-    CallCommonScript 0x7D0
+EternaForest_SignboardEternaForest:
+    ShowLandmarkSign EternaForest_Text_SignEternaForest
     End
 
-_04F7:
-    ScrCmd_037 3, 0
-    ScrCmd_038 3
-    ScrCmd_039
-    ScrCmd_03A 15, 0x800C
-    CallCommonScript 0x7D0
+EternaForest_TrainerTipsSignpost:
+    ShowScrollingSign EternaForest_Text_TrainerTipsItemsOnGround
     End
 
-_050C:
-    PlayFanfare SEQ_SE_CONFIRM
+EternaForest_MossRock:
+    EventMessage EternaForest_Text_RockIsCoveredInMoss
+    End
+
+EternaForest_OnFrame_CherylOldChateauCutscene:
     LockAll
-    Message 10
-    WaitABXPadPress
-    CloseMessage
-    ReleaseAll
-    End
-
-_051D:
-    LockAll
-    SetVar 0x40CD, 2
-    ApplyMovement 0, _053C
+    SetVar VAR_ETERNA_FOREST_CHERYL_OLD_CHATEAU_CUTSCENE_STATE, 2
+    ApplyMovement LOCALID_CHERYL, EternaForest_Movement_CherylWalkOnSpotNorth
     WaitMovement
-    Message 8
-    WaitABXPadPress
+    Message EternaForest_Text_OldChateauAhead
+    WaitButton
     CloseMessage
     ReleaseAll
     End
 
     .balign 4, 0
-_053C:
-    MoveAction_020
+EternaForest_Movement_CherylWalkOnSpotNorth:
+    WalkOnSpotNormalNorth
     EndMovement

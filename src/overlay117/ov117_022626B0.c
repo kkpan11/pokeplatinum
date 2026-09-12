@@ -3,23 +3,19 @@
 #include <nitro.h>
 #include <string.h>
 
-#include "struct_decls/struct_02006C24_decl.h"
-#include "struct_defs/sprite_template.h"
-#include "struct_defs/struct_0200D0F4.h"
-
 #include "overlay117/ov117_02260668.h"
 #include "overlay117/ov117_02263AF0.h"
 #include "overlay117/struct_ov117_02261280.h"
 #include "overlay117/struct_ov117_02264E84.h"
 
-#include "core_sys.h"
 #include "easy3d.h"
 #include "heap.h"
 #include "inlines.h"
 #include "narc.h"
-#include "unk_02002F38.h"
-#include "unk_02005474.h"
-#include "unk_0200C6E4.h"
+#include "palette.h"
+#include "sound_playback.h"
+#include "sprite_system.h"
+#include "system.h"
 
 typedef struct {
     fx32 unk_00;
@@ -56,7 +52,7 @@ typedef struct UnkStruct_ov117_022626B0_t {
     int unk_228;
     int unk_22C;
     fx32 unk_230;
-    CellActorData *unk_234;
+    ManagedSprite *unk_234;
     int unk_238;
     int unk_23C;
     int unk_240;
@@ -104,9 +100,9 @@ void ov117_02262D4C(BOOL param0, BOOL param1);
 void ov117_02262D98();
 static void ov117_022638D8(UnkStruct_ov117_02261280 *param0);
 static void ov117_022639BC(UnkStruct_ov117_02261280 *param0);
-static CellActorData *ov117_02263A00(UnkStruct_ov117_02261280 *param0);
-static void ov117_02263A6C(UnkStruct_ov117_022626B0 *param0, CellActorData *param1);
-static void ov117_02263AE4(CellActorData *param0);
+static ManagedSprite *ov117_02263A00(UnkStruct_ov117_02261280 *param0);
+static void ov117_02263A6C(UnkStruct_ov117_022626B0 *param0, ManagedSprite *param1);
+static void ov117_02263AE4(ManagedSprite *param0);
 
 static const fx16 Unk_ov117_02266B12[3 * 6] = {
     0x0,
@@ -162,9 +158,7 @@ inline void inline_ov117_02262EAC(int param0)
 
 UnkStruct_ov117_022626B0 *ov117_022626B0(UnkStruct_ov117_02261280 *param0)
 {
-    UnkStruct_ov117_022626B0 *v0;
-
-    v0 = Heap_AllocFromHeap(110, sizeof(UnkStruct_ov117_022626B0));
+    UnkStruct_ov117_022626B0 *v0 = Heap_Alloc(HEAP_ID_110, sizeof(UnkStruct_ov117_022626B0));
     MI_CpuClear8(v0, sizeof(UnkStruct_ov117_022626B0));
     v0->unk_270 = param0->unk_00->unk_34;
 
@@ -204,10 +198,10 @@ void ov117_02262760(UnkStruct_ov117_02261280 *param0, UnkStruct_ov117_022626B0 *
     ov117_02263AE4(param1->unk_234);
     ov117_022639BC(param0);
 
-    Heap_FreeToHeap(param1->unk_00);
-    Heap_FreeToHeap(param1->unk_24C);
-    Heap_FreeToHeap(param1->unk_250);
-    Heap_FreeToHeap(param1);
+    Heap_Free(param1->unk_00);
+    Heap_Free(param1->unk_24C);
+    Heap_Free(param1->unk_250);
+    Heap_Free(param1);
 }
 
 void ov117_02262798(UnkStruct_ov117_02261280 *param0, UnkStruct_ov117_022626B0 *param1)
@@ -225,10 +219,10 @@ void ov117_02262798(UnkStruct_ov117_02261280 *param0, UnkStruct_ov117_022626B0 *
         param1->unk_214 = 0;
         param1->unk_218 = 0;
     } else {
-        param1->unk_20C = gCoreSys.touchX;
-        param1->unk_210 = gCoreSys.touchY;
-        param1->unk_214 = gCoreSys.touchHeld;
-        param1->unk_218 = gCoreSys.touchPressed;
+        param1->unk_20C = gSystem.touchX;
+        param1->unk_210 = gSystem.touchY;
+        param1->unk_214 = gSystem.touchHeld;
+        param1->unk_218 = gSystem.touchPressed;
     }
 
     ov117_02263270(param1);
@@ -266,7 +260,7 @@ void ov117_02262798(UnkStruct_ov117_02261280 *param0, UnkStruct_ov117_022626B0 *
                 if (v1 == 1) {
                     param1->unk_268 = 8;
                     param1->unk_275 = 0;
-                    Sound_PlayEffect(1398);
+                    Sound_PlayEffect(SEQ_SE_PL_BALLOON01_sseq);
                 }
             } else {
                 ov117_02262CE8(param1);
@@ -331,16 +325,16 @@ static void ov117_022629E0(UnkStruct_ov117_02261280 *param0, UnkStruct_ov117_022
 {
     if ((param3 == 1) && (param1->unk_244 >= 98)) {
         ov117_02261600(param0, 0);
-        Sound_PlayEffect(1402);
+        Sound_PlayEffect(SEQ_SE_PL_BALLOON04_sseq);
     } else if (param1->unk_244 >= 98) {
         (void)0;
     } else {
         if (param1->unk_0C[0].unk_00.unk_04 < param1->unk_0C[0].unk_10.unk_04) {
             ov117_02261600(param0, 2);
-            Sound_PlayEffect(1400);
+            Sound_PlayEffect(SEQ_SE_PL_BALLOON03_sseq);
         } else if (param1->unk_0C[0].unk_00.unk_04 > param1->unk_0C[0].unk_10.unk_04) {
             ov117_02261600(param0, 1);
-            Sound_PlayEffect(1400);
+            Sound_PlayEffect(SEQ_SE_PL_BALLOON03_sseq);
         }
     }
 }
@@ -422,8 +416,8 @@ static void ov117_02262B98(UnkStruct_ov117_022626B0 *param0)
 
         GF_ASSERT(param0->unk_24C == NULL);
 
-        param0->unk_24C = Heap_AllocFromHeap(110, v0);
-        param0->unk_250 = Heap_AllocFromHeap(110, v0);
+        param0->unk_24C = Heap_Alloc(HEAP_ID_110, v0);
+        param0->unk_250 = Heap_Alloc(HEAP_ID_110, v0);
 
         MI_CpuCopy8(v1, param0->unk_24C, v0);
         MI_CpuCopy8(v1, param0->unk_250, v0);
@@ -443,7 +437,7 @@ static void ov117_02262B98(UnkStruct_ov117_022626B0 *param0)
         v3 = (u8 *)param0->unk_04 + param0->unk_04->texInfo.ofsTex;
         v4 = (u32)(v3 - (u8 *)param0->unk_00);
 
-        Heap_ReallocFromHeap(param0->unk_00, v4);
+        Heap_Realloc(param0->unk_00, v4);
     }
 }
 
@@ -456,16 +450,14 @@ static void ov117_02262C3C(UnkStruct_ov117_022626B0 *param0)
 
 static void ov117_02262C60(UnkStruct_ov117_022626B0 *param0, int param1)
 {
-    int v0;
-
-    v0 = (12 << 8) * param1 / 800;
+    int v0 = (12 << 8) * param1 / 800;
     v0 = (v0 + 0x80) >> 8;
 
     if (v0 > 16) {
         v0 = 16;
     }
 
-    sub_0200393C(param0->unk_24C, param0->unk_250, param0->unk_254 / 2, v0, 0x1f);
+    BlendPalette(param0->unk_24C, param0->unk_250, param0->unk_254 / 2, v0, 0x1f);
     DC_FlushRange(param0->unk_250, param0->unk_254);
 
     param0->unk_276 = 1;
@@ -681,7 +673,7 @@ static int ov117_0226334C(UnkStruct_ov117_022626B0 *param0)
         }
 
         if ((param0->unk_23C != -1) && (param0->unk_210 > param0->unk_23C) && (Sound_IsEffectPlaying(1399) == 0)) {
-            Sound_PlayEffect(1399);
+            Sound_PlayEffect(SEQ_SE_PL_BALLOON02_sseq);
             param0->unk_274 = 1;
         }
 
@@ -916,40 +908,38 @@ static int ov117_022638AC(UnkStruct_ov117_022626B0 *param0)
 
 static void ov117_022638D8(UnkStruct_ov117_02261280 *param0)
 {
-    NARC *v0;
+    NARC *v0 = NARC_ctor(NARC_INDEX_APPLICATION__BALLOON__GRAPHIC__BALLOON_GRA, HEAP_ID_110);
 
-    v0 = NARC_ctor(NARC_INDEX_APPLICATION__BALLOON__GRAPHIC__BALLOON_GRA, 110);
-
-    SpriteRenderer_LoadPalette(param0->unk_8C, 2, param0->unk_24, param0->unk_28, v0, 58, 0, 1, NNS_G2D_VRAM_TYPE_2DMAIN, 10005);
-    SpriteRenderer_LoadCharResObjFromOpenNarc(param0->unk_24, param0->unk_28, v0, 55, 0, NNS_G2D_VRAM_TYPE_2DMAIN, 10003);
-    SpriteRenderer_LoadCellResObjFromOpenNarc(param0->unk_24, param0->unk_28, v0, 57, 0, 10003);
-    SpriteRenderer_LoadAnimResObjFromOpenNarc(param0->unk_24, param0->unk_28, v0, 56, 0, 10003);
+    SpriteSystem_LoadPaletteBufferFromOpenNarc(param0->unk_8C, PLTTBUF_MAIN_OBJ, param0->unk_24, param0->unk_28, v0, 58, FALSE, 1, NNS_G2D_VRAM_TYPE_2DMAIN, 10005);
+    SpriteSystem_LoadCharResObjFromOpenNarc(param0->unk_24, param0->unk_28, v0, 55, FALSE, NNS_G2D_VRAM_TYPE_2DMAIN, 10003);
+    SpriteSystem_LoadCellResObjFromOpenNarc(param0->unk_24, param0->unk_28, v0, 57, FALSE, 10003);
+    SpriteSystem_LoadAnimResObjFromOpenNarc(param0->unk_24, param0->unk_28, v0, 56, FALSE, 10003);
     NARC_dtor(v0);
 }
 
 static void ov117_022639BC(UnkStruct_ov117_02261280 *param0)
 {
-    SpriteGfxHandler_UnloadCharObjById(param0->unk_28, 10003);
-    SpriteGfxHandler_UnloadCellObjById(param0->unk_28, 10003);
-    SpriteGfxHandler_UnloadAnimObjById(param0->unk_28, 10003);
-    SpriteGfxHandler_UnloadPlttObjById(param0->unk_28, 10005);
+    SpriteManager_UnloadCharObjById(param0->unk_28, 10003);
+    SpriteManager_UnloadCellObjById(param0->unk_28, 10003);
+    SpriteManager_UnloadAnimObjById(param0->unk_28, 10003);
+    SpriteManager_UnloadPlttObjById(param0->unk_28, 10005);
 }
 
-static CellActorData *ov117_02263A00(UnkStruct_ov117_02261280 *param0)
+static ManagedSprite *ov117_02263A00(UnkStruct_ov117_02261280 *param0)
 {
-    CellActorData *v0;
+    ManagedSprite *v0;
     SpriteTemplate v1;
 
     v1 = Unk_ov117_02266B38;
-    v0 = SpriteActor_LoadResources(param0->unk_24, param0->unk_28, &v1);
+    v0 = SpriteSystem_NewSprite(param0->unk_24, param0->unk_28, &v1);
 
-    SpriteActor_EnableObject(v0, 0);
-    SpriteActor_UpdateObject(v0->unk_00);
+    ManagedSprite_SetDrawFlag(v0, 0);
+    Sprite_TickFrame(v0->sprite);
 
     return v0;
 }
 
-static void ov117_02263A6C(UnkStruct_ov117_022626B0 *param0, CellActorData *param1)
+static void ov117_02263A6C(UnkStruct_ov117_022626B0 *param0, ManagedSprite *param1)
 {
     int v0;
 
@@ -959,12 +949,12 @@ static void ov117_02263A6C(UnkStruct_ov117_022626B0 *param0, CellActorData *para
         v0 = ov117_022637AC(param0, 0) + 1;
     }
 
-    sub_0200D500(param1, param0->unk_21C, (param0->unk_230 >> FX32_SHIFT) + Unk_ov117_02266B05[param0->unk_270].unk_02, ((192 + 160) << FX32_SHIFT));
-    sub_0200D364(param1, v0);
-    SpriteActor_UpdateObject(param1->unk_00);
+    ManagedSprite_SetPositionXYWithSubscreenOffset(param1, param0->unk_21C, (param0->unk_230 >> FX32_SHIFT) + Unk_ov117_02266B05[param0->unk_270].unk_02, ((192 + 160) << FX32_SHIFT));
+    ManagedSprite_SetAnim(param1, v0);
+    Sprite_TickFrame(param1->sprite);
 }
 
-static void ov117_02263AE4(CellActorData *param0)
+static void ov117_02263AE4(ManagedSprite *param0)
 {
-    sub_0200D0F4(param0);
+    Sprite_DeleteAndFreeResources(param0);
 }

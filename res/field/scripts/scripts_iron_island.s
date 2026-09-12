@@ -1,128 +1,129 @@
-    .include "macros/scrcmd.inc"
+#include "macros/scrcmd.inc"
+#include "res/text/bank/iron_island.h"
+#include "res/field/events/events_iron_island.h"
 
-    .data
 
-    ScriptEntry _000E
-    ScriptEntry _0014
-    ScriptEntry _00FC
-    .short 0xFD13
+    ScriptEntry IronIsland_OnTransition
+    ScriptEntry IronIsland_Sailor
+    ScriptEntry IronIsland_Riley
+    ScriptEntryEnd
 
-_000E:
-    SetFlag 0x9DA
+IronIsland_OnTransition:
+    SetFlag FLAG_FIRST_ARRIVAL_IRON_ISLAND_EXTERIOR
     End
 
-_0014:
-    PlayFanfare SEQ_SE_CONFIRM
+IronIsland_Sailor:
+    PlaySE SE_CONFIRM_sseq_3
     LockAll
     FacePlayer
-    ScrCmd_1BD 0x8004
+    GetPlayerDir VAR_0x8004
     FacePlayer
-    Message 3
-    ScrCmd_03E 0x800C
+    Message IronIsland_Text_WantToSailSomewhere
+    ShowYesNoMenu VAR_RESULT
     CloseMessage
-    GoToIfEq 0x800C, 0, _003E
-    GoTo _0071
+    GoToIfEq VAR_RESULT, MENU_YES, IronIsland_TakeShipToCanalave
+    GoTo IronIsland_TellWheneverSetSail
 
-_003E:
-    Message 4
+IronIsland_TakeShipToCanalave:
+    Message IronIsland_Text_AnchorsAweigh
     CloseMessage
-    Call _007C
-    CallIfEq 0x8004, 1, _0096
-    CallIfEq 0x8004, 2, _00B0
-    ScrCmd_23D 0, 2, 33, 44, 0x2EE
+    Call IronIsland_SailorEnterShip
+    CallIfEq VAR_0x8004, DIR_SOUTH, IronIsland_PlayerEnterShipSouth
+    CallIfEq VAR_0x8004, DIR_WEST, IronIsland_PlayerEnterShipWest
+    TakeShipToCanalave
     ReleaseAll
     End
 
-_0071:
-    Message 5
-    WaitABXPadPress
+IronIsland_TellWheneverSetSail:
+    Message IronIsland_Text_TellWheneverSetSail
+    WaitButton
     CloseMessage
     ReleaseAll
     End
 
-_007C:
-    ApplyMovement 0, _00CC
+IronIsland_SailorEnterShip:
+    ApplyMovement LOCALID_SAILOR, IronIsland_Movement_SailorFaceWest
     WaitMovement
-    PlayFanfare SEQ_SE_DP_KAIDAN2
-    ApplyMovement 0, _00D8
-    WaitMovement
-    Return
-
-_0096:
-    ApplyMovement 0xFF, _00E0
-    WaitMovement
-    PlayFanfare SEQ_SE_DP_KAIDAN2
-    ApplyMovement 0xFF, _00D8
+    PlaySE SEQ_SE_DP_KAIDAN2_sseq
+    ApplyMovement LOCALID_SAILOR, IronIsland_Movement_SetInvisible
     WaitMovement
     Return
 
-_00B0:
-    ApplyMovement 0xFF, _00F0
+IronIsland_PlayerEnterShipSouth:
+    ApplyMovement LOCALID_PLAYER, IronIsland_Movement_PlayerWalkToShipSouth
     WaitMovement
-    PlayFanfare SEQ_SE_DP_KAIDAN2
-    ApplyMovement 0xFF, _00D8
+    PlaySE SEQ_SE_DP_KAIDAN2_sseq
+    ApplyMovement LOCALID_PLAYER, IronIsland_Movement_SetInvisible
+    WaitMovement
+    Return
+
+IronIsland_PlayerEnterShipWest:
+    ApplyMovement LOCALID_PLAYER, IronIsland_Movement_PlayerWalkToShipWest
+    WaitMovement
+    PlaySE SEQ_SE_DP_KAIDAN2_sseq
+    ApplyMovement LOCALID_PLAYER, IronIsland_Movement_SetInvisible
     WaitMovement
     Return
 
     .balign 4, 0
-_00CC:
-    MoveAction_002
-    MoveAction_040
+IronIsland_Movement_SailorFaceWest:
+    FaceWest
+    Delay15
     EndMovement
 
     .balign 4, 0
-_00D8:
-    MoveAction_045
+IronIsland_Movement_SetInvisible:
+    SetInvisible
     EndMovement
 
     .balign 4, 0
-_00E0:
-    MoveAction_00D
-    MoveAction_002
-    MoveAction_040
+IronIsland_Movement_PlayerWalkToShipSouth:
+    WalkNormalSouth
+    FaceWest
+    Delay15
     EndMovement
 
     .balign 4, 0
-_00F0:
-    MoveAction_00E
-    MoveAction_040
+IronIsland_Movement_PlayerWalkToShipWest:
+    WalkNormalWest
+    Delay15
     EndMovement
 
-_00FC:
-    PlayFanfare SEQ_SE_CONFIRM
+IronIsland_Riley:
+    PlaySE SE_CONFIRM_sseq_3
     LockAll
     FacePlayer
-    ScrCmd_0CD 0
-    Message 0
-    SetVar 0x8004, 0x1A7
-    SetVar 0x8005, 1
-    CallCommonScript 0x7FC
-    ScrCmd_15B 5, 0x800C
-    GoToIfEq 0x800C, 0, _0140
-    GoTo _0135
+    BufferPlayerName 0
+    Message IronIsland_Text_ImRileyHeresAGift
+    SetVar VAR_0x8004, ITEM_HM04
+    SetVar VAR_0x8005, 1
+    Common_GiveItemQuantity
+    CheckBadgeAcquired BADGE_ID_MINE, VAR_RESULT
+    GoToIfEq VAR_RESULT, FALSE, IronIsland_YouNeedMineBadge
+    GoTo IronIsland_YouCanJoinMeInside
     End
 
-_0135:
-    Message 1
-    GoTo _014B
+IronIsland_YouCanJoinMeInside:
+    Message IronIsland_Text_YouCanJoinMeInside
+    GoTo IronIsland_RileyEnterIronIsland
     End
 
-_0140:
-    Message 2
-    GoTo _014B
+IronIsland_YouNeedMineBadge:
+    Message IronIsland_Text_YouNeedMineBadge
+    GoTo IronIsland_RileyEnterIronIsland
     End
 
-_014B:
+IronIsland_RileyEnterIronIsland:
     CloseMessage
-    ApplyMovement 1, _0168
+    ApplyMovement LOCALID_RILEY, IronIsland_Movement_RileyWalkOnSpotNorth
     WaitMovement
-    PlayFanfare SEQ_SE_DP_KAIDAN2
-    ScrCmd_065 1
-    ScrCmd_04B 0x603
+    PlaySE SEQ_SE_DP_KAIDAN2_sseq
+    RemoveObject LOCALID_RILEY
+    WaitSE SEQ_SE_DP_KAIDAN2_sseq
     ReleaseAll
     End
 
     .balign 4, 0
-_0168:
-    MoveAction_020
+IronIsland_Movement_RileyWalkOnSpotNorth:
+    WalkOnSpotNormalNorth
     EndMovement

@@ -1,33 +1,32 @@
-    .include "macros/scrcmd.inc"
+#include "macros/scrcmd.inc"
+#include "res/text/bank/survival_area_south_house.h"
 
-    .data
 
-    ScriptEntry _0006
-    .short 0xFD13
+    ScriptEntry SurvivalAreaSouthHouse_BlackBelt
+    ScriptEntryEnd
 
-_0006:
-    PlayFanfare SEQ_SE_CONFIRM
+SurvivalAreaSouthHouse_BlackBelt:
+    PlaySE SE_CONFIRM_sseq_3
     LockAll
     FacePlayer
-    GoToIfSet 203, _004B
-    Message 0
-    SetVar 0x8004, 0x171
-    SetVar 0x8005, 1
-    ScrCmd_07D 0x8004, 0x8005, 0x800C
-    GoToIfEq 0x800C, 0, _0056
-    CallCommonScript 0x7FC
-    SetFlag 203
-    GoTo _004B
+    GoToIfSet FLAG_RECEIVED_SURVIVAL_AREA_SOUTH_HOUSE_TM42, SurvivalAreaSouthHouse_ExplainFacade
+    Message SurvivalAreaSouthHouse_Text_YouWantTM
+    SetVar VAR_0x8004, ITEM_TM42
+    SetVar VAR_0x8005, 1
+    GoToIfCannotFitItem VAR_0x8004, VAR_0x8005, VAR_RESULT, SurvivalAreaSouthHouse_BagIsFull
+    Common_GiveItemQuantity
+    SetFlag FLAG_RECEIVED_SURVIVAL_AREA_SOUTH_HOUSE_TM42
+    GoTo SurvivalAreaSouthHouse_ExplainFacade
 
-_004B:
-    Message 1
-    WaitABXPadPress
+SurvivalAreaSouthHouse_ExplainFacade:
+    Message SurvivalAreaSouthHouse_Text_ExplainFacade
+    WaitButton
     CloseMessage
     ReleaseAll
     End
 
-_0056:
-    CallCommonScript 0x7E1
+SurvivalAreaSouthHouse_BagIsFull:
+    Common_MessageBagIsFull
     CloseMessage
     ReleaseAll
     End

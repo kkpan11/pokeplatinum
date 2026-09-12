@@ -1,6 +1,5 @@
-    .include "macros/btlcmd.inc"
+#include "macros/btlcmd.inc"
 
-    .data
 
 _000:
     CompareVarToValue OPCODE_FLAG_SET, BTLVAR_BATTLE_CTX_STATUS, SYSCTL_PLAYED_MOVE_ANIMATION, _015
@@ -8,7 +7,7 @@ _000:
     Wait 
     WaitButtonABTime 30
     // Magnitude {0}!
-    PrintMessage pl_msg_00000368_00448, TAG_NUMBER, BTLSCR_MSG_TEMP
+    PrintMessage BattleStrings_Text_MagnitudeX, TAG_NUMBER, BTLSCR_MSG_TEMP
     Wait 
     WaitButtonABTime 30
 

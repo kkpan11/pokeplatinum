@@ -1,7 +1,9 @@
 #ifndef POKEPLATINUM_ITEM_DATA_H
 #define POKEPLATINUM_ITEM_DATA_H
 
-#include "strbuf.h"
+#include "constants/heap.h"
+
+#include "string_gf.h"
 
 typedef struct ItemPartyParam {
     u8 healSleep : 1;
@@ -54,14 +56,14 @@ typedef struct ItemPartyParam {
 typedef struct ItemData {
     u16 price;
     u8 holdEffect;
-    u8 holdEffectParam;
+    u8 effectParam;
     u8 pluckEffect;
     u8 flingEffect;
     u8 flingPower;
     u8 naturalGiftPower;
     u16 naturalGiftType : 5;
     u16 preventToss : 1;
-    u16 isSelectable : 1;
+    u16 canRegister : 1;
     u16 fieldPocket : 4;
     u16 battlePocket : 5;
     u8 fieldUseFunc;
@@ -72,8 +74,7 @@ typedef struct ItemData {
         u8 dummy;
         ItemPartyParam partyUseParam;
     };
-    u8 padding[2];
-} ItemData;
+} ALIGN_4 ItemData;
 
 enum ItemFileType {
     ITEM_FILE_TYPE_DATA,
@@ -85,9 +86,9 @@ enum ItemFileType {
 enum ItemDataParam {
     ITEM_PARAM_PRICE,
     ITEM_PARAM_HOLD_EFFECT,
-    ITEM_PARAM_HOLD_EFFECT_PARAM,
+    ITEM_PARAM_EFFECT_PARAM,
     ITEM_PARAM_PREVENT_TOSS,
-    ITEM_PARAM_IS_SELECTABLE,
+    ITEM_PARAM_CAN_REGISTER,
     ITEM_PARAM_FIELD_POCKET,
     ITEM_PARAM_FIELD_USE_FUNC,
     ITEM_PARAM_BATTLE_USE_FUNC,
@@ -173,7 +174,7 @@ u16 Item_FileID(u16 item, enum ItemFileType type);
  * @param gbaID     GBA-era item ID.
  * @return ID of the item which corresponds to the given GBA-era ID.
  */
-u16 Item_FromGBAID(u16 param0);
+u16 Item_FromGBAID(u16 gbaID);
 
 /**
  * @brief Get the file index of the global NCER file used by all item icons.
@@ -197,7 +198,7 @@ u16 Item_IconNANRFile(void);
  * @param heapID    ID of the heap to own the allocated memory.
  * @return The loaded data structure.
  */
-void *Item_Load(u16 item, enum ItemFileType type, u32 heapID);
+void *Item_Load(u16 item, enum ItemFileType type, enum HeapID heapID);
 
 /**
  * @brief Load the name of the item into a string buffer.
@@ -206,7 +207,7 @@ void *Item_Load(u16 item, enum ItemFileType type, u32 heapID);
  * @param item      The item whose name we should load.
  * @param heapID    ID of the heap to own memory needed for the text archive.
  */
-void Item_LoadName(Strbuf *dst, u16 item, u32 heapID);
+void Item_LoadName(String *dst, u16 item, enum HeapID heapID);
 
 /**
  * @brief Load the description of the item into a string buffer.
@@ -215,7 +216,7 @@ void Item_LoadName(Strbuf *dst, u16 item, u32 heapID);
  * @param item      The item whose description we should load.
  * @param heapID    ID of the heap to own memory needed for the text archive.
  */
-void Item_LoadDescription(Strbuf *dst, u16 item, u16 heapID);
+void Item_LoadDescription(String *dst, u16 item, u16 heapID);
 
 /**
  * @brief Load a parameter for a given item from the data archive.
@@ -225,7 +226,7 @@ void Item_LoadDescription(Strbuf *dst, u16 item, u16 heapID);
  * @param heapID    The heap on which to load the item data.
  * @return Parameter value from the loaded item.
  */
-s32 Item_LoadParam(u16 item, enum ItemDataParam param, u32 heapID);
+s32 Item_LoadParam(u16 item, enum ItemDataParam param, enum HeapID heapID);
 
 /**
  * @brief Get a param value from a loaded item.
@@ -244,7 +245,7 @@ s32 Item_Get(ItemData *itemData, enum ItemDataParam param);
  * @param item      The TM or HM item ID.
  * @return The move stored in the given TM or HM.
  */
-const u16 Item_MoveForTMHM(u16 item);
+u16 Item_MoveForTMHM(u16 item);
 
 /**
  * @brief Check if a given move is an HM move.
@@ -273,20 +274,20 @@ u8 Item_TMHMNumber(u16 item);
 u8 Item_IsMail(u16 item);
 
 /**
- * @brief Get the mail number for a given item.
+ * @brief Get the mail type for a given item.
  *
  * @param item
- * @return The mail number for the item, or ITEM_NONE if the item is not mail.
+ * @return The mail type for the item, or ITEM_NONE if the item is not mail.
  */
-u8 Item_MailNumber(u16 item);
+u8 Item_GetMailType(u16 item);
 
 /**
- * @brief Get the item for a given mail number.
+ * @brief Get the item for a given mail type.
  *
  * @param mail
- * @return The item for the mail number, or ITEM_NONE if none exists.
+ * @return The item for the mail type, or ITEM_NONE if none exists.
  */
-u16 Item_ForMailNumber(u8 mail);
+u16 Item_ForMailType(u8 mailType);
 
 /**
  * @brief Check if a given item is a berry.
@@ -310,7 +311,7 @@ u8 Item_BerryNumber(u16 item);
  * @param berry
  * @return The item for the berry number, or ITEM_RETURN_ID if none exists.
  */
-u16 Item_ForBerryNumber(u8 item);
+u16 Item_ForBerryNumber(u8 berry);
 
 /**
  * @brief Check if a given item is herbal medicine.
@@ -326,7 +327,7 @@ u8 Item_IsHerbalMedicine(u16 item);
  * @param heapID    The heap which will own the item table's allocation.
  * @return The full table of item data.
  */
-void *ItemTable_Load(int heapID);
+void *ItemTable_Load(enum HeapID heapID);
 
 /**
  * @brief Get the ItemData value at a given index from within a loaded table.

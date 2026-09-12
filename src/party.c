@@ -3,8 +3,6 @@
 #include <nitro.h>
 #include <string.h>
 
-#include "struct_defs/struct_party.h"
-
 #include "heap.h"
 #include "pokemon.h"
 #include "savedata.h"
@@ -21,43 +19,41 @@ int Party_SaveSize(void)
     return sizeof(Party);
 }
 
-Party *Party_New(u32 param0)
+Party *Party_New(enum HeapID heapID)
 {
-    Party *v0;
+    Party *party = Heap_Alloc(heapID, sizeof(Party));
+    Party_Init(party);
 
-    v0 = Heap_AllocFromHeap(param0, sizeof(Party));
-    Party_Init(v0);
-
-    return v0;
+    return party;
 }
 
-void Party_Init(Party *param0)
+void Party_Init(Party *party)
 {
-    Party_InitWithCapacity(param0, 6);
+    Party_InitWithCapacity(party, MAX_PARTY_SIZE);
 }
 
 void Party_InitWithCapacity(Party *party, int capacity)
 {
     int i;
 
-    GF_ASSERT(capacity <= 6);
+    GF_ASSERT(capacity <= MAX_PARTY_SIZE);
     memset(party, 0, sizeof(Party));
 
     party->currentCount = 0;
     party->capacity = capacity;
 
-    for (i = 0; i < 6; i++) {
+    for (i = 0; i < MAX_PARTY_SIZE; i++) {
         Pokemon_Init(&party->pokemon[i]);
     }
 }
 
-BOOL Party_AddPokemon(Party *party, Pokemon *pokemon)
+BOOL Party_AddPokemon(Party *party, Pokemon *mon)
 {
     if (party->currentCount >= party->capacity) {
         return FALSE;
     }
 
-    party->pokemon[party->currentCount] = *pokemon;
+    party->pokemon[party->currentCount] = *mon;
     party->currentCount++;
 
     return TRUE;
@@ -96,15 +92,14 @@ Pokemon *Party_GetPokemonBySlotIndex(const Party *party, int slot)
     return (Pokemon *)&party->pokemon[slot];
 }
 
-void sub_0207A128(Party *party, int slot, Pokemon *param2)
+void Party_AddPokemonBySlotIndex(Party *party, int slot, Pokemon *mon)
 {
-    int v0;
 
     PARTY_ASSERT_SLOT(party, slot);
 
-    v0 = Pokemon_GetValue(&(party->pokemon[slot]), MON_DATA_SPECIES_EXISTS, NULL) - Pokemon_GetValue(param2, MON_DATA_SPECIES_EXISTS, NULL);
-    party->pokemon[slot] = *param2;
-    party->currentCount += v0;
+    int addOrRemoveSlots = Pokemon_GetValue(&(party->pokemon[slot]), MON_DATA_SPECIES_EXISTS, NULL) - Pokemon_GetValue(mon, MON_DATA_SPECIES_EXISTS, NULL);
+    party->pokemon[slot] = *mon;
+    party->currentCount += addOrRemoveSlots;
 }
 
 BOOL Party_SwapSlots(Party *party, int slotA, int slotB)
@@ -114,18 +109,18 @@ BOOL Party_SwapSlots(Party *party, int slotA, int slotB)
     PARTY_ASSERT_SLOT(party, slotA);
     PARTY_ASSERT_SLOT(party, slotB);
 
-    tempPokemon = Heap_AllocFromHeap(0, sizeof(Pokemon));
+    tempPokemon = Heap_Alloc(HEAP_ID_SYSTEM, sizeof(Pokemon));
     *tempPokemon = party->pokemon[slotA];
 
     party->pokemon[slotA] = party->pokemon[slotB];
     party->pokemon[slotB] = *tempPokemon;
 
-    Heap_FreeToHeap(tempPokemon);
+    Heap_Free(tempPokemon);
 
     return FALSE;
 }
 
-void Party_cpy(const Party *src, Party *dest)
+void Party_Copy(const Party *src, Party *dest)
 {
     *dest = *src;
 }
@@ -143,10 +138,7 @@ BOOL Party_HasSpecies(const Party *party, int species)
     return i != party->currentCount;
 }
 
-Party *Party_GetFromSavedata(SaveData *param0)
+Party *SaveData_GetParty(SaveData *saveData)
 {
-    Party *v0;
-
-    v0 = (Party *)SaveData_SaveTable(param0, 2);
-    return v0;
+    return SaveData_SaveTable(saveData, SAVE_TABLE_ENTRY_PARTY);
 }

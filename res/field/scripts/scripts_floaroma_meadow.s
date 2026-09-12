@@ -1,264 +1,246 @@
-    .include "macros/scrcmd.inc"
+#include "macros/scrcmd.inc"
+#include "res/text/bank/floaroma_meadow.h"
+#include "res/field/events/events_floaroma_meadow.h"
 
-    .data
 
-    ScriptEntry _001E
-    ScriptEntry _0024
-    ScriptEntry _01D8
-    ScriptEntry _01D8
-    ScriptEntry _01DA
-    ScriptEntry _02EF
-    ScriptEntry _0306
-    .short 0xFD13
+    ScriptEntry FloaromaMeadow_OnTransition
+    ScriptEntry FloaromaMeadow_CoordEvent_Grunts
+    ScriptEntry FloaromaMeadow_Grunt_Unused
+    ScriptEntry FloaromaMeadow_Grunt_Unused
+    ScriptEntry FloaromaMeadow_PokefanM
+    ScriptEntry FloaromaMeadow_Dummy6
+    ScriptEntry FloaromaMeadow_ItemWorksKey
+    ScriptEntryEnd
 
-_001E:
-    SetFlag 0x9CE
+FloaromaMeadow_OnTransition:
+    SetFlag FLAG_FIRST_ARRIVAL_FLOAROMA_MEADOW
     End
 
-_0024:
+FloaromaMeadow_CoordEvent_Grunts:
     LockAll
-    Call _00CC
-    ScrCmd_0E5 0x128, 0
-    ScrCmd_0EC 0x800C
-    GoToIfEq 0x800C, 0, _006E
-    Call _00EE
-    ScrCmd_0E5 0x129, 0
-    ScrCmd_0EC 0x800C
-    GoToIfEq 0x800C, 0, _006E
-    Call _010E
-    SetFlag 0x989
+    Call FloaromaMeadow_GruntsNoticePlayer
+    StartTrainerBattle TRAINER_GALACTIC_GRUNT_FLOAROMA_MEADOW_1
+    CheckWonBattle VAR_RESULT
+    GoToIfEq VAR_RESULT, FALSE, FloaromaMeadow_BlackOut
+    Call FloaromaMeadow_DefeatedGrunt1
+    StartTrainerBattle TRAINER_GALACTIC_GRUNT_FLOAROMA_MEADOW_2
+    CheckWonBattle VAR_RESULT
+    GoToIfEq VAR_RESULT, FALSE, FloaromaMeadow_BlackOut
+    Call FloaromaMeadow_DefeatedGrunts
+    SetFlag FLAG_ALT_MUSIC_FLOAROMA_MEADOW
     ReleaseAll
     End
 
-_006E:
-    ScrCmd_0EB
+FloaromaMeadow_BlackOut:
+    BlackOutFromBattle
     ReleaseAll
     End
 
     .balign 4, 0
-_0074:
-    MoveAction_021
-    MoveAction_04B
+FloaromaMeadow_Movement_GruntNoticePlayer:
+    WalkOnSpotNormalSouth
+    EmoteExclamationMark
     EndMovement
 
     .balign 4, 0
-_0080:
-    MoveAction_023
+FloaromaMeadow_Movement_GruntWestWalkOnSpotEast:
+    WalkOnSpotNormalEast
     EndMovement
 
     .balign 4, 0
-_0088:
-    MoveAction_021
+FloaromaMeadow_Movement_GruntWestWalkOnSpotSouth:
+    WalkOnSpotNormalSouth
     EndMovement
 
-    .byte 12
-    .byte 0
-    .byte 9
-    .byte 0
-    .byte 254
-    .byte 0
-    .byte 0
-    .byte 0
-    .byte 12
-    .byte 0
-    .byte 9
-    .byte 0
-    .byte 254
-    .byte 0
-    .byte 0
-    .byte 0
+FloaromaMeadow_Movement_Unused:
+    WalkNormalNorth 9
+    EndMovement
 
-    .balign 4, 0
-_00A0:
-    MoveAction_00D
-    MoveAction_023
-    MoveAction_03F 3
-    MoveAction_021
+FloaromaMeadow_Movement_Unused2:
+    WalkNormalNorth 9
     EndMovement
 
     .balign 4, 0
-_00B4:
-    MoveAction_00D
-    MoveAction_023
-    MoveAction_03F 3
-    MoveAction_00F
-    MoveAction_021
+FloaromaMeadow_Movement_PokefanMWalkToPlayerX12:
+    WalkNormalSouth
+    WalkOnSpotNormalEast
+    Delay8 3
+    WalkOnSpotNormalSouth
     EndMovement
 
-_00CC:
-    Message 0
-    Message 1
-    ApplyMovement 0, _0074
-    ApplyMovement 1, _0074
+    .balign 4, 0
+FloaromaMeadow_Movement_PokefanMWalkToPlayerX13:
+    WalkNormalSouth
+    WalkOnSpotNormalEast
+    Delay8 3
+    WalkNormalEast
+    WalkOnSpotNormalSouth
+    EndMovement
+
+FloaromaMeadow_GruntsNoticePlayer:
+    Message FloaromaMeadow_Text_HandOverThatHoney
+    Message FloaromaMeadow_Text_DoAsWeSay
+    ApplyMovement LOCALID_GRUNT_M_WEST, FloaromaMeadow_Movement_GruntNoticePlayer
+    ApplyMovement LOCALID_GRUNT_M_EAST, FloaromaMeadow_Movement_GruntNoticePlayer
     WaitMovement
-    Message 2
-    Message 3
+    Message FloaromaMeadow_Text_WhatllWeDo
+    Message FloaromaMeadow_Text_EnsureTheBratStaysQuiet
     CloseMessage
     Return
 
-_00EE:
-    ApplyMovement 0, _0080
+FloaromaMeadow_DefeatedGrunt1:
+    ApplyMovement LOCALID_GRUNT_M_WEST, FloaromaMeadow_Movement_GruntWestWalkOnSpotEast
     WaitMovement
-    Message 4
+    Message FloaromaMeadow_Text_ThisIsSoLame
     CloseMessage
-    ApplyMovement 0, _0088
+    ApplyMovement LOCALID_GRUNT_M_WEST, FloaromaMeadow_Movement_GruntWestWalkOnSpotSouth
     WaitMovement
-    Message 5
+    Message FloaromaMeadow_Text_ImUpNextHeheheh
     CloseMessage
     Return
 
-_010E:
-    Message 6
+FloaromaMeadow_DefeatedGrunts:
+    Message FloaromaMeadow_Text_LetsGetBackToWindworks
     CloseMessage
-    FadeScreen 6, 1, 0, 0
+    FadeScreenOut
     WaitFadeScreen
-    ScrCmd_065 0
-    ScrCmd_065 1
-    SetVar 0x40E9, 1
-    FadeScreen 6, 1, 1, 0
+    RemoveObject LOCALID_GRUNT_M_WEST
+    RemoveObject LOCALID_GRUNT_M_EAST
+    SetVar VAR_FLOAROMA_MEADOW_STATE, 1
+    FadeScreenIn
     WaitFadeScreen
-    ClearFlag 0x19E
-    ScrCmd_064 3
-    ScrCmd_069 0x8004, 0x8005
-    CallIfEq 0x8004, 12, _01BA
-    CallIfEq 0x8004, 13, _01C6
-    ScrCmd_065 3
-    Message 7
-    SetVar 0x8004, 0x1B6
-    SetVar 0x8005, 1
-    CallCommonScript 0x7FC
-    SetFlag 159
-    Message 8
-    SetVar 0x8004, 94
-    SetVar 0x8005, 10
-    ScrCmd_07D 0x8004, 0x8005, 0x800C
-    GoToIfEq 0x800C, 0, _01AD
-    CallCommonScript 0x7FC
-    Message 9
-    GoTo _01B0
+    ClearFlag FLAG_HIDE_FLOAROMA_MEADOW_WORKS_KEY
+    AddObject LOCALID_ITEM_WORKS_KEY
+    GetPlayerMapPos VAR_0x8004, VAR_0x8005
+    CallIfEq VAR_0x8004, 12, FloaromaMeadow_PokefanMWalkToPlayerX12
+    CallIfEq VAR_0x8004, 13, FloaromaMeadow_PokefanMWalkToPlayerX13
+    RemoveObject LOCALID_ITEM_WORKS_KEY
+    Message FloaromaMeadow_Text_KeyMustBeForWindworks
+    SetVar VAR_0x8004, ITEM_WORKS_KEY
+    SetVar VAR_0x8005, 1
+    Common_GiveItemQuantity
+    SetFlag FLAG_OBTAINED_FLOAROMA_MEADOW_WORKS_KEY
+    Message FloaromaMeadow_Text_ThankYouTakeALot
+    SetVar VAR_0x8004, ITEM_HONEY
+    SetVar VAR_0x8005, 10
+    GoToIfCannotFitItem VAR_0x8004, VAR_0x8005, VAR_RESULT, FloaromaMeadow_CantGiveHoneyBagIsFull
+    Common_GiveItemQuantity
+    Message FloaromaMeadow_Text_SlatherHoneyOnATree
+    GoTo FloaromaMeadow_DefeatedGruntsReturn
 
-_01AD:
-    Message 12
-_01B0:
-    SetFlag 160
-    WaitABXPadPress
+FloaromaMeadow_CantGiveHoneyBagIsFull:
+    Message FloaromaMeadow_Text_YourBagsFull
+FloaromaMeadow_DefeatedGruntsReturn:
+    SetFlag FLAG_DEFEATED_FLOAROMA_MEADOW_GRUNTS
+    WaitButton
     CloseMessage
     Return
 
-_01BA:
-    ApplyMovement 2, _00A0
+FloaromaMeadow_PokefanMWalkToPlayerX12:
+    ApplyMovement LOCALID_POKEFAN_M, FloaromaMeadow_Movement_PokefanMWalkToPlayerX12
     WaitMovement
     Return
 
-_01C6:
-    ApplyMovement 2, _00B4
+FloaromaMeadow_PokefanMWalkToPlayerX13:
+    ApplyMovement LOCALID_POKEFAN_M, FloaromaMeadow_Movement_PokefanMWalkToPlayerX13
     WaitMovement
     Return
 
-    .byte 235
-    .byte 0
-    .byte 97
-    .byte 0
-    .byte 2
-    .byte 0
-
-_01D8:
+FloaromaMeadow_Unused:
+    BlackOutFromBattle
+    ReleaseAll
     End
 
-_01DA:
-    PlayFanfare SEQ_SE_CONFIRM
+FloaromaMeadow_Grunt_Unused:
+    End
+
+FloaromaMeadow_PokefanM:
+    PlaySE SE_CONFIRM_sseq_3
     LockAll
     FacePlayer
-    Message 10
-    ScrCmd_072 20, 2
-    GoTo _01F3
+    Message FloaromaMeadow_Text_BuySomeHoney
+    ShowMoney 20, 2
+    GoTo FloaromaMeadow_ShowMenuHoney
     End
 
-_01F3:
-    ScrCmd_041 30, 11, 0, 1, 0x800C
-    ScrCmd_33A 1
-    ScrCmd_042 15, 0
-    ScrCmd_042 16, 1
-    ScrCmd_042 17, 2
-    ScrCmd_043
-    SetVar 0x8008, 0x800C
-    GoToIfEq 0x8008, 0, _0241
-    GoToIfEq 0x8008, 1, _026A
-    GoToIfEq 0x8008, 2, _02C8
-    GoTo _02C8
+FloaromaMeadow_ShowMenuHoney:
+    InitLocalTextMenu 30, 11, 0, VAR_RESULT
+    SetMenuXOriginToRight
+    AddMenuEntryImm FloaromaMeadow_Text_Times1, 0
+    AddMenuEntryImm FloaromaMeadow_Text_Times10, 1
+    AddMenuEntryImm FloaromaMeadow_Text_NoThanks, 2
+    ShowMenu
+    SetVar VAR_0x8008, VAR_RESULT
+    GoToIfEq VAR_0x8008, 0, FloaromaMeadow_TryBuy1Honey
+    GoToIfEq VAR_0x8008, 1, FloaromaMeadow_TryBuy10Honey
+    GoToIfEq VAR_0x8008, 2, FloaromaMeadow_OopsyWellComeAgain
+    GoTo FloaromaMeadow_OopsyWellComeAgain
     End
 
-_0241:
-    ScrCmd_071 0x800C, 100
-    GoToIfEq 0x800C, 0, _02E2
-    SetVar 0x8005, 1
-    SetVar 0x8006, 100
-    GoTo _0293
+FloaromaMeadow_TryBuy1Honey:
+    GoToIfNotEnoughMoney 100, FloaromaMeadow_NotEnoughMoney
+    SetVar VAR_0x8005, 1
+    SetVar VAR_0x8006, 100
+    GoTo FloaromaMeadow_TryGiveHoney
     End
 
-_026A:
-    ScrCmd_071 0x800C, 0x3E8
-    GoToIfEq 0x800C, 0, _02E2
-    SetVar 0x8005, 10
-    SetVar 0x8006, 0x3E8
-    GoTo _0293
+FloaromaMeadow_TryBuy10Honey:
+    GoToIfNotEnoughMoney 1000, FloaromaMeadow_NotEnoughMoney
+    SetVar VAR_0x8005, 10
+    SetVar VAR_0x8006, 1000
+    GoTo FloaromaMeadow_TryGiveHoney
     End
 
-_0293:
-    SetVar 0x8004, 94
-    ScrCmd_07D 0x8004, 0x8005, 0x800C
-    GoToIfEq 0x800C, 0, _02D5
-    ScrCmd_1A3 0x8006
-    ScrCmd_074
-    PlayFanfare SEQ_SE_DP_REGI
-    ScrCmd_04B 0x644
-    CallCommonScript 0x7E0
-    ScrCmd_073
+FloaromaMeadow_TryGiveHoney:
+    SetVar VAR_0x8004, ITEM_HONEY
+    GoToIfCannotFitItem VAR_0x8004, VAR_0x8005, VAR_RESULT, FloaromaMeadow_CantBuyHoneyBagIsFull
+    RemoveMoney2 VAR_0x8006
+    UpdateMoneyDisplay
+    PlaySE SEQ_SE_DP_REGI_sseq
+    WaitSE SEQ_SE_DP_REGI_sseq
+    Common_GiveItemQuantityNoLineFeed
+    HideMoney
     CloseMessage
     ReleaseAll
     End
 
-_02C8:
-    Message 14
-    WaitABXPadPress
-    ScrCmd_073
+FloaromaMeadow_OopsyWellComeAgain:
+    Message FloaromaMeadow_Text_OopsyWellComeAgain
+    WaitButton
+    HideMoney
     CloseMessage
     ReleaseAll
     End
 
-_02D5:
-    Message 12
-    WaitABXPadPress
-    ScrCmd_073
+FloaromaMeadow_CantBuyHoneyBagIsFull:
+    Message FloaromaMeadow_Text_YourBagsFull
+    WaitButton
+    HideMoney
     CloseMessage
     ReleaseAll
     End
 
-_02E2:
-    Message 13
-    WaitABXPadPress
-    ScrCmd_073
+FloaromaMeadow_NotEnoughMoney:
+    Message FloaromaMeadow_Text_NotEnoughMoney
+    WaitButton
+    HideMoney
     CloseMessage
     ReleaseAll
     End
 
-_02EF:
-    ScrCmd_036 18, 1, 0, 0x800C
-    ScrCmd_038 3
-    ScrCmd_039
-    ScrCmd_03B 0x800C
-    CallCommonScript 0x7D0
+FloaromaMeadow_Dummy6:
+    ShowArrowSign FloaromaMeadow_Text_Dummy18
     End
 
-_0306:
-    PlayFanfare SEQ_SE_CONFIRM
+FloaromaMeadow_ItemWorksKey:
+    PlaySE SE_CONFIRM_sseq_3
     LockAll
     FacePlayer
-    SetVar 0x8004, 0x1B6
-    SetVar 0x8005, 1
-    CallCommonScript 0x7FC
+    SetVar VAR_0x8004, ITEM_WORKS_KEY
+    SetVar VAR_0x8005, 1
+    Common_GiveItemQuantity
     CloseMessage
-    SetFlag 159
-    ScrCmd_065 3
+    SetFlag FLAG_OBTAINED_FLOAROMA_MEADOW_WORKS_KEY
+    RemoveObject LOCALID_ITEM_WORKS_KEY
     ReleaseAll
     End

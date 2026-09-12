@@ -1,9 +1,8 @@
-#ifndef POKEPLATINUM_UNK_020068C8_H
-#define POKEPLATINUM_UNK_020068C8_H
+#ifndef POKEPLATINUM_NARC_H
+#define POKEPLATINUM_NARC_H
 
+#include "constants/heap.h"
 #include "constants/narc.h"
-
-#include "struct_decls/struct_02006C24_decl.h"
 
 /*
  * The NARC struct wraps NitroSDK type FSFile and manages the important
@@ -11,51 +10,51 @@
  *
  * FATB defines the regions within the FIMG to which the data are allocated.
  */
-struct NARC {
-    FSFile unk_00;
-    u32 unk_AC;
-    u32 unk_B0;
-    u16 unk_B4;
-};
+typedef struct NARC {
+    FSFile file;
+    u32 fatbStart;
+    u32 fimgStart;
+    u16 numFiles;
+} NARC;
 
 /*
  * Reads the entire content of an archive member into an existing buffer
  *
  * @param dest:           Pointer to destination buffer, should be large enough to hold the data
- * @param narcIndex:      Index of NARC to read
+ * @param narcID:      Index of NARC to read
  * @param memebrIndex:    Index of FAT member within the NARC
  */
-void NARC_ReadWholeMemberByIndexPair(void *dest, int narcIndex, int memberIndex);
+void NARC_ReadWholeMemberByIndexPair(void *dest, enum NarcID narcID, int memberIndex);
 
 /*
  * Creates a new buffer large enough to hold the content of the archive member, then reads its data.
  * The AllocAtEnd variant is preferred for very short-lived buffers.
  *
- * @param narcIndex:      Index of NARC to read
+ * @param narcID:      Index of NARC to read
  * @param memberIndex:    Index of FAT member within the NARC
  * @param heapID:         ID of the heap to alloc from
  *
  * @returns: Pointer to the allocated buffer which contains the data that was read.
  */
-void *NARC_AllocAndReadWholeMemberByIndexPair(int narcIndex, int memberIndex, int heapID);
-void *NARC_AllocAtEndAndReadWholeMemberByIndexPair(int narcIndex, int memberIndex, int heapID);
+void *NARC_AllocAndReadWholeMemberByIndexPair(enum NarcID narcID, int memberIndex, enum HeapID heapID);
+void *NARC_AllocAtEndAndReadWholeMemberByIndexPair(enum NarcID narcID, int memberIndex, enum HeapID heapID);
 
 /*
  * Reads a portion of an archive member into an existing buffer
  *
  * @param dest:           Pointer to destination buffer, should be large enough to hold the data
- * @param narcIndex:      Index of NARC to read
+ * @param narcID:      Index of NARC to read
  * @param memberIndex:    Index of FAT member within the NARC
  * @param offset:         Byte offset to start reading, relative to start of member, up to the end of member
  * @param bytesToRead:    Number of bytes to read, up to the total bytesToRead of member minus offset
  */
-void NARC_ReadFromMemberByIndexPair(void *dest, int narcIndex, int memberIndex, int offset, int bytesToRead);
+void NARC_ReadFromMemberByIndexPair(void *dest, enum NarcID narcID, int memberIndex, int offset, int bytesToRead);
 
 /*
  * Creates a new buffer large enough to hold the size of the data to read, then reads the specified data slice.
  * The AllocAtEnd variant is preferred for very short-lived buffers.
  *
- * @param narcIndex:      Index of NARC to read
+ * @param narcID:      Index of NARC to read
  * @param memberIndex:    Index of FAT member within the NARC
  * @param heapID:         ID of the heap to alloc from
  * @param offset:         Byte offset to start reading, relative to start of member, up to the end of member
@@ -63,30 +62,30 @@ void NARC_ReadFromMemberByIndexPair(void *dest, int narcIndex, int memberIndex, 
  *
  * @returns: Pointer to the allocated buffer which contains the data that was read.
  */
-void *NARC_AllocAndReadFromMemberByIndexPair(int narcIndex, int memberIndex, int heapID, int offset, int bytesToRead);
-void *NARC_AllocAtEndAndReadFromMemberByIndexPair(int narcIndex, int memberIndex, int heapID, int offset, int bytesToRead);
+void *NARC_AllocAndReadFromMemberByIndexPair(enum NarcID narcID, int memberIndex, enum HeapID heapID, int offset, int bytesToRead);
+void *NARC_AllocAtEndAndReadFromMemberByIndexPair(enum NarcID narcID, int memberIndex, enum HeapID heapID, int offset, int bytesToRead);
 
 /*
  * Gets the size of a NARC member. Useful when managing the read buffer yourself and the NARC has variable
  * sized members.
  *
- * @param narcIndex:      Index of NARC to read
+ * @param narcID:      Index of NARC to read
  * @param memberIndex:    Index of FAT member within the NARC
  *
  * @returns: Size in bytes of the member
  */
-u32 NARC_GetMemberSizeByIndexPair(int narcIndex, int memberIndex);
+u32 NARC_GetMemberSizeByIndexPair(enum NarcID narcID, int memberIndex);
 
 /*
  * Constructs a new NARC which contains an open FSFile to the corresponding archive.
  * Useful to reduce overhead when reading from the same NARC multiple times.
  *
- * @param narcIndex:    Index of NARC to open
+ * @param narcID:    Index of NARC to open
  * @param heapID:       ID of the heap to alloc from
  *
  * @returns: Pointer to the newly-allocated NARC
  */
-NARC *NARC_ctor(u32 narcIndex, u32 heapID);
+NARC *NARC_ctor(enum NarcID narcID, enum HeapID heapID);
 
 /*
  * Closes the wrapped FSFile and returns the NARC allocation to the heap from whence it came.
@@ -104,7 +103,7 @@ void NARC_dtor(NARC *narc);
  *
  * @returns: Pointer to the allocated buffer which contains the data that was read.
  */
-void *NARC_AllocAndReadWholeMember(NARC *narc, u32 memberIndex, u32 heapID);
+void *NARC_AllocAndReadWholeMember(NARC *narc, u32 memberIndex, enum HeapID heapID);
 
 /*
  * Reads NARC member to preallocated buffer dest, which should be large enough to hold the data.
@@ -146,7 +145,7 @@ void NARC_ReadFromMember(NARC *narc, u32 memberIndex, u32 offset, u32 bytesToRea
  */
 void NARC_ReadFile(NARC *narc, u32 bytesToRead, void *dest);
 
-void sub_02006E28(NARC *param0, u32 param1);
+void NARC_Seek(NARC *narc, u32 offset);
 
 /*
  * Gets the total number of archive members
@@ -157,4 +156,4 @@ void sub_02006E28(NARC *param0, u32 param1);
  */
 u16 NARC_GetFileCount(NARC *narc);
 
-#endif // POKEPLATINUM_UNK_020068C8_H
+#endif // POKEPLATINUM_NARC_H

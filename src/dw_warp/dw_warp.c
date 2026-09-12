@@ -3,36 +3,29 @@
 #include <nitro.h>
 #include <string.h>
 
-#include "consts/sdat.h"
-
-#include "struct_decls/struct_02006C24_decl.h"
-#include "struct_defs/struct_0207C690.h"
-#include "struct_defs/struct_02099F80.h"
-
-#include "overlay115/camera_angle.h"
+#include "constants/graphics.h"
 
 #include "camera.h"
-#include "core_sys.h"
 #include "easy3d_object.h"
+#include "g3d_pipeline.h"
 #include "gx_layers.h"
 #include "heap.h"
 #include "narc.h"
 #include "overlay_manager.h"
+#include "render_text.h"
+#include "screen_fade.h"
+#include "sound_playback.h"
 #include "sys_task.h"
 #include "sys_task_manager.h"
-#include "unk_02002328.h"
-#include "unk_02005474.h"
-#include "unk_0200F174.h"
-#include "unk_02017728.h"
-#include "unk_0201E3D8.h"
+#include "system.h"
+#include "touch_pad.h"
 #include "unk_0202419C.h"
-#include "unk_02024220.h"
 
 #define DWARP_SND_EFFECT_DELAY 15
 #define DWARP_ANM_DURATION     85
 
 typedef struct DistortionWorldWarp {
-    GenericPointerData *p3DCallback;
+    G3DPipelineBuffers *p3DCallback;
     Camera *camera;
     SysTask *task;
     int frameCnt;
@@ -57,14 +50,14 @@ static void DWWarp_DeleteCamera(DistortionWorldWarp *warp);
 static void DWWarp_InitModel(DistortionWorldWarp *warp);
 static void DWWarp_DeleteModel(DistortionWorldWarp *warp);
 static void Model3D_Update(DistortionWorldWarp *warp);
-static GenericPointerData *DWWarp_Init3D(int heapId);
+static G3DPipelineBuffers *DWWarp_Init3D(enum HeapID heapID);
 static void DWWarp_Setup3D(void);
-static void DWWarp_Exit3D(GenericPointerData *param0);
+static void DWWarp_Exit3D(G3DPipelineBuffers *param0);
 static void DWWarp_CameraMove(DistortionWorldWarp *warp);
 
-BOOL DWWarp_Init(OverlayManager *ovy, int *state)
+BOOL DWWarp_Init(ApplicationManager *appMan, int *state)
 {
-    SetMainCallback(NULL, NULL);
+    SetVBlankCallback(NULL, NULL);
     DisableHBlank();
     GXLayers_DisableEngineALayers();
     GXLayers_DisableEngineBLayers();
@@ -78,53 +71,53 @@ BOOL DWWarp_Init(OverlayManager *ovy, int *state)
 
     Heap_Create(HEAP_ID_APPLICATION, HEAP_ID_DISTORTION_WORLD_WARP, HEAP_SIZE_DISTORTION_WORLD_WARP);
 
-    DistortionWorldWarp *dww = OverlayManager_NewData(ovy, sizeof(DistortionWorldWarp), HEAP_ID_DISTORTION_WORLD_WARP);
+    DistortionWorldWarp *dww = ApplicationManager_NewData(appMan, sizeof(DistortionWorldWarp), HEAP_ID_DISTORTION_WORLD_WARP);
     MI_CpuClear8(dww, sizeof(DistortionWorldWarp));
     dww->p3DCallback = DWWarp_Init3D(HEAP_ID_DISTORTION_WORLD_WARP);
 
     SetAutorepeat(4, 8);
     DWWarp_VramSetBank();
-    sub_0201E3D8();
-    sub_0201E450(4);
+    EnableTouchPad();
+    InitializeTouchPad(4);
 
     DWWarp_InitModel(dww);
     DWWarp_InitCamera(dww);
-    sub_0200F174(0, 1, 1, 0x0, 16, 1, HEAP_ID_DISTORTION_WORLD_WARP);
+    StartScreenFade(FADE_BOTH_SCREENS, FADE_TYPE_BRIGHTNESS_IN, FADE_TYPE_BRIGHTNESS_IN, COLOR_BLACK, 16, 1, HEAP_ID_DISTORTION_WORLD_WARP);
 
-    gCoreSys.unk_65 = 0;
+    gSystem.whichScreenIs3D = DS_SCREEN_MAIN;
 
     GXLayers_SwapDisplay();
     GXLayers_TurnBothDispOn();
-    sub_02002AC8(1);
-    sub_02002AE4(0);
-    sub_02002B20(0);
+    RenderControlFlags_SetCanABSpeedUpPrint(TRUE);
+    RenderControlFlags_SetAutoScrollFlags(AUTO_SCROLL_DISABLED);
+    RenderControlFlags_SetSpeedUpOnTouch(FALSE);
 
     dww->task = SysTask_Start(DWWarp_Update, dww, 60000);
-    SetMainCallback(DWWarp_VBlankIntr, dww);
+    SetVBlankCallback(DWWarp_VBlankIntr, dww);
 
     return TRUE;
 }
 
-enum {
+enum DWWarpState {
     DWARP_SEQ_SCREENWIPE = 0,
     DWARP_SEQ_LOOP,
     DWARP_SEQ_CLEAR_SCREEN,
     DWARP_SEQ_WAIT
 };
 
-BOOL DWWarp_Main(OverlayManager *ovy, int *state)
+BOOL DWWarp_Main(ApplicationManager *appMan, int *state)
 {
-    DistortionWorldWarp *warp = OverlayManager_Data(ovy);
+    DistortionWorldWarp *warp = ApplicationManager_Data(appMan);
 
     switch (*state) {
     case DWARP_SEQ_SCREENWIPE:
-        if (ScreenWipe_Done() == TRUE) {
+        if (IsScreenFadeDone() == TRUE) {
             (*state)++;
         }
         break;
     case DWARP_SEQ_LOOP:
         if (warp->soundEffectCnt == DWARP_SND_EFFECT_DELAY) {
-            Sound_PlayEffect(SEQ_SE_PL_SYUWA2);
+            Sound_PlayEffect(SEQ_SE_PL_SYUWA2_sseq);
         }
 
         warp->soundEffectCnt++;
@@ -135,11 +128,11 @@ BOOL DWWarp_Main(OverlayManager *ovy, int *state)
         }
         break;
     case DWARP_SEQ_CLEAR_SCREEN:
-        sub_0200F174(0, 0, 0, 0x0, 20, 1, 30);
+        StartScreenFade(FADE_BOTH_SCREENS, FADE_TYPE_BRIGHTNESS_OUT, FADE_TYPE_BRIGHTNESS_OUT, COLOR_BLACK, 20, 1, HEAP_ID_DISTORTION_WORLD_WARP);
         (*state)++;
         break;
     case DWARP_SEQ_WAIT:
-        if (ScreenWipe_Done() == TRUE) {
+        if (IsScreenFadeDone() == TRUE) {
             return TRUE;
         }
         break;
@@ -150,9 +143,9 @@ BOOL DWWarp_Main(OverlayManager *ovy, int *state)
     return FALSE;
 }
 
-BOOL DWWarp_Exit(OverlayManager *ovy, int *state)
+BOOL DWWarp_Exit(ApplicationManager *appMan, int *state)
 {
-    DistortionWorldWarp *warp = OverlayManager_Data(ovy);
+    DistortionWorldWarp *warp = ApplicationManager_Data(appMan);
 
     SysTask_Done(warp->task);
 
@@ -160,13 +153,13 @@ BOOL DWWarp_Exit(OverlayManager *ovy, int *state)
     DWWarp_DeleteCamera(warp);
     DWWarp_Exit3D(warp->p3DCallback);
 
-    SetMainCallback(NULL, NULL);
+    SetVBlankCallback(NULL, NULL);
     DisableHBlank();
-    sub_0201E530();
-    sub_02002AC8(0);
-    sub_02002AE4(0);
-    sub_02002B20(0);
-    OverlayManager_FreeData(ovy);
+    DisableTouchPad();
+    RenderControlFlags_SetCanABSpeedUpPrint(FALSE);
+    RenderControlFlags_SetAutoScrollFlags(AUTO_SCROLL_DISABLED);
+    RenderControlFlags_SetSpeedUpOnTouch(FALSE);
+    ApplicationManager_FreeData(appMan);
     Heap_Destroy(HEAP_ID_DISTORTION_WORLD_WARP);
 
     return TRUE;
@@ -191,7 +184,7 @@ static void DWWarp_VramSetBank(void)
     GXLayers_DisableEngineALayers();
     GXLayers_DisableEngineBLayers();
 
-    UnkStruct_02099F80 vramBank = {
+    GXBanks vramBank = {
         GX_VRAM_BG_128_C,
         GX_VRAM_BGEXTPLTT_NONE,
         GX_VRAM_SUB_BG_32_H,
@@ -223,8 +216,8 @@ static void DWWarp_InitCamera(DistortionWorldWarp *warp)
 
     warp->camera = Camera_Alloc(HEAP_ID_DISTORTION_WORLD_WARP);
 
-    Camera_InitWithTarget(&target, (160 << FX32_SHIFT), &DWW_CameraAngle, ((22 * 0xffff) / 360), 0, 0, warp->camera);
-    Camera_SetClipping(0, (FX32_ONE * 300), warp->camera);
+    Camera_InitWithTarget(&target, 160 << FX32_SHIFT, &DWW_CameraAngle, (22 * 0xffff) / 360, 0, 0, warp->camera);
+    Camera_SetClipping(0, FX32_ONE * 300, warp->camera);
 
     CameraAngle angle = { 0, 0, 0, 0 };
 
@@ -243,7 +236,7 @@ static void DWWarp_DeleteCamera(DistortionWorldWarp *warp)
 
 static void DWWarp_InitModel(DistortionWorldWarp *warp)
 {
-    Heap_FndInitAllocatorForExpHeap(&warp->allocator, HEAP_ID_DISTORTION_WORLD_WARP, 4);
+    HeapExp_FndInitAllocator(&warp->allocator, HEAP_ID_DISTORTION_WORLD_WARP, 4);
 
     NARC *narc = NARC_ctor(NARC_INDEX_DEMO__TITLE__TITLEDEMO, HEAP_ID_DISTORTION_WORLD_WARP);
 
@@ -261,7 +254,7 @@ static void DWWarp_InitModel(DistortionWorldWarp *warp)
 
     Easy3DObject_SetPosition(&warp->animationObj, 0, 0, 0);
     Easy3DObject_SetScale(&warp->animationObj, FX32_ONE, FX32_ONE, FX32_ONE);
-    Easy3DObject_SetVisibility(&warp->animationObj, TRUE);
+    Easy3DObject_SetVisible(&warp->animationObj, TRUE);
 
     Easy3DObject_AddAnim(&warp->animationObj, &warp->animationAnimation);
     Easy3DObject_AddAnim(&warp->animationObj, &warp->animationAnimation2);
@@ -296,7 +289,7 @@ static void Model3D_Update(DistortionWorldWarp *warp)
 
     MTX_Identity33(&rot33);
 
-    sub_020241B4();
+    G3_ResetG3X();
     Camera_SetAsActive(warp->camera);
     Camera_ComputeProjectionMatrix(0, warp->camera);
     Camera_ComputeViewMatrix();
@@ -318,9 +311,9 @@ static void Model3D_Update(DistortionWorldWarp *warp)
     NNS_G3dGePopMtx(1);
 }
 
-static GenericPointerData *DWWarp_Init3D(int param0)
+static G3DPipelineBuffers *DWWarp_Init3D(enum HeapID heapID)
 {
-    return sub_02024220(param0, 0, 2, 0, 2, DWWarp_Setup3D);
+    return G3DPipeline_Init(heapID, TEXTURE_VRAM_SIZE_256K, PALETTE_VRAM_SIZE_32K, DWWarp_Setup3D);
 }
 
 static void DWWarp_Setup3D(void)
@@ -339,9 +332,9 @@ static void DWWarp_Setup3D(void)
     G3_ViewPort(0, 0, 255, 191);
 }
 
-static void DWWarp_Exit3D(GenericPointerData *param0)
+static void DWWarp_Exit3D(G3DPipelineBuffers *param0)
 {
-    sub_020242C4(param0);
+    G3DPipelineBuffers_Free(param0);
 }
 
 static void DWWarp_CameraMove(DistortionWorldWarp *warp)

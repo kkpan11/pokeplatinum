@@ -1,95 +1,95 @@
-    .include "macros/scrcmd.inc"
+#include "macros/scrcmd.inc"
+#include "res/text/bank/sandgem_town_counterpart_house_1f.h"
 
-    .data
 
-    ScriptEntry _000A
-    ScriptEntry _003A
-    .short 0xFD13
+    ScriptEntry SandgemTownCounterpartHouse1F_ExpertM
+    ScriptEntry SandgemTownCounterpartHouse1F_Twin
+    ScriptEntryEnd
 
-_000A:
-    PlayFanfare SEQ_SE_CONFIRM
+SandgemTownCounterpartHouse1F_ExpertM:
+    PlaySE SE_CONFIRM_sseq_3
     LockAll
     FacePlayer
-    ScrCmd_22D 2, 0x800C
-    GoToIfEq 0x800C, 1, _002F
-    Message 0
-    WaitABXPadPress
+    GetNationalDexEnabled VAR_RESULT
+    GoToIfEq VAR_RESULT, TRUE, SandgemTownCounterpartHouse1F_YouveGotANationalPokedex
+    Message SandgemTownCounterpartHouse1F_Text_RowanIsBack
+    WaitButton
     CloseMessage
     ReleaseAll
     End
 
-_002F:
-    Message 1
-    WaitABXPadPress
+SandgemTownCounterpartHouse1F_YouveGotANationalPokedex:
+    Message SandgemTownCounterpartHouse1F_Text_YouveGotANationalPokedex
+    WaitButton
     CloseMessage
     ReleaseAll
     End
 
-_003A:
-    PlayFanfare SEQ_SE_CONFIRM
+SandgemTownCounterpartHouse1F_Twin:
+    PlaySE SE_CONFIRM_sseq_3
     LockAll
     FacePlayer
-    ScrCmd_22D 2, 0x800C
-    GoToIfEq 0x800C, 1, _009A
-    GoTo _005A
+    GetNationalDexEnabled VAR_RESULT
+    GoToIfEq VAR_RESULT, TRUE, SandgemTownCounterpartHouse1F_TwinNationalDex
+    GoTo SandgemTownCounterpartHouse1F_SameAsMyBigSibling
 
-_005A:
-    ScrCmd_14D 0x800C
-    GoToIfEq 0x800C, 0, _007A
-    GoToIfEq 0x800C, 1, _0086
+SandgemTownCounterpartHouse1F_SameAsMyBigSibling:
+    GetPlayerGender VAR_RESULT
+    GoToIfEq VAR_RESULT, GENDER_MALE, SandgemTownCounterpartHouse1F_SameAsMyBigSister
+    GoToIfEq VAR_RESULT, GENDER_FEMALE, SandgemTownCounterpartHouse1F_SameAsMyBigBrother
     End
 
-_007A:
-    ScrCmd_0CD 0
-    Message 2
-    GoTo _0092
+SandgemTownCounterpartHouse1F_SameAsMyBigSister:
+    BufferPlayerName 0
+    Message SandgemTownCounterpartHouse1F_Text_SameAsMyBigSister
+    GoTo SandgemTownCounterpartHouse1F_CloseMessageSameAsMyBigSibling
 
-_0086:
-    ScrCmd_0CD 0
-    Message 3
-    GoTo _0092
+SandgemTownCounterpartHouse1F_SameAsMyBigBrother:
+    BufferPlayerName 0
+    Message SandgemTownCounterpartHouse1F_Text_SameAsMyBigBrother
+    GoTo SandgemTownCounterpartHouse1F_CloseMessageSameAsMyBigSibling
 
-_0092:
-    WaitABXPadPress
+SandgemTownCounterpartHouse1F_CloseMessageSameAsMyBigSibling:
+    WaitButton
     CloseMessage
     ReleaseAll
     End
 
-_009A:
-    GoToIfUnset 0x964, _005A
-    GoToIfSet 240, _00C4
-    SetFlag 240
-    ScrCmd_21B
-    ScrCmd_0CD 0
-    Message 4
-    WaitABXPadPress
+SandgemTownCounterpartHouse1F_TwinNationalDex:
+    GoToIfUnset FLAG_GAME_COMPLETED, SandgemTownCounterpartHouse1F_SameAsMyBigSibling
+    GoToIfSet FLAG_TALKED_TO_COUNTERPART_SISTER_WITH_NATIONAL_DEX, SandgemTownCounterpartHouse1F_BufferSwarmMapAndSpecies
+    SetFlag FLAG_TALKED_TO_COUNTERPART_SISTER_WITH_NATIONAL_DEX
+    EnableSwarms
+    BufferPlayerName 0
+    Message SandgemTownCounterpartHouse1F_Text_MassiveOutbreakOfPokemon
+    WaitButton
     CloseMessage
     ReleaseAll
     End
 
-_00C4:
-    ScrCmd_0CD 0
-    ScrCmd_0E3 0x4001, 0x4000
-    ScrCmd_0E2 1, 0x4001
-    ScrCmd_0DA 2, 0x4000, 0, 1
-    ScrCmd_14D 0x800C
-    GoToIfEq 0x800C, 0, _00FA
-    GoToIfEq 0x800C, 1, _0103
+SandgemTownCounterpartHouse1F_BufferSwarmMapAndSpecies:
+    BufferPlayerName 0
+    GetSwarmMapAndSpecies VAR_MAP_LOCAL_0x01, VAR_MAP_LOCAL_0x00
+    BufferMapName 1, VAR_MAP_LOCAL_0x01
+    BufferSpeciesNameFromVar 2, VAR_MAP_LOCAL_0x00, 0, 1
+    GetPlayerGender VAR_RESULT
+    GoToIfEq VAR_RESULT, GENDER_MALE, SandgemTownCounterpartHouse1F_BunchOfPokemonAtLocationMale
+    GoToIfEq VAR_RESULT, GENDER_FEMALE, SandgemTownCounterpartHouse1F_BunchOfPokemonAtLocationFemale
     End
 
-_00FA:
-    Message 5
-    GoTo _010F
+SandgemTownCounterpartHouse1F_BunchOfPokemonAtLocationMale:
+    Message SandgemTownCounterpartHouse1F_Text_BunchOfPokemonAtLocationMale
+    GoTo SandgemTownCounterpartHouse1F_CloseMessageBunchOfPokemonAtLocation
 
-_0103:
-    ScrCmd_0CD 0
-    Message 6
-    GoTo _010F
+SandgemTownCounterpartHouse1F_BunchOfPokemonAtLocationFemale:
+    BufferPlayerName 0
+    Message SandgemTownCounterpartHouse1F_Text_BunchOfPokemonAtLocationFemale
+    GoTo SandgemTownCounterpartHouse1F_CloseMessageBunchOfPokemonAtLocation
 
-_010F:
-    WaitABXPadPress
+SandgemTownCounterpartHouse1F_CloseMessageBunchOfPokemonAtLocation:
+    WaitButton
     CloseMessage
     ReleaseAll
     End
 
-    .byte 0
+    .balign 4, 0

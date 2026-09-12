@@ -1,46 +1,28 @@
-    .include "macros/scrcmd.inc"
+#include "macros/scrcmd.inc"
+#include "res/text/bank/hearthome_city_pokecenter_1f.h"
+#include "res/field/events/events_hearthome_city_pokecenter_1f.h"
 
-    .data
 
-    ScriptEntry _0012
-    ScriptEntry _001E
-    ScriptEntry _0031
-    ScriptEntry _0044
-    .short 0xFD13
+    ScriptEntry HearthomeCityPokecenter1F_Nurse
+    ScriptEntry HearthomeCityPokecenter1F_Youngster
+    ScriptEntry HearthomeCityPokecenter1F_Socialite
+    ScriptEntry HearthomeCityPokecenter1F_Guitarist
+    ScriptEntryEnd
 
-_0012:
-    SetVar 0x8007, 0
-    CallCommonScript 0x7D2
+HearthomeCityPokecenter1F_Nurse:
+    Common_CallPokecenterNurse LOCALID_HEARTHOME_NURSE
     End
 
-_001E:
-    PlayFanfare SEQ_SE_CONFIRM
-    LockAll
-    FacePlayer
-    Message 0
-    WaitABXPadPress
-    CloseMessage
-    ReleaseAll
+HearthomeCityPokecenter1F_Youngster:
+    NPCMessage HearthomeCityPokecenter1F_Text_HaveYouCheckedGlobalTerminal
     End
 
-_0031:
-    PlayFanfare SEQ_SE_CONFIRM
-    LockAll
-    FacePlayer
-    Message 1
-    WaitABXPadPress
-    CloseMessage
-    ReleaseAll
+HearthomeCityPokecenter1F_Socialite:
+    NPCMessage HearthomeCityPokecenter1F_Text_DoYouHaveAPoffinCase
     End
 
-_0044:
-    PlayFanfare SEQ_SE_CONFIRM
-    LockAll
-    FacePlayer
-    Message 3
-    WaitABXPadPress
-    CloseMessage
-    ReleaseAll
+HearthomeCityPokecenter1F_Guitarist:
+    NPCMessage HearthomeCityPokecenter1F_Text_FantinaLikesContestsToo
     End
 
-    .byte 0
+    .balign 4, 0

@@ -1,77 +1,76 @@
-    .include "macros/scrcmd.inc"
+#include "macros/scrcmd.inc"
+#include "res/text/bank/grand_lake_valor_lakefront_west_house.h"
 
-    .data
 
-    ScriptEntry _0006
-    .short 0xFD13
+    ScriptEntry GrandLakeValorLakefrontWestHouse_GameDirector
+    ScriptEntryEnd
 
-_0006:
-    PlayFanfare SEQ_SE_CONFIRM
+GrandLakeValorLakefrontWestHouse_GameDirector:
+    PlaySE SE_CONFIRM_sseq_3
     LockAll
     FacePlayer
-    GoToIfSet 1, _00D3
-    ScrCmd_1E8 0x800C
-    GoToIfEq 0x800C, 0, _004C
-    GoToIfUnset 171, _0057
-    ScrCmd_1E9 0x800C
-    GoToIfEq 0x800C, 0, _0057
-    GoTo _0095
+    GoToIfSet FLAG_MAP_LOCAL_0x01, GrandLakeValorLakefrontWestHouse_StoriesAreUnique
+    CheckLocalDexCompleted VAR_RESULT
+    GoToIfEq VAR_RESULT, FALSE, GrandLakeValorLakefrontWestHouse_ImTheGameDirector
+    GoToIfUnset FLAG_RECEIVED_LOCAL_DEX_DIPLOMA, GrandLakeValorLakefrontWestHouse_ShowLocalDexDiploma
+    CheckNationalDexCompleted VAR_RESULT
+    GoToIfEq VAR_RESULT, FALSE, GrandLakeValorLakefrontWestHouse_ShowLocalDexDiploma
+    GoTo GrandLakeValorLakefrontWestHouse_ShowNationalDexDiploma
 
-_004C:
-    Message 0
-    WaitABXPadPress
+GrandLakeValorLakefrontWestHouse_ImTheGameDirector:
+    Message GrandLakeValorLakefrontWestHouse_Text_ImTheGameDirector
+    WaitButton
     CloseMessage
     ReleaseAll
     End
 
-_0057:
-    CallIfUnset 171, _00DE
-    SetFlag 171
-    SetFlag 1
-    Message 1
-    ScrCmd_04E 0x486
-    ScrCmd_04F
+GrandLakeValorLakefrontWestHouse_ShowLocalDexDiploma:
+    CallIfUnset FLAG_RECEIVED_LOCAL_DEX_DIPLOMA, GrandLakeValorLakefrontWestHouse_IncrementScoreLocalDexDiplomaReceived
+    SetFlag FLAG_RECEIVED_LOCAL_DEX_DIPLOMA
+    SetFlag FLAG_MAP_LOCAL_0x01
+    Message GrandLakeValorLakefrontWestHouse_Text_SeenEverySinnohPokemon
+    PlayFanfare SEQ_FANFA4_sseq
+    WaitFanfare
     CloseMessage
-    FadeScreen 6, 1, 0, 0
+    FadeScreenOut
     WaitFadeScreen
-    ScrCmd_1EA
-    ScrCmd_0A1
-    FadeScreen 6, 1, 1, 0
+    ShowDiplomaSinnoh
+    ReturnToField
+    FadeScreenIn
     WaitFadeScreen
     ReleaseAll
     End
 
-_0095:
-    CallIfUnset 172, _00E4
-    SetFlag 172
-    SetFlag 1
-    Message 2
-    ScrCmd_04E 0x486
-    ScrCmd_04F
+GrandLakeValorLakefrontWestHouse_ShowNationalDexDiploma:
+    CallIfUnset FLAG_RECEIVED_NATIONAL_DEX_DIPLOMA, GrandLakeValorLakefrontWestHouse_IncrementScoreNationalDexDiplomaReceived
+    SetFlag FLAG_RECEIVED_NATIONAL_DEX_DIPLOMA
+    SetFlag FLAG_MAP_LOCAL_0x01
+    Message GrandLakeValorLakefrontWestHouse_Text_ObtainedEveryPokemon
+    PlayFanfare SEQ_FANFA4_sseq
+    WaitFanfare
     CloseMessage
-    FadeScreen 6, 1, 0, 0
+    FadeScreenOut
     WaitFadeScreen
-    ScrCmd_1EB
-    ScrCmd_0A1
-    FadeScreen 6, 1, 1, 0
+    ShowDiplomaNationalDex
+    ReturnToField
+    FadeScreenIn
     WaitFadeScreen
     ReleaseAll
     End
 
-_00D3:
-    Message 3
-    WaitABXPadPress
+GrandLakeValorLakefrontWestHouse_StoriesAreUnique:
+    Message GrandLakeValorLakefrontWestHouse_Text_StoriesAreUnique
+    WaitButton
     CloseMessage
     ReleaseAll
     End
 
-_00DE:
-    ScrCmd_260 26
+GrandLakeValorLakefrontWestHouse_IncrementScoreLocalDexDiplomaReceived:
+    IncrementTrainerScore2 TRAINER_SCORE_EVENT_LOCAL_DEX_DIPLOMA_RECEIVED
     Return
 
-_00E4:
-    ScrCmd_260 27
+GrandLakeValorLakefrontWestHouse_IncrementScoreNationalDexDiplomaReceived:
+    IncrementTrainerScore2 TRAINER_SCORE_EVENT_NATIONAL_DEX_DIPLOMA_RECEIVED
     Return
 
-    .byte 0
-    .byte 0
+    .balign 4, 0

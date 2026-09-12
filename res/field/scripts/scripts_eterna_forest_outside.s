@@ -1,51 +1,43 @@
-    .include "macros/scrcmd.inc"
+#include "macros/scrcmd.inc"
+#include "res/text/bank/eterna_forest_outside.h"
 
-    .data
 
-    ScriptEntry _0012
-    ScriptEntry _0058
-    ScriptEntry _006F
-    ScriptEntry _0018
-    .short 0xFD13
+    ScriptEntry EternaForestOutside_OnTransition
+    ScriptEntry EternaForestOutside_Dummy2
+    ScriptEntry EternaForestOutside_Dummy3
+    ScriptEntry EternaForestOutside_PokemonBreederF
+    ScriptEntryEnd
 
-_0012:
-    SetFlag 0x9C4
+EternaForestOutside_OnTransition:
+    SetFlag FLAG_FIRST_ARRIVAL_ETERNA_FOREST
     End
 
-_0018:
-    PlayFanfare SEQ_SE_CONFIRM
+EternaForestOutside_PokemonBreederF:
+    PlaySE SE_CONFIRM_sseq_3
     LockAll
     FacePlayer
-    GoToIfSet 0x12A, _004D
-    SetVar 0x8004, 95
-    ScrCmd_261 0, 0x8004
-    Message 0
-    SetVar 0x8005, 1
-    CallCommonScript 0x7DF
-    SetFlag 0x12A
+    GoToIfSet FLAG_RECEIVED_ETERNA_FOREST_OUTSIDE_ACCESSORY_BIG_TREE, EternaForestOutside_ITradeBerriesForAccessories
+    SetVar VAR_0x8004, ACCESSORY_BIG_TREE
+    BufferAccessoryName 0, VAR_0x8004
+    Message EternaForestOutside_Text_AreYouCollectingAccessories
+    SetVar VAR_0x8005, 1
+    Common_GiveAccessoryWaitForConfirm
+    SetFlag FLAG_RECEIVED_ETERNA_FOREST_OUTSIDE_ACCESSORY_BIG_TREE
     CloseMessage
     ReleaseAll
     End
 
-_004D:
-    Message 1
-    WaitABXPadPress
+EternaForestOutside_ITradeBerriesForAccessories:
+    Message EternaForestOutside_Text_ITradeBerriesForAccessories
+    WaitButton
     CloseMessage
     ReleaseAll
     End
 
-_0058:
-    ScrCmd_036 2, 2, 0, 0x800C
-    ScrCmd_038 3
-    ScrCmd_039
-    ScrCmd_03B 0x800C
-    CallCommonScript 0x7D0
+EternaForestOutside_Dummy2:
+    ShowLandmarkSign EternaForestOutside_Text_Dummy2
     End
 
-_006F:
-    ScrCmd_037 3, 0
-    ScrCmd_038 3
-    ScrCmd_039
-    ScrCmd_03A 3, 0x800C
-    CallCommonScript 0x7D0
+EternaForestOutside_Dummy3:
+    ShowScrollingSign EternaForestOutside_Text_Dummy3
     End

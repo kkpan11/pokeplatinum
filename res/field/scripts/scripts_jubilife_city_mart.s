@@ -1,62 +1,32 @@
-    .include "macros/scrcmd.inc"
+#include "macros/scrcmd.inc"
+#include "res/text/bank/jubilife_city_mart.h"
 
-    .data
 
-    ScriptEntry _0016
-    ScriptEntry _002C
-    ScriptEntry _0042
-    ScriptEntry _0055
-    ScriptEntry _0068
-    .short 0xFD13
+    ScriptEntry JubilifeCityMart_CommonVendor
+    ScriptEntry JubilifeCityMart_SpecialtyVendor
+    ScriptEntry JubilifeCityMart_Guitarist
+    ScriptEntry JubilifeCityMart_Pokefan
+    ScriptEntry JubilifeCityMart_Beauty
+    ScriptEntryEnd
 
-_0016:
-    PlayFanfare SEQ_SE_CONFIRM
-    LockAll
-    FacePlayer
-    CallCommonScript 0x7E3
-    ScrCmd_035
-    ScrCmd_147 1
-    ReleaseAll
+JubilifeCityMart_CommonVendor:
+    PokeMartCommonWithGreeting
     End
 
-_002C:
-    PlayFanfare SEQ_SE_CONFIRM
-    LockAll
-    FacePlayer
-    CallCommonScript 0x7E3
-    ScrCmd_035
-    ScrCmd_148 0
-    ReleaseAll
+JubilifeCityMart_SpecialtyVendor:
+    PokeMartSpecialtiesWithGreeting MART_SPECIALTIES_ID_JUBILIFE
     End
 
-_0042:
-    PlayFanfare SEQ_SE_CONFIRM
-    LockAll
-    FacePlayer
-    Message 0
-    WaitABXPadPress
-    CloseMessage
-    ReleaseAll
+JubilifeCityMart_Guitarist:
+    NPCMessage JubilifeCityMart_Text_WastedMoneyOnPokeBalls
     End
 
-_0055:
-    PlayFanfare SEQ_SE_CONFIRM
-    LockAll
-    FacePlayer
-    Message 1
-    WaitABXPadPress
-    CloseMessage
-    ReleaseAll
+JubilifeCityMart_Pokefan:
+    NPCMessage JubilifeCityMart_Text_PackSomePotions
     End
 
-_0068:
-    PlayFanfare SEQ_SE_CONFIRM
-    LockAll
-    FacePlayer
-    Message 2
-    WaitABXPadPress
-    CloseMessage
-    ReleaseAll
+JubilifeCityMart_Beauty:
+    NPCMessage JubilifeCityMart_Text_JustUseARepel
     End
 
-    .byte 0
+    .balign 4, 0

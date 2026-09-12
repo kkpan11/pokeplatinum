@@ -1,64 +1,49 @@
-    .include "macros/scrcmd.inc"
+#include "macros/scrcmd.inc"
+#include "res/text/bank/fight_area_mart.h"
 
-    .data
 
-    ScriptEntry _0012
-    ScriptEntry _0028
-    ScriptEntry _002A
-    ScriptEntry _0086
-    .short 0xFD13
+    ScriptEntry FightAreaMart_CommonVendor
+    ScriptEntry FightAreaMart_Dummy2
+    ScriptEntry FightAreaMart_Socialite
+    ScriptEntry FightAreaMart_Clown
+    ScriptEntryEnd
 
-_0012:
-    PlayFanfare SEQ_SE_CONFIRM
+FightAreaMart_CommonVendor:
+    PokeMartCommonWithGreeting
+    End
+
+FightAreaMart_Dummy2:
+    End
+
+FightAreaMart_Socialite:
+    PlaySE SE_CONFIRM_sseq_3
     LockAll
     FacePlayer
-    CallCommonScript 0x7E3
-    ScrCmd_035
-    ScrCmd_147 1
-    ReleaseAll
+    GoToIfSet FLAG_RECEIVED_FIGHT_AREA_MART_SCOPE_LENS, FightAreaMart_DilemmaEveryTime
+    Message FightAreaMart_Text_HoldWhatItems
+    SetVar VAR_0x8004, ITEM_SCOPE_LENS
+    SetVar VAR_0x8005, 1
+    GoToIfCannotFitItem VAR_0x8004, VAR_0x8005, VAR_RESULT, FightAreaMart_BagIsFull
+    Common_GiveItemQuantity
+    SetFlag FLAG_RECEIVED_FIGHT_AREA_MART_SCOPE_LENS
+    GoTo FightAreaMart_DilemmaEveryTime
     End
 
-_0028:
-    End
-
-_002A:
-    PlayFanfare SEQ_SE_CONFIRM
-    LockAll
-    FacePlayer
-    GoToIfSet 213, _0071
-    Message 0
-    SetVar 0x8004, 232
-    SetVar 0x8005, 1
-    ScrCmd_07D 0x8004, 0x8005, 0x800C
-    GoToIfEq 0x800C, 0, _007C
-    CallCommonScript 0x7FC
-    SetFlag 213
-    GoTo _0071
-    End
-
-_0071:
-    Message 1
-    WaitABXPadPress
+FightAreaMart_DilemmaEveryTime:
+    Message FightAreaMart_Text_DilemmaEveryTime
+    WaitButton
     CloseMessage
     ReleaseAll
     End
 
-_007C:
-    CallCommonScript 0x7E1
+FightAreaMart_BagIsFull:
+    Common_MessageBagIsFull
     CloseMessage
     ReleaseAll
     End
 
-_0086:
-    PlayFanfare SEQ_SE_CONFIRM
-    LockAll
-    FacePlayer
-    Message 2
-    WaitABXPadPress
-    CloseMessage
-    ReleaseAll
+FightAreaMart_Clown:
+    NPCMessage FightAreaMart_Text_TheyDontSellThat
     End
 
-    .byte 0
-    .byte 0
-    .byte 0
+    .balign 4, 0

@@ -1,88 +1,88 @@
-    .include "macros/scrcmd.inc"
+#include "macros/scrcmd.inc"
+#include "constants/sunyshore_gym_buttons.h"
+#include "res/text/bank/sunyshore_city_gym_room_3.h"
 
-    .data
 
-    ScriptEntry _0012
-    ScriptEntry _001D
-    ScriptEntry _0022
-    ScriptEntry _0027
-    .short 0xFD13
+    ScriptEntry SunyshoreGymRoom3_Init
+    ScriptEntry SunyshoreGymRoom3_TopButtons
+    ScriptEntry SunyshoreGymRoom3_BottomButtons
+    ScriptEntry SunyshoreGymRoom3_Volkner
+    ScriptEntryEnd
 
-_0012:
-    SetVar 0x4000, 0
-    ScrCmd_175 2
+SunyshoreGymRoom3_Init:
+    SetVar VAR_MAP_LOCAL_0x00, 0
+    InitPersistedMapFeaturesForSunyshoreGym 2
     End
 
-_001D:
-    ScrCmd_176 0
+SunyshoreGymRoom3_TopButtons:
+    PressSunyshoreGymButton SUNYSHORE_GYM_BUTTON_NORMAL
     End
 
-_0022:
-    ScrCmd_176 2
+SunyshoreGymRoom3_BottomButtons:
+    PressSunyshoreGymButton SUNYSHORE_GYM_BUTTON_DOUBLE
     End
 
-_0027:
-    PlayFanfare SEQ_SE_CONFIRM
+SunyshoreGymRoom3_Volkner:
+    PlaySE SE_CONFIRM_sseq_3
     LockAll
     FacePlayer
-    ScrCmd_15B 7, 0x800C
-    GoToIfEq 0x800C, 1, _0104
-    ScrCmd_1CD 9, 156, 0, 0, 0
-    Message 0
+    GoToIfBadgeAcquired BADGE_ID_BEACON, SunyshoreGymRoom3_VolknerAlreadyHaveBeaconBadge
+    CreateJournalEvent LOCATION_EVENT_GYM_WAS_TOO_TOUGH, MAP_HEADER_SUNYSHORE_CITY_GYM_ROOM_3
+    Message SunyshoreGymRoom3_Text_VolknerIntro
     CloseMessage
-    ScrCmd_0E5 0x140, 0
-    ScrCmd_0EC 0x800C
-    GoToIfEq 0x800C, 0, _011A
-    Message 1
-    ScrCmd_0CD 0
-    Message 2
-    ScrCmd_04E 0x489
-    ScrCmd_04F
-    ScrCmd_15C 7
-    ScrCmd_260 23
-    SetTrainerFlag 0x119
-    SetTrainerFlag 0x11D
-    SetTrainerFlag 0x12D
-    SetTrainerFlag 0x12E
-    SetTrainerFlag 0x12F
-    SetTrainerFlag 0x14B
-    SetTrainerFlag 0x155
-    SetTrainerFlag 0x158
-    SetVar 0x407E, 2
-    ScrCmd_1CD 10, 156, 246, 0, 0
-    Message 3
-    GoTo _00BC
+    StartTrainerBattle TRAINER_LEADER_VOLKNER
+    CheckWonBattle VAR_RESULT
+    GoToIfEq VAR_RESULT, FALSE, SunyshoreGymRoom3_LostBattle
+    Message SunyshoreGymRoom3_Text_BeatVolkner
+    BufferPlayerName 0
+    Message SunyshoreGymRoom3_Text_VolknerReceiveBeaconBadge
+    PlayFanfare SEQ_BADGE_sseq
+    WaitFanfare
+    GiveBadge BADGE_ID_BEACON
+    IncrementTrainerScore2 TRAINER_SCORE_EVENT_BADGE_EARNED
+    SetTrainerFlag TRAINER_ACE_TRAINER_ZACHERY
+    SetTrainerFlag TRAINER_ACE_TRAINER_DESTINY
+    SetTrainerFlag TRAINER_GUITARIST_JERRY
+    SetTrainerFlag TRAINER_GUITARIST_PRESTON
+    SetTrainerFlag TRAINER_GUITARIST_LONNIE
+    SetTrainerFlag TRAINER_POKE_KID_MEGHAN
+    SetTrainerFlag TRAINER_SCHOOL_KID_FORREST
+    SetTrainerFlag TRAINER_SCHOOL_KID_TIERA
+    SetVar VAR_SUNYSHORE_CITY_STATE, 2
+    // BUG: TRAINER_LEADER_ROARK should be TRAINER_LEADER_VOLKNER
+    CreateJournalEvent LOCATION_EVENT_BEAT_GYM_LEADER, MAP_HEADER_SUNYSHORE_CITY_GYM_ROOM_3, TRAINER_LEADER_ROARK
+    Message SunyshoreGymRoom3_Text_VolknerExplainBeaconBadge
+    GoTo SunyshoreGymRoom3_VolknerTryGiveTM57
 
-_00BC:
-    SetVar 0x8004, 0x180
-    SetVar 0x8005, 1
-    ScrCmd_07D 0x8004, 0x8005, 0x800C
-    GoToIfEq 0x800C, 0, _00FA
-    CallCommonScript 0x7FC
-    SetFlag 182
-    ScrCmd_0D1 0, 0x8004
-    ScrCmd_0D3 1, 0x8004
-    Message 4
-    WaitABXPadPress
-    CloseMessage
-    ReleaseAll
-    End
-
-_00FA:
-    CallCommonScript 0x7E1
+SunyshoreGymRoom3_VolknerTryGiveTM57:
+    SetVar VAR_0x8004, ITEM_TM57
+    SetVar VAR_0x8005, 1
+    GoToIfCannotFitItem VAR_0x8004, VAR_0x8005, VAR_RESULT, SunyshoreGymRoom3_VolknerCannotGiveTM57
+    Common_GiveItemQuantity
+    SetFlag FLAG_RECEIVED_VOLKNER_TM57
+    BufferItemName 0, VAR_0x8004
+    BufferTMHMMoveName 1, VAR_0x8004
+    Message SunyshoreGymRoom3_Text_VolknerExplainTM57
+    WaitButton
     CloseMessage
     ReleaseAll
     End
 
-_0104:
-    GoToIfUnset 182, _00BC
-    Message 5
-    WaitABXPadPress
+SunyshoreGymRoom3_VolknerCannotGiveTM57:
+    Common_MessageBagIsFull
     CloseMessage
     ReleaseAll
     End
 
-_011A:
-    ScrCmd_0EB
+SunyshoreGymRoom3_VolknerAlreadyHaveBeaconBadge:
+    GoToIfUnset FLAG_RECEIVED_VOLKNER_TM57, SunyshoreGymRoom3_VolknerTryGiveTM57
+    Message SunyshoreGymRoom3_Text_Afterbadge
+    WaitButton
+    CloseMessage
+    ReleaseAll
+    End
+
+SunyshoreGymRoom3_LostBattle:
+    BlackOutFromBattle
     ReleaseAll
     End

@@ -1,14 +1,13 @@
-    .include "macros/scrcmd.inc"
+#include "macros/scrcmd.inc"
 
-    .data
 
-    ScriptEntry _000A
-    ScriptEntry _000E
-    .short 0xFD13
+    ScriptEntry DistortionWorldB5F_OnTransition
+    ScriptEntry DistortionWorldB5F_Dummy2
+    ScriptEntryEnd
 
-_000A:
-    ScrCmd_2F2
+DistortionWorldB5F_OnTransition:
+    InitPersistedMapFeaturesForDistortionWorld
     End
 
-_000E:
+DistortionWorldB5F_Dummy2:
     End

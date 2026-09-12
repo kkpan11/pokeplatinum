@@ -2,6 +2,7 @@
 #define POKEPLATINUM_BAG_H
 
 #include "constants/heap.h"
+#include "constants/items.h"
 
 #include "savedata.h"
 
@@ -13,6 +14,18 @@
 #define BERRY_POCKET_SIZE       64
 #define POKEBALL_POCKET_SIZE    15
 #define BATTLE_ITEM_POCKET_SIZE 30
+
+// clang-format off
+#define LARGEST_POCKET_SIZE   \
+    max(ITEM_POCKET_SIZE,     \
+    max(KEY_ITEM_POCKET_SIZE, \
+    max(TMHM_POCKET_SIZE,     \
+    max(MAIL_POCKET_SIZE,     \
+    max(MEDICINE_POCKET_SIZE, \
+    max(BERRY_POCKET_SIZE,    \
+    max(POKEBALL_POCKET_SIZE, \
+    BATTLE_ITEM_POCKET_SIZE)))))))
+// clang-format on
 
 typedef struct BagItem {
     u16 item;
@@ -31,57 +44,66 @@ typedef struct Bag {
     u32 registeredItem;
 } Bag;
 
-typedef struct {
-    u8 unk_00[8];
-    u8 unk_08[8];
-    u16 unk_10;
-    u16 unk_12;
-} UnkStruct_0207D99C_sub1;
+typedef struct FieldBagCursor {
+    u8 scroll[POCKET_MAX];
+    u8 index[POCKET_MAX];
+    u16 pocket;
+    u16 dummy12;
+} FieldBagCursor;
 
-typedef struct {
-    u8 unk_00[5];
-    u8 unk_05[5];
-    u16 unk_0A;
-    u16 unk_0C;
-    u16 unk_0E;
-} UnkStruct_0207D99C_sub2;
+typedef struct BattleBagCursor {
+    u8 scroll[ITEM_BATTLE_CATEGORY_MAX + 1];
+    u8 index[ITEM_BATTLE_CATEGORY_MAX + 1];
+    u16 lastUsedItemID;
+    u16 lastUsedCategory;
+    u16 currentCategory;
+} BattleBagCursor;
 
-typedef struct UnkStruct_0207D99C_t {
-    UnkStruct_0207D99C_sub1 unk_00;
-    UnkStruct_0207D99C_sub2 unk_14;
-} UnkStruct_0207D99C;
+typedef struct BagCursor {
+    FieldBagCursor field;
+    BattleBagCursor battle;
+} BagCursor;
 
 int Bag_SaveSize(void);
-Bag *Bag_New(enum HeapId heapID);
+Bag *Bag_New(enum HeapID heapID);
 void Bag_Init(Bag *bag);
 void Bag_Copy(const Bag *src, Bag *dst);
 u32 Bag_GetRegisteredItem(const Bag *bag);
 void Bag_RegisterItem(Bag *bag, u32 item);
-BOOL Bag_CanFitItem(Bag *bag, u16 item, u16 count, enum HeapId heapID);
-BOOL Bag_TryAddItem(Bag *bag, u16 item, u16 count, enum HeapId heapID);
-BOOL Bag_TryRemoveItem(Bag *bag, u16 item, u16 count, enum HeapId heapID);
-BOOL Pocket_TryRemoveItem(BagItem *pocket, u32 pocketSize, u16 item, u16 count, enum HeapId heapID);
-BOOL Bag_CanRemoveItem(Bag *bag, u16 item, u16 count, enum HeapId heapID);
+BOOL Bag_CanFitItem(Bag *bag, u16 item, u16 count, enum HeapID heapID);
+BOOL Bag_TryAddItem(Bag *bag, u16 item, u16 count, enum HeapID heapID);
+BOOL Bag_TryRemoveItem(Bag *bag, u16 item, u16 count, enum HeapID heapID);
+BOOL Pocket_TryRemoveItem(BagItem *pocket, u32 pocketSize, u16 item, u16 count, enum HeapID heapID);
+BOOL Bag_CanRemoveItem(Bag *bag, u16 item, u16 count, enum HeapID heapID);
 BOOL Bag_HasItemsInPocket(Bag *bag, u32 pocketID);
-u16 Bag_GetItemQuantity(Bag *bag, u16 item, enum HeapId heapID);
-u16 Pocket_GetItemQuantity(BagItem *pocket, u32 pocketSize, u16 item, enum HeapId heapID);
+u16 Bag_GetItemQuantity(Bag *bag, u16 item, enum HeapID heapID);
+u16 Pocket_GetItemQuantity(BagItem *pocket, u32 pocketSize, u16 item, enum HeapID heapID);
 void Pocket_SortEmpty(BagItem *pocket, const u32 size); // Moves empty slots to the end of the pocket
 void Pocket_Sort(BagItem *pocket, const u32 size); // Same as Pocket_SortEmpty, but also sorts by item ID
-void *sub_0207D824(Bag *bag, const u8 *pockets, enum HeapId heapID);
+
+/**
+ * @brief Creates a BagContext with the given pocket types.
+ *
+ * @param bag The Bag from which to pull the pockets
+ * @param pockets A 0xFF-terminated array of which pocket types should be available.
+ * @param heapID
+ * @return A new BagContext giving access to the chosen pockets
+ */
+void *BagContext_CreateWithPockets(Bag *bag, const u8 *pockets, enum HeapID heapID);
 BagItem *Bag_GetItemSlot(Bag *bag, u16 pocketID, u16 slot);
 Bag *SaveData_GetBag(SaveData *saveData);
-UnkStruct_0207D99C *sub_0207D99C(u32 param0);
-void sub_0207D9B4(UnkStruct_0207D99C *param0, u32 param1, u8 *param2, u8 *param3);
-u16 sub_0207D9C4(UnkStruct_0207D99C *param0);
-void sub_0207D9C8(UnkStruct_0207D99C *param0, u32 param1, u8 param2, u8 param3);
-void sub_0207D9D4(UnkStruct_0207D99C *param0, u16 param1);
-void sub_0207D9D8(UnkStruct_0207D99C *param0, u32 param1, u8 *param2, u8 *param3);
-u16 sub_0207D9E4(UnkStruct_0207D99C *param0);
-u16 sub_0207D9E8(UnkStruct_0207D99C *param0);
-u16 sub_0207D9EC(UnkStruct_0207D99C *param0);
-void sub_0207D9F0(UnkStruct_0207D99C *param0, u32 param1, u8 param2, u8 param3);
-void sub_0207D9F8(UnkStruct_0207D99C *param0);
-void Bag_SetLastItemUsed(UnkStruct_0207D99C *param0, u16 param1, u16 param2);
-void sub_0207DA24(UnkStruct_0207D99C *param0, u16 param1);
+BagCursor *BagCursor_New(enum HeapID heapID);
+void BagCursor_GetFieldPocketPosition(BagCursor *cursor, u32 pocket, u8 *outIndex, u8 *outScroll);
+u16 BagCursor_GetFieldPocket(BagCursor *cursor);
+void BagCursor_SetFieldPocketPosition(BagCursor *cursor, u32 pocket, u8 index, u8 scroll);
+void BagCursor_SetFieldPocket(BagCursor *cursor, u16 pocket);
+void BagCursor_GetBattleCategoryPosition(BagCursor *cursor, u32 category, u8 *outIndex, u8 *outScroll);
+u16 BagCursor_GetLastUsedBattleItem(BagCursor *cursor);
+u16 BagCursor_GetLastUsedBattleItemCategory(BagCursor *cursor);
+u16 BagCursor_GetBattleCurrentCategory(BagCursor *cursor);
+void BagCursor_SetBattleCategoryPosition(BagCursor *cursor, u32 category, u8 index, u8 scroll);
+void BagCursor_ResetBattle(BagCursor *cursor);
+void Bag_SetLastBattleItemUsed(BagCursor *cursor, u16 itemID, u16 category);
+void BagCursor_SetBattleCurrentCategory(BagCursor *cursor, u16 category);
 
 #endif // POKEPLATINUM_BAG_H

@@ -1,132 +1,125 @@
-    .include "macros/scrcmd.inc"
+#include "macros/scrcmd.inc"
+#include "res/text/bank/route_206_cycling_road_north_gate.h"
+#include "res/field/events/events_route_206_cycling_road_north_gate.h"
 
-    .data
 
-    ScriptEntry _003B
-    ScriptEntry _004E
-    ScriptEntry _0061
-    ScriptEntry _00B0
-    ScriptEntry _00C0
-    ScriptEntry _001A
-    .short 0xFD13
+    ScriptEntry Route206CyclingRoadNorthGate_OnTransition
+    ScriptEntry Route206CyclingRoadNorthGate_CashierM
+    ScriptEntry Route206CyclingRoadNorthGate_CoordEvent_OnlyBicycles
+    ScriptEntry Route206CyclingRoadNorthGate_CoordEvent_ClearFlagForceBikingInGate
+    ScriptEntry Route206CyclingRoadNorthGate_ScientistM
+    ScriptEntry Route206CyclingRoadNorthGate_OnFrame_TryForceBiking
+    ScriptEntryEnd
 
-_001A:
-    ScrCmd_069 0x4004, 0x4005
-    CallIfGe 0x4005, 12, _0035
-    SetVar 0x4003, 1
+Route206CyclingRoadNorthGate_OnFrame_TryForceBiking:
+    GetPlayerMapPos VAR_MAP_LOCAL_0x04, VAR_MAP_LOCAL_0x05
+    CallIfGe VAR_MAP_LOCAL_0x05, 12, Route206CyclingRoadNorthGate_ForceBikingInGateOnFrame
+    SetVar VAR_MAP_LOCAL_0x03, 1
     End
 
-_0035:
-    SetFlag 0x996
+Route206CyclingRoadNorthGate_ForceBikingInGateOnFrame:
+    SetFlag FLAG_FORCE_BIKING_IN_GATE
     Return
 
-_003B:
-    CallIfSet 0x10B, _0048
+Route206CyclingRoadNorthGate_OnTransition:
+    CallIfSet FLAG_RECEIVED_ROUTE_206_CYCLING_ROAD_NORTH_GATE_EXP_SHARE, Route206CyclingRoadNorthGate_HideScientistM
     End
 
-_0048:
-    SetFlag 0x222
+Route206CyclingRoadNorthGate_HideScientistM:
+    SetFlag FLAG_HIDE_ROUTE_206_CYCLING_ROAD_NORTH_GATE_SCIENTIST_M
     Return
 
-_004E:
-    PlayFanfare SEQ_SE_CONFIRM
-    LockAll
-    FacePlayer
-    Message 2
-    WaitABXPadPress
-    CloseMessage
-    ReleaseAll
+Route206CyclingRoadNorthGate_CashierM:
+    NPCMessage Route206CyclingRoadNorthGate_Text_LearnHowToShiftGears
     End
 
-_0061:
+Route206CyclingRoadNorthGate_CoordEvent_OnlyBicycles:
     LockAll
-    ScrCmd_0C7 0x800C
-    GoToIfEq 0x800C, 1, _0091
-    ApplyMovement 1, _00A0
+    CheckPlayerOnBike VAR_RESULT
+    GoToIfEq VAR_RESULT, TRUE, Route206CyclingRoadNorthGate_ForceBikingInGateCoordEvent
+    ApplyMovement LOCALID_CASHIER_M_WEST, Route206CyclingRoadNorthGate_Movement_CashierMExclamationMark
     WaitMovement
-    Message 1
+    Message Route206CyclingRoadNorthGate_Text_OnlyForBicycles
     CloseMessage
-    ApplyMovement 0xFF, _00A8
+    ApplyMovement LOCALID_PLAYER, Route206CyclingRoadNorthGate_Movement_PlayerWalkNorth
     WaitMovement
     ReleaseAll
     End
 
-_0091:
-    SetFlag 0x996
-    SetVar 0x4002, 1
+Route206CyclingRoadNorthGate_ForceBikingInGateCoordEvent:
+    SetFlag FLAG_FORCE_BIKING_IN_GATE
+    SetVar VAR_MAP_LOCAL_0x02, 1
     ReleaseAll
     End
 
     .balign 4, 0
-_00A0:
-    MoveAction_04B
+Route206CyclingRoadNorthGate_Movement_CashierMExclamationMark:
+    EmoteExclamationMark
     EndMovement
 
     .balign 4, 0
-_00A8:
-    MoveAction_00C
+Route206CyclingRoadNorthGate_Movement_PlayerWalkNorth:
+    WalkNormalNorth
     EndMovement
 
-_00B0:
+Route206CyclingRoadNorthGate_CoordEvent_ClearFlagForceBikingInGate:
     LockAll
-    ClearFlag 0x996
-    SetVar 0x4002, 0
+    ClearFlag FLAG_FORCE_BIKING_IN_GATE
+    SetVar VAR_MAP_LOCAL_0x02, 0
     ReleaseAll
     End
 
-_00C0:
-    PlayFanfare SEQ_SE_CONFIRM
+Route206CyclingRoadNorthGate_ScientistM:
+    PlaySE SE_CONFIRM_sseq_3
     LockAll
     FacePlayer
-    GoToIfSet 0x10B, _0154
-    ScrCmd_0CD 0
-    ScrCmd_0CF 1
-    ScrCmd_14D 0x4000
-    GoToIfEq 0x4000, 0, _00F0
-    GoTo _00F9
+    GoToIfSet FLAG_RECEIVED_ROUTE_206_CYCLING_ROAD_NORTH_GATE_EXP_SHARE, Route206CyclingRoadNorthGate_HoldingExpShareGetExpPoints
+    BufferPlayerName 0
+    BufferCounterpartName 1
+    GetPlayerGender VAR_MAP_LOCAL_0x00
+    GoToIfEq VAR_MAP_LOCAL_0x00, GENDER_MALE, Route206CyclingRoadNorthGate_MetHowManyPokemonMale
+    GoTo Route206CyclingRoadNorthGate_MetHowManyPokemonFemale
 
-_00F0:
-    Message 3
-    GoTo _0102
+Route206CyclingRoadNorthGate_MetHowManyPokemonMale:
+    Message Route206CyclingRoadNorthGate_Text_PlayerMetHowManyPokemon
+    GoTo Route206CyclingRoadNorthGate_CheckAmountPokemonSeen
 
-_00F9:
-    Message 4
-    GoTo _0102
+Route206CyclingRoadNorthGate_MetHowManyPokemonFemale:
+    Message Route206CyclingRoadNorthGate_Text_PlayerMetHowManyPokemon2
+    GoTo Route206CyclingRoadNorthGate_CheckAmountPokemonSeen
 
-_0102:
-    ScrCmd_120 0x8004
-    ScrCmd_0D5 1, 0x8004
-    GoToIfLt 0x8004, 35, _015F
-    Message 5
-    SetVar 0x8004, 216
-    SetVar 0x8005, 1
-    ScrCmd_07D 0x8004, 0x8005, 0x800C
-    GoToIfEq 0x800C, 0, _014A
-    SetFlag 0x10B
-    CallCommonScript 0x7E0
+Route206CyclingRoadNorthGate_CheckAmountPokemonSeen:
+    GetNationalDexSeenCount VAR_0x8004
+    BufferNumber 1, VAR_0x8004
+    GoToIfLt VAR_0x8004, 35, Route206CyclingRoadNorthGate_FindAtLeast35
+    Message Route206CyclingRoadNorthGate_Text_SomethingForYou
+    SetVar VAR_0x8004, ITEM_EXP_SHARE
+    SetVar VAR_0x8005, 1
+    GoToIfCannotFitItem VAR_0x8004, VAR_0x8005, VAR_RESULT, Route206CyclingRoadNorthGate_BagIsFull
+    SetFlag FLAG_RECEIVED_ROUTE_206_CYCLING_ROAD_NORTH_GATE_EXP_SHARE
+    Common_GiveItemQuantityNoLineFeed
     CloseMessage
     ReleaseAll
     End
 
-_014A:
-    CallCommonScript 0x7E1
+Route206CyclingRoadNorthGate_BagIsFull:
+    Common_MessageBagIsFull
     CloseMessage
     ReleaseAll
     End
 
-_0154:
-    Message 6
-    WaitABXPadPress
+Route206CyclingRoadNorthGate_HoldingExpShareGetExpPoints:
+    Message Route206CyclingRoadNorthGate_Text_HoldingExpShareGetExpPoints
+    WaitButton
     CloseMessage
     ReleaseAll
     End
 
-_015F:
-    Message 7
-    WaitABXPadPress
+Route206CyclingRoadNorthGate_FindAtLeast35:
+    Message Route206CyclingRoadNorthGate_Text_FindAtLeast35
+    WaitButton
     CloseMessage
     ReleaseAll
     End
 
-    .byte 0
-    .byte 0
+    .balign 4, 0

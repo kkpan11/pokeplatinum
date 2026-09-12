@@ -3,9 +3,9 @@
 #include <nitro.h>
 #include <string.h>
 
-#include "struct_decls/struct_02029C88_decl.h"
+#include "struct_defs/struct_02029C88.h"
 
-#include "unk_02006E3C.h"
+#include "graphics.h"
 #include "unk_020298BC.h"
 
 u32 ov17_02252A70(const UnkStruct_02029C88 *param0, const u8 *param1)
@@ -28,5 +28,5 @@ u32 ov17_02252A70(const UnkStruct_02029C88 *param0, const u8 *param1)
 
 u8 *ov17_02252A9C(u32 param0, u32 param1)
 {
-    return sub_02006FE8(90, 3 + param1, 0, param0, 0);
+    return LoadMemberFromNARC(NARC_INDEX_CONTEST__DATA__CONTEST_DATA, 3 + param1, 0, param0, 0);
 }

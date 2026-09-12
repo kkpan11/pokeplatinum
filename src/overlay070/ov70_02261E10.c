@@ -13,7 +13,7 @@
 
 #include "enums.h"
 #include "heap.h"
-#include "unk_02005474.h"
+#include "sound_playback.h"
 
 typedef struct {
     UnkStruct_ov70_022610B8 *unk_00;
@@ -141,20 +141,20 @@ static const UnkStruct_ov70_0226D920 Unk_ov70_0226D920[9] = {
     { 0x1, 0x2 }
 };
 
-UnkStruct_ov70_02261E10 *ov70_02261E10(int param0, int param1, const UnkStruct_ov70_0225C894 *param2, u32 param3, u32 param4)
+UnkStruct_ov70_02261E10 *ov70_02261E10(int param0, int param1, const UnkStruct_ov70_0225C894 *param2, enum HeapID heapID, u32 heapID2)
 {
     UnkStruct_ov70_02261E10 *v0;
     int v1;
 
-    v0 = Heap_AllocFromHeap(param3, sizeof(UnkStruct_ov70_02261E10));
+    v0 = Heap_Alloc(heapID, sizeof(UnkStruct_ov70_02261E10));
     memset(v0, 0, sizeof(UnkStruct_ov70_02261E10));
 
     v0->unk_00 = param2;
     v0->unk_610 = param0;
     v0->unk_611 = param1;
-    v0->unk_04 = ov70_02260B44(9, 128, param3, param4);
+    v0->unk_04 = ov70_02260B44(9, 128, heapID, heapID2);
 
-    ov70_02260CE4(v0->unk_04, param1, param0, param3, param4);
+    ov70_02260CE4(v0->unk_04, param1, param0, heapID, heapID2);
 
     {
         int v2;
@@ -276,7 +276,7 @@ void ov70_022621AC(UnkStruct_ov70_02261E10 *param0)
     ov70_02260D80(param0->unk_04);
     ov70_02260BB8(param0->unk_04);
 
-    Heap_FreeToHeap(param0);
+    Heap_Free(param0);
 }
 
 void ov70_02262210(UnkStruct_ov70_02261E10 *param0)
@@ -573,9 +573,7 @@ void ov70_022627BC(UnkStruct_ov70_02261E10 *param0, enum PlazaMinigame param1, u
     BOOL v0;
     UnkStruct_ov70_022610B8 *v1;
     UnkStruct_ov70_022610B8 *v2;
-    u32 v3;
-
-    v3 = param1 - UnkEnum_ov66_022324D0_00;
+    u32 v3 = param1 - UnkEnum_ov66_022324D0_00;
     v2 = param0->unk_22C.unk_00[v3];
     v1 = param0->unk_22C.unk_0C[v3];
 
@@ -626,9 +624,7 @@ static BOOL ov70_022628C8(const UnkStruct_ov70_022610B8 *param0, u8 param1, u8 p
 
 static void ov70_02262908(UnkStruct_ov70_02260BB8 *param0, UnkStruct_ov70_022610B8 *param1)
 {
-    u32 v0;
-
-    v0 = ov70_022610B8(param1);
+    u32 v0 = ov70_022610B8(param1);
     GF_ASSERT((v0 == 11) || (v0 == 12));
 
     if ((v0 == 11) || (v0 == 12)) {
@@ -638,9 +634,7 @@ static void ov70_02262908(UnkStruct_ov70_02260BB8 *param0, UnkStruct_ov70_022610
 
 static void ov70_02262938(UnkStruct_ov70_02260BB8 *param0, UnkStruct_ov70_022610B8 *param1)
 {
-    u32 v0;
-
-    v0 = ov70_022610B8(param1);
+    u32 v0 = ov70_022610B8(param1);
     GF_ASSERT((v0 == 11) || (v0 == 12));
 
     if ((v0 == 11) || (v0 == 12)) {
@@ -668,15 +662,13 @@ static void ov70_02262968(UnkStruct_ov70_02261E10 *param0, UnkStruct_ov70_022610
 
     if (v1 == 1) {
         ov70_022629DC(param0, param1);
-        Sound_PlayEffect(1445);
+        Sound_PlayEffect(SEQ_SE_PL_EFF02_sseq);
     }
 }
 
 static void ov70_022629AC(UnkStruct_ov70_02261E10 *param0, UnkStruct_ov70_022610B8 *param1)
 {
-    BOOL v0;
-
-    v0 = 0;
+    BOOL v0 = 0;
 
     if (ov70_022612B4(param0->unk_04, param1, 0) == 0) {
         v0 = 1;
@@ -684,7 +676,7 @@ static void ov70_022629AC(UnkStruct_ov70_02261E10 *param0, UnkStruct_ov70_022610
 
     if (v0 == 1) {
         ov70_022629DC(param0, param1);
-        Sound_PlayEffect(1449);
+        Sound_PlayEffect(SEQ_SE_PL_EFF04_sseq);
     }
 }
 
@@ -861,7 +853,7 @@ static void ov70_02262BEC(UnkStruct_ov70_022629FC *param0, UnkStruct_ov70_02260B
         }
         break;
     default:
-        GF_ASSERT(0);
+        GF_ASSERT(FALSE);
         break;
     }
 }
@@ -901,7 +893,7 @@ static void ov70_02262C94(UnkStruct_ov70_022629FC *param0, UnkStruct_ov70_02260B
         }
         break;
     default:
-        GF_ASSERT(0);
+        GF_ASSERT(FALSE);
         break;
     }
 }

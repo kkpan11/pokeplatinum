@@ -4,17 +4,16 @@
 #include <string.h>
 
 #include "struct_decls/struct_02095E80_decl.h"
-#include "struct_defs/struct_02027F8C.h"
-#include "struct_defs/struct_02039A58.h"
+#include "struct_defs/comm_cmd_table.h"
 #include "struct_defs/struct_02095E80_t.h"
 
 #include "field/field_system.h"
 #include "overlay088/ov88_0223B140.h"
 
 #include "communication_system.h"
+#include "pal_pad.h"
 #include "party.h"
-#include "unk_02027F84.h"
-#include "unk_0202D778.h"
+#include "ribbon_save_data.h"
 #include "unk_02032798.h"
 
 void sub_02095DFC(int param0, int param1, void *param2, void *param3);
@@ -37,7 +36,7 @@ static const CommCmdTable Unk_020F59BC[] = {
     { sub_02095DAC, CommPacketSizeOf_NetId },
     { sub_02095DFC, sub_02095E74, sub_02095E80 },
     { sub_02095E28, sub_02095E68, sub_02095E80 },
-    { sub_02095DB8, sub_0203294C },
+    { sub_02095DB8, CommPacketSizeOf_Nothing },
     { sub_02095DBC, CommPacketSizeOf_NetId },
     { sub_02095DCC, sub_02095E70 }
 };
@@ -135,7 +134,7 @@ void sub_02095DCC(int param0, int param1, void *param2, void *param3)
 {
     FieldSystem *fieldSystem = (FieldSystem *)param3;
     int v1;
-    u8 *v2 = sub_0202D79C(fieldSystem->saveData);
+    u8 *v2 = SaveData_GetRibbons(fieldSystem->saveData);
     u8 *v3 = (u8 *)param2;
 
     if (CommSys_CurNetId() == param0) {
@@ -156,7 +155,7 @@ void sub_02095DFC(int param0, int param1, void *param2, void *param3)
     UnkStruct_02095E80 *v0 = ((FieldSystem *)param3)->unk_88;
 
     if (CommSys_CurNetId() != param0) {
-        sub_02027FEC(v0->unk_227C, (UnkStruct_02027F8C *)param2, 1, 26);
+        PalPad_PushEntries(v0->unk_227C, (PalPad *)param2, 1, HEAP_ID_26);
         v0->unk_54 = 3;
     }
 }
@@ -189,7 +188,7 @@ static int sub_02095E70(void)
 
 static int sub_02095E74(void)
 {
-    return sizeof(UnkStruct_02027F8C);
+    return sizeof(PalPad);
 }
 
 static int sub_02095E78(void)

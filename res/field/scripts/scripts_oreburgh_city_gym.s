@@ -1,126 +1,120 @@
-    .include "macros/scrcmd.inc"
+#include "macros/scrcmd.inc"
+#include "res/text/bank/oreburgh_city_gym.h"
 
-    .data
 
-    ScriptEntry _000E
-    ScriptEntry _011F
-    ScriptEntry _0153
-    .short 0xFD13
+    ScriptEntry OreburghGym_Roark
+    ScriptEntry OreburghGym_GymGuide
+    ScriptEntry OreburghGym_GymStatue
+    ScriptEntryEnd
 
-_000E:
-    PlayFanfare SEQ_SE_CONFIRM
+OreburghGym_Roark:
+    PlaySE SE_CONFIRM_sseq_3
     LockAll
     FacePlayer
-    ScrCmd_15B 0, 0x800C
-    GoToIfEq 0x800C, 1, _0103
-    ScrCmd_1CD 9, 47, 0, 0, 0
-    Message 0
+    GoToIfBadgeAcquired BADGE_ID_COAL, OreburghGym_AlreadyHaveCoalBadge
+    CreateJournalEvent LOCATION_EVENT_GYM_WAS_TOO_TOUGH, MAP_HEADER_OREBURGH_CITY_GYM
+    Message OreburghGym_Text_RoarkIntro
     CloseMessage
-    ScrCmd_0E5 246, 0
-    ScrCmd_0EC 0x800C
-    GoToIfEq 0x800C, 0, _0119
-    Message 1
-    ScrCmd_0CD 0
-    Message 2
-    ScrCmd_04E 0x489
-    ScrCmd_04F
-    SetTrainerFlag 244
-    SetTrainerFlag 245
-    ScrCmd_15C 0
-    ScrCmd_260 23
-    SetTrainerFlag 244
-    SetTrainerFlag 245
-    SetFlag 0x23F
-    SetVar 0x40F0, 1
-    SetVar 0x4076, 1
-    SetVar 0x4079, 2
-    ScrCmd_1CD 10, 47, 246, 0, 0
-    SetVar 0x4077, 3
-    ClearFlag 0x17A
-    ClearFlag 0x19D
-    ClearFlag 0x19C
-    SetFlag 0x198
-    Message 3
-    GoTo _00BB
+    StartTrainerBattle TRAINER_LEADER_ROARK
+    CheckWonBattle VAR_RESULT
+    GoToIfEq VAR_RESULT, FALSE, OreburghGym_LostBattle
+    Message OreburghGym_Text_BeatRoark
+    BufferPlayerName 0
+    Message OreburghGym_Text_RoarkReceiveCoalBadge
+    PlayFanfare SEQ_BADGE_sseq
+    WaitFanfare
+    SetTrainerFlag TRAINER_YOUNGSTER_JONATHON
+    SetTrainerFlag TRAINER_YOUNGSTER_DARIUS
+    GiveBadge BADGE_ID_COAL
+    IncrementTrainerScore2 TRAINER_SCORE_EVENT_BADGE_EARNED
+    SetTrainerFlag TRAINER_YOUNGSTER_JONATHON
+    SetTrainerFlag TRAINER_YOUNGSTER_DARIUS
+    SetFlag FLAG_HIDE_POKECENTER_BASEMENT_BLOCKADE
+    SetVar VAR_GTS_ACCESS_STATE, 1
+    SetVar VAR_JUBILIFE_LOOKER_PAL_PAD_STATE, 1
+    SetVar VAR_OREBURGH_CITY_STATE, 2
+    CreateJournalEvent LOCATION_EVENT_BEAT_GYM_LEADER, MAP_HEADER_OREBURGH_CITY_GYM, TRAINER_LEADER_ROARK
+    SetVar VAR_JUBILIFE_CITY_STATE, 3
+    ClearFlag FLAG_HIDE_JUBILIFE_CITY_COUNTERPART
+    ClearFlag FLAG_HIDE_JUBILIFE_ROWAN
+    ClearFlag FLAG_HIDE_JUBILIFE_GALACTIC_GRUNTS
+    SetFlag FLAG_HIDE_SANDGEM_TOWN_LAB_PROF_ROWAN
+    Message OreburghGym_Text_RoarkExplainCoalBadge
+    GoTo OreburghGym_RoarkGiveTM76
     End
 
-_00BB:
-    SetVar 0x8004, 0x193
-    SetVar 0x8005, 1
-    ScrCmd_07D 0x8004, 0x8005, 0x800C
-    GoToIfEq 0x800C, 0, _00F9
-    CallCommonScript 0x7FC
-    SetFlag 117
-    ScrCmd_0D1 0, 0x8004
-    ScrCmd_0D3 1, 0x8004
-    Message 4
-    WaitABXPadPress
+OreburghGym_RoarkGiveTM76:
+    SetVar VAR_0x8004, ITEM_TM76
+    SetVar VAR_0x8005, 1
+    GoToIfCannotFitItem VAR_0x8004, VAR_0x8005, VAR_RESULT, OreburghGym_RoarkGiveTM76BagFull
+    Common_GiveItemQuantity
+    SetFlag FLAG_RECEIVED_ROARK_TM76
+    BufferItemName 0, VAR_0x8004
+    BufferTMHMMoveName 1, VAR_0x8004
+    Message OreburghGym_Text_RoarkExplainStealthRock
+    WaitButton
     CloseMessage
     ReleaseAll
     End
 
-_00F9:
-    CallCommonScript 0x7E1
+OreburghGym_RoarkGiveTM76BagFull:
+    Common_MessageBagIsFull
     CloseMessage
     ReleaseAll
     End
 
-_0103:
-    GoToIfUnset 117, _00BB
-    Message 5
-    WaitABXPadPress
+OreburghGym_AlreadyHaveCoalBadge:
+    GoToIfUnset FLAG_RECEIVED_ROARK_TM76, OreburghGym_RoarkGiveTM76
+    Message OreburghGym_Text_RoarkGymBeaten
+    WaitButton
     CloseMessage
     ReleaseAll
     End
 
-_0119:
-    ScrCmd_0EB
+OreburghGym_LostBattle:
+    BlackOutFromBattle
     ReleaseAll
     End
 
-_011F:
-    PlayFanfare SEQ_SE_CONFIRM
+OreburghGym_GymGuide:
+    PlaySE SE_CONFIRM_sseq_3
     LockAll
     FacePlayer
-    ScrCmd_15B 0, 0x800C
-    GoToIfEq 0x800C, 1, _0145
-    Message 6
-    WaitABXPadPress
+    GoToIfBadgeAcquired BADGE_ID_COAL, OreburghGym_GymGuideAfterBadge
+    Message OreburghGym_Text_GymGuideBeforeBadge
+    WaitButton
     CloseMessage
     ReleaseAll
     End
 
-_0145:
-    ScrCmd_0CD 0
-    Message 7
-    WaitABXPadPress
+OreburghGym_GymGuideAfterBadge:
+    BufferPlayerName 0
+    Message OreburghGym_Text_GymGuideAfterBadge
+    WaitButton
     CloseMessage
     ReleaseAll
     End
 
-_0153:
-    PlayFanfare SEQ_SE_CONFIRM
+OreburghGym_GymStatue:
+    PlaySE SE_CONFIRM_sseq_3
     LockAll
-    ScrCmd_15B 0, 0x800C
-    GoToIfEq 0x800C, 1, _017D
-    ScrCmd_0CE 0
-    ScrCmd_0CE 1
-    Message 8
-    WaitABXPadPress
+    GoToIfBadgeAcquired BADGE_ID_COAL, OreburghGym_GymStatueAfterBadge
+    BufferRivalName 0
+    BufferRivalName 1
+    Message OreburghGym_Text_GymStatueBeforeBadge
+    WaitButton
     CloseMessage
     ReleaseAll
     End
 
-_017D:
-    ScrCmd_0CE 0
-    ScrCmd_0CD 1
-    ScrCmd_0CE 2
-    Message 9
-    WaitABXPadPress
+OreburghGym_GymStatueAfterBadge:
+    BufferRivalName 0
+    BufferPlayerName 1
+    BufferRivalName 2
+    Message OreburghGym_Text_GymStatueAfterBadge
+    WaitButton
     CloseMessage
     ReleaseAll
     End
 
-    .byte 0
-    .byte 0
-    .byte 0
+    .balign 4, 0

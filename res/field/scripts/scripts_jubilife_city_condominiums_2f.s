@@ -1,27 +1,15 @@
-    .include "macros/scrcmd.inc"
+#include "macros/scrcmd.inc"
+#include "res/text/bank/jubilife_city_condominiums_2f.h"
 
-    .data
 
-    ScriptEntry _000A
-    ScriptEntry _001D
-    .short 0xFD13
+    ScriptEntry JubilifeCityCondominiums2F_BugCatcher
+    ScriptEntry JubilifeCityCondominiums2F_PokemonBreederM
+    ScriptEntryEnd
 
-_000A:
-    PlayFanfare SEQ_SE_CONFIRM
-    LockAll
-    FacePlayer
-    Message 0
-    WaitABXPadPress
-    CloseMessage
-    ReleaseAll
+JubilifeCityCondominiums2F_BugCatcher:
+    NPCMessage JubilifeCityCondominiums2F_Text_ILikeHowPokemonAttack
     End
 
-_001D:
-    PlayFanfare SEQ_SE_CONFIRM
-    LockAll
-    FacePlayer
-    Message 1
-    WaitABXPadPress
-    CloseMessage
-    ReleaseAll
+JubilifeCityCondominiums2F_PokemonBreederM:
+    NPCMessage JubilifeCityCondominiums2F_Text_DidYouBuyHealBalls
     End

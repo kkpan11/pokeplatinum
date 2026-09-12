@@ -1,15 +1,12 @@
-    .include "macros/scrcmd.inc"
+#include "macros/scrcmd.inc"
 
-    .data
 
-    .byte 2
-    .short 7, 0
-    .byte 1
-    ScriptEntry _000B
-    .byte 0
+    InitScriptEntry_OnTransition 7
+    InitScriptEntry_OnFrameTable InitScriptFrameTable
+    InitScriptEntryEnd
 
-_000B:
-    .short 0x411D, 0, 5
-    .short 0
+InitScriptFrameTable:
+    InitScriptGoToIfEqual VAR_TEAM_GALACTIC_ETERNA_BUILDING_1F_STATE, 0, 5
+    InitScriptFrameTableEnd
 
-    .balign 4, 0
+    InitScriptEnd

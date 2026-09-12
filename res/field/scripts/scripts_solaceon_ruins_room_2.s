@@ -1,72 +1,72 @@
-    .include "macros/scrcmd.inc"
+#include "macros/scrcmd.inc"
+#include "res/text/bank/solaceon_ruins_room_2.h"
+#include "res/field/events/events_solaceon_ruins_room_2.h"
 
-    .data
 
-    ScriptEntry _0006
-    .short 0xFD13
+    ScriptEntry SolaceonRuinsRoom2_Hiker
+    ScriptEntryEnd
 
-_0006:
-    PlayFanfare SEQ_SE_CONFIRM
+SolaceonRuinsRoom2_Hiker:
+    PlaySE SE_CONFIRM_sseq_3
     LockAll
     FacePlayer
-    GoToIfSet 210, _00C7
-    GoToIfSet 232, _004F
-    ScrCmd_07E 0x1A8, 1, 0x800C
-    GoToIfEq 0x800C, 1, _0044
-    Message 0
-    WaitABXPadPress
+    GoToIfSet FLAG_RECEIVED_SOLACEON_RUINS_ROOM_2_GREEN_SHARD, SolaceonRuinsRoom2_IveFinallyGotDefog
+    GoToIfSet FLAG_DID_NOT_LOAN_HM_DEFOG, SolaceonRuinsRoom2_AskLoanHMDefog
+    CheckItem ITEM_HM05, 1, VAR_RESULT
+    GoToIfEq VAR_RESULT, TRUE, SolaceonRuinsRoom2_PlayerHasHMDefog
+    Message SolaceonRuinsRoom2_Text_HMDefogInRuins
+    WaitButton
     CloseMessage
     ReleaseAll
     End
 
-_0044:
-    Message 1
-    GoTo _004F
+SolaceonRuinsRoom2_PlayerHasHMDefog:
+    Message SolaceonRuinsRoom2_Text_HMDefogInRuins2
+    GoTo SolaceonRuinsRoom2_AskLoanHMDefog
     End
 
-_004F:
-    ApplyMovement 0, _00D4
+SolaceonRuinsRoom2_AskLoanHMDefog:
+    ApplyMovement LOCALID_HIKER, SolaceonRuinsRoom2_Movement_HikerExclamationMark
     WaitMovement
-    Message 2
-    ScrCmd_03E 0x800C
-    GoToIfEq 0x800C, 0, _007C
-    GoToIfEq 0x800C, 1, _00B8
+    Message SolaceonRuinsRoom2_Text_CanYouLoanHMDefog
+    ShowYesNoMenu VAR_RESULT
+    GoToIfEq VAR_RESULT, MENU_YES, SolaceonRuinsRoom2_LoanHMDefog
+    GoToIfEq VAR_RESULT, MENU_NO, SolaceonRuinsRoom2_DontLoanHMDefog
     End
 
-_007C:
-    Message 3
-    SetVar 0x8004, 75
-    SetVar 0x8005, 1
-    ScrCmd_07D 0x8004, 0x8005, 0x800C
-    GoToIfEq 0x800C, 0, _00AE
-    SetFlag 210
-    CallCommonScript 0x7E0
+SolaceonRuinsRoom2_LoanHMDefog:
+    Message SolaceonRuinsRoom2_Text_ThanksYoureMyRescuer
+    SetVar VAR_0x8004, ITEM_GREEN_SHARD
+    SetVar VAR_0x8005, 1
+    GoToIfCannotFitItem VAR_0x8004, VAR_0x8005, VAR_RESULT, SolaceonRuinsRoom2_BagIsFull
+    SetFlag FLAG_RECEIVED_SOLACEON_RUINS_ROOM_2_GREEN_SHARD
+    Common_GiveItemQuantityNoLineFeed
     CloseMessage
     ReleaseAll
     End
 
-_00AE:
-    CallCommonScript 0x7E1
+SolaceonRuinsRoom2_BagIsFull:
+    Common_MessageBagIsFull
     CloseMessage
     ReleaseAll
     End
 
-_00B8:
-    SetFlag 232
-    Message 4
-    WaitABXPadPress
+SolaceonRuinsRoom2_DontLoanHMDefog:
+    SetFlag FLAG_DID_NOT_LOAN_HM_DEFOG
+    Message SolaceonRuinsRoom2_Text_ItsNotLikeItWearsOut
+    WaitButton
     CloseMessage
     ReleaseAll
     End
 
-_00C7:
-    Message 5
-    WaitABXPadPress
+SolaceonRuinsRoom2_IveFinallyGotDefog:
+    Message SolaceonRuinsRoom2_Text_IveFinallyGotDefog
+    WaitButton
     CloseMessage
     ReleaseAll
     End
 
     .balign 4, 0
-_00D4:
-    MoveAction_04B
+SolaceonRuinsRoom2_Movement_HikerExclamationMark:
+    EmoteExclamationMark
     EndMovement

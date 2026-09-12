@@ -1,50 +1,50 @@
-    .include "macros/scrcmd.inc"
+#include "macros/scrcmd.inc"
+#include "res/text/bank/grand_lake_route_213_northeast_house.h"
 
-    .data
 
-    ScriptEntry _000A
-    ScriptEntry _0045
-    .short 0xFD13
+    ScriptEntry GrandLakeRoute213NortheastHouse_RichBoy
+    ScriptEntry GrandLakeRoute213NortheastHouse_Lady
+    ScriptEntryEnd
 
-_000A:
-    PlayFanfare SEQ_SE_CONFIRM
+GrandLakeRoute213NortheastHouse_RichBoy:
+    PlaySE SE_CONFIRM_sseq_3
     LockAll
     FacePlayer
-    ScrCmd_134 14, 0x800C
-    GoToIfNe 0x800C, 0, _003A
-    Message 0
-    SetVar 0x8004, 14
-    CallCommonScript 0x7D9
-    WaitABXPadPress
+    CheckPoketchAppRegistered POKETCH_APPID_COINTOSS, VAR_RESULT
+    GoToIfNe VAR_RESULT, FALSE, GrandLakeRoute213NortheastHouse_CoinTossForDecisions
+    Message GrandLakeRoute213NortheastHouse_Text_ReservationsWereFull
+    SetVar VAR_0x8004, POKETCH_APPID_COINTOSS
+    Common_GivePoketchApp
+    WaitButton
     CloseMessage
     ReleaseAll
     End
 
-_003A:
-    Message 1
-    WaitABXPadPress
+GrandLakeRoute213NortheastHouse_CoinTossForDecisions:
+    Message GrandLakeRoute213NortheastHouse_Text_CoinTossForDecisions
+    WaitButton
     CloseMessage
     ReleaseAll
     End
 
-_0045:
-    PlayFanfare SEQ_SE_CONFIRM
+GrandLakeRoute213NortheastHouse_Lady:
+    PlaySE SE_CONFIRM_sseq_3
     LockAll
     FacePlayer
-    ScrCmd_134 14, 0x800C
-    GoToIfNe 0x800C, 0, _0071
-    GoTo _0066
+    CheckPoketchAppRegistered POKETCH_APPID_COINTOSS, VAR_RESULT
+    GoToIfNe VAR_RESULT, FALSE, GrandLakeRoute213NortheastHouse_WantedJustUsTwo
+    GoTo GrandLakeRoute213NortheastHouse_HereBecauseCoinToss
 
-_0066:
-    Message 2
-    WaitABXPadPress
+GrandLakeRoute213NortheastHouse_HereBecauseCoinToss:
+    Message GrandLakeRoute213NortheastHouse_Text_HereBecauseCoinToss
+    WaitButton
     CloseMessage
     ReleaseAll
     End
 
-_0071:
-    Message 3
-    WaitABXPadPress
+GrandLakeRoute213NortheastHouse_WantedJustUsTwo:
+    Message GrandLakeRoute213NortheastHouse_Text_WantedJustUsTwo
+    WaitButton
     CloseMessage
     ReleaseAll
     End

@@ -1,189 +1,184 @@
-    .include "macros/scrcmd.inc"
+#include "macros/scrcmd.inc"
+#include "res/text/bank/route_218_gate_to_canalave_city.h"
+#include "res/field/events/events_route_218_gate_to_canalave_city.h"
 
-    .data
 
-    ScriptEntry _0208
-    ScriptEntry _000A
-    .short 0xFD13
+    ScriptEntry Route218GateToCanalaveCity_Policeman
+    ScriptEntry Route218GateToCanalaveCity_CoordEvent_ScientistM
+    ScriptEntryEnd
 
-_000A:
+Route218GateToCanalaveCity_CoordEvent_ScientistM:
     LockAll
-    Call _006A
-    ScrCmd_0CD 0
-    ScrCmd_0CF 1
-    ScrCmd_14D 0x800C
-    GoToIfEq 0x800C, 0, _0031
-    GoTo _003C
+    Call Route218GateToCanalaveCity_ScientistMWalkToPlayer
+    BufferPlayerName 0
+    BufferCounterpartName 1
+    GetPlayerGender VAR_RESULT
+    GoToIfEq VAR_RESULT, GENDER_MALE, Route218GateToCanalaveCity_UpgradeYourPokedexMale
+    GoTo Route218GateToCanalaveCity_UpgradeYourPokedexFemale
     End
 
-_0031:
-    Message 2
-    GoTo _0047
+Route218GateToCanalaveCity_UpgradeYourPokedexMale:
+    Message Route218GateToCanalaveCity_Text_UpgradeYourPokedexMale
+    GoTo Route218GateToCanalaveCity_UpgradePokdex
     End
 
-_003C:
-    Message 3
-    GoTo _0047
+Route218GateToCanalaveCity_UpgradeYourPokedexFemale:
+    Message Route218GateToCanalaveCity_Text_UpgradeYourPokedexFemale
+    GoTo Route218GateToCanalaveCity_UpgradePokdex
     End
 
-_0047:
-    Message 4
+Route218GateToCanalaveCity_UpgradePokdex:
+    Message Route218GateToCanalaveCity_Text_DisplayMaleAndFemale
     CloseMessage
-    ScrCmd_22C
-    Call _00E8
-    PlayFanfare SEQ_SE_DP_KAIDAN2
-    SetFlag 0x21C
-    ScrCmd_065 1
-    SetVar 0x4105, 1
+    TurnOnPokedexFormDetection
+    Call Route218GateToCanalaveCity_ScientistMLeave
+    PlaySE SEQ_SE_DP_KAIDAN2_sseq
+    SetFlag FLAG_HIDE_ROUTE_218_GATE_TO_CANALAVE_CITY_SCIENTIST_M
+    RemoveObject LOCALID_SCIENTIST_M
+    SetVar VAR_ROUTE_218_GATE_TO_CANALAVE_CITY_STATE, 1
     ReleaseAll
     End
 
-_006A:
-    ScrCmd_069 0x8005, 0x8006
-    GoToIfEq 0x8006, 5, _00AC
-    GoToIfEq 0x8006, 6, _00B8
-    GoToIfEq 0x8006, 7, _00C4
-    GoToIfEq 0x8006, 8, _00D0
-    GoTo _00DC
+Route218GateToCanalaveCity_ScientistMWalkToPlayer:
+    GetPlayerMapPos VAR_0x8005, VAR_0x8006
+    GoToIfEq VAR_0x8006, 5, Route218GateToCanalaveCity_ScientistMWalkToPlayerZ5
+    GoToIfEq VAR_0x8006, 6, Route218GateToCanalaveCity_ScientistMWalkToPlayerZ6
+    GoToIfEq VAR_0x8006, 7, Route218GateToCanalaveCity_ScientistMWalkToPlayerZ7
+    GoToIfEq VAR_0x8006, 8, Route218GateToCanalaveCity_ScientistMWalkToPlayerZ8
+    GoTo Route218GateToCanalaveCity_ScientistMWalkToPlayerZ9
     End
 
-_00AC:
-    ApplyMovement 1, _0168
+Route218GateToCanalaveCity_ScientistMWalkToPlayerZ5:
+    ApplyMovement LOCALID_SCIENTIST_M, Route218GateToCanalaveCity_Movement_ScientistMWalkToPlayerZ5
     WaitMovement
     Return
 
-_00B8:
-    ApplyMovement 1, _017C
+Route218GateToCanalaveCity_ScientistMWalkToPlayerZ6:
+    ApplyMovement LOCALID_SCIENTIST_M, Route218GateToCanalaveCity_Movement_ScientistMWalkToPlayerZ6
     WaitMovement
     Return
 
-_00C4:
-    ApplyMovement 1, _0190
+Route218GateToCanalaveCity_ScientistMWalkToPlayerZ7:
+    ApplyMovement LOCALID_SCIENTIST_M, Route218GateToCanalaveCity_Movement_ScientistMWalkToPlayerZ7
     WaitMovement
     Return
 
-_00D0:
-    ApplyMovement 1, _019C
+Route218GateToCanalaveCity_ScientistMWalkToPlayerZ8:
+    ApplyMovement LOCALID_SCIENTIST_M, Route218GateToCanalaveCity_Movement_ScientistMWalkToPlayerZ8
     WaitMovement
     Return
 
-_00DC:
-    ApplyMovement 1, _01B0
+Route218GateToCanalaveCity_ScientistMWalkToPlayerZ9:
+    ApplyMovement LOCALID_SCIENTIST_M, Route218GateToCanalaveCity_Movement_ScientistMWalkToPlayerZ9
     WaitMovement
     Return
 
-_00E8:
-    ScrCmd_069 0x8005, 0x8006
-    GoToIfEq 0x8006, 5, _012A
-    GoToIfEq 0x8006, 6, _0136
-    GoToIfEq 0x8006, 7, _0142
-    GoToIfEq 0x8006, 8, _014E
-    GoTo _015A
+Route218GateToCanalaveCity_ScientistMLeave:
+    GetPlayerMapPos VAR_0x8005, VAR_0x8006
+    GoToIfEq VAR_0x8006, 5, Route218GateToCanalaveCity_ScientistMLeaveZ5
+    GoToIfEq VAR_0x8006, 6, Route218GateToCanalaveCity_ScientistMLeaveZ6
+    GoToIfEq VAR_0x8006, 7, Route218GateToCanalaveCity_ScientistMLeaveZ7
+    GoToIfEq VAR_0x8006, 8, Route218GateToCanalaveCity_ScientistMLeaveZ8
+    GoTo Route218GateToCanalaveCity_ScientistMLeaveZ9
     End
 
-_012A:
-    ApplyMovement 1, _01C4
+Route218GateToCanalaveCity_ScientistMLeaveZ5:
+    ApplyMovement LOCALID_SCIENTIST_M, Route218GateToCanalaveCity_Movement_ScientistMLeaveZ5
     WaitMovement
     Return
 
-_0136:
-    ApplyMovement 1, _01D0
+Route218GateToCanalaveCity_ScientistMLeaveZ6:
+    ApplyMovement LOCALID_SCIENTIST_M, Route218GateToCanalaveCity_Movement_ScientistMLeaveZ6
     WaitMovement
     Return
 
-_0142:
-    ApplyMovement 1, _01DC
+Route218GateToCanalaveCity_ScientistMLeaveZ7:
+    ApplyMovement LOCALID_SCIENTIST_M, Route218GateToCanalaveCity_Movement_ScientistMLeaveZ7
     WaitMovement
     Return
 
-_014E:
-    ApplyMovement 1, _01F0
+Route218GateToCanalaveCity_ScientistMLeaveZ8:
+    ApplyMovement LOCALID_SCIENTIST_M, Route218GateToCanalaveCity_Movement_ScientistMLeaveZ8
     WaitMovement
     Return
 
-_015A:
-    ApplyMovement 1, _01FC
+Route218GateToCanalaveCity_ScientistMLeaveZ9:
+    ApplyMovement LOCALID_SCIENTIST_M, Route218GateToCanalaveCity_Movement_ScientistMLeaveZ9
     WaitMovement
     Return
 
     .balign 4, 0
-_0168:
-    MoveAction_04B
-    MoveAction_00F
-    MoveAction_00C 2
-    MoveAction_023
+Route218GateToCanalaveCity_Movement_ScientistMWalkToPlayerZ5:
+    EmoteExclamationMark
+    WalkNormalEast
+    WalkNormalNorth 2
+    WalkOnSpotNormalEast
     EndMovement
 
     .balign 4, 0
-_017C:
-    MoveAction_04B
-    MoveAction_00F
-    MoveAction_00C
-    MoveAction_023
+Route218GateToCanalaveCity_Movement_ScientistMWalkToPlayerZ6:
+    EmoteExclamationMark
+    WalkNormalEast
+    WalkNormalNorth
+    WalkOnSpotNormalEast
     EndMovement
 
     .balign 4, 0
-_0190:
-    MoveAction_04B
-    MoveAction_00F
+Route218GateToCanalaveCity_Movement_ScientistMWalkToPlayerZ7:
+    EmoteExclamationMark
+    WalkNormalEast
     EndMovement
 
     .balign 4, 0
-_019C:
-    MoveAction_04B
-    MoveAction_00F
-    MoveAction_00D
-    MoveAction_023
+Route218GateToCanalaveCity_Movement_ScientistMWalkToPlayerZ8:
+    EmoteExclamationMark
+    WalkNormalEast
+    WalkNormalSouth
+    WalkOnSpotNormalEast
     EndMovement
 
     .balign 4, 0
-_01B0:
-    MoveAction_04B
-    MoveAction_00F
-    MoveAction_00D 2
-    MoveAction_023
+Route218GateToCanalaveCity_Movement_ScientistMWalkToPlayerZ9:
+    EmoteExclamationMark
+    WalkNormalEast
+    WalkNormalSouth 2
+    WalkOnSpotNormalEast
     EndMovement
 
     .balign 4, 0
-_01C4:
-    MoveAction_00D 2
-    MoveAction_00F 4
+Route218GateToCanalaveCity_Movement_ScientistMLeaveZ5:
+    WalkNormalSouth 2
+    WalkNormalEast 4
     EndMovement
 
     .balign 4, 0
-_01D0:
-    MoveAction_00D
-    MoveAction_00F 4
+Route218GateToCanalaveCity_Movement_ScientistMLeaveZ6:
+    WalkNormalSouth
+    WalkNormalEast 4
     EndMovement
 
     .balign 4, 0
-_01DC:
-    MoveAction_00C
-    MoveAction_00F 3
-    MoveAction_00D
-    MoveAction_00F
+Route218GateToCanalaveCity_Movement_ScientistMLeaveZ7:
+    WalkNormalNorth
+    WalkNormalEast 3
+    WalkNormalSouth
+    WalkNormalEast
     EndMovement
 
     .balign 4, 0
-_01F0:
-    MoveAction_00C
-    MoveAction_00F 4
+Route218GateToCanalaveCity_Movement_ScientistMLeaveZ8:
+    WalkNormalNorth
+    WalkNormalEast 4
     EndMovement
 
     .balign 4, 0
-_01FC:
-    MoveAction_00C 2
-    MoveAction_00F 4
+Route218GateToCanalaveCity_Movement_ScientistMLeaveZ9:
+    WalkNormalNorth 2
+    WalkNormalEast 4
     EndMovement
 
-_0208:
-    PlayFanfare SEQ_SE_CONFIRM
-    LockAll
-    FacePlayer
-    Message 0
-    WaitABXPadPress
-    CloseMessage
-    ReleaseAll
+Route218GateToCanalaveCity_Policeman:
+    NPCMessage Route218GateToCanalaveCity_Text_ISureAmThirsty
     End
 
-    .byte 0
+    .balign 4, 0

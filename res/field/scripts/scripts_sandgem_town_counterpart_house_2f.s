@@ -1,19 +1,18 @@
-    .include "macros/scrcmd.inc"
+#include "macros/scrcmd.inc"
+#include "res/text/bank/sandgem_town_counterpart_house_2f.h"
 
-    .data
 
-    ScriptEntry _0006
-    .short 0xFD13
+    ScriptEntry SandgemTownCounterpartHouse2F_PC
+    ScriptEntryEnd
 
-_0006:
-    PlayFanfare SEQ_SE_CONFIRM
+SandgemTownCounterpartHouse2F_PC:
+    PlaySE SE_CONFIRM_sseq_3
     LockAll
-    ScrCmd_0CD 0
-    Message 0
-    WaitABXPadPress
+    BufferPlayerName 0
+    Message SandgemTownCounterpartHouse2F_Text_PlayerCheckedPCScreen
+    WaitButton
     CloseMessage
     ReleaseAll
     End
 
-    .byte 0
-    .byte 0
+    .balign 4, 0

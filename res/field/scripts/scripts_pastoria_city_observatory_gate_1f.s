@@ -1,282 +1,267 @@
-    .include "macros/scrcmd.inc"
+#include "macros/scrcmd.inc"
+#include "res/text/bank/pastoria_city_observatory_gate_1f.h"
+#include "res/field/events/events_pastoria_city_observatory_gate_1f.h"
 
-    .data
 
-    ScriptEntry _0020
-    ScriptEntry _0022
-    ScriptEntry _01CC
-    ScriptEntry _0298
-    ScriptEntry _02BF
-    ScriptEntry _0300
-    ScriptEntry _001E
-    .short 0xFD13
+    ScriptEntry PastoriaCityObservatoryGate1F_CashierM
+    ScriptEntry PastoriaCityObservatoryGate1F_CoordEvent_TryStartSafariGame
+    ScriptEntry PastoriaCityObservatoryGate1F_OnFrame_TryExitEarly
+    ScriptEntry PastoriaCityObservatoryGate1F_OnFrame_GameEnded
+    ScriptEntry PastoriaCityObservatoryGate1F_CashierF
+    ScriptEntry PastoriaCityObservatoryGate1F_Cowgirl
+    ScriptEntry PastoriaCityObservatoryGate1F_OnTransition
+    ScriptEntryEnd
 
-_001E:
+PastoriaCityObservatoryGate1F_OnTransition:
     End
 
-_0020:
+PastoriaCityObservatoryGate1F_CashierM:
     End
 
-_0022:
+PastoriaCityObservatoryGate1F_CoordEvent_TryStartSafariGame:
     LockAll
-    ApplyMovement 0xFF, _0194
+    ApplyMovement LOCALID_PLAYER, PastoriaCityObservatoryGate1F_Movement_PlayerWalkOnSpotWest
     WaitMovement
-    ScrCmd_069 0x4000, 0x4001
-    CallIfEq 0x4000, 5, _017D
-    ScrCmd_072 20, 2
-    Message 0
-    ScrCmd_03E 0x800C
-    GoToIfEq 0x800C, 0, _006A
-    GoToIfEq 0x800C, 1, _0156
+    GetPlayerMapPos VAR_MAP_LOCAL_0x00, VAR_MAP_LOCAL_0x01
+    CallIfEq VAR_MAP_LOCAL_0x00, 5, PastoriaCityObservatoryGate1F_PlayerWalkWest
+    ShowMoney 20, 2
+    Message PastoriaCityObservatoryGate1F_Text_AskPlaySafariGame
+    ShowYesNoMenu VAR_RESULT
+    GoToIfEq VAR_RESULT, MENU_YES, PastoriaCityObservatoryGate1F_CheckRoomForPokemon
+    GoToIfEq VAR_RESULT, MENU_NO, PastoriaCityObservatoryGate1F_DontPlaySafariGame
     End
 
-_006A:
-    ScrCmd_252 0x800C
-    GoToIfNe 0x800C, 0, _008C
-    ScrCmd_177 0x800C
-    GoToIfEq 0x800C, 6, _0168
-_008C:
-    Message 1
-    ScrCmd_071 0x800C, 0x1F4
-    GoToIfEq 0x800C, 0, _0141
-    PlayFanfare SEQ_SE_DP_REGI
-    ScrCmd_070 0x1F4
-    ScrCmd_074
-    Message 2
-    ScrCmd_0CD 0
-    Message 3
-    Message 4
+PastoriaCityObservatoryGate1F_CheckRoomForPokemon:
+    GetPCBoxesFreeSlotCount VAR_RESULT
+    GoToIfNe VAR_RESULT, 0, PastoriaCityObservatoryGate1F_TryStartSafariGame
+    GetPartyCount VAR_RESULT
+    GoToIfEq VAR_RESULT, MAX_PARTY_SIZE, PastoriaCityObservatoryGate1F_NoRoomForPokemon
+PastoriaCityObservatoryGate1F_TryStartSafariGame:
+    Message PastoriaCityObservatoryGate1F_Text_ThatWillBe500
+    GoToIfNotEnoughMoney 500, PastoriaCityObservatoryGate1F_NotEnoughMoney
+    PlaySE SEQ_SE_DP_REGI_sseq
+    RemoveMoney 500
+    UpdateMoneyDisplay
+    Message PastoriaCityObservatoryGate1F_Text_HereAreSafariBalls
+    BufferPlayerName 0
+    Message PastoriaCityObservatoryGate1F_Text_PlayerReceived30SafariBalls
+    Message PastoriaCityObservatoryGate1F_Text_OffYouGo
     CloseMessage
-    ScrCmd_073
-    ScrCmd_069 0x8004, 0x8005
-    GoToIfEq 0x8004, 4, _00E2
-    GoToIfEq 0x8004, 5, _00F2
+    HideMoney
+    GetPlayerMapPos VAR_0x8004, VAR_0x8005
+    GoToIfEq VAR_0x8004, 4, PastoriaCityObservatoryGate1F_EnterGreatMarshX4
+    GoToIfEq VAR_0x8004, 5, PastoriaCityObservatoryGate1F_EnterGreatMarshX5
     End
 
-_00E2:
-    ApplyMovement 0xFF, _019C
+PastoriaCityObservatoryGate1F_EnterGreatMarshX4:
+    ApplyMovement LOCALID_PLAYER, PastoriaCityObservatoryGate1F_Movement_PlayerEnterGreatMarshX4
     WaitMovement
-    GoTo _0102
+    GoTo PastoriaCityObservatoryGate1F_StartSafariGame
 
-_00F2:
-    ApplyMovement 0xFF, _01B4
+PastoriaCityObservatoryGate1F_EnterGreatMarshX5:
+    ApplyMovement LOCALID_PLAYER, PastoriaCityObservatoryGate1F_Movement_PlayerEnterGreatMarshX5
     WaitMovement
-    GoTo _0102
+    GoTo PastoriaCityObservatoryGate1F_StartSafariGame
 
-_0102:
-    SetVar 0x40DA, 1
-    ScrCmd_202 0
-    ScrCmd_11B 125, 2, 5, 2, 1
-    PlayFanfare SEQ_SE_DP_KAIDAN2
-    FadeScreen 6, 1, 0, 0
+PastoriaCityObservatoryGate1F_StartSafariGame:
+    SetVar VAR_SAFARI_GAME_STATE, 1
+    StartSafariGame
+    SetSpecialLocation MAP_HEADER_PASTORIA_CITY_OBSERVATORY_GATE_1F, 2, 5, 2, DIR_SOUTH
+    PlaySE SEQ_SE_DP_KAIDAN2_sseq
+    FadeScreenOut
     WaitFadeScreen
-    ScrCmd_0BE 0x1FD, 0, 68, 116, 0
-    FadeScreen 6, 1, 1, 0
+    Warp MAP_HEADER_GREAT_MARSH_6, 68, 116, DIR_NORTH
+    FadeScreenIn
     WaitFadeScreen
     End
 
-_0141:
-    Message 6
+PastoriaCityObservatoryGate1F_NotEnoughMoney:
+    Message PastoriaCityObservatoryGate1F_Text_NotEnoughMoney
     CloseMessage
-    ScrCmd_073
-    ApplyMovement 0xFF, _01C4
+    HideMoney
+    ApplyMovement LOCALID_PLAYER, PastoriaCityObservatoryGate1F_Movement_PlayerWalkSouth
     WaitMovement
     ReleaseAll
     End
 
-_0156:
+PastoriaCityObservatoryGate1F_DontPlaySafariGame:
     CloseMessage
-    ScrCmd_073
-    ApplyMovement 0xFF, _01C4
+    HideMoney
+    ApplyMovement LOCALID_PLAYER, PastoriaCityObservatoryGate1F_Movement_PlayerWalkSouth
     WaitMovement
     ReleaseAll
     End
 
-_0168:
-    ScrCmd_073
-    Message 7
+PastoriaCityObservatoryGate1F_NoRoomForPokemon:
+    HideMoney
+    Message PastoriaCityObservatoryGate1F_Text_NoRoomForPokemon
     CloseMessage
-    ApplyMovement 0xFF, _01C4
+    ApplyMovement LOCALID_PLAYER, PastoriaCityObservatoryGate1F_Movement_PlayerWalkSouth
     WaitMovement
     ReleaseAll
     End
 
-_017D:
-    ApplyMovement 0xFF, _018C
+PastoriaCityObservatoryGate1F_PlayerWalkWest:
+    ApplyMovement LOCALID_PLAYER, PastoriaCityObservatoryGate1F_Movement_PlayerWalkWest
     WaitMovement
     Return
 
     .balign 4, 0
-_018C:
-    MoveAction_00E
+PastoriaCityObservatoryGate1F_Movement_PlayerWalkWest:
+    WalkNormalWest
     EndMovement
 
     .balign 4, 0
-_0194:
-    MoveAction_022
+PastoriaCityObservatoryGate1F_Movement_PlayerWalkOnSpotWest:
+    WalkOnSpotNormalWest
     EndMovement
 
     .balign 4, 0
-_019C:
-    MoveAction_020
-    MoveAction_00C 3
-    MoveAction_00F
-    MoveAction_00C
-    MoveAction_045
+PastoriaCityObservatoryGate1F_Movement_PlayerEnterGreatMarshX4:
+    WalkOnSpotNormalNorth
+    WalkNormalNorth 3
+    WalkNormalEast
+    WalkNormalNorth
+    SetInvisible
     EndMovement
 
     .balign 4, 0
-_01B4:
-    MoveAction_020
-    MoveAction_00C 4
-    MoveAction_045
+PastoriaCityObservatoryGate1F_Movement_PlayerEnterGreatMarshX5:
+    WalkOnSpotNormalNorth
+    WalkNormalNorth 4
+    SetInvisible
     EndMovement
 
     .balign 4, 0
-_01C4:
-    MoveAction_00D
+PastoriaCityObservatoryGate1F_Movement_PlayerWalkSouth:
+    WalkNormalSouth
     EndMovement
 
-_01CC:
+PastoriaCityObservatoryGate1F_OnFrame_TryExitEarly:
     LockAll
-    Message 9
-    ScrCmd_03E 0x800C
-    GoToIfEq 0x800C, 0, _01F1
-    GoToIfEq 0x800C, 1, _024E
+    Message PastoriaCityObservatoryGate1F_Text_AskExitGreatMarsh
+    ShowYesNoMenu VAR_RESULT
+    GoToIfEq VAR_RESULT, MENU_YES, PastoriaCityObservatoryGate1F_ExitGreatMarsh
+    GoToIfEq VAR_RESULT, MENU_NO, PastoriaCityObservatoryGate1F_ReturnToGreatMarsh
     End
 
-_01F1:
-    Message 10
+PastoriaCityObservatoryGate1F_ExitGreatMarsh:
+    Message PastoriaCityObservatoryGate1F_Text_ThanksForPlaying
     CloseMessage
-    ApplyMovement 0xFF, _0280
+    ApplyMovement LOCALID_PLAYER, PastoriaCityObservatoryGate1F_Movement_PlayerExitGreatMarsh
     WaitMovement
-    SetVar 0x40DA, 0
-    ScrCmd_202 1
-    ScrCmd_31B 0x4002
-    GoToIfGe 0x4002, 5, _021E
+    SetVar VAR_SAFARI_GAME_STATE, 0
+    EndSafariGame
+    GetCurrentSafariGameCaughtNum VAR_MAP_LOCAL_0x02
+    GoToIfGe VAR_MAP_LOCAL_0x02, 5, PastoriaCityObservatoryGate1F_TryGiveMatchupchecker
     ReleaseAll
     End
 
-_021E:
-    GoToIfSet 163, _024A
-    ApplyMovement 2, _0334
+PastoriaCityObservatoryGate1F_TryGiveMatchupchecker:
+    GoToIfSet FLAG_RECEIVED_PASTORIA_CITY_OBSERVATORY_GATE_1F_MATCHUPCHECKER, PastoriaCityObservatoryGate1F_DontGiveMatchupChecker
+    ApplyMovement LOCALID_COWGIRL, PastoriaCityObservatoryGate1F_Movement_CowgirlWalkToPlayer
     WaitMovement
-    Message 18
-    SetVar 0x8004, 22
-    CallCommonScript 0x7D9
-    SetFlag 163
+    Message PastoriaCityObservatoryGate1F_Text_HereAppMatchupChecker
+    SetVar VAR_0x8004, POKETCH_APPID_MATCHUPCHECKER
+    Common_GivePoketchApp
+    SetFlag FLAG_RECEIVED_PASTORIA_CITY_OBSERVATORY_GATE_1F_MATCHUPCHECKER
     CloseMessage
     ReleaseAll
     End
 
-_024A:
+PastoriaCityObservatoryGate1F_DontGiveMatchupChecker:
     ReleaseAll
     End
 
-_024E:
+PastoriaCityObservatoryGate1F_ReturnToGreatMarsh:
     CloseMessage
-    ApplyMovement 0xFF, _0288
+    ApplyMovement LOCALID_PLAYER, PastoriaCityObservatoryGate1F_Movement_PlayerReturnToGreatMarsh
     WaitMovement
-    FadeScreen 6, 1, 0, 0
+    FadeScreenOut
     WaitFadeScreen
-    ScrCmd_0BE 0x1FD, 0, 68, 116, 0
-    FadeScreen 6, 1, 1, 0
+    Warp MAP_HEADER_GREAT_MARSH_6, 68, 116, DIR_NORTH
+    FadeScreenIn
     WaitFadeScreen
     End
 
     .balign 4, 0
-_0280:
-    MoveAction_00D 5
+PastoriaCityObservatoryGate1F_Movement_PlayerExitGreatMarsh:
+    WalkNormalSouth 5
     EndMovement
 
     .balign 4, 0
-_0288:
-    MoveAction_000
-    MoveAction_00C
-    MoveAction_045
+PastoriaCityObservatoryGate1F_Movement_PlayerReturnToGreatMarsh:
+    FaceNorth
+    WalkNormalNorth
+    SetInvisible
     EndMovement
 
-_0298:
+PastoriaCityObservatoryGate1F_OnFrame_GameEnded:
     LockAll
-    ApplyMovement 0xFF, _0280
+    ApplyMovement LOCALID_PLAYER, PastoriaCityObservatoryGate1F_Movement_PlayerExitGreatMarsh
     WaitMovement
-    SetVar 0x40DA, 0
-    ScrCmd_31B 0x4002
-    GoToIfGe 0x4002, 5, _021E
+    SetVar VAR_SAFARI_GAME_STATE, 0
+    GetCurrentSafariGameCaughtNum VAR_MAP_LOCAL_0x02
+    GoToIfGe VAR_MAP_LOCAL_0x02, 5, PastoriaCityObservatoryGate1F_TryGiveMatchupchecker
     ReleaseAll
     End
 
-_02BF:
-    PlayFanfare SEQ_SE_CONFIRM
+PastoriaCityObservatoryGate1F_CashierF:
+    PlaySE SE_CONFIRM_sseq_3
     LockAll
     FacePlayer
-    Message 12
-    ScrCmd_03E 0x800C
-    GoToIfEq 0x800C, 0, _02EA
-    GoToIfEq 0x800C, 1, _02F5
+    Message PastoriaCityObservatoryGate1F_Text_IsThisFirstSafariGame
+    ShowYesNoMenu VAR_RESULT
+    GoToIfEq VAR_RESULT, MENU_YES, PastoriaCityObservatoryGate1F_ExplainSafariGame
+    GoToIfEq VAR_RESULT, MENU_NO, PastoriaCityObservatoryGate1F_EnjoySafariGame
     End
 
-_02EA:
-    Message 13
-    WaitABXPadPress
+PastoriaCityObservatoryGate1F_ExplainSafariGame:
+    Message PastoriaCityObservatoryGate1F_Text_ExplainSafariGame
+    WaitButton
     CloseMessage
     ReleaseAll
     End
 
-_02F5:
-    Message 14
-    WaitABXPadPress
+PastoriaCityObservatoryGate1F_EnjoySafariGame:
+    Message PastoriaCityObservatoryGate1F_Text_EnjoySafariGame
+    WaitButton
     CloseMessage
     ReleaseAll
     End
 
-_0300:
-    PlayFanfare SEQ_SE_CONFIRM
+PastoriaCityObservatoryGate1F_Cowgirl:
+    PlaySE SE_CONFIRM_sseq_3
     LockAll
     FacePlayer
-    GoToIfSet 163, _031E
-    Message 15
-    GoTo _0329
+    GoToIfSet FLAG_RECEIVED_PASTORIA_CITY_OBSERVATORY_GATE_1F_MATCHUPCHECKER, PastoriaCityObservatoryGate1F_ExplainMatchupChecker
+    Message PastoriaCityObservatoryGate1F_Text_CaptureFivePokemon
+    GoTo PastoriaCityObservatoryGate1F_CowgirlEnd
     End
 
-_031E:
-    Message 19
-    GoTo _0329
+PastoriaCityObservatoryGate1F_ExplainMatchupChecker:
+    Message PastoriaCityObservatoryGate1F_Text_ExplainMatchupChecker
+    GoTo PastoriaCityObservatoryGate1F_CowgirlEnd
     End
 
-_0329:
-    WaitABXPadPress
+PastoriaCityObservatoryGate1F_CowgirlEnd:
+    WaitButton
     CloseMessage
     ReleaseAll
     End
 
     .balign 4, 0
-_0334:
-    MoveAction_00F 4
-    MoveAction_020
+PastoriaCityObservatoryGate1F_Movement_CowgirlWalkToPlayer:
+    WalkNormalEast 4
+    WalkOnSpotNormalNorth
     EndMovement
 
-    .byte 14
-    .byte 0
-    .byte 1
-    .byte 0
-    .byte 35
-    .byte 0
-    .byte 1
-    .byte 0
-    .byte 254
-    .byte 0
-    .byte 0
-    .byte 0
-    .byte 15
-    .byte 0
-    .byte 1
-    .byte 0
-    .byte 34
-    .byte 0
-    .byte 1
-    .byte 0
-    .byte 254
-    .byte 0
-    .byte 0
-    .byte 0
+PastoriaCityObservatoryGate1F_Movement_Unused:
+    WalkNormalWest
+    WalkOnSpotNormalEast
+    EndMovement
+
+PastoriaCityObservatoryGate1F_Movement_Unused2:
+    WalkNormalEast
+    WalkOnSpotNormalWest
+    EndMovement

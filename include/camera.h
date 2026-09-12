@@ -5,17 +5,26 @@
 
 #include "constants/heap.h"
 
-#include "overlay115/camera_angle.h"
-
 #define CAMERA_DELAY_NONE 0
 #define CAMERA_DELAY_X    1
 #define CAMERA_DELAY_Y    2
 #define CAMERA_DELAY_Z    4
 
+#define CAMERA_DEFAULT_NEAR_CLIP (FX32_ONE * 150)
+#define CAMERA_DEFAULT_FAR_CLIP  (FX32_ONE * 900)
+
 enum CameraProjection {
     CAMERA_PROJECTION_PERSPECTIVE = 0,
     CAMERA_PROJECTION_ORTHOGRAPHIC,
+    CAMERA_PROJECTION_COUNT
 };
+
+typedef struct CameraAngle {
+    u16 x;
+    u16 y;
+    u16 z;
+    u16 padding_06;
+} CameraAngle;
 
 typedef struct CameraLookAt {
     VecFx32 position;
@@ -60,9 +69,9 @@ typedef struct Camera {
 
 extern GXBufferMode gBufferMode;
 
-void Camera_InitHistory(int historySize, int delay, int delayMask, enum HeapId heapID, Camera *camera);
+void Camera_InitHistory(int historySize, int delay, int delayMask, enum HeapID heapID, Camera *camera);
 void Camera_DeleteHistory(Camera *camera);
-Camera *Camera_Alloc(const enum HeapId heapID);
+Camera *Camera_Alloc(const enum HeapID heapID);
 void Camera_Delete(Camera *camera);
 void Camera_Copy(Camera const *src, Camera *dst);
 void Camera_SetAsActive(Camera *camera);

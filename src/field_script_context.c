@@ -3,7 +3,7 @@
 #include <nitro.h>
 #include <string.h>
 
-enum {
+enum FieldScriptState {
     SCRIPT_STATE_STOPPED,
     SCRIPT_STATE_RUNNING,
     SCRIPT_STATE_WAITING,
@@ -27,7 +27,7 @@ void ScriptContext_Init(ScriptContext *ctx, const ScrCmdFunc *cmdTable, u32 cmdT
         ctx->stack[i] = NULL;
     }
 
-    ctx->taskManager = NULL;
+    ctx->task = NULL;
 }
 
 BOOL ScriptContext_Start(ScriptContext *ctx, const u8 *ptr)
@@ -50,9 +50,9 @@ void ScriptContext_Stop(ScriptContext *ctx)
     ctx->scriptPtr = NULL;
 }
 
-void ScriptContext_SetTaskManager(ScriptContext *ctx, TaskManager *taskManager)
+void ScriptContext_SetTask(ScriptContext *ctx, FieldTask *task)
 {
-    ctx->taskManager = taskManager;
+    ctx->task = task;
 }
 
 BOOL ScriptContext_Run(ScriptContext *ctx)
@@ -99,7 +99,7 @@ BOOL ScriptContext_Run(ScriptContext *ctx)
 
 static BOOL ScriptContext_Push(ScriptContext *ctx, const u8 *ptr)
 {
-    if (ctx->stackPointer + 1 >= (int)NELEMS(ctx->stack)) {
+    if (ctx->stackPointer + 1 >= SNELEMS(ctx->stack)) {
         return TRUE;
     }
 

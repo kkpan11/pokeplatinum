@@ -16,16 +16,16 @@
 #include "overlay070/struct_ov70_0225DEE8_decl.h"
 #include "overlay070/struct_ov70_02263344_decl.h"
 #include "overlay070/struct_ov70_02265F38.h"
-#include "overlay084/struct_ov84_02240FA8.h"
 
+#include "comm_manager.h"
 #include "communication_information.h"
 #include "communication_system.h"
-#include "core_sys.h"
 #include "enums.h"
-#include "strbuf.h"
-#include "unk_02005474.h"
+#include "list_menu.h"
+#include "sound_playback.h"
+#include "string_gf.h"
+#include "system.h"
 #include "unk_020363E8.h"
-#include "unk_020366A0.h"
 
 typedef struct {
     u8 unk_00;
@@ -49,7 +49,7 @@ typedef struct {
     s32 unk_0C;
     s32 unk_10;
     BOOL unk_14;
-    UnkStruct_ov84_02240FA8 unk_18;
+    ListMenuTemplate unk_18;
     u32 unk_38;
     UnkStruct_ov70_02266C68 unk_3C;
 } UnkStruct_ov70_02266AF0;
@@ -70,7 +70,7 @@ static void ov70_02266CFC(UnkStruct_ov70_02266C68 *param0, UnkStruct_ov70_0225DE
 static void ov70_02266CF0(UnkStruct_ov70_02266C68 *param0, UnkStruct_ov70_0225DEE8 *param1, BOOL param2);
 static void ov70_02266D08(UnkStruct_ov70_02266C68 *param0, UnkStruct_ov70_0225DEE8 *param1, BOOL param2, BOOL param3);
 
-static const UnkStruct_ov84_02240FA8 Unk_ov70_0226DC94 = {
+static const ListMenuTemplate Unk_ov70_0226DC94 = {
     NULL,
     NULL,
     NULL,
@@ -123,7 +123,7 @@ BOOL ov70_02265F38(UnkStruct_ov70_02263344 *param0, UnkStruct_ov70_0225DEE8 *par
             break;
         }
 
-        if (sub_020388AC() == 0) {
+        if (CommManager_GetWifiP2PConnectState() == 0) {
             v1->unk_00 = 4;
             ov70_02262E88(param0, 23);
             break;
@@ -151,7 +151,7 @@ BOOL ov70_02265F38(UnkStruct_ov70_02263344 *param0, UnkStruct_ov70_0225DEE8 *par
     case 20:
     case 21:
     case 22:
-        switch (sub_020380E4()) {
+        switch (CommManager_GetMatchmakingState()) {
         case 2:
         case 3:
         case 4:
@@ -185,7 +185,7 @@ BOOL ov70_02265F38(UnkStruct_ov70_02263344 *param0, UnkStruct_ov70_0225DEE8 *par
             break;
         }
 
-        Sound_PlayEffect(1501);
+        Sound_PlayEffect(SEQ_SE_DP_DECIDE_sseq);
         ov70_02262E8C(param0);
         break;
     case 2:
@@ -256,7 +256,7 @@ BOOL ov70_02265F38(UnkStruct_ov70_02263344 *param0, UnkStruct_ov70_0225DEE8 *par
         v0->unk_10 = (30 * 30);
 
         {
-            Strbuf *v5;
+            String *v5;
 
             if (v0->unk_00 > (11 * 30)) {
                 v5 = ov70_0225E20C(param1, 0, 10);
@@ -269,7 +269,7 @@ BOOL ov70_02265F38(UnkStruct_ov70_02263344 *param0, UnkStruct_ov70_0225DEE8 *par
             ov70_0225DFBC(param1);
         }
 
-        sub_0203883C(v1->unk_01);
+        CommManager_StartWifiP2P(v1->unk_01);
 
         if (ov66_02233374() == 1) {
             ov66_0222EA10(v2, v1->unk_02, 1, param2, 0, 0, 0, 0);
@@ -284,14 +284,14 @@ BOOL ov70_02265F38(UnkStruct_ov70_02263344 *param0, UnkStruct_ov70_0225DEE8 *par
         u32 v6;
         u32 v7;
 
-        v6 = sub_020388AC();
+        v6 = CommManager_GetWifiP2PConnectState();
         v7 = ov66_02233224(v1->unk_01);
         v0->unk_00 = ov66_022332F8(v1->unk_01);
 
         ov70_02266CCC(&v0->unk_3C, v0->unk_00);
 
         if ((v0->unk_00 <= (11 * 30)) && (v0->unk_14 == 0)) {
-            Strbuf *v8;
+            String *v8;
 
             ov70_0225DFCC(param1);
 
@@ -315,7 +315,7 @@ BOOL ov70_02265F38(UnkStruct_ov70_02263344 *param0, UnkStruct_ov70_0225DEE8 *par
 
             {
                 u32 v9;
-                Strbuf *v10;
+                String *v10;
 
                 if (v7 == 4) {
                     v9 = 16;
@@ -340,8 +340,8 @@ BOOL ov70_02265F38(UnkStruct_ov70_02263344 *param0, UnkStruct_ov70_0225DEE8 *par
         }
 
         if (v0->unk_14 == 0) {
-            if (gCoreSys.pressedKeys & PAD_BUTTON_B) {
-                Sound_PlayEffect(1500);
+            if (gSystem.pressedKeys & PAD_BUTTON_B) {
+                Sound_PlayEffect(SE_CONFIRM_sseq_3);
 
                 if (ov66_02233374() == 0) {
                     v1->unk_00 = 6;
@@ -383,7 +383,7 @@ BOOL ov70_02265F38(UnkStruct_ov70_02263344 *param0, UnkStruct_ov70_0225DEE8 *par
         if (v0->unk_00 == 0) {
             ov70_02262E88(param0, 8);
             {
-                Strbuf *v11;
+                String *v11;
 
                 ov70_0225DFCC(param1);
                 v11 = ov70_0225E20C(param1, 0, 18);
@@ -401,10 +401,10 @@ BOOL ov70_02265F38(UnkStruct_ov70_02263344 *param0, UnkStruct_ov70_0225DEE8 *par
         ov70_02266CCC(&v0->unk_3C, 0);
         ov70_02266CF0(&v0->unk_3C, param1, 0);
 
-        v12 = sub_020388AC();
+        v12 = CommManager_GetWifiP2PConnectState();
         v13 = ov66_02233224(v1->unk_01);
 
-        switch (sub_020380E4()) {
+        switch (CommManager_GetMatchmakingState()) {
         case 3:
         case 4:
             v1->unk_00 = 4;
@@ -438,7 +438,7 @@ BOOL ov70_02265F38(UnkStruct_ov70_02263344 *param0, UnkStruct_ov70_0225DEE8 *par
         ov70_02266CF0(&v0->unk_3C, param1, 0);
         ov66_0222E3E4(ov70_0225DEE8(param1), v1->unk_03);
 
-        sub_02038B40();
+        CommManager_SetState_WifiPlaza();
         CommInfo_Init(ov66_0222E0C4(ov70_0225DEE8(param1)), NULL);
         CommInfo_SetPersonalTrainerInfo(ov66_0222E918(v2));
         sub_0203632C(0);
@@ -448,7 +448,7 @@ BOOL ov70_02265F38(UnkStruct_ov70_02263344 *param0, UnkStruct_ov70_0225DEE8 *par
         ov70_02266CCC(&v0->unk_3C, 0);
         ov70_02266CF0(&v0->unk_3C, param1, 0);
 
-        CommInfo_SendBattleRegulation();
+        CommInfo_SendPlayerInfo();
         sub_02032E1C(CommSys_CurNetId());
 
         ov70_02262E88(param0, 11);
@@ -488,7 +488,7 @@ BOOL ov70_02265F38(UnkStruct_ov70_02263344 *param0, UnkStruct_ov70_0225DEE8 *par
         ov70_02266CCC(&v0->unk_3C, 0);
         ov70_02266CF0(&v0->unk_3C, param1, 0);
 
-        sub_020365F4();
+        CommTool_ClearReceivedTempDataAllPlayers();
 
         ov66_0222E238(v2);
         ov70_02266B18(v0, param0, 13, 14);
@@ -560,7 +560,7 @@ BOOL ov70_02265F38(UnkStruct_ov70_02263344 *param0, UnkStruct_ov70_0225DEE8 *par
         }
         break;
     case 15:
-        CommMan_SetErrorHandling(0, 1);
+        CommManager_SetErrorHandling(0, 1);
 
         if (ov66_02233374() == 1) {
             int v23;
@@ -575,7 +575,7 @@ BOOL ov70_02265F38(UnkStruct_ov70_02263344 *param0, UnkStruct_ov70_0225DEE8 *par
         ov70_02266B18(v0, param0, 28, 18);
         break;
     case 16: {
-        Strbuf *v25;
+        String *v25;
 
         v25 = ov70_0225E20C(param1, 0, 26);
         ov70_0225DF8C(param1, v25);
@@ -632,7 +632,7 @@ BOOL ov70_02265F38(UnkStruct_ov70_02263344 *param0, UnkStruct_ov70_0225DEE8 *par
         ov70_02266CFC(&v0->unk_3C, param1, 1);
 
         {
-            Strbuf *v29;
+            String *v29;
 
             if (v0->unk_00 > (11 * 30)) {
                 v29 = ov70_0225E20C(param1, 0, 10);
@@ -654,7 +654,7 @@ BOOL ov70_02265F38(UnkStruct_ov70_02263344 *param0, UnkStruct_ov70_0225DEE8 *par
 
         {
             u32 v31;
-            Strbuf *v32;
+            String *v32;
 
             if (v30 == 4) {
                 v31 = 16;
@@ -673,7 +673,7 @@ BOOL ov70_02265F38(UnkStruct_ov70_02263344 *param0, UnkStruct_ov70_0225DEE8 *par
         ov70_02266CFC(&v0->unk_3C, param1, 1);
     } break;
     case 22: {
-        Strbuf *v33;
+        String *v33;
 
         v33 = ov70_0225E20C(param1, 0, 18);
 
@@ -686,13 +686,13 @@ BOOL ov70_02265F38(UnkStruct_ov70_02263344 *param0, UnkStruct_ov70_0225DEE8 *par
     } break;
     case 23:
         CommInfo_Delete();
-        sub_0203888C();
+        CommManager_EndWifiP2P();
         ov70_02262E88(param0, 24);
         break;
     case 24: {
         u32 v34;
 
-        v34 = sub_020388AC();
+        v34 = CommManager_GetWifiP2PConnectState();
 
         if (v34 == 0) {
             ov70_02262E88(param0, 28);
@@ -742,17 +742,17 @@ BOOL ov70_022669B8(UnkStruct_ov70_02263344 *param0, UnkStruct_ov70_0225DEE8 *par
 {
     switch (ov70_02262E84(param0)) {
     case 0:
-        CommMan_SetErrorHandling(0, 0);
+        CommManager_SetErrorHandling(0, 0);
 
-        if (sub_020382C0() == 0) {
+        if (CommManager_IsLoginBattleMatchWifi() == 0) {
             CommInfo_Delete();
-            sub_0203888C();
+            CommManager_EndWifiP2P();
         }
 
         ov70_02262E88(param0, 1);
         break;
     case 1:
-        if (sub_020382C0() == 1) {
+        if (CommManager_IsLoginBattleMatchWifi() == 1) {
             return 1;
         }
         break;
@@ -763,13 +763,11 @@ BOOL ov70_022669B8(UnkStruct_ov70_02263344 *param0, UnkStruct_ov70_0225DEE8 *par
 
 BOOL ov70_022669FC(UnkStruct_ov70_02263344 *param0, UnkStruct_ov70_0225DEE8 *param1, u32 param2)
 {
-    UnkStruct_ov70_022669FC *v0;
-
-    v0 = ov70_02262E80(param0);
+    UnkStruct_ov70_022669FC *v0 = ov70_02262E80(param0);
 
     switch (ov70_02262E84(param0)) {
     case 0: {
-        Strbuf *v1;
+        String *v1;
         u32 v2;
         u32 v3;
         u32 v4;
@@ -791,7 +789,7 @@ BOOL ov70_022669FC(UnkStruct_ov70_02263344 *param0, UnkStruct_ov70_0225DEE8 *par
             v4 = UnkEnum_ov66_022324D0_02;
             break;
         default:
-            GF_ASSERT(0);
+            GF_ASSERT(FALSE);
             return 1;
         }
 
@@ -805,7 +803,7 @@ BOOL ov70_022669FC(UnkStruct_ov70_02263344 *param0, UnkStruct_ov70_0225DEE8 *par
         ov70_02262E8C(param0);
     } break;
     case 1:
-        if ((gCoreSys.pressedKeys & PAD_BUTTON_A) || (gCoreSys.pressedKeys & PAD_KEY_RIGHT) || (gCoreSys.pressedKeys & PAD_KEY_LEFT) || (gCoreSys.pressedKeys & PAD_KEY_DOWN)) {
+        if ((gSystem.pressedKeys & PAD_BUTTON_A) || (gSystem.pressedKeys & PAD_KEY_RIGHT) || (gSystem.pressedKeys & PAD_KEY_LEFT) || (gSystem.pressedKeys & PAD_KEY_DOWN)) {
             ov70_02266CB0(&v0->unk_00, param1);
             ov70_0225DFEC(param1);
 
@@ -832,9 +830,7 @@ BOOL ov70_022669FC(UnkStruct_ov70_02263344 *param0, UnkStruct_ov70_0225DEE8 *par
 
 static void ov70_02266AF0(UnkStruct_ov70_02266AF0 *param0, UnkStruct_ov70_02263344 *param1, UnkStruct_ov70_0225DEE8 *param2, u32 param3, u32 param4)
 {
-    Strbuf *v0;
-
-    v0 = ov70_0225E20C(param2, 0, param3);
+    String *v0 = ov70_0225E20C(param2, 0, param3);
     ov70_0225DF8C(param2, v0);
     param0->unk_04 = param4;
     ov70_02262E88(param1, 25);
@@ -853,7 +849,7 @@ static void ov70_02266B18(UnkStruct_ov70_02266AF0 *param0, UnkStruct_ov70_022633
 static void ov70_02266B30(UnkStruct_ov70_02266AF0 *param0, UnkStruct_ov70_0225DEE8 *param1, u32 param2, u32 param3)
 {
     int v0;
-    Strbuf *v1;
+    String *v1;
 
     ov70_0225E00C(param1, param2);
 
@@ -865,13 +861,13 @@ static void ov70_02266B30(UnkStruct_ov70_02266AF0 *param0, UnkStruct_ov70_0225DE
     }
 
     param0->unk_18 = Unk_ov70_0226DC94;
-    param0->unk_18.unk_10 = param0->unk_38;
+    param0->unk_18.count = param0->unk_38;
 
-    if (param0->unk_18.unk_12 > param0->unk_38) {
-        param0->unk_18.unk_12 = param0->unk_38;
+    if (param0->unk_18.maxDisplay > param0->unk_38) {
+        param0->unk_18.maxDisplay = param0->unk_38;
     }
 
-    param0->unk_18.unk_00 = ov70_0225E054(param1);
+    param0->unk_18.choices = ov70_0225E054(param1);
 }
 
 static void ov70_02266BA0(UnkStruct_ov70_02266AF0 *param0, UnkStruct_ov70_0225DEE8 *param1)
@@ -883,10 +879,8 @@ static BOOL ov70_02266BAC(UnkStruct_ov70_02266AF0 *param0, UnkStruct_ov70_0225DE
 {
     u32 v0;
     u32 v1;
-    UnkStruct_ov66_0222DFF8 *v2;
-
-    v2 = ov70_0225DEE8(param1);
-    v0 = sub_020388AC();
+    UnkStruct_ov66_0222DFF8 *v2 = ov70_0225DEE8(param1);
+    v0 = CommManager_GetWifiP2PConnectState();
     v1 = ov66_02233224(param2->unk_01);
 
     if (v0 == 0) {
@@ -956,9 +950,7 @@ static void ov70_02266CB0(UnkStruct_ov70_02266C68 *param0, UnkStruct_ov70_0225DE
 
 static void ov70_02266CCC(UnkStruct_ov70_02266C68 *param0, s32 param1)
 {
-    s16 v0;
-
-    v0 = param1 / 30;
+    s16 v0 = param1 / 30;
 
     if (v0 != param0->unk_04) {
         param0->unk_04 = v0;
@@ -978,7 +970,7 @@ static void ov70_02266CFC(UnkStruct_ov70_02266C68 *param0, UnkStruct_ov70_0225DE
 
 static void ov70_02266D08(UnkStruct_ov70_02266C68 *param0, UnkStruct_ov70_0225DEE8 *param1, BOOL param2, BOOL param3)
 {
-    Strbuf *v0;
+    String *v0;
     u32 v1;
     BOOL v2;
     BOOL v3;
@@ -999,7 +991,7 @@ static void ov70_02266D08(UnkStruct_ov70_02266C68 *param0, UnkStruct_ov70_0225DE
         v1 = UnkEnum_ov66_02232F38_02;
         break;
     default:
-        GF_ASSERT(0);
+        GF_ASSERT(FALSE);
         v1 = UnkEnum_ov66_02232F38_02;
         break;
     }

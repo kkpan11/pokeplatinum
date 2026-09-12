@@ -1,168 +1,159 @@
-    .include "macros/scrcmd.inc"
+#include "macros/scrcmd.inc"
+#include "res/text/bank/canalave_library_2f.h"
+#include "res/field/events/events_canalave_library_2f.h"
 
-    .data
 
-    ScriptEntry _0033
-    ScriptEntry _005C
-    ScriptEntry _0090
-    ScriptEntry _00A1
-    ScriptEntry _001A
-    ScriptEntry _00B2
-    .short 0xFD13
+    ScriptEntry CanalaveLibrary2F_SchoolKidM
+    ScriptEntry CanalaveLibrary2F_Bookshelves
+    ScriptEntry CanalaveLibrary2F_Shelves
+    ScriptEntry CanalaveLibrary2F_BgSign
+    ScriptEntry CanalaveLibrary2F_OnTransition
+    ScriptEntry CanalaveLibrary2F_OnFrame_Hiker
+    ScriptEntryEnd
 
-_001A:
-    SetFlag 0x2C9
-    CallIfEq 0x4056, 2, _002D
+CanalaveLibrary2F_OnTransition:
+    SetFlag FLAG_HIDE_CANALAVE_LIBRARY_2F_HIKER
+    CallIfEq VAR_ARCEUS_EVENT_STATE, 2, CanalaveLibrary2F_ShowHiker
     End
 
-_002D:
-    ClearFlag 0x2C9
+CanalaveLibrary2F_ShowHiker:
+    ClearFlag FLAG_HIDE_CANALAVE_LIBRARY_2F_HIKER
     Return
 
-_0033:
-    PlayFanfare SEQ_SE_CONFIRM
+CanalaveLibrary2F_SchoolKidM:
+    PlaySE SE_CONFIRM_sseq_3
     LockAll
     FacePlayer
-    GoToIfSet 168, _0051
-    Message 0
-    WaitABXPadPress
+    GoToIfSet FLAG_LAKE_VALOR_EXPLODED, CanalaveLibrary2F_TremorWasWicked
+    Message CanalaveLibrary2F_Text_ThirdFloorEasyRead
+    WaitButton
     CloseMessage
     ReleaseAll
     End
 
-_0051:
-    Message 1
-    WaitABXPadPress
+CanalaveLibrary2F_TremorWasWicked:
+    Message CanalaveLibrary2F_Text_TremorWasWicked
+    WaitButton
     CloseMessage
     ReleaseAll
     End
 
-_005C:
-    PlayFanfare SEQ_SE_CONFIRM
+CanalaveLibrary2F_Bookshelves:
+    PlaySE SE_CONFIRM_sseq_3
     LockAll
-    GoToIfGe 0x4056, 3, _0082
-    Message 2
-    GoTo _007A
+    GoToIfGe VAR_ARCEUS_EVENT_STATE, 3, CanalaveLibrary2F_SinnohAsToldOnPlates
+    Message CanalaveLibrary2F_Text_BookshelvesAreCrammed
+    GoTo CanalaveLibrary2F_BookshelvesEnd
     End
 
-_007A:
-    WaitABXPadPress
+CanalaveLibrary2F_BookshelvesEnd:
+    WaitButton
     CloseMessage
     ReleaseAll
     End
 
-_0082:
-    ScrCmd_0CD 0
-    Message 13
-    GoTo _007A
+CanalaveLibrary2F_SinnohAsToldOnPlates:
+    BufferPlayerName 0
+    Message CanalaveLibrary2F_Text_SinnohAsToldOnPlates
+    GoTo CanalaveLibrary2F_BookshelvesEnd
     End
 
-_0090:
-    PlayFanfare SEQ_SE_CONFIRM
+CanalaveLibrary2F_Shelves:
+    EventMessage CanalaveLibrary2F_Text_ShelvesLinedWithBooks
+    End
+
+CanalaveLibrary2F_BgSign:
+    EventMessage CanalaveLibrary2F_Text_RefrainFromBringingFood
+    End
+
+CanalaveLibrary2F_OnFrame_Hiker:
     LockAll
-    Message 3
-    WaitABXPadPress
-    CloseMessage
-    ReleaseAll
-    End
-
-_00A1:
-    PlayFanfare SEQ_SE_CONFIRM
-    LockAll
-    Message 4
-    WaitABXPadPress
-    CloseMessage
-    ReleaseAll
-    End
-
-_00B2:
-    LockAll
-    ApplyMovement 1, _019C
+    ApplyMovement LOCALID_HIKER, CanalaveLibrary2F_Movement_HikerNoticeWalkToPlayer
     WaitMovement
-    Message 5
-    ScrCmd_03E 0x800C
-    GoToIfEq 0x800C, 0, _0104
-    GoToIfEq 0x800C, 1, _00E1
+    Message CanalaveLibrary2F_Text_WantToHearAboutJourney
+    ShowYesNoMenu VAR_RESULT
+    GoToIfEq VAR_RESULT, MENU_YES, CanalaveLibrary2F_TheWayISeeIt
+    GoToIfEq VAR_RESULT, MENU_NO, CanalaveLibrary2F_LetsNotBeHasty
     End
 
-_00E1:
-    Message 6
-    ScrCmd_03E 0x800C
-    GoToIfEq 0x800C, 0, _0104
-    GoToIfEq 0x800C, 1, _00E1
+CanalaveLibrary2F_LetsNotBeHasty:
+    Message CanalaveLibrary2F_Text_LetsNotBeHasty
+    ShowYesNoMenu VAR_RESULT
+    GoToIfEq VAR_RESULT, MENU_YES, CanalaveLibrary2F_TheWayISeeIt
+    GoToIfEq VAR_RESULT, MENU_NO, CanalaveLibrary2F_LetsNotBeHasty
     End
 
-_0104:
-    Message 7
+CanalaveLibrary2F_TheWayISeeIt:
+    Message CanalaveLibrary2F_Text_TheWayISeeIt
     CloseMessage
-    ApplyMovement 1, _01B4
+    ApplyMovement LOCALID_HIKER, CanalaveLibrary2F_Movement_HikerLookAround
     WaitMovement
-    Message 8
-    ScrCmd_03E 0x800C
-    GoToIfEq 0x800C, 0, _0159
-    GoToIfEq 0x800C, 1, _0136
+    Message CanalaveLibrary2F_Text_WantToHearMore
+    ShowYesNoMenu VAR_RESULT
+    GoToIfEq VAR_RESULT, MENU_YES, CanalaveLibrary2F_ThereWerePlates
+    GoToIfEq VAR_RESULT, MENU_NO, CanalaveLibrary2F_DontTeaseMe
     End
 
-_0136:
-    Message 9
-    ScrCmd_03E 0x800C
-    GoToIfEq 0x800C, 0, _0159
-    GoToIfEq 0x800C, 1, _0136
+CanalaveLibrary2F_DontTeaseMe:
+    Message CanalaveLibrary2F_Text_DontTeaseMe
+    ShowYesNoMenu VAR_RESULT
+    GoToIfEq VAR_RESULT, MENU_YES, CanalaveLibrary2F_ThereWerePlates
+    GoToIfEq VAR_RESULT, MENU_NO, CanalaveLibrary2F_DontTeaseMe
     End
 
-_0159:
-    Message 10
+CanalaveLibrary2F_ThereWerePlates:
+    Message CanalaveLibrary2F_Text_ThereWerePlates
     CloseMessage
-    ApplyMovement 1, _01C4
+    ApplyMovement LOCALID_HIKER, CanalaveLibrary2F_Movement_HikerWalkOnSpotWest
     WaitMovement
-    Message 11
+    Message CanalaveLibrary2F_Text_WroteDownEngravings
     CloseMessage
-    ApplyMovement 1, _01CC
+    ApplyMovement LOCALID_HIKER, CanalaveLibrary2F_Movement_HikerWalkOnSpotEast
     WaitMovement
-    Message 12
+    Message CanalaveLibrary2F_Text_GladICameToSinnoh
     CloseMessage
-    ApplyMovement 0xFF, _01E0
-    ApplyMovement 1, _01D4
+    ApplyMovement LOCALID_PLAYER, CanalaveLibrary2F_Movement_PlayerMoveAside
+    ApplyMovement LOCALID_HIKER, CanalaveLibrary2F_Movement_HikerLeave
     WaitMovement
-    ScrCmd_065 1
-    SetVar 0x4056, 3
+    RemoveObject LOCALID_HIKER
+    SetVar VAR_ARCEUS_EVENT_STATE, 3
     ReleaseAll
     End
 
     .balign 4, 0
-_019C:
-    MoveAction_023
-    MoveAction_04B
-    MoveAction_00F
-    MoveAction_00C
-    MoveAction_023
+CanalaveLibrary2F_Movement_HikerNoticeWalkToPlayer:
+    WalkOnSpotNormalEast
+    EmoteExclamationMark
+    WalkNormalEast
+    WalkNormalNorth
+    WalkOnSpotNormalEast
     EndMovement
 
     .balign 4, 0
-_01B4:
-    MoveAction_021
-    MoveAction_020
-    MoveAction_023
+CanalaveLibrary2F_Movement_HikerLookAround:
+    WalkOnSpotNormalSouth
+    WalkOnSpotNormalNorth
+    WalkOnSpotNormalEast
     EndMovement
 
     .balign 4, 0
-_01C4:
-    MoveAction_022
+CanalaveLibrary2F_Movement_HikerWalkOnSpotWest:
+    WalkOnSpotNormalWest
     EndMovement
 
     .balign 4, 0
-_01CC:
-    MoveAction_023
+CanalaveLibrary2F_Movement_HikerWalkOnSpotEast:
+    WalkOnSpotNormalEast
     EndMovement
 
     .balign 4, 0
-_01D4:
-    MoveAction_03F 2
-    MoveAction_00F 2
+CanalaveLibrary2F_Movement_HikerLeave:
+    Delay8 2
+    WalkNormalEast 2
     EndMovement
 
     .balign 4, 0
-_01E0:
-    MoveAction_00D
-    MoveAction_020
+CanalaveLibrary2F_Movement_PlayerMoveAside:
+    WalkNormalSouth
+    WalkOnSpotNormalNorth
     EndMovement

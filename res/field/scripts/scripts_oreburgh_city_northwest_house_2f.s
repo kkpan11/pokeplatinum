@@ -1,75 +1,52 @@
-    .include "macros/scrcmd.inc"
+#include "macros/scrcmd.inc"
+#include "res/text/bank/oreburgh_city_northwest_house_2f.h"
 
-    .data
 
-    ScriptEntry _0012
-    ScriptEntry _0025
-    ScriptEntry _0038
-    ScriptEntry _0097
-    .short 0xFD13
+    ScriptEntry OreburghCityNorthwestHouse2F_Worker
+    ScriptEntry OreburghCityNorthwestHouse2F_SchoolKidF
+    ScriptEntry OreburghCityNorthwestHouse2F_Lass
+    ScriptEntry OreburghCityNorthwestHouse2F_Psyduck
+    ScriptEntryEnd
 
-_0012:
-    PlayFanfare SEQ_SE_CONFIRM
+OreburghCityNorthwestHouse2F_Worker:
+    NPCMessage OreburghCityNorthwestHouse2F_Text_GivingNicknamesIsTheWayToGo
+    End
+
+OreburghCityNorthwestHouse2F_SchoolKidF:
+    NPCMessage OreburghCityNorthwestHouse2F_Text_HeNamedPsyduckYellow
+    End
+
+OreburghCityNorthwestHouse2F_Lass:
+    PlaySE SE_CONFIRM_sseq_3
     LockAll
     FacePlayer
-    Message 0
-    WaitABXPadPress
+    GoToIfSet FLAG_RECEIVED_OREBURGH_CITY_NORTHWEST_HOUSE_2F_DUSK_BALL, OreburghCityNorthwestHouse2F_DuskBallIsDesignedForDarkness
+    BufferItemName 0, ITEM_DUSK_BALL
+    Message OreburghCityNorthwestHouse2F_Text_HereTakeThis
+    SetVar VAR_0x8004, ITEM_DUSK_BALL
+    SetVar VAR_0x8005, 1
+    GoToIfCannotFitItem VAR_0x8004, VAR_0x8005, VAR_RESULT, OreburghCityNorthwestHouse2F_BagIsFull
+    SetFlag FLAG_RECEIVED_OREBURGH_CITY_NORTHWEST_HOUSE_2F_DUSK_BALL
+    Common_GiveItemQuantityNoLineFeed
     CloseMessage
     ReleaseAll
     End
 
-_0025:
-    PlayFanfare SEQ_SE_CONFIRM
-    LockAll
-    FacePlayer
-    Message 1
-    WaitABXPadPress
+OreburghCityNorthwestHouse2F_BagIsFull:
+    Common_MessageBagIsFull
     CloseMessage
     ReleaseAll
     End
 
-_0038:
-    PlayFanfare SEQ_SE_CONFIRM
-    LockAll
-    FacePlayer
-    GoToIfSet 192, _008C
-    ScrCmd_0D1 0, 13
-    Message 2
-    SetVar 0x8004, 13
-    SetVar 0x8005, 1
-    ScrCmd_07D 0x8004, 0x8005, 0x800C
-    GoToIfEq 0x800C, 0, _0082
-    SetFlag 192
-    CallCommonScript 0x7E0
+OreburghCityNorthwestHouse2F_DuskBallIsDesignedForDarkness:
+    Message OreburghCityNorthwestHouse2F_Text_DuskBallIsDesignedForDarkness
+    WaitButton
     CloseMessage
     ReleaseAll
     End
 
-_0082:
-    CallCommonScript 0x7E1
-    CloseMessage
-    ReleaseAll
+OreburghCityNorthwestHouse2F_Psyduck:
+    PokemonCryAndMessage SPECIES_PSYDUCK, OreburghCityNorthwestHouse2F_Text_YellowPsyduckCry
     End
 
-_008C:
-    Message 3
-    WaitABXPadPress
-    CloseMessage
-    ReleaseAll
-    End
-
-_0097:
-    PlayFanfare SEQ_SE_CONFIRM
-    LockAll
-    FacePlayer
-    ScrCmd_04B 0x5DC
-    ScrCmd_04C 54, 0
-    Message 4
-    ScrCmd_04D
-    WaitABXPadPress
-    CloseMessage
-    ReleaseAll
-    End
-
-    .byte 0
-    .byte 0
+    .balign 4, 0

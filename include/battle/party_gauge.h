@@ -1,15 +1,23 @@
 #ifndef POKEPLATINUM_BATTLE_PARTY_GAUGE_H
 #define POKEPLATINUM_BATTLE_PARTY_GAUGE_H
 
-#include "struct_decls/struct_02002F38_decl.h"
-#include "struct_decls/struct_0200C6E4_decl.h"
-#include "struct_decls/struct_0200C704_decl.h"
+#include "constants/pokemon.h"
 
-#include "battle/struct_ov16_0226D160_decl.h"
+#include "palette.h"
+#include "sprite_system.h"
+#include "sys_task.h"
+
+enum PartyStockStatus {
+    STOCK_STATUS_NO_MON = 0,
+    STOCK_STATUS_MON_ALIVE,
+    STOCK_STATUS_MON_FAINTED,
+    STOCK_STATUS_HAS_STATUS_CONDITION,
+};
 
 enum PartyGaugeSide {
     PARTY_GAUGE_OURS,
     PARTY_GAUGE_THEIRS,
+    PARTY_GAUGE_COUNT
 };
 
 enum ShowPartyGaugeType {
@@ -33,6 +41,43 @@ enum HideArrowType {
     HIDE_ARROW_FADE_IN_PLACE,
 };
 
+typedef struct {
+    ManagedSprite *managedSprite;
+    SysTask *task;
+    enum HideArrowType hideType;
+    enum PartyGaugeSide side;
+    enum PartyGaugePosition position;
+    s32 x;
+    s16 alpha;
+    u8 state;
+    u8 delay;
+} PartyGaugeArrow;
+
+typedef struct {
+    ManagedSprite *managedSprite;
+    SysTask *task;
+    enum PartyGaugeSide side;
+    enum PartyGaugePosition position;
+    enum HidePartyGaugeType hideType;
+    s8 *pokeballCount;
+    s16 *arrowAlpha;
+    s32 xStart;
+    s32 xEnd;
+    s32 xOverflow;
+    s16 delay;
+    u16 sdatID;
+    u8 state;
+    u8 ballSlot;
+    u8 flipAnimation;
+    u8 startDelay;
+} PartyGaugePokeballs;
+
+typedef struct PartyGauge {
+    PartyGaugeArrow arrow;
+    PartyGaugePokeballs pokeballs[MAX_PARTY_SIZE];
+    s8 pokeballCount;
+} PartyGauge;
+
 /**
  * @brief Load the graphics resources needed for the Party Gauge into memory.
  *
@@ -40,14 +85,14 @@ enum HideArrowType {
  * @param gfxHandler
  * @param palette
  */
-void PartyGauge_LoadGraphics(SpriteRenderer *renderer, SpriteGfxHandler *gfxHandler, PaletteData *palette);
+void PartyGauge_LoadGraphics(SpriteSystem *spriteSys, SpriteManager *spriteMan, PaletteData *palette);
 
 /**
  * @brief Free the graphics resources needed for the Party Gauge from memory.
  *
  * @param gfxHandler
  */
-void PartyGauge_FreeGraphics(SpriteGfxHandler *gfxHandler);
+void PartyGauge_FreeGraphics(SpriteManager *spriteMan);
 
 /**
  * @brief Show the Party Gauge.
@@ -55,7 +100,7 @@ void PartyGauge_FreeGraphics(SpriteGfxHandler *gfxHandler);
  * @param ballStatus    The status of each battler's, represented as a Pokeball with a particular
  *                      masking filter. Plain Pokeballs represent healthy battlers, gray represent
  *                      fainted, darkened represent those afflicted with a status condition. For
- *                      possible values, see enum PartyGaugeBallStatus.
+ *                      possible values, see enum PartyStockStatus.
  *
  * @param side          The side of the battle for which the gauge should be displayed.
  *
@@ -69,7 +114,7 @@ void PartyGauge_FreeGraphics(SpriteGfxHandler *gfxHandler);
  * @return              Pointer to the constructed PartyGauge struct, for tracking its progress
  *                      and eventually hiding it.
  */
-PartyGauge *PartyGauge_Show(u8 ballStatus[], enum PartyGaugeSide side, enum ShowPartyGaugeType showType, enum PartyGaugePosition pos, SpriteRenderer *renderer, SpriteGfxHandler *gfxHandler);
+PartyGauge *PartyGauge_Show(u8 ballStatus[], enum PartyGaugeSide side, enum ShowPartyGaugeType showType, enum PartyGaugePosition pos, SpriteSystem *spriteSys, SpriteManager *spriteMan);
 
 /**
  * @brief Check if the Party Gauge has finished the inward scrolling animation.

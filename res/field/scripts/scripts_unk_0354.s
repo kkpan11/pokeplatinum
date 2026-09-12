@@ -1,15 +1,14 @@
-    .include "macros/scrcmd.inc"
+#include "macros/scrcmd.inc"
 
-    .data
 
-    ScriptEntry _0006
-    .short 0xFD13
+    ScriptEntry Unk354_Dummy1
+    ScriptEntryEnd
 
-_0006:
-    SetFlag 0x9E0
+Unk354_Dummy1:
+    SetFlag FLAG_FIRST_ARRIVAL_LAKE_VALOR_UNUSED
     End
 
-    .byte 2
-    .byte 0
-    .byte 0
-    .byte 0
+Unk354_Unused:
+    End
+
+    .balign 4, 0

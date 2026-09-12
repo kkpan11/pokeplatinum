@@ -1,605 +1,542 @@
-    .include "macros/scrcmd.inc"
+#include "macros/scrcmd.inc"
+#include "res/text/bank/battle_castle.h"
+#include "res/text/bank/menu_entries.h"
+#include "constants/battle_frontier.h"
+#include "constants/battle_castle_functions.h"
 
-    .data
 
-    ScriptEntry _0059
-    ScriptEntry _06A4
-    ScriptEntry _06DD
-    ScriptEntry _06EC
-    ScriptEntry _0760
-    ScriptEntry _0075
-    ScriptEntry _0788
-    ScriptEntry _079B
-    ScriptEntry _07AE
-    ScriptEntry _07C1
-    ScriptEntry _07D4
-    ScriptEntry _07E7
-    ScriptEntry _07FA
-    ScriptEntry _003A
-    .short 0xFD13
+    ScriptEntry BattleCastle_SingleAttendant
+    ScriptEntry BattleCastle_OnFrame_ResumeChallenge
+    ScriptEntry BattleCastle_OnFrame_DidntSaveBeforeQuit
+    ScriptEntry BattleCastle_OnFrame_ChallengeEndedCompletedRound
+    ScriptEntry BattleCastle_OnFrame_ChallengeEnded
+    ScriptEntry BattleCastle_MultiAttendant
+    ScriptEntry BattleCastle_Artist
+    ScriptEntry BattleCastle_Socialite
+    ScriptEntry BattleCastle_Waitress
+    ScriptEntry BattleCastle_Collector
+    ScriptEntry BattleCastle_Roughneck
+    ScriptEntry BattleCastle_Gentleman
+    ScriptEntry BattleCastle_BlackBelt
+    ScriptEntry BattleCastle_OnTransition
+    ScriptEntryEnd
 
-_003A:
-    ScrCmd_238 19, 0x4000
-    GoToIfEq 0x4000, 0, _0053
-    ClearFlag 0x2C3
+BattleCastle_OnTransition:
+    CheckTVInterviewEligible TV_PROGRAM_SEGMENT_BATTLE_FRONTIER_FRONTLINE_NEWS_MULTI, VAR_MAP_LOCAL_0x00
+    GoToIfEq VAR_MAP_LOCAL_0x00, FALSE, BattleCastle_HideBattleFrontierReporter
+    ClearFlag FLAG_HIDE_BATTLE_FRONTIER_REPORTER
     End
 
-_0053:
-    SetFlag 0x2C3
+BattleCastle_HideBattleFrontierReporter:
+    SetFlag FLAG_HIDE_BATTLE_FRONTIER_REPORTER
     End
 
-_0059:
-    PlayFanfare SEQ_SE_CONFIRM
+BattleCastle_SingleAttendant:
+    PlaySE SE_CONFIRM_sseq_3
     LockAll
     FacePlayer
-    SetVar 0x4003, 0
-    SetVar 0x4004, 0
-    GoTo _0091
+    SetVar VAR_MAP_LOCAL_0x03, 0
+    SetVar VAR_MAP_LOCAL_0x04, 0
+    GoTo BattleCastle_Attendant
     End
 
-_0075:
-    PlayFanfare SEQ_SE_CONFIRM
+BattleCastle_MultiAttendant:
+    PlaySE SE_CONFIRM_sseq_3
     LockAll
     FacePlayer
-    SetVar 0x4003, 0
-    SetVar 0x4004, 1
-    GoTo _0091
+    SetVar VAR_MAP_LOCAL_0x03, 0
+    SetVar VAR_MAP_LOCAL_0x04, 1
+    GoTo BattleCastle_Attendant
     End
 
-_0091:
-    ScrCmd_313 0
-    CallIfEq 0x4004, 0, _0664
-    CallIfEq 0x4004, 1, _0669
-    GoTo _00B7
+BattleCastle_Attendant:
+    RecordHeapMemory
+    CallIfEq VAR_MAP_LOCAL_0x04, 0, BattleCastle_WelcomeToSingleDoubleChallenge
+    CallIfEq VAR_MAP_LOCAL_0x04, 1, BattleCastle_WelcomeToMultiChallenge
+    GoTo BattleCastle_SelectChallenge
     End
 
-_00B7:
-    CallIfEq 0x4004, 0, _066E
-    CallIfEq 0x4004, 1, _0686
-    ScrCmd_042 41, 2
-    ScrCmd_042 42, 3
-    ScrCmd_043
-    GoToIfEq 0x800C, 0, _0152
-    GoToIfEq 0x800C, 1, _017F
-    GoToIfEq 0x800C, 2, _0117
-    GoToIfEq 0x800C, 4, _01AC
-    GoTo _0139
+BattleCastle_SelectChallenge:
+    CallIfEq VAR_MAP_LOCAL_0x04, 0, BattleCastle_InitMenuSingleDoubleChallenge
+    CallIfEq VAR_MAP_LOCAL_0x04, 1, BattleCastle_InitMenuMultiChallenge
+    AddMenuEntryImm BattleCastle_Text_Info, 2
+    AddMenuEntryImm BattleCastle_Text_Cancel, 3
+    ShowMenu
+    GoToIfEq VAR_RESULT, 0, BattleCastle_TryTakeSingleChallenge
+    GoToIfEq VAR_RESULT, 1, BattleCastle_TryTakeDoubleChallenge
+    GoToIfEq VAR_RESULT, 2, BattleCastle_ExplainChallenge
+    GoToIfEq VAR_RESULT, 4, BattleCastle_TryTakeMultiChallenge
+    GoTo BattleCastle_EndChallenge
     End
 
-_0117:
-    CallIfEq 0x4004, 0, _069A
-    CallIfEq 0x4004, 1, _069F
-    GoTo _00B7
+BattleCastle_ExplainChallenge:
+    CallIfEq VAR_MAP_LOCAL_0x04, 0, BattleCastle_ExplainSingleDoubleChallenge
+    CallIfEq VAR_MAP_LOCAL_0x04, 1, BattleCastle_ExplainMultiChallenge
+    GoTo BattleCastle_SelectChallenge
     End
 
-_0139:
-    GoTo _0141
+BattleCastle_EndChallenge:
+    GoTo BattleCastle_HopeToSeeYouAgain
     End
 
-_0141:
-    SetVar 0x40BC, 0
-    Message 6
-    WaitABXPadPress
+BattleCastle_HopeToSeeYouAgain:
+    SetVar VAR_BATTLE_CASTLE_LOBBY_LOAD_ACTION, 0
+    Message BattleCastle_Text_HopeToSeeYouAgain
+    WaitButton
     CloseMessage
     ReleaseAll
     End
 
-_0152:
-    SetVar 0x40BD, 0
-    ScrCmd_2D2 0, 3, 0x800C
-    ScrCmd_0D5 0, 3
-    ScrCmd_0D5 1, 3
-    GoToIfEq 0x800C, 0, _01D9
-    GoTo _01FF
+BattleCastle_TryTakeSingleChallenge:
+    SetVar VAR_BATTLE_CASTLE_CHALLENGE_TYPE, FRONTIER_CHALLENGE_SINGLE
+    CallBattleCastleLobbyFunction BC_LOBBY_FUNC_CHECK_PARTY_ELIGIBLE, 3, VAR_RESULT
+    BufferNumber 0, 3
+    BufferNumber 1, 3
+    GoToIfEq VAR_RESULT, 0, BattleCastle_NotEnoughEligiblePokemonSingleDouble
+    GoTo BattleCastle_SelectPokemon
     End
 
-_017F:
-    SetVar 0x40BD, 1
-    ScrCmd_2D2 0, 3, 0x800C
-    ScrCmd_0D5 0, 3
-    ScrCmd_0D5 1, 3
-    GoToIfEq 0x800C, 0, _01D9
-    GoTo _01FF
+BattleCastle_TryTakeDoubleChallenge:
+    SetVar VAR_BATTLE_CASTLE_CHALLENGE_TYPE, FRONTIER_CHALLENGE_DOUBLE
+    CallBattleCastleLobbyFunction BC_LOBBY_FUNC_CHECK_PARTY_ELIGIBLE, 3, VAR_RESULT
+    BufferNumber 0, 3
+    BufferNumber 1, 3
+    GoToIfEq VAR_RESULT, 0, BattleCastle_NotEnoughEligiblePokemonSingleDouble
+    GoTo BattleCastle_SelectPokemon
     End
 
-_01AC:
-    SetVar 0x40BD, 2
-    ScrCmd_2D2 0, 2, 0x800C
-    ScrCmd_0D5 0, 2
-    ScrCmd_0D5 1, 2
-    GoToIfEq 0x800C, 0, _01EC
-    GoTo _01FF
+BattleCastle_TryTakeMultiChallenge:
+    SetVar VAR_BATTLE_CASTLE_CHALLENGE_TYPE, FRONTIER_CHALLENGE_MULTI
+    CallBattleCastleLobbyFunction BC_LOBBY_FUNC_CHECK_PARTY_ELIGIBLE, 2, VAR_RESULT
+    BufferNumber 0, 2
+    BufferNumber 1, 2
+    GoToIfEq VAR_RESULT, 0, BattleCastle_NotEnoughEligiblePokemonMulti
+    GoTo BattleCastle_SelectPokemon
     End
 
-_01D9:
-    Message 8
-    ScrCmd_1FF 9, 3, 0, 0
-    GoTo _0139
+BattleCastle_NotEnoughEligiblePokemonSingleDouble:
+    Message BattleCastle_Text_NotEnoughEligiblePokemon
+    MessageSeenBanlistSpecies BattleCastle_Text_Banlist, 3
+    GoTo BattleCastle_EndChallenge
     End
 
-_01EC:
-    Message 8
-    ScrCmd_1FF 9, 2, 0, 0
-    GoTo _0139
+BattleCastle_NotEnoughEligiblePokemonMulti:
+    Message BattleCastle_Text_NotEnoughEligiblePokemon
+    MessageSeenBanlistSpecies BattleCastle_Text_Banlist, 2
+    GoTo BattleCastle_EndChallenge
     End
 
-_01FF:
-    Message 7
+BattleCastle_SelectPokemon:
+    Message BattleCastle_Text_SelectPokemonToEnter
     CloseMessage
-    FadeScreen 6, 1, 0, 0
+    FadeScreenOut
     WaitFadeScreen
-    ScrCmd_2D2 4, 0x40BD, 0x800C
-    ScrCmd_2D4 0x4002, 0x4005, 0x4006
-    ScrCmd_0A1
-    FadeScreen 6, 1, 1, 0
+    CallBattleCastleLobbyFunction BC_LOBBY_FUNC_SELECT_POKEMON, VAR_BATTLE_CASTLE_CHALLENGE_TYPE, VAR_RESULT
+    GetBattleCastleSelectedSlots VAR_MAP_LOCAL_0x02, VAR_MAP_LOCAL_0x05, VAR_MAP_LOCAL_0x06
+    ReturnToField
+    FadeScreenIn
     WaitFadeScreen
-    GoToIfEq 0x4002, 0xFF, _0139
-    ScrCmd_31E 0x4002, 0x800C
-    GoToIfEq 0x800C, 0xFF, _05D5
-    ScrCmd_31E 0x4005, 0x800C
-    GoToIfEq 0x800C, 0xFF, _05D5
-    ScrCmd_31E 0x4006, 0x800C
-    GoToIfEq 0x800C, 0xFF, _05D5
-    ScrCmd_198 0x4002, 0x4001
-    GoToIfEq 0x4001, 0, _0139
-    GoTo _028F
+    GoToIfEq VAR_MAP_LOCAL_0x02, 0xFF, BattleCastle_EndChallenge
+    TryRevertPokemonForm VAR_MAP_LOCAL_0x02, VAR_RESULT
+    GoToIfEq VAR_RESULT, 0xFF, BattleCastle_GriseousOrbCouldNotBeRemoved
+    TryRevertPokemonForm VAR_MAP_LOCAL_0x05, VAR_RESULT
+    GoToIfEq VAR_RESULT, 0xFF, BattleCastle_GriseousOrbCouldNotBeRemoved
+    TryRevertPokemonForm VAR_MAP_LOCAL_0x06, VAR_RESULT
+    GoToIfEq VAR_RESULT, 0xFF, BattleCastle_GriseousOrbCouldNotBeRemoved
+    GetPartyMonSpecies VAR_MAP_LOCAL_0x02, VAR_MAP_LOCAL_0x01
+    GoToIfEq VAR_MAP_LOCAL_0x01, 0, BattleCastle_EndChallenge
+    GoTo BattleCastle_TryStartChallenge
     End
 
-_028F:
-    GoTo _0297
+BattleCastle_TryStartChallenge:
+    GoTo BattleCastle_HealAndSaveBeforeChallenge
     End
 
-_0297:
-    CallIfEq 0x40BD, 0, _043C
-    CallIfEq 0x40BD, 1, _043C
-    SetVar 0x4000, 0
-    ScrCmd_14E
-    CallCommonScript 0x7D6
-    SetVar 0x800C, 0x4000
-    GoToIfEq 0x800C, 0, _0139
-    GoToIfEq 0x40BD, 2, _02E5
-    GoTo _049D
+BattleCastle_HealAndSaveBeforeChallenge:
+    CallIfEq VAR_BATTLE_CASTLE_CHALLENGE_TYPE, FRONTIER_CHALLENGE_SINGLE, BattleCastle_SetChallengeInProgress
+    CallIfEq VAR_BATTLE_CASTLE_CHALLENGE_TYPE, FRONTIER_CHALLENGE_DOUBLE, BattleCastle_SetChallengeInProgress
+    SetVar VAR_MAP_LOCAL_0x00, 0
+    HealParty
+    Common_SaveGame
+    SetVar VAR_RESULT, VAR_MAP_LOCAL_0x00
+    GoToIfEq VAR_RESULT, 0, BattleCastle_EndChallenge
+    GoToIfEq VAR_BATTLE_CASTLE_CHALLENGE_TYPE, FRONTIER_CHALLENGE_MULTI, BattleCastle_BecomeLeaderOrJoinGroup
+    GoTo BattleCastle_WalkIntoCorridor
     End
 
-_02E5:
-    Message 43
-    ScrCmd_040 30, 1, 0, 1, 0x800C
-    ScrCmd_33A 1
-    ScrCmd_042 13, 0
-    ScrCmd_042 14, 1
-    ScrCmd_042 5, 2
-    ScrCmd_043
-    SetVar 0x8008, 0x800C
-    GoToIfEq 0x8008, 0, _0329
-    GoToIfEq 0x8008, 1, _037D
-    GoTo _0139
+BattleCastle_BecomeLeaderOrJoinGroup:
+    Message BattleCastle_Text_BecomeLeaderOrJoinGroup
+    InitGlobalTextMenu 30, 1, 0, VAR_RESULT
+    SetMenuXOriginToRight
+    AddMenuEntryImm MenuEntries_Text_JoinGroup, 0
+    AddMenuEntryImm MenuEntries_Text_BecomeLeader, 1
+    AddMenuEntryImm MenuEntries_Text_Exit, 2
+    ShowMenu
+    SetVar VAR_0x8008, VAR_RESULT
+    GoToIfEq VAR_0x8008, 0, BattleCastle_LaunchWiFiToJoinGroup
+    GoToIfEq VAR_0x8008, 1, BattleCastle_LaunchWiFiToBecomeLeader
+    GoTo BattleCastle_EndChallenge
     End
 
-_0329:
-    Message 44
-    ScrCmd_03E 0x800C
-    GoToIfEq 0x800C, 1, _02E5
+BattleCastle_LaunchWiFiToJoinGroup:
+    Message BattleCastle_Text_NeedToLaunchWiFiComm
+    ShowYesNoMenu VAR_RESULT
+    GoToIfEq VAR_RESULT, MENU_NO, BattleCastle_BecomeLeaderOrJoinGroup
     CloseMessage
-    ScrCmd_0F2 31, 0, 0, 0x800C
-    GoToIfEq 0x800C, 1, _036B
-    GoToIfEq 0x800C, 3, _0373
-    GoTo _03D1
+    StartBattleClient 31, 0, 0, VAR_RESULT
+    GoToIfEq VAR_RESULT, COMM_CLUB_RET_CANCEL, BattleCastle_CancelJoiningGroup
+    GoToIfEq VAR_RESULT, COMM_CLUB_RET_ERROR, BattleCastle_ErrorJoiningGroup
+    GoTo BattleCastle_StartMultiChallenge
     End
 
-_036B:
-    GoTo _02E5
+BattleCastle_CancelJoiningGroup:
+    GoTo BattleCastle_BecomeLeaderOrJoinGroup
     End
 
-_0373:
-    ScrCmd_150
-    GoTo _02E5
+BattleCastle_ErrorJoiningGroup:
+    EndCommunication
+    GoTo BattleCastle_BecomeLeaderOrJoinGroup
     End
 
-_037D:
-    Message 44
-    ScrCmd_03E 0x800C
-    GoToIfEq 0x800C, 1, _02E5
+BattleCastle_LaunchWiFiToBecomeLeader:
+    Message BattleCastle_Text_NeedToLaunchWiFiComm
+    ShowYesNoMenu VAR_RESULT
+    GoToIfEq VAR_RESULT, MENU_NO, BattleCastle_BecomeLeaderOrJoinGroup
     CloseMessage
-    ScrCmd_0F3 31, 0, 0, 0x800C
-    GoToIfEq 0x800C, 1, _03BF
-    GoToIfEq 0x800C, 3, _03C7
-    GoTo _03D1
+    StartBattleServer 31, 0, 0, VAR_RESULT
+    GoToIfEq VAR_RESULT, COMM_CLUB_RET_CANCEL, BattleCastle_CancelBecomingLeader
+    GoToIfEq VAR_RESULT, COMM_CLUB_RET_ERROR, BattleCastle_ErrorBecomingLeader
+    GoTo BattleCastle_StartMultiChallenge
     End
 
-_03BF:
-    GoTo _02E5
+BattleCastle_CancelBecomingLeader:
+    GoTo BattleCastle_BecomeLeaderOrJoinGroup
     End
 
-_03C7:
-    ScrCmd_150
-    GoTo _02E5
+BattleCastle_ErrorBecomingLeader:
+    EndCommunication
+    GoTo BattleCastle_BecomeLeaderOrJoinGroup
     End
 
-_03D1:
-    ScrCmd_136
+BattleCastle_StartMultiChallenge:
+    ClearReceivedTempDataAllPlayers
     ScrCmd_135 136
-    ScrCmd_198 0x4002, 0x8000
-    ScrCmd_198 0x4005, 0x8001
-    ScrCmd_2D3 0x8000, 0x8001, 0x800C
-    SetVar 0x8008, 0x800C
-    GoToIfEq 0x8008, 1, _0444
-    GoToIfEq 0x8008, 2, _045A
-    GoToIfEq 0x8008, 3, _0470
-    ScrCmd_136
+    GetPartyMonSpecies VAR_MAP_LOCAL_0x02, VAR_0x8000
+    GetPartyMonSpecies VAR_MAP_LOCAL_0x05, VAR_0x8001
+    CheckBattleCastlePartnerUsesDifferentSpecies VAR_0x8000, VAR_0x8001, VAR_RESULT
+    SetVar VAR_0x8008, VAR_RESULT
+    GoToIfEq VAR_0x8008, 1, BattleCastle_BothTrainerChosePokemon1
+    GoToIfEq VAR_0x8008, 2, BattleCastle_BothTrainerChosePokemon2
+    GoToIfEq VAR_0x8008, 3, BattleCastle_BothTrainerChosePokemon1And2
+    ClearReceivedTempDataAllPlayers
     ScrCmd_135 138
-    Message 45
-    CallIfEq 0x40BD, 2, _043C
-    Call _06CB
-    GoTo _049D
+    Message BattleCastle_Text_MustSaveFirst
+    CallIfEq VAR_BATTLE_CASTLE_CHALLENGE_TYPE, FRONTIER_CHALLENGE_MULTI, BattleCastle_SetChallengeInProgress
+    Call BattleCastle_SaveGame
+    GoTo BattleCastle_WalkIntoCorridor
     End
 
-_043C:
-    SetVar 0x40BC, 0xFF
+BattleCastle_SetChallengeInProgress:
+    SetVar VAR_BATTLE_CASTLE_LOBBY_LOAD_ACTION, 0xFF
     Return
 
-_0444:
-    Call _0493
-    ScrCmd_0D0 0, 0x4002
-    Message 29
-    GoTo _048B
+BattleCastle_BothTrainerChosePokemon1:
+    Call BattleCastle_EndCommunicationSamePokemon
+    BufferPartyMonSpecies 0, VAR_MAP_LOCAL_0x02
+    Message BattleCastle_Text_BothTrainersChoseThisPokemon
+    GoTo BattleCastle_ChoseSamePokemonCancel
     End
 
-_045A:
-    Call _0493
-    ScrCmd_0D0 0, 0x4005
-    Message 29
-    GoTo _048B
+BattleCastle_BothTrainerChosePokemon2:
+    Call BattleCastle_EndCommunicationSamePokemon
+    BufferPartyMonSpecies 0, VAR_MAP_LOCAL_0x05
+    Message BattleCastle_Text_BothTrainersChoseThisPokemon
+    GoTo BattleCastle_ChoseSamePokemonCancel
     End
 
-_0470:
-    Call _0493
-    ScrCmd_0D0 0, 0x4002
-    ScrCmd_0D0 1, 0x4005
-    Message 30
-    GoTo _048B
+BattleCastle_BothTrainerChosePokemon1And2:
+    Call BattleCastle_EndCommunicationSamePokemon
+    BufferPartyMonSpecies 0, VAR_MAP_LOCAL_0x02
+    BufferPartyMonSpecies 1, VAR_MAP_LOCAL_0x05
+    Message BattleCastle_Text_BothTrainersChoseThesePokemon
+    GoTo BattleCastle_ChoseSamePokemonCancel
     End
 
-_048B:
-    GoTo _0139
+BattleCastle_ChoseSamePokemonCancel:
+    GoTo BattleCastle_EndChallenge
     End
 
-_0493:
-    ScrCmd_136
+BattleCastle_EndCommunicationSamePokemon:
+    ClearReceivedTempDataAllPlayers
     ScrCmd_135 139
-    ScrCmd_150
+    EndCommunication
     Return
 
-_049D:
-    CallIfEq 0x40BD, 0, _053D
-    CallIfEq 0x40BD, 1, _0558
-    CallIfEq 0x40BD, 2, _0573
-    PlayFanfare SEQ_SE_DP_KAIDAN2
-    GoTo _04D0
+BattleCastle_WalkIntoCorridor:
+    CallIfEq VAR_BATTLE_CASTLE_CHALLENGE_TYPE, FRONTIER_CHALLENGE_SINGLE, BattleCastle_WalkToCorridorSingleChallenge
+    CallIfEq VAR_BATTLE_CASTLE_CHALLENGE_TYPE, FRONTIER_CHALLENGE_DOUBLE, BattleCastle_WalkToCorridorDoubleChallenge
+    CallIfEq VAR_BATTLE_CASTLE_CHALLENGE_TYPE, FRONTIER_CHALLENGE_MULTI, BattleCastle_WalkToCorridorMultiChallenge
+    PlaySE SEQ_SE_DP_KAIDAN2_sseq
+    GoTo BattleCastle_StartChallenge
     End
 
-_04D0:
-    FadeScreen 6, 1, 0, 0
+BattleCastle_StartChallenge:
+    FadeScreenOut
     WaitFadeScreen
-    CallIfEq 0x40BD, 0, _0599
-    CallIfEq 0x40BD, 1, _05AD
-    CallIfEq 0x40BD, 2, _05C1
-    ScrCmd_1E5 58
-    ScrCmd_1CD 38, 0, 0, 0, 0
-    ScrCmd_1F8
-    ScrCmd_2C4 11
-    CallIfEq 0x40BD, 2, _0539
-    ScrCmd_0A1
-    FadeScreen 6, 1, 1, 0
+    CallIfEq VAR_BATTLE_CASTLE_CHALLENGE_TYPE, FRONTIER_CHALLENGE_SINGLE, BattleCastle_WalkBackInvisiblySingleChallenge
+    CallIfEq VAR_BATTLE_CASTLE_CHALLENGE_TYPE, FRONTIER_CHALLENGE_DOUBLE, BattleCastle_WalkBackInvisiblyDoubleChallenge
+    CallIfEq VAR_BATTLE_CASTLE_CHALLENGE_TYPE, FRONTIER_CHALLENGE_MULTI, BattleCastle_WalkBackInvisiblyMultiChallenge
+    IncrementGameRecord RECORD_TIMES_STARTED_BATTLE_FRONTIER_CHALLENGE
+    CreateJournalEvent LOCATION_EVENT_BATTLE_CASTLE
+    WaitForTransition
+    LaunchBattleFrontierScene FRONTIER_SCENE_CASTLE_CORRIDOR
+    CallIfEq VAR_BATTLE_CASTLE_CHALLENGE_TYPE, FRONTIER_CHALLENGE_MULTI, BattleCastle_EndCommunication
+    ReturnToField
+    FadeScreenIn
     WaitFadeScreen
-    ScrCmd_313 1
+    AssertHeapMemory
     End
 
-_0539:
-    ScrCmd_150
+BattleCastle_EndCommunication:
+    EndCommunication
     Return
 
-_053D:
-    Message 32
+BattleCastle_WalkToCorridorSingleChallenge:
+    Message BattleCastle_Text_ThisWayPlease
     WaitABPress
     CloseMessage
-    ApplyMovement 0xFF, _05E4
-    ApplyMovement 0x800D, _0604
+    ApplyMovement LOCALID_PLAYER, BattleCastle_Movement_PlayerWalkToCorridorSingleDoubleChallenge
+    ApplyMovement VAR_LAST_TALKED, BattleCastle_Movement_AttendantWalkToCorridorSingleDoubleChallenge
     WaitMovement
     Return
 
-_0558:
-    Message 32
+BattleCastle_WalkToCorridorDoubleChallenge:
+    Message BattleCastle_Text_ThisWayPlease
     WaitABPress
     CloseMessage
-    ApplyMovement 0xFF, _05E4
-    ApplyMovement 0x800D, _0604
+    ApplyMovement LOCALID_PLAYER, BattleCastle_Movement_PlayerWalkToCorridorSingleDoubleChallenge
+    ApplyMovement VAR_LAST_TALKED, BattleCastle_Movement_AttendantWalkToCorridorSingleDoubleChallenge
     WaitMovement
     Return
 
-_0573:
-    ScrCmd_02E 32
-    WaitTime 10, 0x800C
-    ScrCmd_136
+BattleCastle_WalkToCorridorMultiChallenge:
+    MessageNoSkip BattleCastle_Text_ThisWayPlease
+    WaitTime 10, VAR_RESULT
+    ClearReceivedTempDataAllPlayers
     ScrCmd_135 137
     CloseMessage
-    ApplyMovement 0xFF, _05F0
-    ApplyMovement 0x800D, _0610
+    ApplyMovement LOCALID_PLAYER, BattleCastle_Movement_PlayerWalkToCorridorMultiChallenge
+    ApplyMovement VAR_LAST_TALKED, BattleCastle_Movement_AttendantWalkToCorridorMultiChallenge
     WaitMovement
     Return
 
-_0599:
-    ApplyMovement 0xFF, _0624
-    ApplyMovement 0x800D, _0648
+BattleCastle_WalkBackInvisiblySingleChallenge:
+    ApplyMovement LOCALID_PLAYER, BattleCastle_Movement_PlayerWalkBackSingleDoubleChallenge
+    ApplyMovement VAR_LAST_TALKED, BattleCastle_Movement_AttendantWalkBackSingleDoubleChallenge
     WaitMovement
     Return
 
-_05AD:
-    ApplyMovement 0xFF, _0624
-    ApplyMovement 0x800D, _0648
+BattleCastle_WalkBackInvisiblyDoubleChallenge:
+    ApplyMovement LOCALID_PLAYER, BattleCastle_Movement_PlayerWalkBackSingleDoubleChallenge
+    ApplyMovement VAR_LAST_TALKED, BattleCastle_Movement_AttendantWalkBackSingleDoubleChallenge
     WaitMovement
     Return
 
-_05C1:
-    ApplyMovement 0xFF, _0634
-    ApplyMovement 0x800D, _0654
+BattleCastle_WalkBackInvisiblyMultiChallenge:
+    ApplyMovement LOCALID_PLAYER, BattleCastle_Movement_PlayerWalkBackMultiChallenge
+    ApplyMovement VAR_LAST_TALKED, BattleCastle_Movement_AttendantWalkBackMultiChallenge
     WaitMovement
     Return
 
-_05D5:
-    SetVar 0x40BC, 0
-    CallCommonScript 0x809
+BattleCastle_GriseousOrbCouldNotBeRemoved:
+    SetVar VAR_BATTLE_CASTLE_LOBBY_LOAD_ACTION, 0
+    Common_GriseousOrbCouldNotBeRemoved
     End
 
     .balign 4, 0
-_05E4:
-    MoveAction_00E 6
-    MoveAction_045
+BattleCastle_Movement_PlayerWalkToCorridorSingleDoubleChallenge:
+    WalkNormalWest 6
+    SetInvisible
     EndMovement
 
     .balign 4, 0
-_05F0:
-    MoveAction_00E 3
-    MoveAction_00C
-    MoveAction_00E 3
-    MoveAction_045
+BattleCastle_Movement_PlayerWalkToCorridorMultiChallenge:
+    WalkNormalWest 3
+    WalkNormalNorth
+    WalkNormalWest 3
+    SetInvisible
     EndMovement
 
     .balign 4, 0
-_0604:
-    MoveAction_00E 5
-    MoveAction_045
+BattleCastle_Movement_AttendantWalkToCorridorSingleDoubleChallenge:
+    WalkNormalWest 5
+    SetInvisible
     EndMovement
 
     .balign 4, 0
-_0610:
-    MoveAction_00E 2
-    MoveAction_00C
-    MoveAction_00E 3
-    MoveAction_045
+BattleCastle_Movement_AttendantWalkToCorridorMultiChallenge:
+    WalkNormalWest 2
+    WalkNormalNorth
+    WalkNormalWest 3
+    SetInvisible
     EndMovement
 
     .balign 4, 0
-_0624:
-    MoveAction_017 6
-    MoveAction_046
-    MoveAction_002
+BattleCastle_Movement_PlayerWalkBackSingleDoubleChallenge:
+    WalkFasterEast 6
+    SetVisible
+    FaceWest
     EndMovement
 
     .balign 4, 0
-_0634:
-    MoveAction_017 6
-    MoveAction_015
-    MoveAction_046
-    MoveAction_002
+BattleCastle_Movement_PlayerWalkBackMultiChallenge:
+    WalkFasterEast 6
+    WalkFasterSouth
+    SetVisible
+    FaceWest
     EndMovement
 
     .balign 4, 0
-_0648:
-    MoveAction_017 5
-    MoveAction_046
+BattleCastle_Movement_AttendantWalkBackSingleDoubleChallenge:
+    WalkFasterEast 5
+    SetVisible
     EndMovement
 
     .balign 4, 0
-_0654:
-    MoveAction_015
-    MoveAction_017 5
-    MoveAction_046
+BattleCastle_Movement_AttendantWalkBackMultiChallenge:
+    WalkFasterSouth
+    WalkFasterEast 5
+    SetVisible
     EndMovement
 
-_0664:
-    Message 0
+BattleCastle_WelcomeToSingleDoubleChallenge:
+    Message BattleCastle_Text_WelcomeToSingleDoubleChallenge
     Return
 
-_0669:
-    Message 3
+BattleCastle_WelcomeToMultiChallenge:
+    Message BattleCastle_Text_WelcomeToMultiChallenge
     Return
 
-_066E:
-    ScrCmd_041 31, 9, 0, 1, 0x800C
-    ScrCmd_33A 1
-    ScrCmd_042 38, 0
-    ScrCmd_042 39, 1
-    Message 1
+BattleCastle_InitMenuSingleDoubleChallenge:
+    InitLocalTextMenu 31, 9, 0, VAR_RESULT
+    SetMenuXOriginToRight
+    AddMenuEntryImm BattleCastle_Text_SingleBattle, 0
+    AddMenuEntryImm BattleCastle_Text_DoubleBattle, 1
+    Message BattleCastle_Text_TakeWhichChallenge
     Return
 
-_0686:
-    ScrCmd_041 31, 11, 0, 1, 0x800C
-    ScrCmd_33A 1
-    ScrCmd_042 40, 4
-    Message 4
+BattleCastle_InitMenuMultiChallenge:
+    InitLocalTextMenu 31, 11, 0, VAR_RESULT
+    SetMenuXOriginToRight
+    AddMenuEntryImm BattleCastle_Text_TakeChallenge, 4
+    Message BattleCastle_Text_AskTakeMultiChallenge
     Return
 
-_069A:
-    Message 2
+BattleCastle_ExplainSingleDoubleChallenge:
+    Message BattleCastle_Text_ExplainSingleDoubleChallenge
     Return
 
-_069F:
-    Message 5
+BattleCastle_ExplainMultiChallenge:
+    Message BattleCastle_Text_ExplainMultiChallenge
     Return
 
-_06A4:
-    ScrCmd_313 0
-    SetVar 0x4003, 1
-    SetVar 0x40BC, 0
-    Message 33
-    Call _043C
-    Call _06CB
-    GoTo _049D
+BattleCastle_OnFrame_ResumeChallenge:
+    RecordHeapMemory
+    SetVar VAR_MAP_LOCAL_0x03, 1
+    SetVar VAR_BATTLE_CASTLE_LOBBY_LOAD_ACTION, 0
+    Message BattleCastle_Text_MustSaveBeforeResuming
+    Call BattleCastle_SetChallengeInProgress
+    Call BattleCastle_SaveGame
+    GoTo BattleCastle_WalkIntoCorridor
     End
 
-_06CB:
-    ScrCmd_18D
-    ScrCmd_12D 0x800C
-    ScrCmd_18E
-    PlayFanfare SEQ_SE_DP_SAVE
-    ScrCmd_04B 0x61B
+BattleCastle_SaveGame:
+    ShowSavingIcon
+    TrySaveGame VAR_RESULT
+    HideSavingIcon
+    PlaySE SEQ_SE_DP_SAVE_sseq
+    WaitSE SEQ_SE_DP_SAVE_sseq
     Return
 
-_06DD:
-    Message 34
-    ScrCmd_2D5 0x40BD
-    GoTo _0139
+BattleCastle_OnFrame_DidntSaveBeforeQuit:
+    Message BattleCastle_Text_DidntSaveBeforeQuit
+    DeleteActiveBattleCastleStreak VAR_BATTLE_CASTLE_CHALLENGE_TYPE
+    GoTo BattleCastle_EndChallenge
     End
 
-_06EC:
-    CallIfEq 0x40BD, 0, _0728
-    CallIfEq 0x40BD, 1, _0728
-    CallIfEq 0x4052, 1, _072E
-    CallIfEq 0x4052, 3, _0745
-    GoTo _0139
+BattleCastle_OnFrame_ChallengeEndedCompletedRound:
+    CallIfEq VAR_BATTLE_CASTLE_CHALLENGE_TYPE, FRONTIER_CHALLENGE_SINGLE, BattleCastle_IncrementTrainerScoreRoundCompleted
+    CallIfEq VAR_BATTLE_CASTLE_CHALLENGE_TYPE, FRONTIER_CHALLENGE_DOUBLE, BattleCastle_IncrementTrainerScoreRoundCompleted
+    CallIfEq VAR_BATTLE_CASTLE_PRINT_STATE, 1, BattleCastle_EarnedSilverPrint
+    CallIfEq VAR_BATTLE_CASTLE_PRINT_STATE, 3, BattleCastle_EarnedGoldPrint
+    GoTo BattleCastle_EndChallenge
     End
 
-_0728:
-    ScrCmd_30A 39
+BattleCastle_IncrementTrainerScoreRoundCompleted:
+    IncrementTrainerScore TRAINER_SCORE_EVENT_BATTLE_CASTLE_ROUND_COMPLETED
     Return
 
-_072E:
-    Message 35
-    ScrCmd_0CD 0
-    Message 37
-    ScrCmd_04E 0x486
-    ScrCmd_04F
-    SetVar 0x4052, 2
+BattleCastle_EarnedSilverPrint:
+    Message BattleCastle_Text_PrintForVictory
+    BufferPlayerName 0
+    Message BattleCastle_Text_SinglePrintAdded
+    PlayFanfare SEQ_FANFA4_sseq
+    WaitFanfare
+    SetVar VAR_BATTLE_CASTLE_PRINT_STATE, 2
     Return
 
-_0745:
-    Message 35
-    ScrCmd_0CD 0
-    Message 36
-    ScrCmd_04E 0x486
-    ScrCmd_04F
-    SetVar 0x4052, 4
-    CallCommonScript 0x806
+BattleCastle_EarnedGoldPrint:
+    Message BattleCastle_Text_PrintForVictory
+    BufferPlayerName 0
+    Message BattleCastle_Text_GoldPrintAdded
+    PlayFanfare SEQ_FANFA4_sseq
+    WaitFanfare
+    SetVar VAR_BATTLE_CASTLE_PRINT_STATE, 4
+    Common_CheckAllFrontierGoldPrintsObtained
     Return
 
-_0760:
-    GoTo _0139
-
-    .byte 2
-    .byte 0
-    .byte 12
-    .byte 0
-    .byte 2
-    .byte 0
-    .byte 63
-    .byte 0
-    .byte 1
-    .byte 0
-    .byte 12
-    .byte 0
-    .byte 1
-    .byte 0
-    .byte 254
-    .byte 0
-    .byte 0
-    .byte 0
-    .byte 12
-    .byte 0
-    .byte 2
-    .byte 0
-    .byte 63
-    .byte 0
-    .byte 1
-    .byte 0
-    .byte 12
-    .byte 0
-    .byte 1
-    .byte 0
-    .byte 254
-    .byte 0
-    .byte 0
-    .byte 0
-
-_0788:
-    PlayFanfare SEQ_SE_CONFIRM
-    LockAll
-    FacePlayer
-    Message 46
-    WaitABXPadPress
-    CloseMessage
-    ReleaseAll
+BattleCastle_OnFrame_ChallengeEnded:
+    GoTo BattleCastle_EndChallenge
     End
 
-_079B:
-    PlayFanfare SEQ_SE_CONFIRM
-    LockAll
-    FacePlayer
-    Message 47
-    WaitABXPadPress
-    CloseMessage
-    ReleaseAll
+BattleCastle_Movement_Unused:
+    WalkNormalNorth 2
+    Delay8
+    WalkNormalNorth
+    EndMovement
+
+BattleCastle_Movement_Unused2:
+    WalkNormalNorth 2
+    Delay8
+    WalkNormalNorth
+    EndMovement
+
+BattleCastle_Artist:
+    NPCMessage BattleCastle_Text_NoDamageMoreCP
     End
 
-_07AE:
-    PlayFanfare SEQ_SE_CONFIRM
-    LockAll
-    FacePlayer
-    Message 48
-    WaitABXPadPress
-    CloseMessage
-    ReleaseAll
+BattleCastle_Socialite:
+    NPCMessage BattleCastle_Text_HigherLevelOpponentsMoreCP
     End
 
-_07C1:
-    PlayFanfare SEQ_SE_CONFIRM
-    LockAll
-    FacePlayer
-    Message 49
-    WaitABXPadPress
-    CloseMessage
-    ReleaseAll
+BattleCastle_Waitress:
+    NPCMessage BattleCastle_Text_CheckOpponentsLineup
     End
 
-_07D4:
-    PlayFanfare SEQ_SE_CONFIRM
-    LockAll
-    FacePlayer
-    Message 50
-    WaitABXPadPress
-    CloseMessage
-    ReleaseAll
+BattleCastle_Collector:
+    NPCMessage BattleCastle_Text_IPineForMrDarach
     End
 
-_07E7:
-    PlayFanfare SEQ_SE_CONFIRM
-    LockAll
-    FacePlayer
-    Message 51
-    WaitABXPadPress
-    CloseMessage
-    ReleaseAll
+BattleCastle_Roughneck:
+    NPCMessage BattleCastle_Text_SpendCPToRankUp
     End
 
-_07FA:
-    PlayFanfare SEQ_SE_CONFIRM
-    LockAll
-    FacePlayer
-    Message 52
-    WaitABXPadPress
-    CloseMessage
-    ReleaseAll
+BattleCastle_Gentleman:
+    NPCMessage BattleCastle_Text_MatterOfGraveImportance
     End
 
-    .byte 0
-    .byte 0
-    .byte 0
+BattleCastle_BlackBelt:
+    NPCMessage BattleCastle_Text_IWantToLiveInCastle
+    End
+
+    .balign 4, 0

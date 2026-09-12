@@ -53,15 +53,13 @@ static void ov63_0222CA48(UnkStruct_ov63_0222BEC0 *param0);
 static UnkStruct_ov63_0222CC3C ov63_0222C9E4(UnkStruct_ov63_0222CC3C param0, int param1);
 static BOOL ov63_0222CA14(UnkStruct_ov63_0222BEC0 *param0);
 
-UnkStruct_ov63_0222BE18 *ov63_0222BE18(u32 param0, u32 param1)
+UnkStruct_ov63_0222BE18 *ov63_0222BE18(u32 param0, enum HeapID heapID)
 {
-    UnkStruct_ov63_0222BE18 *v0;
-
-    v0 = Heap_AllocFromHeap(param1, sizeof(UnkStruct_ov63_0222BE18));
+    UnkStruct_ov63_0222BE18 *v0 = Heap_Alloc(heapID, sizeof(UnkStruct_ov63_0222BE18));
     GF_ASSERT(v0);
 
     v0->unk_04 = param0;
-    v0->unk_00 = Heap_AllocFromHeap(param1, sizeof(UnkStruct_ov63_0222BEC0) * v0->unk_04);
+    v0->unk_00 = Heap_Alloc(heapID, sizeof(UnkStruct_ov63_0222BEC0) * v0->unk_04);
     GF_ASSERT(v0->unk_00);
 
     memset(v0->unk_00, 0, sizeof(UnkStruct_ov63_0222BEC0) * v0->unk_04);
@@ -72,15 +70,13 @@ UnkStruct_ov63_0222BE18 *ov63_0222BE18(u32 param0, u32 param1)
 void ov63_0222BE58(UnkStruct_ov63_0222BE18 *param0)
 {
     GF_ASSERT(param0);
-    Heap_FreeToHeap(param0->unk_00);
-    Heap_FreeToHeap(param0);
+    Heap_Free(param0->unk_00);
+    Heap_Free(param0);
 }
 
 void ov63_0222BE70(UnkStruct_ov63_0222BE18 *param0, const UnkStruct_ov63_0222CCB8 *param1)
 {
-    UnkStruct_ov63_0222BEC0 *v0;
-
-    v0 = ov63_0222BF18(param0, param1->unk_07);
+    UnkStruct_ov63_0222BEC0 *v0 = ov63_0222BF18(param0, param1->unk_07);
     ov63_0222C350(v0, param1);
 }
 
@@ -88,9 +84,7 @@ void ov63_0222BE84(UnkStruct_ov63_0222BE18 *param0)
 {
     int v0;
     UnkStruct_ov63_0222BEC0 *v1;
-    u32 v2;
-
-    v2 = ov63_0222BEB0(param0);
+    u32 v2 = ov63_0222BEB0(param0);
 
     for (v0 = 0; v0 < v2; v0++) {
         v1 = ov63_0222BF50(param0, v0);
@@ -212,7 +206,7 @@ s32 ov63_0222BF90(const UnkStruct_ov63_0222BEC0 *param0, int param1)
         v0 = param0->unk_16;
         break;
     default:
-        GF_ASSERT(0);
+        GF_ASSERT(FALSE);
         break;
     }
 
@@ -260,7 +254,7 @@ void ov63_0222C000(UnkStruct_ov63_0222BEC0 *param0, int param1, s32 param2)
         param0->unk_16 = param2;
         break;
     default:
-        GF_ASSERT(0);
+        GF_ASSERT(FALSE);
         break;
     }
 }
@@ -302,7 +296,7 @@ static UnkStruct_ov63_0222BEC0 *ov63_0222C0B8(UnkStruct_ov63_0222BE18 *param0)
         }
     }
 
-    GF_ASSERT(0);
+    GF_ASSERT(FALSE);
     return NULL;
 }
 
@@ -467,9 +461,7 @@ static void ov63_0222C37C(UnkStruct_ov63_0222BEC0 *param0)
     };
 
     u32 v1 = ov63_0222BF90(param0, 5);
-    BOOL v2;
-
-    v2 = v0[v1](param0);
+    BOOL v2 = v0[v1](param0);
     param0->unk_16++;
 
     if (v2 == 1) {

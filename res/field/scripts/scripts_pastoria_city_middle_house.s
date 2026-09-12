@@ -1,70 +1,63 @@
-    .include "macros/scrcmd.inc"
+#include "macros/scrcmd.inc"
+#include "res/text/bank/pastoria_city_middle_house.h"
 
-    .data
 
-    ScriptEntry _000A
-    ScriptEntry _001D
-    .short 0xFD13
+    ScriptEntry PastoriaCityMiddleHouse_OldMan
+    ScriptEntry PastoriaCityMiddleHouse_BugCatcher
+    ScriptEntryEnd
 
-_000A:
-    PlayFanfare SEQ_SE_CONFIRM
+PastoriaCityMiddleHouse_OldMan:
+    NPCMessage PastoriaCityMiddleHouse_Text_FemaleCombeeEvolves
+    End
+
+PastoriaCityMiddleHouse_BugCatcher:
+    PlaySE SE_CONFIRM_sseq_3
     LockAll
     FacePlayer
-    Message 0
-    WaitABXPadPress
+    GoToIfSet FLAG_RECEIVED_PASTORIA_CITY_MIDDLE_HOUSE_MACHO_BRACE, PastoriaCityMiddleHouse_YoureGood
+    GoToIfSet FLAG_TALKED_TO_PASTORIA_CITY_MIDDLE_HOUSE_BUG_CATCHER, PastoriaCityMiddleHouse_HandlePartyCombeeGenderCount
+    Message PastoriaCityMiddleHouse_Text_CatchBothGendersCombee
+    SetFlag FLAG_TALKED_TO_PASTORIA_CITY_MIDDLE_HOUSE_BUG_CATCHER
+    GoTo PastoriaCityMiddleHouse_BugCatcherEnd
+    End
+
+PastoriaCityMiddleHouse_HandlePartyCombeeGenderCount:
+    CheckPartyCombeeGenderCount VAR_RESULT
+    GoToIfEq VAR_RESULT, 0, PastoriaCityMiddleHouse_NotASingleCombee
+    GoToIfEq VAR_RESULT, 1, PastoriaCityMiddleHouse_ThatsACombee
+    Message PastoriaCityMiddleHouse_Text_BothGendersCombee
+    SetVar VAR_0x8004, ITEM_MACHO_BRACE
+    SetVar VAR_0x8005, 1
+    GoToIfCannotFitItem VAR_0x8004, VAR_0x8005, VAR_RESULT, PastoriaCityMiddleHouse_BagIsFull
+    SetFlag FLAG_RECEIVED_PASTORIA_CITY_MIDDLE_HOUSE_MACHO_BRACE
+    Common_GiveItemQuantity
+    GoTo PastoriaCityMiddleHouse_YoureGood
+    End
+
+PastoriaCityMiddleHouse_NotASingleCombee:
+    Message PastoriaCityMiddleHouse_Text_NotASingleCombee
+    WaitButton
     CloseMessage
     ReleaseAll
     End
 
-_001D:
-    PlayFanfare SEQ_SE_CONFIRM
-    LockAll
-    FacePlayer
-    GoToIfSet 0x11C, _00BD
-    GoToIfSet 120, _004A
-    Message 1
-    SetFlag 120
-    GoTo _00C8
+PastoriaCityMiddleHouse_ThatsACombee:
+    Message PastoriaCityMiddleHouse_Text_ThatsACombee
+    GoTo PastoriaCityMiddleHouse_BugCatcherEnd
     End
 
-_004A:
-    ScrCmd_264 0x800C
-    GoToIfEq 0x800C, 0, _009C
-    GoToIfEq 0x800C, 1, _00A7
-    Message 4
-    SetVar 0x8004, 215
-    SetVar 0x8005, 1
-    ScrCmd_07D 0x8004, 0x8005, 0x800C
-    GoToIfEq 0x800C, 0, _00B2
-    SetFlag 0x11C
-    CallCommonScript 0x7FC
-    GoTo _00BD
+PastoriaCityMiddleHouse_BagIsFull:
+    Message PastoriaCityMiddleHouse_Text_BagIsFull
+    GoTo PastoriaCityMiddleHouse_BugCatcherEnd
     End
 
-_009C:
-    Message 2
-    WaitABXPadPress
-    CloseMessage
-    ReleaseAll
+PastoriaCityMiddleHouse_YoureGood:
+    Message PastoriaCityMiddleHouse_Text_YoureGood
+    GoTo PastoriaCityMiddleHouse_BugCatcherEnd
     End
 
-_00A7:
-    Message 3
-    GoTo _00C8
-    End
-
-_00B2:
-    Message 5
-    GoTo _00C8
-    End
-
-_00BD:
-    Message 6
-    GoTo _00C8
-    End
-
-_00C8:
-    WaitABXPadPress
+PastoriaCityMiddleHouse_BugCatcherEnd:
+    WaitButton
     CloseMessage
     ReleaseAll
     End

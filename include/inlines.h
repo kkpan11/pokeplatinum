@@ -3,42 +3,38 @@
 
 #include <nitro/rtc.h>
 
-#include "struct_decls/struct_02006C24_decl.h"
-#include "struct_decls/struct_0203A790_decl.h"
-#include "struct_defs/struct_02049FA8.h"
-
 #include "field/field_system.h"
 #include "overlay061/struct_ov61_0222C3B0.h"
 
 #include "assert.h"
 #include "field_overworld_state.h"
 #include "field_script_context.h"
+#include "graphics.h"
 #include "heap.h"
+#include "location.h"
 #include "map_header.h"
+#include "math_util.h"
+#include "narc.h"
+#include "palette.h"
 #include "script_manager.h"
 #include "sys_task.h"
 #include "sys_task_manager.h"
-#include "unk_02002F38.h"
-#include "unk_02006E3C.h"
-#include "unk_0201D15C.h"
-#include "unk_0206A8DC.h"
-#include "vars_flags.h"
 
 static inline void inline_ov61_0222C3B0_sub_1(UnkStruct_ov61_0222C3B0 *);
 static inline void inline_ov61_0222C3B0_sub(SysTask *, void *);
 
-static inline void inline_ov61_0222C3B0(UnkStruct_ov61_0222C3B0 *param0, NARC *param1, int param2, int param3)
+static inline void inline_ov61_0222C3B0(UnkStruct_ov61_0222C3B0 *param0, NARC *param1, int param2, enum HeapID heapID)
 {
     NNSG2dPaletteData *v0;
     void *v1;
 
     MI_CpuClear8(param0, sizeof(UnkStruct_ov61_0222C3B0));
 
-    v1 = sub_020071EC(param1, param2, &v0, param3);
+    v1 = Graphics_GetPlttDataFromOpenNARC(param1, param2, &v0, heapID);
 
     MI_CpuCopy16(&((u16 *)(v0->pRawData))[0 * 16], param0->unk_08, 4 * 0x20);
     MI_CpuCopy16(&((u16 *)(v0->pRawData))[0 * 16], param0->unk_88, 4 * 0x20);
-    Heap_FreeToHeap(v1);
+    Heap_Free(v1);
     inline_ov61_0222C3B0_sub_1(param0);
 
     param0->unk_04 = 1;
@@ -81,7 +77,7 @@ static inline void inline_ov61_0222C3B0_sub_1(UnkStruct_ov61_0222C3B0 *param0)
         do {
             GF_ASSERT(v1 < (((16 << 8) / 0x300 + 2) * (4 - 1)));
             for (v4 = 1; v4 < 1 + 15; v4++) {
-                sub_0200393C(&param0->unk_08[v0][v4], &param0->unk_88[v1][v4], 1, v3 >> 8, param0->unk_08[v2][v4]);
+                BlendPalette(&param0->unk_08[v0][v4], &param0->unk_88[v1][v4], 1, v3 >> 8, param0->unk_08[v2][v4]);
             }
             v1++;
             if (v5 == 1) {
@@ -129,34 +125,21 @@ static inline void inline_ov61_0222C3B0_sub(SysTask *param0, void *param1)
     }
 }
 
-static inline void inline_ov47_0225621C_sub(FieldSystem *fieldSystem, int *param1, int *param2)
+static inline void PoketchMap_GetPlayerLocation(FieldSystem *fieldSystem, int *x, int *z)
 {
-    FieldOverworldState *v0 = SaveData_GetFieldOverworldState(fieldSystem->saveData);
-    Location *location = sub_0203A72C(v0);
+    FieldOverworldState *fieldState = SaveData_GetFieldOverworldState(fieldSystem->saveData);
+    Location *location = FieldOverworldState_GetExitLocation(fieldState);
 
-    if (MapHeader_IsOnMainMatrix(fieldSystem->location->mapId)) {
-        *param1 = fieldSystem->location->x;
-        *param2 = fieldSystem->location->z;
+    if (MapHeader_IsOnMainMatrix(fieldSystem->location->mapHeaderID)) {
+        *x = fieldSystem->location->x;
+        *z = fieldSystem->location->z;
     } else {
-        *param1 = location->x;
-        *param2 = location->z;
+        *x = location->x;
+        *z = location->z;
     }
-}
 
-static inline void inline_ov47_0225621C(FieldSystem *fieldSystem, int *param1, int *param2)
-{
-    inline_ov47_0225621C_sub(fieldSystem, param1, param2);
-    *param1 /= 32;
-    *param2 /= 32;
-}
-
-static inline void Location_Set(Location *location, int mapId, int param2, int param3, int param4, int param5)
-{
-    location->mapId = mapId;
-    location->unk_04 = param2;
-    location->x = param3;
-    location->z = param4;
-    location->unk_10 = param5;
+    *x /= MAP_TILES_COUNT_X;
+    *z /= MAP_TILES_COUNT_Z;
 }
 
 static inline u16 *ScriptContext_GetVarPointer(ScriptContext *ctx)
@@ -169,111 +152,58 @@ static inline u16 ScriptContext_GetVar(ScriptContext *ctx)
     return FieldSystem_TryGetVar(ctx->fieldSystem, ScriptContext_ReadHalfWord(ctx));
 }
 
-static inline void inline_0204E650(VarsFlags *param0)
+// Functionally equivalent to LCRNG_Next() % param
+inline u16 LCRNG_RandMod(const u16 param)
 {
-    sub_0206AEAC(param0, 1);
-}
+    GF_ASSERT(param != 0);
 
-static inline void inline_0204E650_1(VarsFlags *param0)
-{
-    sub_0206AEAC(param0, 0);
-}
-
-static inline BOOL inline_0204E650_2(VarsFlags *param0)
-{
-    return sub_0206AEAC(param0, 2);
-}
-
-static inline void inline_02044528(VarsFlags *param0)
-{
-    sub_0206AF2C(param0, 1);
-}
-
-static inline BOOL inline_020535E8(VarsFlags *param0)
-{
-    return sub_0206AF2C(param0, 2);
-}
-
-static inline void inline_0203A8E8(VarsFlags *param0, u32 param1)
-{
-    sub_0206AF3C(param0, 1, param1);
-}
-
-static inline BOOL inline_0208BE68(VarsFlags *param0, u32 param1)
-{
-    return sub_0206AF3C(param0, 2, param1);
-}
-
-inline u16 inline_020564D0(const u16 param0)
-{
-    GF_ASSERT(param0 != 0);
-
-    if (param0 <= 1) {
+    if (param <= 1) {
         return 0;
     } else {
-        u16 v0;
-        u16 v1;
-        v0 = (0xffff / param0) + 1;
-        v1 = LCRNG_Next() / v0;
+        u16 v0 = (0xffff / param) + 1;
+        u16 v1 = LCRNG_Next() / v0;
 
-        GF_ASSERT(v1 < param0);
+        GF_ASSERT(v1 < param);
         return v1;
     }
 }
 
-static inline u32 inline_0202D4B0_sub1(u32 param0, u32 param1, u32 param2, int param3)
+static inline u32 Date_EncodeParams(u32 year, u32 month, u32 day, int week)
 {
-    return (param0 << 24) | ((param1 & 0xff) << 16) | ((param2 & 0xff) << 8) | param3;
+    return (year << 24) | ((month & 0xff) << 16) | ((day & 0xff) << 8) | week;
 }
 
-static inline u32 inline_0202D4B0(RTCDate *param0)
+static inline u32 Date_Encode(RTCDate *rtcDate)
 {
-    return inline_0202D4B0_sub1(param0->year, param0->month, param0->day, param0->week);
+    return Date_EncodeParams(rtcDate->year, rtcDate->month, rtcDate->day, rtcDate->week);
 }
 
-static inline u8 inline_0202D558_sub1(u32 param0)
+static inline u8 Date_DecodeYear(u32 date)
 {
-    return param0 >> 24;
+    return date >> 24;
 }
 
-static inline u8 inline_0202D558_sub2(u32 param0)
+static inline u8 Date_DecodeMonth(u32 date)
 {
-    return (param0 >> 16) & 0xff;
+    return (date >> 16) & 0xff;
 }
 
-static inline u8 inline_0202D558_sub3(u32 param0)
+static inline u8 Date_DecodeDay(u32 date)
 {
-    return (param0 >> 8) & 0xff;
+    return (date >> 8) & 0xff;
 }
 
-static inline u8 inline_0202D558_sub4(u32 param0)
+static inline u8 Date_DecodeWeek(u32 date)
 {
-    return param0 & 0xff;
+    return date & 0xff;
 }
 
-static inline void inline_0202D558(u32 param0, RTCDate *param1)
+static inline void Date_Decode(u32 date, RTCDate *rtcDate)
 {
-    param1->year = inline_0202D558_sub1(param0);
-    param1->month = inline_0202D558_sub2(param0);
-    param1->day = inline_0202D558_sub3(param0);
-    param1->week = inline_0202D558_sub4(param0);
-}
-
-static inline BOOL inline_0203A944(u32 param0)
-{
-    if (((param0 % 4 == 0) && (param0 % 100 != 0)) || (param0 % 400 == 0)) {
-        return 1;
-    } else {
-        return 0;
-    }
-}
-
-static inline BOOL inline_ov12_02235998(int param0, int param1)
-{
-    if ((param0 & param1) == param1) {
-        return 1;
-    }
-    return 0;
+    rtcDate->year = Date_DecodeYear(date);
+    rtcDate->month = Date_DecodeMonth(date);
+    rtcDate->day = Date_DecodeDay(date);
+    rtcDate->week = Date_DecodeWeek(date);
 }
 
 #endif // POKEPLATINUM_INLINES_H

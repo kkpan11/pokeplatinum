@@ -1,86 +1,66 @@
-    .include "macros/scrcmd.inc"
+#include "macros/scrcmd.inc"
+#include "res/text/bank/route_218.h"
 
-    .data
 
-    ScriptEntry _001E
-    ScriptEntry _0035
-    ScriptEntry _004C
-    ScriptEntry _005D
-    ScriptEntry _006E
-    ScriptEntry _008B
-    ScriptEntry _00A8
-    .short 0xFD13
+    ScriptEntry Route218_ArrowSignpostCanalaveCity
+    ScriptEntry Route218_ArrowSignpostJubilifeCity
+    ScriptEntry Route218_Guitarist
+    ScriptEntry Route218_Fisherman
+    ScriptEntry Route218_ClefairySouth
+    ScriptEntry Route218_ClefairyNorth
+    ScriptEntry Route218_Pikachu
+    ScriptEntryEnd
 
-_001E:
-    ScrCmd_036 5, 1, 0, 0x800C
-    ScrCmd_038 3
-    ScrCmd_039
-    ScrCmd_03B 0x800C
-    CallCommonScript 0x7D0
+Route218_ArrowSignpostCanalaveCity:
+    ShowArrowSign Route218_Text_SignCanalaveCity
     End
 
-_0035:
-    ScrCmd_036 6, 1, 0, 0x800C
-    ScrCmd_038 3
-    ScrCmd_039
-    ScrCmd_03B 0x800C
-    CallCommonScript 0x7D0
+Route218_ArrowSignpostJubilifeCity:
+    ShowArrowSign Route218_Text_SignJubilifeCity
     End
 
-_004C:
-    PlayFanfare SEQ_SE_CONFIRM
+Route218_Guitarist:
+    EventMessage Route218_Text_ClefairyCuterNow
+    End
+
+Route218_Fisherman:
+    EventMessage Route218_Text_PikachuDazzle
+    End
+
+Route218_ClefairySouth:
+    PlaySE SE_CONFIRM_sseq_3
     LockAll
-    Message 0
-    WaitABXPadPress
+    WaitSE SE_CONFIRM_sseq_3
+    PlayCry SPECIES_CLEFAIRY
+    Message Route218_Text_ClefairyCryPippiih
+    WaitCry
+    WaitButton
     CloseMessage
     ReleaseAll
     End
 
-_005D:
-    PlayFanfare SEQ_SE_CONFIRM
+Route218_ClefairyNorth:
+    PlaySE SE_CONFIRM_sseq_3
     LockAll
-    Message 4
-    WaitABXPadPress
+    WaitSE SE_CONFIRM_sseq_3
+    PlayCry SPECIES_CLEFAIRY
+    Message Route218_Text_ClefairyCryPippippiih
+    WaitCry
+    WaitButton
     CloseMessage
     ReleaseAll
     End
 
-_006E:
-    PlayFanfare SEQ_SE_CONFIRM
+Route218_Pikachu:
+    PlaySE SE_CONFIRM_sseq_3
     LockAll
-    ScrCmd_04B 0x5DC
-    ScrCmd_04C 35, 0
-    Message 1
-    ScrCmd_04D
-    WaitABXPadPress
+    WaitSE SE_CONFIRM_sseq_3
+    PlayCry SPECIES_PIKACHU
+    Message Route218_Text_PikachuCry
+    WaitCry
+    WaitButton
     CloseMessage
     ReleaseAll
     End
 
-_008B:
-    PlayFanfare SEQ_SE_CONFIRM
-    LockAll
-    ScrCmd_04B 0x5DC
-    ScrCmd_04C 35, 0
-    Message 2
-    ScrCmd_04D
-    WaitABXPadPress
-    CloseMessage
-    ReleaseAll
-    End
-
-_00A8:
-    PlayFanfare SEQ_SE_CONFIRM
-    LockAll
-    ScrCmd_04B 0x5DC
-    ScrCmd_04C 25, 0
-    Message 3
-    ScrCmd_04D
-    WaitABXPadPress
-    CloseMessage
-    ReleaseAll
-    End
-
-    .byte 0
-    .byte 0
-    .byte 0
+    .balign 4, 0

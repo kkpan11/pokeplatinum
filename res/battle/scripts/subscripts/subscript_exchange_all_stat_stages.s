@@ -1,6 +1,5 @@
-    .include "macros/btlcmd.inc"
+#include "macros/btlcmd.inc"
 
-    .data
 
 _000:
     CompareVarToValue OPCODE_FLAG_SET, BTLVAR_MOVE_STATUS_FLAGS, MOVE_STATUS_MISSED|MOVE_STATUS_SEMI_INVULNERABLE, _198
@@ -52,7 +51,7 @@ _185:
 
 _190:
     // {0} switched stat changes with the target!
-    PrintMessage pl_msg_00000368_01024, TAG_NICKNAME, BTLSCR_ATTACKER
+    PrintMessage BattleStrings_Text_PokemonSwitchedStatChangesWithTheTarget_Ally, TAG_NICKNAME, BTLSCR_ATTACKER
     Wait 
     WaitButtonABTime 30
     End 

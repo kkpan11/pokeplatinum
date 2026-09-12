@@ -1,10 +1,7 @@
 #ifndef POKEPLATINUM_OV62_02231690_H
 #define POKEPLATINUM_OV62_02231690_H
 
-#include "struct_decls/cell_actor_data.h"
-#include "struct_decls/struct_02006C24_decl.h"
 #include "struct_decls/struct_0202F41C_decl.h"
-#include "struct_defs/struct_0205AA50.h"
 #include "struct_defs/struct_0208B878.h"
 #include "struct_defs/struct_0208C06C.h"
 
@@ -16,16 +13,19 @@
 #include "overlay062/struct_ov62_0223CAA4.h"
 #include "overlay062/struct_ov62_02248CDC.h"
 
+#include "bg_window.h"
 #include "message.h"
-#include "strbuf.h"
+#include "narc.h"
+#include "sprite_system.h"
+#include "string_gf.h"
 
-StringTemplate *ov62_02231690(u32 param0);
+StringTemplate *ov62_02231690(enum HeapID heapID);
 int ov62_022316A0(UnkStruct_0208C06C *param0);
 int ov62_022316D0(UnkStruct_0208C06C *param0);
 int ov62_02231710(UnkStruct_0208C06C *param0, int param1);
 void ov62_022317CC(UnkStruct_0208C06C *param0, int param1);
 void ov62_022318E8(UnkStruct_0208C06C *param0);
-u16 *ov62_02231948(int param0, int param1, int *param2);
+u16 *ov62_Pokedex_Alphabetical(enum HeapID heapID, int unused, int *pokedexLength);
 void ov62_0223196C(UnkStruct_0208C06C *param0, BOOL param1);
 BOOL ov62_02231974(UnkStruct_0208C06C *param0);
 void ov62_0223197C(UnkStruct_0208C06C *param0, int param1);
@@ -41,10 +41,10 @@ void ov62_02232394(UnkStruct_ov62_022323B8 *param0, UnkStruct_0208C06C *param1);
 void ov62_022323B8(UnkStruct_ov62_022323B8 *param0, int param1);
 void ov62_022324A0(UnkStruct_ov62_02233310 *param0, UnkStruct_0208C06C *param1, const UnkStruct_ov62_02248CDC *param2);
 void ov62_02232594(UnkStruct_ov62_02233310 *param0, UnkStruct_0208C06C *param1, MessageLoader *param2, const UnkStruct_ov62_02248CDC *param3);
-void ov62_02232778(UnkStruct_ov62_02233310 *param0, UnkStruct_0208C06C *param1, MessageLoader *param2, const UnkStruct_ov62_02248CDC *param3, int param4, int param5, Strbuf *param6);
-void ov62_02232AAC(UnkStruct_ov62_02233310 *param0, UnkStruct_0208C06C *param1, const UnkStruct_ov62_02248CDC *param2, Strbuf *param3[20][2]);
-int ov62_02232BB4(UnkStruct_ov62_02233310 *param0, UnkStruct_0208C06C *param1, Strbuf *param2[20][2]);
-int ov62_02232C78(UnkStruct_ov62_02233310 *param0, UnkStruct_0208C06C *param1, int param2, int param3, Strbuf *param4);
+void ov62_02232778(UnkStruct_ov62_02233310 *param0, UnkStruct_0208C06C *param1, MessageLoader *param2, const UnkStruct_ov62_02248CDC *param3, int param4, int param5, String *param6);
+void ov62_02232AAC(UnkStruct_ov62_02233310 *param0, UnkStruct_0208C06C *param1, const UnkStruct_ov62_02248CDC *param2, String *param3[20][2]);
+int ov62_02232BB4(UnkStruct_ov62_02233310 *param0, UnkStruct_0208C06C *param1, String *param2[20][2]);
+int ov62_02232C78(UnkStruct_ov62_02233310 *param0, UnkStruct_0208C06C *param1, int param2, int param3, String *param4);
 int ov62_02232F68(UnkStruct_ov62_02233310 *param0, UnkStruct_0208C06C *param1);
 int ov62_02233064(UnkStruct_ov62_02233310 *param0, UnkStruct_0208C06C *param1);
 void ov62_022331C8(UnkStruct_ov62_02233310 *param0, s16 param1);
@@ -77,15 +77,15 @@ void ov62_022339DC(UnkStruct_0208C06C *param0);
 void ov62_02233A44(UnkStruct_0208C06C *param0);
 NARC *ov62_02233A68(int param0);
 void ov62_02233A74(NARC *param0);
-CellActorData *ov62_02233A7C(UnkStruct_0208C06C *param0, NARC *param1, int param2, int param3, int param4, int param5);
-void ov62_02233B24(UnkStruct_0208C06C *param0, int param1, CellActorData *param2);
-void ov62_02233B40(UnkStruct_0208C06C *param0, int param1, CellActorData *param2);
+ManagedSprite *ov62_02233A7C(UnkStruct_0208C06C *param0, NARC *param1, int param2, int param3, int param4, int param5);
+void ov62_02233B24(UnkStruct_0208C06C *param0, int param1, ManagedSprite *param2);
+void ov62_02233B40(UnkStruct_0208C06C *param0, int param1, ManagedSprite *param2);
 BOOL ov62_02233F94(UnkStruct_0202F41C *param0);
 int ov62_02233FEC(UnkStruct_ov62_02233F74 *param0);
 void ov62_02234214(UnkStruct_ov62_02233F74 *param0, UnkStruct_0208C06C *param1);
 void ov62_02234228(UnkStruct_ov62_02233F74 *param0, UnkStruct_0208C06C *param1);
 void ov62_0223427C(UnkStruct_ov62_02233F74 *param0, int param1);
-int ov62_0223429C(Window *param0, Strbuf *param1);
+int ov62_0223429C(Window *param0, String *param1);
 void ov62_022342BC(UnkStruct_0208C06C *param0);
 BOOL ov62_022342CC(UnkStruct_0208C06C *param0);
 void ov62_02234314(void);
@@ -101,6 +101,6 @@ int ov62_022345B8(UnkStruct_0208C06C *param0, int param1, int param2, int param3
 void ov62_022348B8(UnkStruct_0208C06C *param0, int param1, int param2, int param3);
 void ov62_022348FC(UnkStruct_0208C06C *param0);
 BOOL ov62_02234970(UnkStruct_0208C06C *param0, u64 param1);
-void ov62_022349A8(UnkStruct_0208C06C *param0, Strbuf *param1);
+void ov62_022349A8(UnkStruct_0208C06C *param0, String *param1);
 
 #endif // POKEPLATINUM_OV62_02231690_H

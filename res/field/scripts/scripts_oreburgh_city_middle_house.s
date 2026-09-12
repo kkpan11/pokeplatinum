@@ -1,27 +1,15 @@
-    .include "macros/scrcmd.inc"
+#include "macros/scrcmd.inc"
+#include "res/text/bank/oreburgh_city_middle_house.h"
 
-    .data
 
-    ScriptEntry _000A
-    ScriptEntry _001D
-    .short 0xFD13
+    ScriptEntry OreburghCityMiddleHouse_SchoolKidF
+    ScriptEntry OreburghCityMiddleHouse_Hiker
+    ScriptEntryEnd
 
-_000A:
-    PlayFanfare SEQ_SE_CONFIRM
-    LockAll
-    FacePlayer
-    Message 0
-    WaitABXPadPress
-    CloseMessage
-    ReleaseAll
+OreburghCityMiddleHouse_SchoolKidF:
+    NPCMessage OreburghCityMiddleHouse_Text_RoarkUsesRockTypePokemon
     End
 
-_001D:
-    PlayFanfare SEQ_SE_CONFIRM
-    LockAll
-    FacePlayer
-    Message 1
-    WaitABXPadPress
-    CloseMessage
-    ReleaseAll
+OreburghCityMiddleHouse_Hiker:
+    NPCMessage OreburghCityMiddleHouse_Text_RoarkIsOurTownsGymLeader
     End

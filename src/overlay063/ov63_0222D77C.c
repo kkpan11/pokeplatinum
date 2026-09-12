@@ -22,15 +22,13 @@ typedef struct UnkStruct_ov63_0222D848_t {
     u16 unk_0A;
 } UnkStruct_ov63_0222D848;
 
-UnkStruct_ov63_0222D77C *ov63_0222D77C(u32 param0, u32 param1)
+UnkStruct_ov63_0222D77C *ov63_0222D77C(u32 param0, enum HeapID heapID)
 {
-    UnkStruct_ov63_0222D77C *v0;
-
-    v0 = Heap_AllocFromHeap(param1, sizeof(UnkStruct_ov63_0222D77C));
+    UnkStruct_ov63_0222D77C *v0 = Heap_Alloc(heapID, sizeof(UnkStruct_ov63_0222D77C));
     GF_ASSERT(v0);
 
     v0->unk_04 = param0 + 1;
-    v0->unk_00 = Heap_AllocFromHeap(param1, sizeof(UnkStruct_ov63_0222CCB8) * v0->unk_04);
+    v0->unk_00 = Heap_Alloc(heapID, sizeof(UnkStruct_ov63_0222CCB8) * v0->unk_04);
 
     memset(v0->unk_00, 0, sizeof(UnkStruct_ov63_0222CCB8) * v0->unk_04);
 
@@ -42,8 +40,8 @@ UnkStruct_ov63_0222D77C *ov63_0222D77C(u32 param0, u32 param1)
 
 void ov63_0222D7B4(UnkStruct_ov63_0222D77C *param0)
 {
-    Heap_FreeToHeap(param0->unk_00);
-    Heap_FreeToHeap(param0);
+    Heap_Free(param0->unk_00);
+    Heap_Free(param0);
 }
 
 void ov63_0222D7C8(UnkStruct_ov63_0222D77C *param0, const UnkStruct_ov63_0222CCB8 *param1)
@@ -69,15 +67,13 @@ BOOL ov63_0222D810(UnkStruct_ov63_0222D77C *param0, UnkStruct_ov63_0222CCB8 *par
     return 1;
 }
 
-UnkStruct_ov63_0222D848 *ov63_0222D848(u32 param0, u32 param1)
+UnkStruct_ov63_0222D848 *ov63_0222D848(u32 param0, enum HeapID heapID)
 {
-    UnkStruct_ov63_0222D848 *v0;
-
-    v0 = Heap_AllocFromHeap(param1, sizeof(UnkStruct_ov63_0222D848));
+    UnkStruct_ov63_0222D848 *v0 = Heap_Alloc(heapID, sizeof(UnkStruct_ov63_0222D848));
     GF_ASSERT(v0);
 
     v0->unk_04 = param0 + 1;
-    v0->unk_00 = Heap_AllocFromHeap(param1, sizeof(UnkStruct_ov63_0222D894) * v0->unk_04);
+    v0->unk_00 = Heap_Alloc(heapID, sizeof(UnkStruct_ov63_0222D894) * v0->unk_04);
 
     memset(v0->unk_00, 0, sizeof(UnkStruct_ov63_0222D894) * v0->unk_04);
 
@@ -89,8 +85,8 @@ UnkStruct_ov63_0222D848 *ov63_0222D848(u32 param0, u32 param1)
 
 void ov63_0222D880(UnkStruct_ov63_0222D848 *param0)
 {
-    Heap_FreeToHeap(param0->unk_00);
-    Heap_FreeToHeap(param0);
+    Heap_Free(param0->unk_00);
+    Heap_Free(param0);
 }
 
 void ov63_0222D894(UnkStruct_ov63_0222D848 *param0, const UnkStruct_ov63_0222D894 *param1)

@@ -1,27 +1,15 @@
-    .include "macros/scrcmd.inc"
+#include "macros/scrcmd.inc"
+#include "res/text/bank/route_225_gate_to_fight_area.h"
 
-    .data
 
-    ScriptEntry _000A
-    ScriptEntry _001D
-    .short 0xFD13
+    ScriptEntry Route225GateToFightArea_AceTrainerM
+    ScriptEntry Route225GateToFightArea_RichBoy
+    ScriptEntryEnd
 
-_000A:
-    PlayFanfare SEQ_SE_CONFIRM
-    LockAll
-    FacePlayer
-    Message 0
-    WaitABXPadPress
-    CloseMessage
-    ReleaseAll
+Route225GateToFightArea_AceTrainerM:
+    NPCMessage Route225GateToFightArea_Text_NorthSurvivalArea
     End
 
-_001D:
-    PlayFanfare SEQ_SE_CONFIRM
-    LockAll
-    FacePlayer
-    Message 1
-    WaitABXPadPress
-    CloseMessage
-    ReleaseAll
+Route225GateToFightArea_RichBoy:
+    NPCMessage Route225GateToFightArea_Text_InterestingPokemon
     End

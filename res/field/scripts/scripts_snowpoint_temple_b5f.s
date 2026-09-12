@@ -1,72 +1,73 @@
-    .include "macros/scrcmd.inc"
+#include "macros/scrcmd.inc"
+#include "res/text/bank/snowpoint_temple_b5f.h"
+#include "res/field/events/events_snowpoint_temple_b5f.h"
 
-    .data
 
-    ScriptEntry _000A
-    ScriptEntry _0025
-    .short 0xFD13
+    ScriptEntry SnowpointTempleB5F_OnLoad
+    ScriptEntry SnowpointTempleB5F_Regigigas
+    ScriptEntryEnd
 
-_000A:
-    GoToIfSet 142, _0017
+SnowpointTempleB5F_OnLoad:
+    GoToIfSet FLAG_MAP_LOCAL_REMOVE_OBJECT, SnowpointTempleB5F_RemoveRegigigas
     End
 
-_0017:
-    SetFlag 0x243
-    ScrCmd_065 0
-    ClearFlag 142
+SnowpointTempleB5F_RemoveRegigigas:
+    SetFlag FLAG_HIDE_SNOWPOINT_TEMPLE_B5F_REGIGIGAS
+    RemoveObject LOCALID_REGIGIGAS
+    ClearFlag FLAG_MAP_LOCAL_REMOVE_OBJECT
     End
 
-_0025:
+SnowpointTempleB5F_Regigigas:
     LockAll
-    PlayFanfare SEQ_SE_CONFIRM
-    ScrCmd_04B 0x5DC
-    GoToIfSet 0x11A, _0081
-    ScrCmd_26B 0x800C
-    GoToIfEq 0x800C, 0, _0073
-    SetFlag 0x11A
-    ScrCmd_0CD 0
-    Message 1
+    PlaySE SE_CONFIRM_sseq_3
+    WaitSE SE_CONFIRM_sseq_3
+    GoToIfSet FLAG_AWAKENED_REGIGIGAS, SnowpointTempleB5F_EncounterRegigigas
+    CheckHasAllLegendaryTitansInParty VAR_RESULT
+    GoToIfEq VAR_RESULT, FALSE, SnowpointTempleB5F_GatherThreePokemon
+    SetFlag FLAG_AWAKENED_REGIGIGAS
+    BufferPlayerName 0
+    Message SnowpointTempleB5F_Text_KingShallAppear
     CloseMessage
-    ScrCmd_063 0
-    ScrCmd_269 0, 8, 90, 3, 0
-    ScrCmd_062 0
-    GoTo _0081
+    ReleaseObject LOCALID_REGIGIGAS
+    ShakeObject LOCALID_REGIGIGAS, 8, 90, 3, 0
+    LockObject LOCALID_REGIGIGAS
+    GoTo SnowpointTempleB5F_EncounterRegigigas
     End
 
-_0073:
-    ScrCmd_0CD 0
-    Message 0
-    WaitABXPadPress
-    CloseMessage
-    ReleaseAll
-    End
-
-_0081:
-    Message 2
-    CloseMessage
-    ScrCmd_04C 0x1E6, 0
-    ScrCmd_04D
-    SetFlag 142
-    ScrCmd_2BD 0x1E6, 1
-    ClearFlag 142
-    ScrCmd_0EC 0x800C
-    GoToIfEq 0x800C, 0, _00D1
-    ScrCmd_2BC 0x800C
-    GoToIfEq 0x800C, 1, _00C6
-    SetFlag 0x11B
-    ReleaseAll
-    End
-
-_00C6:
-    Message 3
-    WaitABXPadPress
+SnowpointTempleB5F_GatherThreePokemon:
+    BufferPlayerName 0
+    Message SnowpointTempleB5F_Text_GatherThreePokemon
+    WaitButton
     CloseMessage
     ReleaseAll
     End
 
-_00D1:
-    ScrCmd_0EB
+SnowpointTempleB5F_EncounterRegigigas:
+    Message SnowpointTempleB5F_Text_RegigigasCry
+    CloseMessage
+    PlayCry SPECIES_REGIGIGAS
+    WaitCry
+    SetFlag FLAG_MAP_LOCAL_REMOVE_OBJECT
+    StartLegendaryBattle SPECIES_REGIGIGAS, 1
+    ClearFlag FLAG_MAP_LOCAL_REMOVE_OBJECT
+    CheckWonBattle VAR_RESULT
+    GoToIfEq VAR_RESULT, FALSE, SnowpointTempleB5F_BlackOut
+    CheckDidNotCapture VAR_RESULT
+    GoToIfEq VAR_RESULT, TRUE, SnowpointTempleB5F_RegigigasDisappeared
+    SetFlag FLAG_CAUGHT_REGIGIGAS
     ReleaseAll
     End
 
-    .byte 0
+SnowpointTempleB5F_RegigigasDisappeared:
+    Message SnowpointTempleB5F_Text_RegigigasDisappeared
+    WaitButton
+    CloseMessage
+    ReleaseAll
+    End
+
+SnowpointTempleB5F_BlackOut:
+    BlackOutFromBattle
+    ReleaseAll
+    End
+
+    .balign 4, 0

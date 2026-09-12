@@ -1,6 +1,5 @@
-    .include "macros/btlcmd.inc"
+#include "macros/btlcmd.inc"
 
-    .data
 
 _000:
     CompareMonDataToValue OPCODE_EQU, BTLSCR_ATTACKER, BATTLEMON_CUSTAP_BERRY, 1, _022
@@ -15,7 +14,7 @@ _022:
     Wait 
     CompareVarToValue OPCODE_EQU, BTLVAR_WAITING_BATTLERS, 1, _039
     // {0}’s {1} let it move first!
-    PrintMessage pl_msg_00000368_01254, TAG_NICKNAME_ITEM, BTLSCR_ATTACKER, BTLSCR_ATTACKER
+    PrintMessage BattleStrings_Text_PokemonsItemLetItMoveFirst_Ally, TAG_NICKNAME_ITEM, BTLSCR_ATTACKER, BTLSCR_ATTACKER
     Wait 
     WaitButtonABTime 30
 

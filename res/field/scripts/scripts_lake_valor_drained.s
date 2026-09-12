@@ -1,55 +1,27 @@
-    .include "macros/scrcmd.inc"
+#include "macros/scrcmd.inc"
+#include "res/text/bank/lake_valor_drained.h"
 
-    .data
 
-    ScriptEntry _0012
-    ScriptEntry _0025
-    ScriptEntry _0038
-    ScriptEntry _004B
-    .short 0xFD13
+    ScriptEntry LakeValorDrained_GruntM1
+    ScriptEntry LakeValorDrained_GruntF
+    ScriptEntry LakeValorDrained_GruntM2
+    ScriptEntry LakeValorDrained_Magikarp
+    ScriptEntryEnd
 
-_0012:
-    PlayFanfare SEQ_SE_CONFIRM
-    LockAll
-    FacePlayer
-    Message 0
-    WaitABXPadPress
-    CloseMessage
-    ReleaseAll
+LakeValorDrained_GruntM1:
+    NPCMessage LakeValorDrained_Text_WhatYouDoWant
     End
 
-_0025:
-    PlayFanfare SEQ_SE_CONFIRM
-    LockAll
-    FacePlayer
-    Message 1
-    WaitABXPadPress
-    CloseMessage
-    ReleaseAll
+LakeValorDrained_GruntF:
+    NPCMessage LakeValorDrained_Text_MagikarpWorthless
     End
 
-_0038:
-    PlayFanfare SEQ_SE_CONFIRM
-    LockAll
-    FacePlayer
-    Message 2
-    WaitABXPadPress
-    CloseMessage
-    ReleaseAll
+LakeValorDrained_GruntM2:
+    NPCMessage LakeValorDrained_Text_NextStopLakeVerity
     End
 
-_004B:
-    PlayFanfare SEQ_SE_CONFIRM
-    LockAll
-    FacePlayer
-    ScrCmd_04B 0x5DC
-    ScrCmd_04C 129, 11
-    Message 3
-    ScrCmd_04D
-    WaitABXPadPress
-    CloseMessage
-    ReleaseAll
+LakeValorDrained_Magikarp:
+    PokemonCryAndMessage SPECIES_MAGIKARP, LakeValorDrained_Text_MagikarpIsFlopping, 11
     End
 
-    .byte 0
-    .byte 0
+    .balign 4, 0

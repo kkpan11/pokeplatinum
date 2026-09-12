@@ -3,41 +3,16 @@
 #include <nitro.h>
 #include <string.h>
 
-#include "struct_defs/struct_02049FA8.h"
-#include "struct_defs/struct_020556C4.h"
-#include "struct_defs/struct_0205EC34.h"
-#include "struct_defs/struct_02061D3C.h"
+#include "struct_defs/player_data.h"
 
 #include "field/field_system.h"
 
+#include "location.h"
 #include "map_object.h"
+#include "overworld_map_history.h"
 #include "player_avatar.h"
 #include "savedata.h"
-#include "unk_0203A7D8.h"
-#include "unk_020556C4.h"
-
-typedef struct UnkStruct_0203A790_t {
-    Location unk_00;
-    Location entrance;
-    Location previous;
-    Location unk_3C;
-    Location unk_50;
-    u16 unk_64;
-    u16 weather;
-    u16 warpId;
-    u8 cameraType;
-    UnkStruct_020556C4 unk_6C;
-    PlayerData playerData;
-    u16 unk_94;
-    u16 unk_96;
-    u16 unk_98;
-    u16 unk_9A;
-    u16 unk_9C;
-} FieldOverworldState;
-
-typedef struct UnkStruct_0203A79C_t {
-    MapObjectSave unk_00[64];
-} FieldOverworldSave;
+#include "spawn_locations.h"
 
 int FieldOverworldState_Size(void)
 {
@@ -49,24 +24,24 @@ int FieldOverworldSave_Size(void)
     return sizeof(FieldOverworldSave);
 }
 
-void FieldOverworldSave_Init(FieldOverworldSave *fieldState)
+void FieldOverworldSave_Init(FieldOverworldSave *fieldSave)
 {
-    MI_CpuClear32(fieldState, sizeof(FieldOverworldSave));
+    MI_CpuClear32(fieldSave, sizeof(FieldOverworldSave));
 }
 
 void FieldOverworldState_Init(FieldOverworldState *fieldState)
 {
     memset(fieldState, 0, sizeof(FieldOverworldState));
 
-    sub_020556C4(&fieldState->unk_6C);
+    OverworldMapHistory_Clear(&fieldState->mapHistory);
     PlayerData_Init(&fieldState->playerData);
 
-    fieldState->warpId = sub_0203A7EC();
+    fieldState->blackOutWarpId = FieldOverworldState_GetDefaultWarpID();
 }
 
-Location *sub_0203A720(FieldOverworldState *fieldState)
+Location *FieldOverworldState_GetPlayerLocation(FieldOverworldState *fieldState)
 {
-    return &fieldState->unk_00;
+    return &fieldState->player;
 }
 
 Location *FieldOverworldState_GetEntranceLocation(FieldOverworldState *fieldState)
@@ -79,25 +54,25 @@ Location *FieldOverworldState_GetPrevLocation(FieldOverworldState *fieldState)
     return &fieldState->previous;
 }
 
-Location *sub_0203A72C(FieldOverworldState *fieldState)
+Location *FieldOverworldState_GetExitLocation(FieldOverworldState *fieldState)
 {
-    return &fieldState->unk_50;
+    return &fieldState->exit;
 }
 
-Location *sub_0203A730(FieldOverworldState *fieldState)
+Location *FieldOverworldState_GetSpecialLocation(FieldOverworldState *fieldState)
 {
-    return &fieldState->unk_3C;
+    return &fieldState->special;
 }
 
-void sub_0203A734(FieldOverworldState *fieldState, Location *param1)
+void FieldOverworldState_SetSpecialLocation(FieldOverworldState *fieldState, Location *location)
 {
-    fieldState->unk_3C = *param1;
+    fieldState->special = *location;
     return;
 }
 
-u16 *sub_0203A748(FieldOverworldState *fieldState)
+u16 *FieldOverworldState_GetSpecialBGM(FieldOverworldState *fieldState)
 {
-    return &fieldState->unk_64;
+    return &fieldState->bgm;
 }
 
 u16 FieldOverworldState_GetWeather(const FieldOverworldState *fieldState)
@@ -110,19 +85,19 @@ void FieldOverworldState_SetWeather(FieldOverworldState *fieldState, u16 weather
     fieldState->weather = weather;
 }
 
-u16 FieldOverworldState_GetWarpId(const FieldOverworldState *fieldState)
+u16 FieldOverworldState_GetBlackOutWarpId(const FieldOverworldState *fieldState)
 {
-    return fieldState->warpId;
+    return fieldState->blackOutWarpId;
 }
 
-void FieldOverworldState_SetWarpId(FieldOverworldState *fieldState, u16 warpId)
+void FieldOverworldState_SetBlackOutWarpId(FieldOverworldState *fieldState, u16 blackOutWarpId)
 {
-    fieldState->warpId = warpId;
+    fieldState->blackOutWarpId = blackOutWarpId;
 }
 
-UnkStruct_020556C4 *sub_0203A76C(FieldOverworldState *fieldState)
+OverworldMapHistory *FieldOverworldState_GetMapHistory(FieldOverworldState *fieldState)
 {
-    return &fieldState->unk_6C;
+    return &fieldState->mapHistory;
 }
 
 int FieldOverworldState_GetCameraType(const FieldOverworldState *fieldState)
@@ -130,9 +105,9 @@ int FieldOverworldState_GetCameraType(const FieldOverworldState *fieldState)
     return fieldState->cameraType;
 }
 
-void FieldOverworldState_SetCameraType(FieldOverworldState *fieldState, int param1)
+void FieldOverworldState_SetCameraType(FieldOverworldState *fieldState, int type)
 {
-    fieldState->cameraType = param1;
+    fieldState->cameraType = type;
 }
 
 PlayerData *FieldOverworldState_GetPlayerData(FieldOverworldState *fieldState)
@@ -140,31 +115,29 @@ PlayerData *FieldOverworldState_GetPlayerData(FieldOverworldState *fieldState)
     return &fieldState->playerData;
 }
 
-u16 *sub_0203A784(FieldOverworldState *fieldState)
+u16 *FieldOverworldState_GetSafariBallCount(FieldOverworldState *fieldState)
 {
-    return &fieldState->unk_98;
+    return &fieldState->safariBalls;
 }
 
-u16 *sub_0203A788(FieldOverworldState *fieldState)
+u16 *FieldOverworldState_GetSafariStepCount(FieldOverworldState *fieldState)
 {
-    return &fieldState->unk_96;
+    return &fieldState->safariSteps;
 }
 
-u16 *sub_0203A78C(FieldOverworldState *fieldState)
+u16 *FieldOverworldState_GetPoisonStepCount(FieldOverworldState *fieldState)
 {
-    return &fieldState->unk_94;
+    return &fieldState->poisonSteps;
 }
 
 FieldOverworldState *SaveData_GetFieldOverworldState(SaveData *saveData)
 {
-    FieldOverworldState *fieldState = SaveData_SaveTable(saveData, 6);
-    return fieldState;
+    return SaveData_SaveTable(saveData, SAVE_TABLE_ENTRY_FIELD_PLAYER_STATE);
 }
 
 FieldOverworldSave *SaveData_GetFieldOverworldSave(SaveData *saveData)
 {
-    FieldOverworldSave *fieldSave = SaveData_SaveTable(saveData, 11);
-    return fieldSave;
+    return SaveData_SaveTable(saveData, SAVE_TABLE_ENTRY_FIELD_OVERWORLD_STATE);
 }
 
 void FieldSystem_SaveObjects(FieldSystem *fieldSystem)

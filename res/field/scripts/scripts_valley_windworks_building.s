@@ -1,350 +1,345 @@
-    .include "macros/scrcmd.inc"
+#include "macros/scrcmd.inc"
+#include "res/text/bank/valley_windworks_building.h"
+#include "res/field/events/events_valley_windworks_building.h"
 
-    .data
 
-    ScriptEntry _0022
-    ScriptEntry _005F
-    ScriptEntry _00AC
-    ScriptEntry _00BF
-    ScriptEntry _037C
-    ScriptEntry _03A7
-    ScriptEntry _03D2
-    ScriptEntry _03DA
-    .short 0xFD13
+    ScriptEntry ValleyWindworksBuilding_OnTransition
+    ScriptEntry ValleyWindworksBuilding_OnFrame_FirstEntry
+    ScriptEntry ValleyWindworksBuilding_GruntM
+    ScriptEntry ValleyWindworksBuilding_CoordEvent_Mars
+    ScriptEntry ValleyWindworksBuilding_ScientistPapa
+    ScriptEntry ValleyWindworksBuilding_Twin
+    ScriptEntry ValleyWindworksBuilding_PCWest
+    ScriptEntry ValleyWindworksBuilding_PCEast
+    ScriptEntryEnd
 
-_0022:
-    SetFlag 0x9C3
-    GoToIfGe 0x4089, 2, _0035
+ValleyWindworksBuilding_OnTransition:
+    SetFlag FLAG_FIRST_ARRIVAL_VALLEY_WINDWORKS
+    GoToIfGe VAR_VALLEY_WINDWORKS_STATE, 2, ValleyWindworksBuilding_SetGirlAndPapaPositions
     End
 
-_0035:
-    ScrCmd_186 5, 21, 5
-    ScrCmd_189 5, 2
-    ScrCmd_188 5, 16
-    ScrCmd_186 2, 18, 4
-    ScrCmd_189 2, 1
-    ScrCmd_188 2, 15
+ValleyWindworksBuilding_SetGirlAndPapaPositions:
+    SetObjectEventPos LOCALID_LITTLE_GIRL, 21, 5
+    SetObjectEventDir LOCALID_LITTLE_GIRL, DIR_WEST
+    SetObjectEventMovementType LOCALID_LITTLE_GIRL, MOVEMENT_TYPE_LOOK_WEST
+    SetObjectEventPos LOCALID_SCIENTIST_PAPA, 18, 4
+    SetObjectEventDir LOCALID_SCIENTIST_PAPA, DIR_SOUTH
+    SetObjectEventMovementType LOCALID_SCIENTIST_PAPA, MOVEMENT_TYPE_LOOK_SOUTH
     End
 
-_005F:
+ValleyWindworksBuilding_OnFrame_FirstEntry:
     LockAll
-    ApplyMovement 0, _0090
+    ApplyMovement LOCALID_GALACTIC_GRUNT_1, ValleyWindworksBuilding_Movement_GalacticGrunt1NoticePlayer
     WaitMovement
-    Message 0
+    Message ValleyWindworksBuilding_Text_GotToAlertCommander
     CloseMessage
-    ApplyMovement 0, _0098
-    ApplyMovement 0xFF, _00A0
+    ApplyMovement LOCALID_GALACTIC_GRUNT_1, ValleyWindworksBuilding_Movement_GalacticGrunt1Leave
+    ApplyMovement LOCALID_PLAYER, ValleyWindworksBuilding_Movement_PlayerWatchGalacticGrunt1Leave
     WaitMovement
-    ScrCmd_065 0
-    SetVar 0x40CF, 1
+    RemoveObject LOCALID_GALACTIC_GRUNT_1
+    SetVar VAR_VALLEY_WINDWORKS_TEAM_GALACTIC_STATE, 1
     ReleaseAll
     End
 
     .balign 4, 0
-_0090:
-    MoveAction_04B
+ValleyWindworksBuilding_Movement_GalacticGrunt1NoticePlayer:
+    EmoteExclamationMark
     EndMovement
 
     .balign 4, 0
-_0098:
-    MoveAction_012 9
+ValleyWindworksBuilding_Movement_GalacticGrunt1Leave:
+    WalkFastWest 9
     EndMovement
 
     .balign 4, 0
-_00A0:
-    MoveAction_03F
-    MoveAction_022
+ValleyWindworksBuilding_Movement_PlayerWatchGalacticGrunt1Leave:
+    Delay8
+    WalkOnSpotNormalWest
     EndMovement
 
-_00AC:
-    PlayFanfare SEQ_SE_CONFIRM
+ValleyWindworksBuilding_GruntM:
+    NPCMessage ValleyWindworksBuilding_Text_CommanderWillSmooshYou
+    End
+
+ValleyWindworksBuilding_CoordEvent_Mars:
     LockAll
-    FacePlayer
-    Message 1
-    WaitABXPadPress
-    CloseMessage
-    ReleaseAll
+    GetPlayerMapPos VAR_0x8004, VAR_0x8005
+    GoToIfEq VAR_0x8005, 6, ValleyWindworksBuilding_MarsNoticeAndWalkToPlayer
+    GoToIfEq VAR_0x8005, 7, ValleyWindworksBuilding_MarsNoticePlayer
     End
 
-_00BF:
-    LockAll
-    ScrCmd_069 0x8004, 0x8005
-    GoToIfEq 0x8005, 6, _00E3
-    GoToIfEq 0x8005, 7, _00F5
+ValleyWindworksBuilding_MarsNoticeAndWalkToPlayer:
+    ApplyMovement LOCALID_MARS, ValleyWindworksBuilding_Movement_MarsNoticeAndWalkToPlayer
+    WaitMovement
+    GoTo ValleyWindworksBuilding_Mars
     End
 
-_00E3:
-    ApplyMovement 1, _0348
+ValleyWindworksBuilding_MarsNoticePlayer:
+    ApplyMovement LOCALID_MARS, ValleyWindworksBuilding_Movement_MarsNoticePlayer
     WaitMovement
-    GoTo _0107
+    GoTo ValleyWindworksBuilding_Mars
     End
 
-_00F5:
-    ApplyMovement 1, _0358
-    WaitMovement
-    GoTo _0107
-    End
-
-_0107:
-    Message 2
+ValleyWindworksBuilding_Mars:
+    Message ValleyWindworksBuilding_Text_LetsHaveABattle
     CloseMessage
-    ScrCmd_0E5 0x127, 0
-    ScrCmd_0EC 0x800C
-    GoToIfEq 0x800C, 0, _02B9
-    Message 3
+    StartTrainerBattle TRAINER_COMMANDER_MARS_VALLEY_WINDWORKS
+    CheckWonBattle VAR_RESULT
+    GoToIfEq VAR_RESULT, FALSE, ValleyWindworksBuilding_BlackOut
+    Message ValleyWindworksBuilding_Text_IMessedThatOneUp
     CloseMessage
-    ApplyMovement 7, _0374
+    ApplyMovement LOCALID_CHARON, ValleyWindworksBuilding_Movement_CharonWalkOnSpotSouth
     WaitMovement
-    WaitTime 15, 0x800C
-    Message 4
-    ApplyMovement 1, _0364
+    WaitTime 15, VAR_RESULT
+    Message ValleyWindworksBuilding_Text_LoseToAChild
+    ApplyMovement LOCALID_MARS, ValleyWindworksBuilding_Movement_MarsWalkOnSpotNorth
     WaitMovement
-    Message 5
-    ApplyMovement 1, _036C
+    Message ValleyWindworksBuilding_Text_WillYouShutIt
+    ApplyMovement LOCALID_MARS, ValleyWindworksBuilding_Movement_MarsWalkOnSpotWest
     WaitMovement
-    Message 6
+    Message ValleyWindworksBuilding_Text_LeaveForTheTimeBeing
     CloseMessage
-    FadeScreen 6, 1, 0, 0
+    FadeScreenOut
     WaitFadeScreen
-    ScrCmd_065 1
-    ScrCmd_065 7
-    ScrCmd_065 6
-    ScrCmd_065 3
-    ScrCmd_065 4
-    SetFlag 0x1A2
-    ClearFlag 0x17F
-    SetVar 0x4089, 2
-    SetFlag 0xAA8
-    FadeScreen 6, 1, 1, 0
+    RemoveObject LOCALID_MARS
+    RemoveObject LOCALID_CHARON
+    RemoveObject LOCALID_GRUNT_M
+    RemoveObject LOCALID_GALACTIC_GRUNT_2
+    RemoveObject LOCALID_GALACTIC_GRUNT_3
+    SetFlag FLAG_HIDE_ROUTE_205_SOUTH_GRUNTS
+    ClearFlag FLAG_HIDE_ROUTE_205_SOUTH_YOUNGSTER
+    SetVar VAR_VALLEY_WINDWORKS_STATE, 2
+    SetFlag FLAG_DAILY_WON_AGAINST_VALLEY_WINDWORKS_OUTSIDE_DRIFLOON
+    FadeScreenIn
     WaitFadeScreen
-    ScrCmd_069 0x8004, 0x8005
-    GoToIfEq 0x8005, 6, _01B7
-    GoToIfEq 0x8005, 7, _01C9
+    GetPlayerMapPos VAR_0x8004, VAR_0x8005
+    GoToIfEq VAR_0x8005, 6, ValleyWindworksBuilding_ScientistPapaWalkToPlayerZ6
+    GoToIfEq VAR_0x8005, 7, ValleyWindworksBuilding_ScientistPapaWalkToPlayerZ7
     End
 
-_01B7:
-    ApplyMovement 2, _02E8
+ValleyWindworksBuilding_ScientistPapaWalkToPlayerZ6:
+    ApplyMovement LOCALID_SCIENTIST_PAPA, ValleyWindworksBuilding_Movement_ScientistPapaWalkToPlayerZ6
     WaitMovement
-    GoTo _01DB
+    GoTo ValleyWindworksBuilding_FinallySeeMyDaughterAgain
     End
 
-_01C9:
-    ApplyMovement 2, _02F4
+ValleyWindworksBuilding_ScientistPapaWalkToPlayerZ7:
+    ApplyMovement LOCALID_SCIENTIST_PAPA, ValleyWindworksBuilding_Movement_ScientistPapaWalkToPlayerZ7
     WaitMovement
-    GoTo _01DB
+    GoTo ValleyWindworksBuilding_FinallySeeMyDaughterAgain
     End
 
-_01DB:
-    Message 7
+ValleyWindworksBuilding_FinallySeeMyDaughterAgain:
+    Message ValleyWindworksBuilding_Text_FinallySeeMyDaughterAgain
     CloseMessage
-    SetFlag 0x1F8
-    ClearFlag 0x1F9
-    ScrCmd_188 5, 16
-    ScrCmd_064 5
-    ScrCmd_062 5
-    ScrCmd_069 0x8004, 0x8005
-    GoToIfEq 0x8005, 6, _0218
-    GoToIfEq 0x8005, 7, _0232
+    SetFlag FLAG_HIDE_ROUTE_205_SOUTH_LITTLE_GIRL
+    ClearFlag FLAG_HIDE_VALLEY_WINDWORKS_BUILDING_LITTLE_GIRL
+    SetObjectEventMovementType LOCALID_LITTLE_GIRL, MOVEMENT_TYPE_LOOK_WEST
+    AddObject LOCALID_LITTLE_GIRL
+    LockObject LOCALID_LITTLE_GIRL
+    GetPlayerMapPos VAR_0x8004, VAR_0x8005
+    GoToIfEq VAR_0x8005, 6, ValleyWindworksBuilding_LittleGirlWalkToScientistPapaZ6
+    GoToIfEq VAR_0x8005, 7, ValleyWindworksBuilding_LittleGirlWalkToScientistPapaZ7
     End
 
-_0218:
-    ApplyMovement 5, _02C0
-    ApplyMovement 2, _0300
+ValleyWindworksBuilding_LittleGirlWalkToScientistPapaZ6:
+    ApplyMovement LOCALID_LITTLE_GIRL, ValleyWindworksBuilding_Movement_LittleGirlWalkToScientistPapaZ6
+    ApplyMovement LOCALID_SCIENTIST_PAPA, ValleyWindworksBuilding_Movement_ScientistPapaWalkOnSpotSouth
     WaitMovement
-    GoTo _024C
+    GoTo ValleyWindworksBuilding_YuckPapaYoureStinky
     End
 
-_0232:
-    ApplyMovement 5, _02D4
-    ApplyMovement 2, _030C
+ValleyWindworksBuilding_LittleGirlWalkToScientistPapaZ7:
+    ApplyMovement LOCALID_LITTLE_GIRL, ValleyWindworksBuilding_Movement_LittleGirlWalkToScientistPapaZ7
+    ApplyMovement LOCALID_SCIENTIST_PAPA, ValleyWindworksBuilding_Movement_ScientistPapaWalkOnSpotNorth
     WaitMovement
-    GoTo _024C
+    GoTo ValleyWindworksBuilding_YuckPapaYoureStinky
     End
 
-_024C:
-    Message 8
+ValleyWindworksBuilding_YuckPapaYoureStinky:
+    Message ValleyWindworksBuilding_Text_YuckPapaYoureStinky
     CloseMessage
-    ScrCmd_069 0x8004, 0x8005
-    GoToIfEq 0x8005, 6, _0273
-    GoToIfEq 0x8005, 7, _0285
+    GetPlayerMapPos VAR_0x8004, VAR_0x8005
+    GoToIfEq VAR_0x8005, 6, ValleyWindworksBuilding_ScientistPapaTurnInSpotFaceSouth
+    GoToIfEq VAR_0x8005, 7, ValleyWindworksBuilding_ScientistPapaTurnInSpotFaceNorth
     End
 
-_0273:
-    ApplyMovement 2, _0318
+ValleyWindworksBuilding_ScientistPapaTurnInSpotFaceSouth:
+    ApplyMovement LOCALID_SCIENTIST_PAPA, ValleyWindworksBuilding_Movement_ScientistPapaTurnInSpotFaceSouth
     WaitMovement
-    GoTo _0297
+    GoTo ValleyWindworksBuilding_BalloonPokemonWillVisitAgain
     End
 
-_0285:
-    ApplyMovement 2, _0330
+ValleyWindworksBuilding_ScientistPapaTurnInSpotFaceNorth:
+    ApplyMovement LOCALID_SCIENTIST_PAPA, ValleyWindworksBuilding_Movement_ScientistPapaTurnInSpotFaceNorth
     WaitMovement
-    GoTo _0297
+    GoTo ValleyWindworksBuilding_BalloonPokemonWillVisitAgain
     End
 
-_0297:
-    Message 9
-    Message 10
-    WaitABXPadPress
+ValleyWindworksBuilding_BalloonPokemonWillVisitAgain:
+    Message ValleyWindworksBuilding_Text_SorryWorkingNonstop
+    Message ValleyWindworksBuilding_Text_BalloonPokemonWillVisitAgain
+    WaitButton
     CloseMessage
-    SetVar 0x411E, 1
-    ClearFlag 0x1FA
-    SetVar 0x40CF, 2
-    SetFlag 0x988
+    SetVar VAR_VALLEY_WINDWORKS_LOOKER_STATE, 1
+    ClearFlag FLAG_HIDE_VALLEY_WINDWORKS_OUTSIDE_LOOKER
+    SetVar VAR_VALLEY_WINDWORKS_TEAM_GALACTIC_STATE, 2
+    SetFlag FLAG_ALT_MUSIC_VALLEY_WINDWORKS_BUILDING
     ReleaseAll
     End
 
-_02B9:
-    ScrCmd_0EB
+ValleyWindworksBuilding_BlackOut:
+    BlackOutFromBattle
     ReleaseAll
     End
 
     .balign 4, 0
-_02C0:
-    MoveAction_013 4
-    MoveAction_010
-    MoveAction_013 6
-    MoveAction_024
+ValleyWindworksBuilding_Movement_LittleGirlWalkToScientistPapaZ6:
+    WalkFastEast 4
+    WalkFastNorth
+    WalkFastEast 6
+    WalkOnSpotFastNorth
     EndMovement
 
     .balign 4, 0
-_02D4:
-    MoveAction_013 4
-    MoveAction_010 2
-    MoveAction_013 6
-    MoveAction_025
+ValleyWindworksBuilding_Movement_LittleGirlWalkToScientistPapaZ7:
+    WalkFastEast 4
+    WalkFastNorth 2
+    WalkFastEast 6
+    WalkOnSpotFastSouth
     EndMovement
 
     .balign 4, 0
-_02E8:
-    MoveAction_00D 3
-    MoveAction_00E
+ValleyWindworksBuilding_Movement_ScientistPapaWalkToPlayerZ6:
+    WalkNormalSouth 3
+    WalkNormalWest
     EndMovement
 
     .balign 4, 0
-_02F4:
-    MoveAction_00D 4
-    MoveAction_00E
+ValleyWindworksBuilding_Movement_ScientistPapaWalkToPlayerZ7:
+    WalkNormalSouth 4
+    WalkNormalWest
     EndMovement
 
     .balign 4, 0
-_0300:
-    MoveAction_03F 6
-    MoveAction_021
+ValleyWindworksBuilding_Movement_ScientistPapaWalkOnSpotSouth:
+    Delay8 6
+    WalkOnSpotNormalSouth
     EndMovement
 
     .balign 4, 0
-_030C:
-    MoveAction_03F 6
-    MoveAction_020
+ValleyWindworksBuilding_Movement_ScientistPapaWalkOnSpotNorth:
+    Delay8 6
+    WalkOnSpotNormalNorth
     EndMovement
 
     .balign 4, 0
-_0318:
-    MoveAction_003
-    MoveAction_03F 2
-    MoveAction_002
-    MoveAction_03F 2
-    MoveAction_001
+ValleyWindworksBuilding_Movement_ScientistPapaTurnInSpotFaceSouth:
+    FaceEast
+    Delay8 2
+    FaceWest
+    Delay8 2
+    FaceSouth
     EndMovement
 
     .balign 4, 0
-_0330:
-    MoveAction_003
-    MoveAction_03F 2
-    MoveAction_002
-    MoveAction_03F 2
-    MoveAction_000
+ValleyWindworksBuilding_Movement_ScientistPapaTurnInSpotFaceNorth:
+    FaceEast
+    Delay8 2
+    FaceWest
+    Delay8 2
+    FaceNorth
     EndMovement
 
     .balign 4, 0
-_0348:
-    MoveAction_04B
-    MoveAction_00C
-    MoveAction_022
+ValleyWindworksBuilding_Movement_MarsNoticeAndWalkToPlayer:
+    EmoteExclamationMark
+    WalkNormalNorth
+    WalkOnSpotNormalWest
     EndMovement
 
     .balign 4, 0
-_0358:
-    MoveAction_04B
-    MoveAction_022
+ValleyWindworksBuilding_Movement_MarsNoticePlayer:
+    EmoteExclamationMark
+    WalkOnSpotNormalWest
     EndMovement
 
     .balign 4, 0
-_0364:
-    MoveAction_020
+ValleyWindworksBuilding_Movement_MarsWalkOnSpotNorth:
+    WalkOnSpotNormalNorth
     EndMovement
 
     .balign 4, 0
-_036C:
-    MoveAction_022
+ValleyWindworksBuilding_Movement_MarsWalkOnSpotWest:
+    WalkOnSpotNormalWest
     EndMovement
 
     .balign 4, 0
-_0374:
-    MoveAction_021
+ValleyWindworksBuilding_Movement_CharonWalkOnSpotSouth:
+    WalkOnSpotNormalSouth
     EndMovement
 
-_037C:
-    PlayFanfare SEQ_SE_CONFIRM
+ValleyWindworksBuilding_ScientistPapa:
+    PlaySE SE_CONFIRM_sseq_3
     LockAll
     FacePlayer
-    GoToIfGe 0x40CF, 3, _039C
-    Message 11
-    WaitABXPadPress
+    GoToIfGe VAR_VALLEY_WINDWORKS_TEAM_GALACTIC_STATE, 3, ValleyWindworksBuilding_ValleyWindworksUsesTurbines
+    Message ValleyWindworksBuilding_Text_BalloonPokemonOnDayOfWeek
+    WaitButton
     CloseMessage
     ReleaseAll
     End
 
-_039C:
-    Message 12
-    WaitABXPadPress
+ValleyWindworksBuilding_ValleyWindworksUsesTurbines:
+    Message ValleyWindworksBuilding_Text_ValleyWindworksUsesTurbines
+    WaitButton
     CloseMessage
     ReleaseAll
     End
 
-_03A7:
-    PlayFanfare SEQ_SE_CONFIRM
+ValleyWindworksBuilding_Twin:
+    PlaySE SE_CONFIRM_sseq_3
     LockAll
     FacePlayer
-    GoToIfGe 0x40CF, 3, _03C7
-    Message 10
-    WaitABXPadPress
+    GoToIfGe VAR_VALLEY_WINDWORKS_TEAM_GALACTIC_STATE, 3, ValleyWindworksBuilding_BlowBalloonPokemonAway
+    Message ValleyWindworksBuilding_Text_BalloonPokemonWillVisitAgain
+    WaitButton
     CloseMessage
     ReleaseAll
     End
 
-_03C7:
-    Message 13
-    WaitABXPadPress
+ValleyWindworksBuilding_BlowBalloonPokemonAway:
+    Message ValleyWindworksBuilding_Text_BlowBalloonPokemonAway
+    WaitButton
     CloseMessage
     ReleaseAll
     End
 
-_03D2:
-    GoTo _03E2
+ValleyWindworksBuilding_PCWest:
+    GoTo ValleyWindworksBuilding_PC
     End
 
-_03DA:
-    GoTo _03E2
+ValleyWindworksBuilding_PCEast:
+    GoTo ValleyWindworksBuilding_PC
     End
 
-_03E2:
-    PlayFanfare SEQ_SE_CONFIRM
+ValleyWindworksBuilding_PC:
+    PlaySE SE_CONFIRM_sseq_3
     LockAll
-    GoToIfGe 0x40AA, 2, _0400
-    Message 14
-    GoTo _040B
+    GoToIfGe VAR_EXITED_DISTORTION_WORLD_STATE, 2, ValleyWindworksBuilding_PCScreenFilledWithNumbers
+    Message ValleyWindworksBuilding_Text_BringersAndTargetsTeamGalactic
+    GoTo ValleyWindworksBuilding_PCEnd
     End
 
-_0400:
-    Message 15
-    GoTo _040B
+ValleyWindworksBuilding_PCScreenFilledWithNumbers:
+    Message ValleyWindworksBuilding_Text_PCScreenFilledWithNumbers
+    GoTo ValleyWindworksBuilding_PCEnd
     End
 
-_040B:
-    WaitABXPadPress
+ValleyWindworksBuilding_PCEnd:
+    WaitButton
     CloseMessage
     ReleaseAll
     End
 
-    .byte 0
+    .balign 4, 0

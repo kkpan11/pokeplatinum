@@ -9,9 +9,9 @@
 
 #include "heap.h"
 #include "inlines.h"
+#include "math_util.h"
 #include "savedata_misc.h"
-#include "unk_02017728.h"
-#include "unk_0201D15C.h"
+#include "system.h"
 #include "unk_0209A74C.h"
 #include "unk_0209AA74.h"
 
@@ -38,7 +38,7 @@ static BOOL sSaveComplete;
 
 SaveData *SaveData_Init(void)
 {
-    SaveData *saveData = Heap_AllocFromHeap(HEAP_ID_SAVE, sizeof(SaveData));
+    SaveData *saveData = Heap_Alloc(HEAP_ID_SAVE, sizeof(SaveData));
     ;
 
     MI_CpuClearFast(saveData, sizeof(SaveData));
@@ -117,9 +117,9 @@ const void *SaveData_SaveTableConst(const SaveData *saveData, int saveTableID)
 
 BOOL SaveData_Erase(SaveData *saveData)
 {
-    u8 *saveBuffer = Heap_AllocFromHeapAtEnd(HEAP_ID_APPLICATION, SAVE_SECTOR_SIZE);
+    u8 *saveBuffer = Heap_AllocAtEnd(HEAP_ID_APPLICATION, SAVE_SECTOR_SIZE);
 
-    SleepLock(1);
+    SleepLock(SLEEP_TYPE_SAVE_DATA);
 
     SaveBlockFooter_Erase(saveData, SAVE_BLOCK_ID_NORMAL, !saveData->blockOffsets[SAVE_BLOCK_ID_NORMAL]);
     SaveBlockFooter_Erase(saveData, SAVE_BLOCK_ID_BOXES, !saveData->blockOffsets[SAVE_BLOCK_ID_BOXES]);
@@ -133,11 +133,11 @@ BOOL SaveData_Erase(SaveData *saveData)
         SaveData_CardSave(SAVE_SECTOR_SIZE * (i + BACKUP_SECTOR_START), saveBuffer, SAVE_SECTOR_SIZE);
     }
 
-    Heap_FreeToHeap(saveBuffer);
+    Heap_Free(saveBuffer);
     SaveData_Clear(saveData);
 
     saveData->dataExists = FALSE;
-    SleepUnlock(1);
+    SleepUnlock(SLEEP_TYPE_SAVE_DATA);
 
     return TRUE;
 }
@@ -169,14 +169,14 @@ int SaveData_Save(SaveData *saveData)
     }
 
     if (saveData->isNewGameData) {
-        SleepLock(1);
+        SleepLock(SLEEP_TYPE_SAVE_DATA);
 
         SaveBlockFooter_Erase(saveData, SAVE_BLOCK_ID_NORMAL, !saveData->blockOffsets[SAVE_BLOCK_ID_NORMAL]);
         SaveBlockFooter_Erase(saveData, SAVE_BLOCK_ID_BOXES, !saveData->blockOffsets[SAVE_BLOCK_ID_BOXES]);
         SaveBlockFooter_Erase(saveData, SAVE_BLOCK_ID_NORMAL, saveData->blockOffsets[SAVE_BLOCK_ID_NORMAL]);
         SaveBlockFooter_Erase(saveData, SAVE_BLOCK_ID_BOXES, saveData->blockOffsets[SAVE_BLOCK_ID_BOXES]);
 
-        SleepUnlock(1);
+        SleepUnlock(SLEEP_TYPE_SAVE_DATA);
     }
 
     int saveResult = SaveDataState_Save(saveData);
@@ -288,12 +288,12 @@ static void SaveData_CheckInfoInit(SaveCheckInfo *checkInfo)
 
 u16 SaveData_CalculateChecksum(const SaveData *saveData, const void *startAddress, u32 size)
 {
-    return sub_0201D628(startAddress, size);
+    return CalcCRC16Checksum(startAddress, size);
 }
 
 static u16 SaveData_CalculateFooterChecksum(const SaveData *saveData, void *startAddress, u32 size)
 {
-    return sub_0201D628(startAddress, size - sizeof(SaveBlockFooter));
+    return CalcCRC16Checksum(startAddress, size - sizeof(SaveBlockFooter));
 }
 
 static u32 SaveData_SaveOffset(int sectorID, const SaveBlockInfo *blockInfo)
@@ -440,8 +440,8 @@ static void SaveData_SetBlockCheckInfo(SaveData *saveData, const SaveCheckInfo *
 
 static int SaveData_LoadCheck(SaveData *saveData)
 {
-    u8 *primaryBuffer = Heap_AllocFromHeapAtEnd(HEAP_ID_APPLICATION, SAVE_SECTOR_SIZE * SAVE_PAGE_MAX);
-    u8 *backupBuffer = Heap_AllocFromHeapAtEnd(HEAP_ID_APPLICATION, SAVE_SECTOR_SIZE * SAVE_PAGE_MAX);
+    u8 *primaryBuffer = Heap_AllocAtEnd(HEAP_ID_APPLICATION, SAVE_SECTOR_SIZE * SAVE_PAGE_MAX);
+    u8 *backupBuffer = Heap_AllocAtEnd(HEAP_ID_APPLICATION, SAVE_SECTOR_SIZE * SAVE_PAGE_MAX);
 
     SaveCheckInfo normalInfo[SECTOR_ID_MAX];
     SaveCheckInfo boxInfo[SECTOR_ID_MAX];
@@ -462,8 +462,8 @@ static int SaveData_LoadCheck(SaveData *saveData)
         SaveData_CheckInfoInit(&boxInfo[SECTOR_ID_BACKUP]);
     }
 
-    Heap_FreeToHeap(primaryBuffer);
-    Heap_FreeToHeap(backupBuffer);
+    Heap_Free(primaryBuffer);
+    Heap_Free(backupBuffer);
 
     int currNormalSector, currBoxSector, staleNormalSector, staleBoxSector;
     int normalResult = SaveCheckInfo_CompareSectors(&normalInfo[SECTOR_ID_PRIMARY], &normalInfo[SECTOR_ID_BACKUP], &currNormalSector, &staleNormalSector);
@@ -543,7 +543,7 @@ static void SaveDataExtra_LoadCheck(SaveData *saveData, int *frontierResult, int
     void *saveBuffer;
     if (currKey != EXTRA_SAVE_TABLE_ENTRY_NONE || oldKey != EXTRA_SAVE_TABLE_ENTRY_NONE) {
         saveBuffer = SaveDataExtra_Mirror(saveData, HEAP_ID_APPLICATION, EXTRA_SAVE_TABLE_ENTRY_FRONTIER, &loadResult, &isOld);
-        Heap_FreeToHeap(saveBuffer);
+        Heap_Free(saveBuffer);
 
         if (loadResult == LOAD_RESULT_CORRUPT) {
             *frontierResult = LOAD_RESULT_ERROR;
@@ -557,7 +557,7 @@ static void SaveDataExtra_LoadCheck(SaveData *saveData, int *frontierResult, int
 
         if (currKey != EXTRA_SAVE_TABLE_ENTRY_NONE || oldKey != EXTRA_SAVE_TABLE_ENTRY_NONE) {
             saveBuffer = SaveDataExtra_Mirror(saveData, HEAP_ID_APPLICATION, i, &loadResult, &isOld);
-            Heap_FreeToHeap(saveBuffer);
+            Heap_Free(saveBuffer);
 
             if (loadResult == LOAD_RESULT_CORRUPT) {
                 *videoResult = LOAD_RESULT_ERROR;
@@ -593,7 +593,7 @@ static BOOL SaveDataState_Load(SaveData *saveData)
     }
 
     for (i = 0; i < SAVE_TABLE_ENTRY_MAX; i++) {
-        saveData->pageInfo[i].checksum = sub_0201D628(SaveData_SaveTable(saveData, i), saveData->pageInfo[i].size);
+        saveData->pageInfo[i].checksum = CalcCRC16Checksum(SaveData_SaveTable(saveData, i), saveData->pageInfo[i].size);
     }
 
     return TRUE;
@@ -662,7 +662,7 @@ static void SaveDataState_Init(SaveData *saveData, SaveDataState *state, int blo
         state->endBlock = blockID + 1;
     }
 
-    SleepLock(1);
+    SleepLock(SLEEP_TYPE_SAVE_DATA);
 }
 
 static int SaveDataState_Main(SaveData *saveData, SaveDataState *state)
@@ -756,7 +756,7 @@ static void SaveDataState_End(SaveData *saveData, SaveDataState *state, int save
         saveData->fullSaveRequired = FALSE;
     }
 
-    SleepUnlock(1);
+    SleepUnlock(SLEEP_TYPE_SAVE_DATA);
 }
 
 static void SaveDataState_Cancel(SaveData *saveData, SaveDataState *state)
@@ -781,7 +781,7 @@ static void SaveDataState_Cancel(SaveData *saveData, SaveDataState *state)
         state->locked = FALSE;
     }
 
-    SleepUnlock(1);
+    SleepUnlock(SLEEP_TYPE_SAVE_DATA);
 }
 
 BOOL SaveDataState_Save(SaveData *saveData)
@@ -917,7 +917,7 @@ void SaveDataExtra_Init(SaveData *saveData)
         extraTable[i].initFunc(extraData);
 
         SaveDataExtra_Save(saveData, extraTable[i].dataID, extraData);
-        Heap_FreeToHeap(extraData);
+        Heap_Free(extraData);
     }
 
     SaveData_MiscSaveBlock_SetInitFlag(saveData);
@@ -931,7 +931,7 @@ static void SaveCheckFooter_Set(const SaveData *saveData, void *saveBody, int ex
     footer->saveCounter = saveData->sectorCounter + 1;
     footer->size = size;
     footer->id = extraSaveID;
-    footer->checksum = sub_0201D628(saveBody, size + sizeof(SaveCheckFooter) - 2);
+    footer->checksum = CalcCRC16Checksum(saveBody, size + sizeof(SaveCheckFooter) - 2);
 }
 
 static BOOL SaveCheckFooter_Validate(const SaveData *saveData, void *saveBody, int extraSaveID, u32 size)
@@ -950,7 +950,7 @@ static BOOL SaveCheckFooter_Validate(const SaveData *saveData, void *saveBody, i
         return FALSE;
     }
 
-    if (footer->checksum != sub_0201D628(saveBody, size + sizeof(SaveCheckFooter) - 2)) {
+    if (footer->checksum != CalcCRC16Checksum(saveBody, size + sizeof(SaveCheckFooter) - 2)) {
         return FALSE;
     }
 
@@ -964,7 +964,7 @@ static u32 SaveCheckFooter_SaveCounter(void *saveBody, u32 size)
 
 int SaveDataExtra_Save(const SaveData *saveData, int extraSaveID, void *data)
 {
-    SleepLock(1);
+    SleepLock(SLEEP_TYPE_SAVE_DATA);
     GF_ASSERT(extraSaveID < gExtraSaveTableSize);
 
     const SaveTableEntry *saveTable = &gExtraSaveTable[extraSaveID];
@@ -994,17 +994,17 @@ int SaveDataExtra_Save(const SaveData *saveData, int extraSaveID, void *data)
     }
 
     if (saveResult == TRUE) {
-        SleepUnlock(1);
+        SleepUnlock(SLEEP_TYPE_SAVE_DATA);
         return SAVE_RESULT_OK;
     } else {
-        SleepUnlock(1);
+        SleepUnlock(SLEEP_TYPE_SAVE_DATA);
         return SAVE_RESULT_CORRUPT;
     }
 }
 
 int SaveDataExtra_SaveMirror(SaveData *saveData, int extraSaveID, void *data)
 {
-    SleepLock(1);
+    SleepLock(SLEEP_TYPE_SAVE_DATA);
     GF_ASSERT(extraSaveID < gExtraSaveTableSize);
 
     const SaveTableEntry *saveTable = &gExtraSaveTable[extraSaveID];
@@ -1037,15 +1037,15 @@ int SaveDataExtra_SaveMirror(SaveData *saveData, int extraSaveID, void *data)
     }
 
     if (saveResult == TRUE) {
-        SleepUnlock(1);
+        SleepUnlock(SLEEP_TYPE_SAVE_DATA);
         return SAVE_RESULT_OK;
     } else {
-        SleepUnlock(1);
+        SleepUnlock(SLEEP_TYPE_SAVE_DATA);
         return SAVE_RESULT_CORRUPT;
     }
 }
 
-void *SaveDataExtra_Get(SaveData *saveData, int heapID, int extraSaveID, int *loadResult)
+void *SaveDataExtra_Get(SaveData *saveData, enum HeapID heapID, int extraSaveID, int *loadResult)
 {
     GF_ASSERT(extraSaveID < gExtraSaveTableSize);
 
@@ -1053,7 +1053,7 @@ void *SaveDataExtra_Get(SaveData *saveData, int heapID, int extraSaveID, int *lo
     GF_ASSERT(saveTable->dataID == extraSaveID);
 
     u32 size = saveTable->sizeFunc() + sizeof(SaveCheckFooter);
-    void *ret = Heap_AllocFromHeap(heapID, size);
+    void *ret = Heap_Alloc(heapID, size);
 
     SaveData_CardLoad((PRIMARY_SECTOR_START + saveTable->blockID) * SAVE_SECTOR_SIZE, ret, size);
 
@@ -1103,7 +1103,7 @@ void *SaveDataExtra_Get(SaveData *saveData, int heapID, int extraSaveID, int *lo
     return ret;
 }
 
-void *SaveDataExtra_Mirror(SaveData *saveData, int heapID, int extraSaveID, int *loadResult, BOOL *isOld)
+void *SaveDataExtra_Mirror(SaveData *saveData, enum HeapID heapID, int extraSaveID, int *loadResult, BOOL *isOld)
 {
     const SaveTableEntry *saveTable;
     void *ret;
@@ -1118,7 +1118,7 @@ void *SaveDataExtra_Mirror(SaveData *saveData, int heapID, int extraSaveID, int 
     GF_ASSERT(saveTable->dataID == extraSaveID);
 
     size = saveTable->sizeFunc() + sizeof(SaveCheckFooter);
-    ret = Heap_AllocFromHeap(heapID, size);
+    ret = Heap_Alloc(heapID, size);
 
     u32 primaryKey, backupKey, currKey, oldKey;
     u8 keyFlag;
@@ -1253,7 +1253,7 @@ BOOL SaveData_CardLoad(u32 address, void *data, u32 size)
     OS_ReleaseLockID(lockID);
 
     if (!result) {
-        Heap_FreeToHeap(sSaveDataPtr);
+        Heap_Free(sSaveDataPtr);
         sub_0209A74C(HEAP_ID_SAVE);
     }
 
@@ -1300,7 +1300,7 @@ static BOOL SaveData_CardSave_Main(s32 lockID, BOOL lockFlag, BOOL *result)
             *result = TRUE;
             break;
         default:
-            GF_ASSERT(0);
+            GF_ASSERT(FALSE);
         case CARD_RESULT_TIMEOUT:
             *result = FALSE;
             SaveData_CardSave_Error(lockID, SAVE_ERROR_DISABLE_WRITE);
@@ -1321,7 +1321,7 @@ static void SaveData_CardSave_Error(s32 lockID, int errorID)
     CARD_UnlockBackup(lockID);
     OS_ReleaseLockID(lockID);
 
-    Heap_FreeToHeap(sSaveDataPtr);
+    Heap_Free(sSaveDataPtr);
     sub_0209AA74(HEAP_ID_SAVE, errorID);
 }
 
@@ -1331,7 +1331,7 @@ BOOL SaveData_Checksum(int saveTableID)
     void *table = SaveData_SaveTable(saveData, saveTableID);
     int size = SaveTableEntry_BodySize(saveTableID) - 4;
 
-    u16 checkResult = sub_0201D628(table, size);
+    u16 checkResult = CalcCRC16Checksum(table, size);
 
     int halfSize = size / 2;
     u16 *halfTable = table;
@@ -1341,7 +1341,7 @@ BOOL SaveData_Checksum(int saveTableID)
     }
 
     u32 address = (u32)&halfTable[halfSize];
-    GF_ASSERT(0);
+    GF_ASSERT(FALSE);
 
     return FALSE;
 }
@@ -1355,7 +1355,7 @@ void SaveData_SetChecksum(int saveTableID)
     int halfSize = size / 2;
     u16 *halfTable = table;
 
-    u16 checksum = sub_0201D628(table, size);
+    u16 checksum = CalcCRC16Checksum(table, size);
 
     halfTable[halfSize] = checksum;
 

@@ -1,34 +1,33 @@
+#include "main.h"
+
 #include <dwc.h>
-#include <nitro.h>
-#include <string.h>
 
-#include "struct_defs/struct_0203CC84.h"
-
-#include "overlay057/const_ov57_021D0F70.h"
-#include "overlay077/const_ov77_021D742C.h"
+#include "constants/graphics.h"
+#include "constants/heap.h"
+#include "constants/versions.h"
 
 #include "assert.h"
+#include "brightness_controller.h"
+#include "chatot_cry.h"
+#include "comm_manager.h"
 #include "communication_system.h"
-#include "core_sys.h"
+#include "font.h"
 #include "game_overlay.h"
+#include "game_start.h"
+#include "main.h"
+#include "math_util.h"
 #include "overlay_manager.h"
+#include "play_time_manager.h"
 #include "rtc.h"
 #include "save_player.h"
 #include "savedata.h"
+#include "screen_fade.h"
+#include "sound_system.h"
 #include "sys_task_manager.h"
-#include "unk_02000C88.h"
-#include "unk_02002B7C.h"
-#include "unk_02003B60.h"
-#include "unk_0200A9DC.h"
-#include "unk_0200F174.h"
-#include "unk_02017428.h"
-#include "unk_02017728.h"
-#include "unk_0201D15C.h"
-#include "unk_0201E3D8.h"
-#include "unk_02022844.h"
+#include "system.h"
+#include "timer.h"
+#include "touch_pad.h"
 #include "unk_0202419C.h"
-#include "unk_0202CC64.h"
-#include "unk_020366A0.h"
 #include "unk_02038FFC.h"
 #include "unk_02039814.h"
 #include "unk_02039A64.h"
@@ -36,84 +35,86 @@
 
 #define RESET_COMBO (PAD_BUTTON_START | PAD_BUTTON_SELECT | PAD_BUTTON_L | PAD_BUTTON_R)
 
-FS_EXTERN_OVERLAY(overlay57);
-FS_EXTERN_OVERLAY(overlay77);
+FS_EXTERN_OVERLAY(game_start);
+FS_EXTERN_OVERLAY(game_opening);
 
-typedef struct {
-    FSOverlayID unk_00;
-    OverlayManager *unk_04;
-    FSOverlayID unk_08;
-    const OverlayManagerTemplate *unk_0C;
-    UnkStruct_0203CC84 unk_10;
-} UnkStruct_02101D28;
+typedef struct Application {
+    FSOverlayID currOverlayID;
+    ApplicationManager *currApplication;
+    FSOverlayID nextOverlayID;
+    const ApplicationManagerTemplate *nextApplication;
+    ApplicationArgs args;
+} Application;
 
-static void sub_02000E3C(void);
-static void sub_02000E54(void);
+static void InitApplication(void);
+static void RunApplication(void);
 static void WaitFrame(void);
-static void sub_02000F10(int param0);
-static void SoftReset(int param0);
-static void HeapCanaryFailed(int param0, int param1);
+static void TrySystemReset(enum OSResetParameter resetParam);
+static void SoftReset(enum OSResetParameter resetParam);
+static void HeapCanaryFailed(int resetParam, int param1);
 static void CheckHeapCanary(void);
 
-static UnkStruct_02101D28 Unk_02101D28;
+static Application sApplication;
 // This variable doesn't really makes sense. If it's set to off, the game will
 // repeatedly try to restore the backlight to its saved state.
 static PMBackLightSwitch sSavedBacklightState;
 BOOL gIgnoreCartridgeForWake;
-extern const OverlayManagerTemplate Unk_ov77_021D788C;
+extern const ApplicationManagerTemplate gOpeningCutsceneAppTemplate;
 
 void NitroMain(void)
 {
-    sub_0201789C();
-    InitGraphics();
+    InitSystem();
+    InitVRAM();
     InitKeypadAndTouchpad();
 
-    sub_02017B70(0);
+    SetGBACartridgeVersion(VERSION_NONE);
     PM_GetBackLight(&sSavedBacklightState, NULL);
     sub_0202419C();
     InitRTC();
-    sub_02000E3C();
-    sub_02002B7C();
+    InitApplication();
 
-    sub_02002BB8(0, 3);
-    sub_02002BB8(1, 3);
-    sub_02002BB8(3, 3);
+    Fonts_Init();
+    Font_InitManager(FONT_SYSTEM, HEAP_ID_APPLICATION);
+    Font_InitManager(FONT_MESSAGE, HEAP_ID_APPLICATION);
+    Font_InitManager(FONT_UNOWN, HEAP_ID_APPLICATION);
 
-    Unk_02101D28.unk_10.unk_00 = -1;
-    Unk_02101D28.unk_10.unk_08 = SaveData_Init();
+    sApplication.args.unk_00 = -1;
+    sApplication.args.saveData = SaveData_Init();
 
-    sub_02003B60(GetChatotCryDataFromSave(Unk_02101D28.unk_10.unk_08), SaveData_Options(Unk_02101D28.unk_10.unk_08));
-    sub_02022844();
+    SoundSystem_Init(SaveData_GetChatotCry(sApplication.args.saveData), SaveData_GetOptions(sApplication.args.saveData));
+    Timer_Start();
 
-    if (sub_02038FFC(3) == DWC_INIT_RESULT_DESTROY_OTHER_SETTING) {
-        sub_02039A64(3, 0);
+    if (sub_02038FFC(HEAP_ID_APPLICATION) == DWC_INIT_RESULT_DESTROY_OTHER_SETTING) {
+        sub_02039A64(HEAP_ID_APPLICATION, 0);
     }
 
-    if (SaveData_BackupExists(Unk_02101D28.unk_10.unk_08) == 0) {
-        sub_0209A74C(0);
+    if (SaveData_BackupExists(sApplication.args.saveData) == FALSE) {
+        sub_0209A74C(HEAP_ID_SYSTEM);
     } else {
         switch (OS_GetResetParameter()) {
-        case 0:
-            Unk_02101D28.unk_10.unk_04 = 0;
-            sub_02000EC4(FS_OVERLAY_ID(overlay77), &Unk_ov77_021D788C);
+        case RESET_CLEAN:
+            sApplication.args.error = FALSE;
+            EnqueueApplication(FS_OVERLAY_ID(game_opening), &gOpeningCutsceneAppTemplate);
             break;
-        case 1:
-            sub_0200F344(0, 0x0);
-            sub_0200F344(1, 0x0);
-            Unk_02101D28.unk_10.unk_04 = 1;
-            sub_02000EC4(FS_OVERLAY_ID(overlay57), &Unk_ov57_021D0F70);
+
+        case RESET_ERROR:
+            SetScreenColorBrightness(DS_SCREEN_MAIN, COLOR_BLACK);
+            SetScreenColorBrightness(DS_SCREEN_SUB, COLOR_BLACK);
+            sApplication.args.error = TRUE;
+            EnqueueApplication(FS_OVERLAY_ID(game_start), &gGameStartLoadSaveAppTemplate);
             break;
+
         default:
-            GF_ASSERT(0);
+            GF_ASSERT(FALSE);
         }
     }
 
-    gCoreSys.unk_6C = 1;
-    gCoreSys.unk_30 = 0;
+    gSystem.showTitleScreenIntro = TRUE;
+    gSystem.frameCounter = 0;
 
     InitRNG();
-    sub_0200AB84();
-    sub_02017428();
+    BrightnessController_ResetAllControllers();
+    PlayTime_FlagNotStarted();
 
     gIgnoreCartridgeForWake = FALSE;
 
@@ -122,113 +123,105 @@ void NitroMain(void)
         HandleConsoleFold();
         ReadKeypadAndTouchpad();
 
-        if ((gCoreSys.heldKeysRaw & RESET_COMBO) == RESET_COMBO) {
-            if (gCoreSys.inhibitReset == 0) {
-                SoftReset(0);
-            }
+        if ((gSystem.heldKeysRaw & RESET_COMBO) == RESET_COMBO && !gSystem.inhibitReset) {
+            SoftReset(RESET_CLEAN);
         }
 
         if (CommSys_Update()) {
             CheckHeapCanary();
-            sub_02000E54();
-            SysTaskManager_ExecuteTasks(gCoreSys.mainTaskMgr);
-            SysTaskManager_ExecuteTasks(gCoreSys.unk_24);
+            RunApplication();
+            SysTaskManager_ExecuteTasks(gSystem.mainTaskMgr);
+            SysTaskManager_ExecuteTasks(gSystem.printTaskMgr);
 
-            if (!gCoreSys.unk_30) {
-                OS_WaitIrq(1, OS_IE_V_BLANK);
-                gCoreSys.frameCounter++;
+            if (!gSystem.frameCounter) {
+                OS_WaitIrq(TRUE, OS_IE_V_BLANK);
+                gSystem.vblankCounter++;
             }
         }
 
         UpdateRTC();
-        sub_02017458();
+        PlayTime_IncrementTimer();
         sub_020241CC();
-        SysTaskManager_ExecuteTasks(gCoreSys.unk_24);
+        SysTaskManager_ExecuteTasks(gSystem.printTaskMgr);
 
-        OS_WaitIrq(1, OS_IE_V_BLANK);
+        OS_WaitIrq(TRUE, OS_IE_V_BLANK);
 
-        gCoreSys.frameCounter++;
-        gCoreSys.unk_30 = 0;
+        gSystem.vblankCounter++;
+        gSystem.frameCounter = 0;
 
-        sub_0200ABF0();
-        sub_0200F27C();
+        BrightnessController_Update();
+        ExecScreenFade();
 
-        if (gCoreSys.mainCallback != NULL) {
-            gCoreSys.mainCallback(gCoreSys.mainCallbackData);
+        if (gSystem.vblankCallback != NULL) {
+            gSystem.vblankCallback(gSystem.vblankCallbackData);
         }
 
-        UpdateSound();
-        SysTaskManager_ExecuteTasks(gCoreSys.postVBlankTaskMgr);
+        SoundSystem_Tick();
+        SysTaskManager_ExecuteTasks(gSystem.postVBlankTaskMgr);
     }
 }
 
-static void sub_02000E3C(void)
+static void InitApplication()
 {
-    Unk_02101D28.unk_00 = 0xffffffff;
-    Unk_02101D28.unk_04 = NULL;
-    Unk_02101D28.unk_08 = 0xffffffff;
-    Unk_02101D28.unk_0C = NULL;
+    sApplication.currOverlayID = FS_OVERLAY_ID_NONE;
+    sApplication.currApplication = NULL;
+    sApplication.nextOverlayID = FS_OVERLAY_ID_NONE;
+    sApplication.nextApplication = NULL;
 }
 
-static void sub_02000E54(void)
+static void RunApplication(void)
 {
-    BOOL v0;
-
-    if (Unk_02101D28.unk_04 == NULL) {
-        if (Unk_02101D28.unk_0C == NULL) {
+    if (sApplication.currApplication == NULL) {
+        if (sApplication.nextApplication == NULL) {
             return;
         }
 
-        if (Unk_02101D28.unk_08 != 0xffffffff) {
-            Overlay_LoadByID(Unk_02101D28.unk_08, 0);
+        if (sApplication.nextOverlayID != FS_OVERLAY_ID_NONE) {
+            Overlay_LoadByID(sApplication.nextOverlayID, OVERLAY_LOAD_NORMAL);
         }
 
-        Unk_02101D28.unk_00 = Unk_02101D28.unk_08;
-        Unk_02101D28.unk_04 = OverlayManager_New(Unk_02101D28.unk_0C, &Unk_02101D28.unk_10, 0);
-        Unk_02101D28.unk_08 = 0xffffffff;
-        Unk_02101D28.unk_0C = NULL;
+        sApplication.currOverlayID = sApplication.nextOverlayID;
+        sApplication.currApplication = ApplicationManager_New(sApplication.nextApplication, &sApplication.args, HEAP_ID_SYSTEM);
+        sApplication.nextOverlayID = FS_OVERLAY_ID_NONE;
+        sApplication.nextApplication = NULL;
     }
 
-    v0 = OverlayManager_Exec(Unk_02101D28.unk_04);
+    if (ApplicationManager_Exec(sApplication.currApplication)) {
+        ApplicationManager_Free(sApplication.currApplication);
+        sApplication.currApplication = NULL;
 
-    if (v0) {
-        OverlayManager_Free(Unk_02101D28.unk_04);
-        Unk_02101D28.unk_04 = NULL;
-
-        if (Unk_02101D28.unk_00 != 0xffffffff) {
-            Overlay_UnloadByID(Unk_02101D28.unk_00);
+        if (sApplication.currOverlayID != FS_OVERLAY_ID_NONE) {
+            Overlay_UnloadByID(sApplication.currOverlayID);
         }
     }
 }
 
-void sub_02000EC4(FSOverlayID param0, const OverlayManagerTemplate *param1)
+void EnqueueApplication(FSOverlayID overlayID, const ApplicationManagerTemplate *template)
 {
-    GF_ASSERT(Unk_02101D28.unk_0C == NULL);
+    GF_ASSERT(sApplication.nextApplication == NULL);
 
-    Unk_02101D28.unk_08 = param0;
-    Unk_02101D28.unk_0C = param1;
+    sApplication.nextOverlayID = overlayID;
+    sApplication.nextApplication = template;
 }
 
 static void WaitFrame(void)
 {
     CommSys_Update();
 
-    OS_WaitIrq(1, OS_IE_V_BLANK);
+    OS_WaitIrq(TRUE, OS_IE_V_BLANK);
 
-    gCoreSys.frameCounter++;
-    gCoreSys.unk_30 = 0;
+    gSystem.vblankCounter++;
+    gSystem.frameCounter = 0;
 
-    if (gCoreSys.mainCallback != NULL) {
-        gCoreSys.mainCallback(gCoreSys.mainCallbackData);
+    if (gSystem.vblankCallback != NULL) {
+        gSystem.vblankCallback(gSystem.vblankCallbackData);
     }
 }
 
-static void sub_02000F10(int param0)
+static void TrySystemReset(enum OSResetParameter resetParam)
 {
-    if (sub_02038AB8()) {
-        if (CARD_TryWaitBackupAsync() == TRUE) {
-            OS_ResetSystem(param0);
-        }
+    if (CommManager_CheckResetFinished() && CARD_TryWaitBackupAsync() == TRUE) {
+        OS_ResetSystem(resetParam);
     }
 
     WaitFrame();
@@ -236,7 +229,7 @@ static void sub_02000F10(int param0)
 
 static void CheckHeapCanary(void)
 {
-    int v0 = sub_020389D8();
+    int v0 = CommManager_GetResetType();
 
     switch (v0) {
     case 1:
@@ -251,45 +244,44 @@ static void CheckHeapCanary(void)
     }
 }
 
-static void SoftReset(int param0)
+static void SoftReset(enum OSResetParameter resetParam)
 {
-    sub_0200F344(0, 0x7fff);
-    sub_0200F344(1, 0x7fff);
+    SetScreenColorBrightness(DS_SCREEN_MAIN, COLOR_WHITE);
+    SetScreenColorBrightness(DS_SCREEN_SUB, COLOR_WHITE);
 
-    if (sub_02037DB0()) {
+    if (CommManager_ExitOrReset()) {
         SaveData_SaveStateCancel(SaveData_Ptr());
     }
 
     while (TRUE) {
         HandleConsoleFold();
-        sub_02000F10(param0);
+        TrySystemReset(resetParam);
     }
 }
 
-static void HeapCanaryFailed(int param0, int param1)
+static void HeapCanaryFailed(int resetParam, int param1)
 {
     int elapsed;
-    BOOL v1;
 
     if (param1 == 3) {
-        sub_02039834(0, 3, 0);
-    } else if (0 == param0) {
-        if (sub_020389B8() == TRUE) {
-            sub_02039834(0, 6, 0);
+        NetworkError_DisplayNetworkError(HEAP_ID_SYSTEM, 3, 0);
+    } else if (resetParam == RESET_CLEAN) {
+        if (CommManager_IsConnectedToWifi() == TRUE) {
+            NetworkError_DisplayNetworkError(HEAP_ID_SYSTEM, 6, 0);
         } else {
-            sub_02039834(0, 2, 0);
+            NetworkError_DisplayNetworkError(HEAP_ID_SYSTEM, 2, 0);
         }
     } else {
-        if (sub_020389B8() == TRUE) {
-            sub_02039834(0, 5, 0);
+        if (CommManager_IsConnectedToWifi() == TRUE) {
+            NetworkError_DisplayNetworkError(HEAP_ID_SYSTEM, 5, 0);
         } else {
-            sub_02039834(0, 0, 0);
+            NetworkError_DisplayNetworkError(HEAP_ID_SYSTEM, 0, 0);
         }
     }
 
-    sub_02037DB0();
+    CommManager_ExitOrReset();
     WaitFrame();
-    UpdateSound();
+    SoundSystem_Tick();
 
     elapsed = 0;
 
@@ -297,10 +289,8 @@ static void HeapCanaryFailed(int param0, int param1)
         HandleConsoleFold();
         ReadKeypadAndTouchpad();
 
-        if (elapsed >= 30) {
-            if (gCoreSys.pressedKeys & PAD_BUTTON_A) {
-                break;
-            }
+        if (elapsed >= 30 && gSystem.pressedKeys & PAD_BUTTON_A) {
+            break;
         }
 
         WaitFrame();
@@ -310,21 +300,19 @@ static void HeapCanaryFailed(int param0, int param1)
         }
     }
 
-    SoftReset(param0);
+    SoftReset(resetParam);
 }
 
 void InitRNG(void)
 {
-    RTCDate v0;
-    RTCTime v1;
-    u32 v2;
+    RTCDate date;
+    RTCTime time;
+    GetCurrentDateTime(&date, &time);
 
-    GetCurrentDateTime(&v0, &v1);
+    u32 seed = date.year + date.month * 0x100 * date.day * 0x10000 + time.hour * 0x10000 + (time.minute + time.second) * 0x1000000 + gSystem.vblankCounter;
 
-    v2 = v0.year + v0.month * 0x100 * v0.day * 0x10000 + v1.hour * 0x10000 + (v1.minute + v1.second) * 0x1000000 + gCoreSys.frameCounter;
-
-    MTRNG_SetSeed(v2);
-    LCRNG_SetSeed(v2);
+    MTRNG_SetSeed(seed);
+    LCRNG_SetSeed(seed);
 }
 
 void HandleConsoleFold(void)
@@ -333,7 +321,7 @@ void HandleConsoleFold(void)
     PMWakeUpTrigger trigger;
 
     if (PAD_DetectFold()) {
-        if (gCoreSys.inhibitSleep == 0) {
+        if (gSystem.inhibitSleep == 0) {
             BeforeSleep();
 
             if (CTRDG_IsPulledOut() == TRUE) {
@@ -343,7 +331,7 @@ void HandleConsoleFold(void)
 sleep_again:
             trigger = PM_TRIGGER_COVER_OPEN | PM_TRIGGER_CARD;
 
-            if (gCoreSys.unk_66 && !gIgnoreCartridgeForWake) {
+            if (gSystem.gbaCartridgeVersion && !gIgnoreCartridgeForWake) {
                 trigger |= PM_TRIGGER_CARTRIDGE;
             }
 

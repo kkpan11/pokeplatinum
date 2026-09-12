@@ -1,20 +1,12 @@
-    .include "macros/scrcmd.inc"
+#include "macros/scrcmd.inc"
+#include "res/text/bank/galactic_hq_b1f.h"
 
-    .data
 
-    ScriptEntry _0006
-    .short 0xFD13
+    ScriptEntry GalacticHQB1F_GruntM
+    ScriptEntryEnd
 
-_0006:
-    PlayFanfare SEQ_SE_CONFIRM
-    LockAll
-    FacePlayer
-    Message 0
-    WaitABXPadPress
-    CloseMessage
-    ReleaseAll
+GalacticHQB1F_GruntM:
+    NPCMessage GalacticHQB1F_Text_GruntiestOfGrunts
     End
 
-    .byte 0
-    .byte 0
-    .byte 0
+    .balign 4, 0

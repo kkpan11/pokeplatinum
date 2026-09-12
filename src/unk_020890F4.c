@@ -4,57 +4,54 @@
 #include <nitro.h>
 #include <string.h>
 
-#include "struct_decls/struct_02018340_decl.h"
+#include "constants/graphics.h"
+
 #include "struct_defs/struct_02089438.h"
 #include "struct_defs/struct_02089688.h"
-#include "struct_defs/struct_02099F80.h"
 
-#include "overlay097/struct_ov97_0222DB78.h"
-
-#include "core_sys.h"
+#include "bg_window.h"
 #include "game_options.h"
 #include "gx_layers.h"
 #include "heap.h"
 #include "narc.h"
+#include "network_icon.h"
 #include "overlay_manager.h"
-#include "strbuf.h"
-#include "unk_02002F38.h"
-#include "unk_0200C6E4.h"
-#include "unk_02017728.h"
-#include "unk_02018340.h"
-#include "unk_0201DBEC.h"
-#include "unk_0201E3D8.h"
-#include "unk_02023FCC.h"
-#include "unk_020393C8.h"
+#include "palette.h"
+#include "sprite_system.h"
+#include "string_gf.h"
+#include "system.h"
+#include "touch_pad.h"
+#include "touch_screen_actions.h"
 #include "unk_02089604.h"
 #include "unk_0208A3F4.h"
+#include "vram_transfer.h"
 
 #include "constdata/const_020F2DBC.h"
 
-static void sub_0208945C(BGL *param0);
+static void sub_0208945C(BgConfig *param0);
 static void sub_020895CC(void *param0);
-static int sub_020890F4(OverlayManager *param0, int *param1);
-static int sub_0208924C(OverlayManager *param0, int *param1);
-static int sub_0208927C(OverlayManager *param0, int *param1);
+static int sub_020890F4(ApplicationManager *appMan, int *param1);
+static int sub_0208924C(ApplicationManager *appMan, int *param1);
+static int sub_0208927C(ApplicationManager *appMan, int *param1);
 
-const OverlayManagerTemplate Unk_020F2DBC = {
+const ApplicationManagerTemplate Unk_020F2DBC = {
     sub_020890F4,
     sub_0208924C,
     sub_0208927C,
     0xffffffff,
 };
 
-static int sub_020890F4(OverlayManager *param0, int *param1)
+static int sub_020890F4(ApplicationManager *appMan, int *param1)
 {
     UnkStruct_02089688 *v0;
 
-    Heap_Create(3, 101, 0x40000);
+    Heap_Create(HEAP_ID_APPLICATION, HEAP_ID_101, 0x40000);
 
-    v0 = OverlayManager_NewData(param0, sizeof(UnkStruct_02089688), 101);
+    v0 = ApplicationManager_NewData(appMan, sizeof(UnkStruct_02089688), HEAP_ID_101);
     memset(v0, 0, sizeof(UnkStruct_02089688));
-    v0->unk_38C = *((UnkStruct_02089438 *)OverlayManager_Args(param0));
+    v0->unk_3B8 = *((UnkStruct_02089438 *)ApplicationManager_Args(appMan));
 
-    SetMainCallback(NULL, NULL);
+    SetVBlankCallback(NULL, NULL);
     DisableHBlank();
     GXLayers_DisableEngineALayers();
     GXLayers_DisableEngineBLayers();
@@ -62,61 +59,57 @@ static int sub_020890F4(OverlayManager *param0, int *param1)
     GX_SetVisiblePlane(0);
     GXS_SetVisiblePlane(0);
 
-    v0->unk_2C0.unk_00 = NARC_ctor(NARC_INDEX_ARC__CODEIN_GRA, 101);
-    v0->unk_2C0.unk_0C = sub_02018340(101);
-    v0->unk_2C0.unk_10 = sub_02002F38(101);
+    v0->unk_2EC.unk_00 = NARC_ctor(NARC_INDEX_ARC__CODEIN_GRA, HEAP_ID_101);
+    v0->unk_2EC.unk_0C = BgConfig_New(HEAP_ID_101);
+    v0->unk_2EC.unk_10 = PaletteData_New(HEAP_ID_101);
 
-    sub_02003858(v0->unk_2C0.unk_10, 1);
-    sub_02002F70(v0->unk_2C0.unk_10, 0, 0x200, 101);
-    sub_02002F70(v0->unk_2C0.unk_10, 1, 0x200, 101);
-    sub_02002F70(v0->unk_2C0.unk_10, 2, 0x200, 101);
-    sub_02002F70(v0->unk_2C0.unk_10, 3, 0x200, 101);
-    sub_0208945C(v0->unk_2C0.unk_0C);
+    PaletteData_SetAutoTransparent(v0->unk_2EC.unk_10, TRUE);
+    PaletteData_AllocBuffer(v0->unk_2EC.unk_10, PLTTBUF_MAIN_BG, PALETTE_SIZE_BYTES * 16, HEAP_ID_101);
+    PaletteData_AllocBuffer(v0->unk_2EC.unk_10, PLTTBUF_SUB_BG, PALETTE_SIZE_BYTES * 16, HEAP_ID_101);
+    PaletteData_AllocBuffer(v0->unk_2EC.unk_10, PLTTBUF_MAIN_OBJ, PALETTE_SIZE_BYTES * 16, HEAP_ID_101);
+    PaletteData_AllocBuffer(v0->unk_2EC.unk_10, PLTTBUF_SUB_OBJ, PALETTE_SIZE_BYTES * 16, HEAP_ID_101);
+    sub_0208945C(v0->unk_2EC.unk_0C);
     sub_0208A3F4(v0);
     sub_02089688(v0);
 
     {
-        sub_0201E3D8();
-        sub_0201E450(4);
+        EnableTouchPad();
+        InitializeTouchPad(4);
         sub_0208A0B8(v0);
     }
 
-    if (v0->unk_38C.unk_30 != 0) {
-        sub_02039734();
-        sub_020397C8(1, 101);
+    if (v0->unk_3B8.unk_30 != 0) {
+        NetworkIcon_Init();
+        NetworkIcon_CreateOnSubScreen(1, HEAP_ID_101);
     }
 
     G2_SetBlendAlpha(GX_BLEND_PLANEMASK_NONE, GX_BLEND_PLANEMASK_BG1 | GX_BLEND_PLANEMASK_BG2, 15, 7);
     G2S_SetBlendAlpha(GX_BLEND_PLANEMASK_NONE, GX_BLEND_PLANEMASK_BG1 | GX_BLEND_PLANEMASK_BG2 | GX_BLEND_PLANEMASK_BG3, 7, 8);
 
-    SetMainCallback(sub_020895CC, v0);
+    SetVBlankCallback(sub_020895CC, v0);
 
     return 1;
 }
 
-static int sub_0208924C(OverlayManager *param0, int *param1)
+static int sub_0208924C(ApplicationManager *appMan, int *param1)
 {
     BOOL v0;
-    UnkStruct_02089688 *v1;
-
-    v1 = OverlayManager_Data(param0);
+    UnkStruct_02089688 *v1 = ApplicationManager_Data(appMan);
     v0 = sub_02089BEC(v1);
 
-    if (v1->unk_38C.unk_30 != 0) {
-        sub_020397B0(WM_LINK_LEVEL_3 - DWC_GetLinkLevel());
+    if (v1->unk_3B8.unk_30 != 0) {
+        NetworkIcon_SetStrength(WM_LINK_LEVEL_3 - DWC_GetLinkLevel());
     }
 
     return v0 ? 1 : 0;
 }
 
-static int sub_0208927C(OverlayManager *param0, int *param1)
+static int sub_0208927C(ApplicationManager *appMan, int *param1)
 {
-    UnkStruct_02089688 *v0;
+    UnkStruct_02089688 *v0 = ApplicationManager_Data(appMan);
 
-    v0 = OverlayManager_Data(param0);
-
-    if (v0->unk_38C.unk_30 != 0) {
-        sub_02039794();
+    if (v0->unk_3B8.unk_30 != 0) {
+        NetworkIcon_Destroy();
     }
 
     sub_0208A6CC(v0);
@@ -128,69 +121,69 @@ static int sub_0208927C(OverlayManager *param0, int *param1)
     GXLayers_EngineBToggleLayers(GX_PLANEMASK_BG1, 0);
     GXLayers_EngineBToggleLayers(GX_PLANEMASK_BG2, 0);
     GXLayers_EngineBToggleLayers(GX_PLANEMASK_BG3, 0);
-    sub_02019044(v0->unk_2C0.unk_0C, 1);
-    sub_02019044(v0->unk_2C0.unk_0C, 2);
-    sub_02019044(v0->unk_2C0.unk_0C, 3);
-    sub_02019044(v0->unk_2C0.unk_0C, 4);
-    sub_02019044(v0->unk_2C0.unk_0C, 5);
-    sub_02019044(v0->unk_2C0.unk_0C, 6);
-    sub_02019044(v0->unk_2C0.unk_0C, 7);
-    Heap_FreeToHeap(v0->unk_2C0.unk_0C);
-    sub_02002FA0(v0->unk_2C0.unk_10, 0);
-    sub_02002FA0(v0->unk_2C0.unk_10, 1);
-    sub_02002FA0(v0->unk_2C0.unk_10, 2);
-    sub_02002FA0(v0->unk_2C0.unk_10, 3);
-    sub_02002F54(v0->unk_2C0.unk_10);
-    NARC_dtor(v0->unk_2C0.unk_00);
+    Bg_FreeTilemapBuffer(v0->unk_2EC.unk_0C, 1);
+    Bg_FreeTilemapBuffer(v0->unk_2EC.unk_0C, 2);
+    Bg_FreeTilemapBuffer(v0->unk_2EC.unk_0C, 3);
+    Bg_FreeTilemapBuffer(v0->unk_2EC.unk_0C, 4);
+    Bg_FreeTilemapBuffer(v0->unk_2EC.unk_0C, 5);
+    Bg_FreeTilemapBuffer(v0->unk_2EC.unk_0C, 6);
+    Bg_FreeTilemapBuffer(v0->unk_2EC.unk_0C, 7);
+    Heap_Free(v0->unk_2EC.unk_0C);
+    PaletteData_FreeBuffer(v0->unk_2EC.unk_10, PLTTBUF_MAIN_BG);
+    PaletteData_FreeBuffer(v0->unk_2EC.unk_10, PLTTBUF_SUB_BG);
+    PaletteData_FreeBuffer(v0->unk_2EC.unk_10, PLTTBUF_MAIN_OBJ);
+    PaletteData_FreeBuffer(v0->unk_2EC.unk_10, PLTTBUF_SUB_OBJ);
+    PaletteData_Free(v0->unk_2EC.unk_10);
+    NARC_dtor(v0->unk_2EC.unk_00);
 
     {
         u32 v1;
-        v1 = sub_0201E530();
+        v1 = DisableTouchPad();
     }
 
-    sub_0200D0B0(v0->unk_2C0.unk_04, v0->unk_2C0.unk_08);
-    sub_0200C8D4(v0->unk_2C0.unk_04);
-    sub_02024034(v0->unk_2C0.unk_14);
-    OverlayManager_FreeData(param0);
-    Heap_Destroy(101);
+    SpriteSystem_FreeResourcesAndManager(v0->unk_2EC.unk_04, v0->unk_2EC.unk_08);
+    SpriteSystem_Free(v0->unk_2EC.unk_04);
+    TouchScreenActions_Free(v0->unk_2EC.unk_14);
+    ApplicationManager_FreeData(appMan);
+    Heap_Destroy(HEAP_ID_101);
 
     return 1;
 }
 
-UnkStruct_02089438 *sub_020893B4(int param0, int param1, int param2[], Options *param3, u32 param4, u32 param5)
+static UnkStruct_02089438 *sub_020893B4(enum HeapID heapID, int param1, int param2[], Options *options, u32 param4, u32 param5)
 {
-    int v0;
+    int i;
     UnkStruct_02089438 *v1 = NULL;
 
-    v1 = Heap_AllocFromHeap(param0, sizeof(UnkStruct_02089438));
+    v1 = Heap_Alloc(heapID, sizeof(UnkStruct_02089438));
 
     v1->unk_00 = param1;
-    v1->unk_1C = Strbuf_Init(param1 + 1, param0);
-    v1->unk_20 = param3;
+    v1->unk_1C = String_Init(param1 + 1, heapID);
+    v1->options = options;
 
-    for (v0 = 0; v0 < 4; v0++) {
-        v1->unk_04[v0] = param2[v0];
+    for (i = 0; i < 4; i++) {
+        v1->unk_04[i] = param2[i];
     }
 
-    v1->unk_04[v0] = param2[v0 - 1];
+    v1->unk_04[i] = param2[i - 1];
     v1->unk_2C = param4;
     v1->unk_30 = param5;
 
     return v1;
 }
 
-UnkStruct_02089438 *sub_02089400(int param0, int param1, int param2[], Options *param3, u32 param4, u32 param5)
+UnkStruct_02089438 *sub_02089400(enum HeapID heapID, int param1, int param2[], Options *options, u32 param4, u32 param5)
 {
-    UnkStruct_02089438 *v0 = sub_020893B4(param0, param1, param2, param3, param4, param5);
+    UnkStruct_02089438 *v0 = sub_020893B4(heapID, param1, param2, options, param4, param5);
 
     v0->unk_24 = 0;
     v0->unk_28 = 0;
     return v0;
 }
 
-UnkStruct_02089438 *sub_0208941C(int param0, int param1, int param2[], Options *param3, u32 param4, u32 param5, u32 param6, u32 param7)
+UnkStruct_02089438 *sub_0208941C(enum HeapID heapID, int param1, int param2[], Options *options, u32 param4, u32 param5, u32 param6, u32 param7)
 {
-    UnkStruct_02089438 *v0 = sub_020893B4(param0, param1, param2, param3, param4, param5);
+    UnkStruct_02089438 *v0 = sub_020893B4(heapID, param1, param2, options, param4, param5);
 
     v0->unk_24 = param6;
     v0->unk_28 = param7;
@@ -202,16 +195,16 @@ void sub_02089438(UnkStruct_02089438 *param0)
     GF_ASSERT(param0->unk_1C != NULL);
     GF_ASSERT(param0 != NULL);
 
-    Strbuf_Free(param0->unk_1C);
-    Heap_FreeToHeap(param0);
+    String_Free(param0->unk_1C);
+    Heap_Free(param0);
 }
 
-static void sub_0208945C(BGL *param0)
+static void sub_0208945C(BgConfig *param0)
 {
     GXLayers_DisableEngineALayers();
 
     {
-        UnkStruct_02099F80 v0 = {
+        GXBanks v0 = {
             GX_VRAM_BG_128_A,
             GX_VRAM_BGEXTPLTT_NONE,
             GX_VRAM_SUB_BG_32_H,
@@ -233,60 +226,57 @@ static void sub_0208945C(BGL *param0)
     }
 
     {
-        UnkStruct_ov97_0222DB78 v1[] = {
+        BgTemplate v1[] = {
             {
-                0,
-                0,
-                0x800,
-                0,
-                1,
-                GX_BG_COLORMODE_16,
-                GX_BG_SCRBASE_0x0000,
-                GX_BG_CHARBASE_0x04000,
-                GX_BG_EXTPLTT_01,
-                0x1,
-                0,
-                0,
-                0,
+                .x = 0,
+                .y = 0,
+                .bufferSize = 0x800,
+                .baseTile = 0,
+                .screenSize = BG_SCREEN_SIZE_256x256,
+                .colorMode = GX_BG_COLORMODE_16,
+                .screenBase = GX_BG_SCRBASE_0x0000,
+                .charBase = GX_BG_CHARBASE_0x04000,
+                .bgExtPltt = GX_BG_EXTPLTT_01,
+                .priority = 0x1,
+                .areaOver = 0,
+                .mosaic = FALSE,
             },
             {
-                0,
-                0,
-                0x1000,
-                0,
-                1,
-                GX_BG_COLORMODE_16,
-                GX_BG_SCRBASE_0x1000,
-                GX_BG_CHARBASE_0x0c000,
-                GX_BG_EXTPLTT_01,
-                0x2,
-                0,
-                0,
-                0,
+                .x = 0,
+                .y = 0,
+                .bufferSize = 0x1000,
+                .baseTile = 0,
+                .screenSize = BG_SCREEN_SIZE_256x256,
+                .colorMode = GX_BG_COLORMODE_16,
+                .screenBase = GX_BG_SCRBASE_0x1000,
+                .charBase = GX_BG_CHARBASE_0x0c000,
+                .bgExtPltt = GX_BG_EXTPLTT_01,
+                .priority = 0x2,
+                .areaOver = 0,
+                .mosaic = FALSE,
             },
             {
-                0,
-                0,
-                0x1800,
-                0,
-                1,
-                GX_BG_COLORMODE_16,
-                GX_BG_SCRBASE_0x3000,
-                GX_BG_CHARBASE_0x10000,
-                GX_BG_EXTPLTT_01,
-                0x3,
-                0,
-                0,
-                0,
+                .x = 0,
+                .y = 0,
+                .bufferSize = 0x1800,
+                .baseTile = 0,
+                .screenSize = BG_SCREEN_SIZE_256x256,
+                .colorMode = GX_BG_COLORMODE_16,
+                .screenBase = GX_BG_SCRBASE_0x3000,
+                .charBase = GX_BG_CHARBASE_0x10000,
+                .bgExtPltt = GX_BG_EXTPLTT_01,
+                .priority = 0x3,
+                .areaOver = 0,
+                .mosaic = FALSE,
             },
         };
 
-        sub_020183C4(param0, 1, &v1[0], 0);
-        sub_020183C4(param0, 2, &v1[1], 0);
-        sub_020183C4(param0, 3, &v1[2], 0);
-        sub_02019EBC(param0, 1);
-        sub_02019EBC(param0, 2);
-        sub_02019EBC(param0, 3);
+        Bg_InitFromTemplate(param0, BG_LAYER_MAIN_1, &v1[0], 0);
+        Bg_InitFromTemplate(param0, BG_LAYER_MAIN_2, &v1[1], 0);
+        Bg_InitFromTemplate(param0, BG_LAYER_MAIN_3, &v1[2], 0);
+        Bg_ClearTilemap(param0, BG_LAYER_MAIN_1);
+        Bg_ClearTilemap(param0, BG_LAYER_MAIN_2);
+        Bg_ClearTilemap(param0, BG_LAYER_MAIN_3);
         GXLayers_EngineAToggleLayers(GX_PLANEMASK_BG0, 0);
         GXLayers_EngineAToggleLayers(GX_PLANEMASK_BG1, 1);
         GXLayers_EngineAToggleLayers(GX_PLANEMASK_BG2, 0);
@@ -294,56 +284,54 @@ static void sub_0208945C(BGL *param0)
     }
 
     {
-        UnkStruct_ov97_0222DB78 v2[] = {
+        BgTemplate v2[] = {
             {
-                0,
-                0,
-                0x800,
-                0,
-                1,
-                GX_BG_COLORMODE_16,
-                GX_BG_SCRBASE_0x6800,
-                GX_BG_CHARBASE_0x00000,
-                GX_BG_EXTPLTT_01,
-                0x0,
-                0,
-                0,
-                0,
+                .x = 0,
+                .y = 0,
+                .bufferSize = 0x800,
+                .baseTile = 0,
+                .screenSize = BG_SCREEN_SIZE_256x256,
+                .colorMode = GX_BG_COLORMODE_16,
+                .screenBase = GX_BG_SCRBASE_0x6800,
+                .charBase = GX_BG_CHARBASE_0x00000,
+                .bgExtPltt = GX_BG_EXTPLTT_01,
+                .priority = 0x0,
+                .areaOver = 0,
+                .mosaic = FALSE,
             },
             {
-                0,
-                0,
-                0x800,
-                0,
-                1,
-                GX_BG_COLORMODE_16,
-                GX_BG_SCRBASE_0x7000,
-                GX_BG_CHARBASE_0x04000,
-                GX_BG_EXTPLTT_01,
-                0x1,
-                0,
-                0,
-                0,
+                .x = 0,
+                .y = 0,
+                .bufferSize = 0x800,
+                .baseTile = 0,
+                .screenSize = BG_SCREEN_SIZE_256x256,
+                .colorMode = GX_BG_COLORMODE_16,
+                .screenBase = GX_BG_SCRBASE_0x7000,
+                .charBase = GX_BG_CHARBASE_0x04000,
+                .bgExtPltt = GX_BG_EXTPLTT_01,
+                .priority = 0x1,
+                .areaOver = 0,
+                .mosaic = FALSE,
             },
             { 0 },
             { 0 },
         };
 
-        sub_020183C4(param0, 4, &v2[0], 0);
-        sub_020183C4(param0, 5, &v2[1], 0);
-        sub_020183C4(param0, 6, &v2[2], 0);
-        sub_020183C4(param0, 7, &v2[3], 0);
-        sub_02019EBC(param0, 4);
-        sub_02019EBC(param0, 5);
-        sub_02019EBC(param0, 6);
-        sub_02019EBC(param0, 7);
+        Bg_InitFromTemplate(param0, BG_LAYER_SUB_0, &v2[0], 0);
+        Bg_InitFromTemplate(param0, BG_LAYER_SUB_1, &v2[1], 0);
+        Bg_InitFromTemplate(param0, BG_LAYER_SUB_2, &v2[2], 0);
+        Bg_InitFromTemplate(param0, BG_LAYER_SUB_3, &v2[3], 0);
+        Bg_ClearTilemap(param0, BG_LAYER_SUB_0);
+        Bg_ClearTilemap(param0, BG_LAYER_SUB_1);
+        Bg_ClearTilemap(param0, BG_LAYER_SUB_2);
+        Bg_ClearTilemap(param0, BG_LAYER_SUB_3);
         GXLayers_EngineBToggleLayers(GX_PLANEMASK_BG0, 1);
         GXLayers_EngineBToggleLayers(GX_PLANEMASK_BG1, 1);
         GXLayers_EngineBToggleLayers(GX_PLANEMASK_BG2, 0);
         GXLayers_EngineBToggleLayers(GX_PLANEMASK_BG3, 0);
     }
 
-    gCoreSys.unk_65 = 1;
+    gSystem.whichScreenIs3D = DS_SCREEN_SUB;
 
     GXLayers_SwapDisplay();
     GXLayers_EngineAToggleLayers(GX_PLANEMASK_OBJ, 1);
@@ -354,10 +342,10 @@ static void sub_020895CC(void *param0)
 {
     UnkStruct_02089688 *v0 = param0;
 
-    sub_0201DCAC();
-    sub_0200C800();
-    sub_02003694(v0->unk_2C0.unk_10);
-    sub_0201C2B8(v0->unk_2C0.unk_0C);
+    VramTransfer_Process();
+    SpriteSystem_TransferOam();
+    PaletteData_CommitFadedBuffers(v0->unk_2EC.unk_10);
+    Bg_RunScheduledUpdates(v0->unk_2EC.unk_0C);
 
     OS_SetIrqCheckFlag(OS_IE_V_BLANK);
 }

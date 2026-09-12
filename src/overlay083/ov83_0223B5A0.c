@@ -3,68 +3,67 @@
 #include <nitro.h>
 #include <string.h>
 
-#include "consts/game_records.h"
+#include "generated/game_records.h"
+#include "generated/trainer_score_events.h"
 
-#include "struct_decls/struct_0202440C_decl.h"
-#include "struct_decls/struct_0202B370_decl.h"
-#include "struct_defs/struct_0202A93C.h"
+#include "struct_decls/tv_broadcast.h"
+#include "struct_decls/wi_fi_list.h"
 
-#include "overlay004/ov4_021D0D80.h"
+#include "applications/poffin_berry_selection.h"
+#include "nintendo_wfc/main.h"
 #include "overlay083/ov83_0223C958.h"
 #include "overlay083/ov83_0223D150.h"
 #include "overlay083/ov83_0223D4CC.h"
 #include "overlay083/ov83_0223D6A8.h"
 #include "overlay083/ov83_0223F7F4.h"
 #include "overlay083/struct_ov83_0223B784.h"
-#include "overlay083/struct_ov83_0223C344.h"
 #include "overlay083/struct_ov83_0223FCE8.h"
 #include "savedata/save_table.h"
 
 #include "bag.h"
-#include "cell_actor.h"
+#include "comm_manager.h"
 #include "communication_information.h"
 #include "communication_system.h"
-#include "core_sys.h"
 #include "game_options.h"
 #include "game_records.h"
 #include "gx_layers.h"
 #include "heap.h"
 #include "journal.h"
+#include "network_icon.h"
 #include "overlay_manager.h"
 #include "poffin.h"
-#include "unk_020041CC.h"
-#include "unk_02005474.h"
-#include "unk_0200F174.h"
-#include "unk_02017728.h"
-#include "unk_0201DBEC.h"
-#include "unk_0202ACE0.h"
+#include "screen_fade.h"
+#include "sound.h"
+#include "sound_playback.h"
+#include "sprite.h"
+#include "system.h"
+#include "tv_segment.h"
 #include "unk_020363E8.h"
-#include "unk_020366A0.h"
 #include "unk_0203909C.h"
-#include "unk_020393C8.h"
-#include "unk_0206CCB0.h"
+#include "vram_transfer.h"
+#include "wifi_list.h"
 
-typedef int (*UnkFuncPtr_ov83_0224024C)(UnkStruct_ov83_0223C344 *, UnkStruct_ov83_0223B784 *, int *);
+typedef int (*UnkFuncPtr_ov83_0224024C)(PoffinBerrySelectionData *, UnkStruct_ov83_0223B784 *, int *);
 
 typedef struct {
     UnkFuncPtr_ov83_0224024C unk_00;
     int unk_04;
 } UnkStruct_ov83_0224024C;
 
-int ov83_0223B5B0(OverlayManager *param0, int *param1);
-int ov83_0223B65C(OverlayManager *param0, int *param1);
-int ov83_0223B710(OverlayManager *param0, int *param1);
-static int ov83_0223C344(UnkStruct_ov83_0223C344 *param0, UnkStruct_ov83_0223B784 *param1, int *param2);
-static int ov83_0223B78C(UnkStruct_ov83_0223C344 *param0, UnkStruct_ov83_0223B784 *param1, int *param2);
-static int ov83_0223B920(UnkStruct_ov83_0223C344 *param0, UnkStruct_ov83_0223B784 *param1, int *param2);
-static int ov83_0223B950(UnkStruct_ov83_0223C344 *param0, UnkStruct_ov83_0223B784 *param1, int *param2);
-static int ov83_0223B964(UnkStruct_ov83_0223C344 *param0, UnkStruct_ov83_0223B784 *param1, int *param2);
-static int ov83_0223B9EC(UnkStruct_ov83_0223C344 *param0, UnkStruct_ov83_0223B784 *param1, int *param2);
-static int ov83_0223BB40(UnkStruct_ov83_0223C344 *param0, UnkStruct_ov83_0223B784 *param1, int *param2);
-static int ov83_0223BCEC(UnkStruct_ov83_0223C344 *param0, UnkStruct_ov83_0223B784 *param1, int *param2);
-static int ov83_0223BF74(UnkStruct_ov83_0223C344 *param0, UnkStruct_ov83_0223B784 *param1, int *param2);
-static int ov83_0223C24C(UnkStruct_ov83_0223C344 *param0, UnkStruct_ov83_0223B784 *param1, int *param2);
-static int ov83_0223C258(UnkStruct_ov83_0223C344 *param0, UnkStruct_ov83_0223B784 *param1, int *param2);
+int ov83_0223B5B0(ApplicationManager *appMan, int *param1);
+int ov83_0223B65C(ApplicationManager *appMan, int *param1);
+int ov83_0223B710(ApplicationManager *appMan, int *param1);
+static int ov83_0223C344(PoffinBerrySelectionData *param0, UnkStruct_ov83_0223B784 *param1, int *param2);
+static int ov83_0223B78C(PoffinBerrySelectionData *param0, UnkStruct_ov83_0223B784 *param1, int *param2);
+static int ov83_0223B920(PoffinBerrySelectionData *param0, UnkStruct_ov83_0223B784 *param1, int *param2);
+static int ov83_0223B950(PoffinBerrySelectionData *param0, UnkStruct_ov83_0223B784 *param1, int *param2);
+static int ov83_0223B964(PoffinBerrySelectionData *param0, UnkStruct_ov83_0223B784 *param1, int *param2);
+static int ov83_0223B9EC(PoffinBerrySelectionData *param0, UnkStruct_ov83_0223B784 *param1, int *param2);
+static int ov83_0223BB40(PoffinBerrySelectionData *param0, UnkStruct_ov83_0223B784 *param1, int *param2);
+static int ov83_0223BCEC(PoffinBerrySelectionData *param0, UnkStruct_ov83_0223B784 *param1, int *param2);
+static int ov83_0223BF74(PoffinBerrySelectionData *param0, UnkStruct_ov83_0223B784 *param1, int *param2);
+static int ov83_0223C24C(PoffinBerrySelectionData *param0, UnkStruct_ov83_0223B784 *param1, int *param2);
+static int ov83_0223C258(PoffinBerrySelectionData *param0, UnkStruct_ov83_0223B784 *param1, int *param2);
 static void ov83_0223C3E8(UnkStruct_ov83_0223B784 *param0);
 static void ov83_0223C480(UnkStruct_ov83_0223B784 *param0);
 static void ov83_0223C558(UnkStruct_ov83_0223B784 *param0);
@@ -73,9 +72,9 @@ static void ov83_0223C6D4(UnkStruct_ov83_0223B784 *param0);
 static void ov83_0223C758(UnkStruct_ov83_0223B784 *param0);
 static void ov83_0223C7FC(UnkStruct_ov83_0223B784 *param0);
 static void ov83_0223C90C(UnkStruct_ov83_0223B784 *param0);
-static void ov83_0223C82C(UnkStruct_ov83_0223C344 *param0, UnkStruct_ov83_0223B784 *param1);
-static void ov83_0223C87C(UnkStruct_ov83_0223C344 *param0, UnkStruct_ov83_0223B784 *param1);
-static BOOL ov83_0223C8B0(UnkStruct_ov83_0223C344 *param0, Poffin *param1, int param2);
+static void ov83_0223C82C(PoffinBerrySelectionData *param0, UnkStruct_ov83_0223B784 *param1);
+static void ov83_0223C87C(PoffinBerrySelectionData *param0, UnkStruct_ov83_0223B784 *param1);
+static BOOL ov83_0223C8B0(PoffinBerrySelectionData *param0, Poffin *param1, int param2);
 
 static const UnkStruct_ov83_0224024C Unk_ov83_0224024C[] = {
     { ov83_0223B78C, 0x1 },
@@ -96,55 +95,51 @@ static const UnkStruct_ov83_0224024C Unk_ov83_0224024C[] = {
 
 static void ov83_0223B5A0(void *param0)
 {
-    UnkStruct_ov83_0223C344 *v0 = (UnkStruct_ov83_0223C344 *)param0;
-    UnkStruct_ov83_0223B784 *v1 = (v0->unk_18);
+    PoffinBerrySelectionData *v0 = (PoffinBerrySelectionData *)param0;
+    UnkStruct_ov83_0223B784 *v1 = v0->buffer;
 
     ov83_0223CBFC(v1);
-    sub_0201DCAC();
+    VramTransfer_Process();
 }
 
-int ov83_0223B5B0(OverlayManager *param0, int *param1)
+int ov83_0223B5B0(ApplicationManager *appMan, int *param1)
 {
-    UnkStruct_ov83_0223C344 *v0 = OverlayManager_Args(param0);
+    PoffinBerrySelectionData *v0 = ApplicationManager_Args(appMan);
     UnkStruct_ov83_0223B784 *v1;
 
-    Heap_Create(3, 56, 0x20000);
-    v1 = OverlayManager_NewData(param0, sizeof(UnkStruct_ov83_0223B784), 56);
+    Heap_Create(HEAP_ID_APPLICATION, HEAP_ID_56, 0x20000);
+    v1 = ApplicationManager_NewData(appMan, sizeof(UnkStruct_ov83_0223B784), HEAP_ID_56);
     memset(v1, 0, sizeof(UnkStruct_ov83_0223B784));
 
-    v0->unk_18 = v1;
-    v1->unk_00 = 56;
+    v0->buffer = v1;
+    v1->heapID = HEAP_ID_56;
 
-    sub_0201DBEC(16, v1->unk_00);
+    VramTransfer_New(16, v1->heapID);
 
-    if (v0->unk_06_0 == 1) {
-        v1->unk_1490 = 1;
-    } else {
-        v1->unk_1490 = 0;
-    }
+    v1->unk_1490 = v0->isInGroup == TRUE;
 
-    ov83_0223D150(v1, v0->unk_10->unk_10);
+    ov83_0223D150(v1, v0->ctx->trainerInfo);
 
     if (v0->unk_26) {
         sub_0203632C(1);
     }
 
-    v1->unk_24 = Options_Frame(v0->unk_10->unk_18);
-    v1->unk_28 = Options_TextFrameDelay(v0->unk_10->unk_18);
+    v1->unk_24 = Options_Frame(v0->ctx->options);
+    v1->unk_28 = Options_TextFrameDelay(v0->ctx->options);
     v1->unk_31C = 1;
 
-    SetMainCallback(ov83_0223B5A0, v0);
+    SetVBlankCallback(ov83_0223B5A0, v0);
     DisableHBlank();
-    sub_02004550(12, 1183, 1);
+    Sound_SetSceneAndPlayBGM(SOUND_SCENE_12, SEQ_KINOMI1_sseq, 1);
 
     return 1;
 }
 
-int ov83_0223B65C(OverlayManager *param0, int *param1)
+int ov83_0223B65C(ApplicationManager *appMan, int *param1)
 {
     int v0, v1;
-    UnkStruct_ov83_0223C344 *v2 = OverlayManager_Args(param0);
-    UnkStruct_ov83_0223B784 *v3 = (UnkStruct_ov83_0223B784 *)OverlayManager_Data(param0);
+    PoffinBerrySelectionData *v2 = ApplicationManager_Args(appMan);
+    UnkStruct_ov83_0223B784 *v3 = (UnkStruct_ov83_0223B784 *)ApplicationManager_Data(appMan);
     const UnkStruct_ov83_0224024C *v4;
 
     v0 = v3->unk_0C;
@@ -170,7 +165,7 @@ int ov83_0223B65C(OverlayManager *param0, int *param1)
 
         v3->unk_10 = 0;
 
-        if (!v2->unk_06_0) {
+        if (!v2->isInGroup) {
             break;
         }
 
@@ -196,7 +191,7 @@ int ov83_0223B65C(OverlayManager *param0, int *param1)
     }
 
     ov83_0223CBA4(v3);
-    sub_02038A1C(v3->unk_00, v3->unk_20);
+    CommManager_Dummy_02038A1C(v3->heapID, v3->unk_20);
 
     if (v3->unk_04) {
         return 1;
@@ -205,31 +200,31 @@ int ov83_0223B65C(OverlayManager *param0, int *param1)
     }
 }
 
-int ov83_0223B710(OverlayManager *param0, int *param1)
+int ov83_0223B710(ApplicationManager *appMan, int *param1)
 {
-    int v0;
-    UnkStruct_ov83_0223C344 *v1 = OverlayManager_Args(param0);
-    UnkStruct_ov83_0223B784 *v2 = (UnkStruct_ov83_0223B784 *)OverlayManager_Data(param0);
+    int heapID;
+    PoffinBerrySelectionData *v1 = ApplicationManager_Args(appMan);
+    UnkStruct_ov83_0223B784 *v2 = (UnkStruct_ov83_0223B784 *)ApplicationManager_Data(appMan);
 
-    v0 = v2->unk_00;
+    heapID = v2->heapID;
 
     if (v1->unk_26) {
         if (CommSys_CurNetId() == 0) {
-            ov4_021D25FC();
+            NintendoWFC_ResetMatchmakingCancelState();
         }
     }
 
     ov83_0223D1EC(v2);
 
-    SetMainCallback(NULL, NULL);
+    SetVBlankCallback(NULL, NULL);
     DisableHBlank();
-    sub_0201DC3C();
+    VramTransfer_Free();
     MI_CpuClear8(v2, sizeof(UnkStruct_ov83_0223B784));
-    OverlayManager_FreeData(param0);
+    ApplicationManager_FreeData(appMan);
 
-    v1->unk_18 = NULL;
+    v1->buffer = NULL;
 
-    Heap_Destroy(v0);
+    Heap_Destroy(heapID);
     return 1;
 }
 
@@ -250,7 +245,7 @@ void ov83_0223B784(UnkStruct_ov83_0223B784 *param0)
     param0->unk_04 = 1;
 }
 
-static int ov83_0223B78C(UnkStruct_ov83_0223C344 *param0, UnkStruct_ov83_0223B784 *param1, int *param2)
+static int ov83_0223B78C(PoffinBerrySelectionData *param0, UnkStruct_ov83_0223B784 *param1, int *param2)
 {
     switch (*param2) {
     case 0:
@@ -261,9 +256,9 @@ static int ov83_0223B78C(UnkStruct_ov83_0223C344 *param0, UnkStruct_ov83_0223B78
             ov83_0223FDB0(&param1->unk_34C);
         }
 
-        ov83_0223DEA0(&param1->unk_5B0, param1->unk_1488, &param1->unk_15E0, &param1->unk_1494, param1->unk_24, param1->unk_00);
+        ov83_0223DEA0(&param1->unk_5B0, param1->unk_1488, &param1->unk_15E0, &param1->unk_1494, param1->unk_24, param1->heapID);
         ov83_0223E340(&param1->unk_608);
-        ov83_0223E6D4(&param1->unk_6A0, param1->unk_1488, &param1->unk_15E0, &param1->unk_1494, param1->unk_24, param1->unk_00);
+        ov83_0223E6D4(&param1->unk_6A0, param1->unk_1488, &param1->unk_15E0, &param1->unk_1494, param1->unk_24, param1->heapID);
         ov83_0223E244(&param1->unk_5E4);
         ov83_0223E244(&param1->unk_5F0);
         ov83_0223E244(&param1->unk_5FC);
@@ -274,7 +269,7 @@ static int ov83_0223B78C(UnkStruct_ov83_0223C344 *param0, UnkStruct_ov83_0223B78
         ov83_0223F820(&param1->unk_334);
         ov83_0223C958(param1);
 
-        sub_02039734();
+        NetworkIcon_Init();
         GXLayers_EngineAToggleLayers(GX_PLANEMASK_OBJ, 1);
 
         if (param1->unk_1488 > 1) {
@@ -288,11 +283,11 @@ static int ov83_0223B78C(UnkStruct_ov83_0223C344 *param0, UnkStruct_ov83_0223B78
         (*param2)++;
         break;
     case 1:
-        sub_0200F174(0, 1, 1, 0xffff, 6, 1, param1->unk_00);
+        StartScreenFade(FADE_BOTH_SCREENS, 1, 1, 0xffff, 6, 1, param1->heapID);
         (*param2)++;
         break;
     case 2:
-        if (ScreenWipe_Done()) {
+        if (IsScreenFadeDone()) {
             return param1->unk_0C + 1;
         }
         break;
@@ -301,7 +296,7 @@ static int ov83_0223B78C(UnkStruct_ov83_0223C344 *param0, UnkStruct_ov83_0223B78
     return param1->unk_0C;
 }
 
-static int ov83_0223B920(UnkStruct_ov83_0223C344 *param0, UnkStruct_ov83_0223B784 *param1, int *param2)
+static int ov83_0223B920(PoffinBerrySelectionData *param0, UnkStruct_ov83_0223B784 *param1, int *param2)
 {
     BOOL v0;
 
@@ -316,7 +311,7 @@ static int ov83_0223B920(UnkStruct_ov83_0223C344 *param0, UnkStruct_ov83_0223B78
     return param1->unk_0C + 1;
 }
 
-static int ov83_0223B950(UnkStruct_ov83_0223C344 *param0, UnkStruct_ov83_0223B784 *param1, int *param2)
+static int ov83_0223B950(PoffinBerrySelectionData *param0, UnkStruct_ov83_0223B784 *param1, int *param2)
 {
     if (param1->unk_14) {
         param1->unk_0C = param1->unk_18;
@@ -326,7 +321,7 @@ static int ov83_0223B950(UnkStruct_ov83_0223C344 *param0, UnkStruct_ov83_0223B78
     return param1->unk_0C;
 }
 
-static int ov83_0223B964(UnkStruct_ov83_0223C344 *param0, UnkStruct_ov83_0223B784 *param1, int *param2)
+static int ov83_0223B964(PoffinBerrySelectionData *param0, UnkStruct_ov83_0223B784 *param1, int *param2)
 {
     BOOL v0;
 
@@ -336,7 +331,7 @@ static int ov83_0223B964(UnkStruct_ov83_0223C344 *param0, UnkStruct_ov83_0223B78
         (*param2)++;
         break;
     case 1:
-        param1->unk_1494.unk_00.unk_00 = param0->unk_08;
+        param1->unk_1494.unk_00.unk_00 = param0->item;
         {
             int v1;
 
@@ -357,14 +352,14 @@ static int ov83_0223B964(UnkStruct_ov83_0223C344 *param0, UnkStruct_ov83_0223B78
         }
         break;
     default:
-        GF_ASSERT(0);
+        GF_ASSERT(FALSE);
         break;
     }
 
     return param1->unk_0C;
 }
 
-static int ov83_0223B9EC(UnkStruct_ov83_0223C344 *param0, UnkStruct_ov83_0223B784 *param1, int *param2)
+static int ov83_0223B9EC(PoffinBerrySelectionData *param0, UnkStruct_ov83_0223B784 *param1, int *param2)
 {
     u32 v0;
     int v1;
@@ -372,7 +367,7 @@ static int ov83_0223B9EC(UnkStruct_ov83_0223C344 *param0, UnkStruct_ov83_0223B78
 
     switch (*param2) {
     case 0:
-        ov83_0223F790(&param1->unk_1480, param1->unk_00, param1->unk_20);
+        ov83_0223F790(&param1->unk_1480, param1->heapID, param1->unk_20);
         (*param2)++;
         break;
     case 1:
@@ -412,13 +407,13 @@ static int ov83_0223B9EC(UnkStruct_ov83_0223C344 *param0, UnkStruct_ov83_0223B78
     case 5:
         v2 = ov83_0223E32C(&param1->unk_5E4);
         {
-            int v3 = CellActor_GetAnimFrame(param1->unk_5E4.unk_08);
+            int v3 = Sprite_GetAnimFrame(param1->unk_5E4.unk_08);
 
             if (param1->unk_3BC != (v3 + 1) / 3) {
                 if (v3 < 10) {
-                    Sound_PlayEffect(1725);
+                    Sound_PlayEffect(SEQ_SE_DP_NM10_sseq);
                 } else {
-                    Sound_PlayEffect(1726);
+                    Sound_PlayEffect(SEQ_SE_DP_NM10_2_sseq);
                 }
 
                 param1->unk_3BC = (v3 + 1) / 3;
@@ -437,7 +432,7 @@ static int ov83_0223B9EC(UnkStruct_ov83_0223C344 *param0, UnkStruct_ov83_0223B78
     return param1->unk_0C;
 }
 
-static int ov83_0223BB40(UnkStruct_ov83_0223C344 *param0, UnkStruct_ov83_0223B784 *param1, int *param2)
+static int ov83_0223BB40(PoffinBerrySelectionData *param0, UnkStruct_ov83_0223B784 *param1, int *param2)
 {
     BOOL v0;
 
@@ -516,7 +511,7 @@ static int ov83_0223BB40(UnkStruct_ov83_0223C344 *param0, UnkStruct_ov83_0223B78
     return param1->unk_0C;
 }
 
-static int ov83_0223BCEC(UnkStruct_ov83_0223C344 *param0, UnkStruct_ov83_0223B784 *param1, int *param2)
+static int ov83_0223BCEC(PoffinBerrySelectionData *param0, UnkStruct_ov83_0223B784 *param1, int *param2)
 {
     Poffin *v0;
     BOOL v1;
@@ -532,11 +527,11 @@ static int ov83_0223BCEC(UnkStruct_ov83_0223C344 *param0, UnkStruct_ov83_0223B78
         ov83_0223F3D0(&param1->unk_AEC, 3);
         ov83_0223E2E4(&param1->unk_5F0);
 
-        sub_020057A4(1722, 0);
-        sub_020057A4(1723, 0);
-        sub_020057A4(1727, 0);
-        sub_020057A4(1729, 0);
-        Sound_PlayEffect(1730);
+        Sound_StopEffect(1722, 0);
+        Sound_StopEffect(1723, 0);
+        Sound_StopEffect(1727, 0);
+        Sound_StopEffect(1729, 0);
+        Sound_PlayEffect(SEQ_SE_DP_NM13_sseq);
 
         ov83_0223E484(&param1->unk_608, 0, 0);
         ov83_0223E484(&param1->unk_608, 1, 0);
@@ -548,11 +543,11 @@ static int ov83_0223BCEC(UnkStruct_ov83_0223C344 *param0, UnkStruct_ov83_0223B78
             break;
         }
 
-        sub_0200F174(3, 0, 0, 0x0, 6, 1, param1->unk_00);
+        StartScreenFade(FADE_MAIN_ONLY, FADE_TYPE_BRIGHTNESS_OUT, FADE_TYPE_BRIGHTNESS_OUT, COLOR_BLACK, 6, 1, param1->heapID);
         (*param2)++;
         break;
     case 2:
-        if (ScreenWipe_Done()) {
+        if (IsScreenFadeDone()) {
             if (param0->unk_26) {
                 sub_0203632C(0);
             }
@@ -560,7 +555,7 @@ static int ov83_0223BCEC(UnkStruct_ov83_0223C344 *param0, UnkStruct_ov83_0223B78
         }
         break;
     case 3: {
-        GameRecords *v2 = SaveData_GetGameRecordsPtr(param0->unk_10->unk_0C);
+        GameRecords *v2 = SaveData_GetGameRecords(param0->ctx->saveData);
 
         if (param1->unk_1490 == 0) {
             GameRecords_IncrementTrainerScore(v2, TRAINER_SCORE_EVENT_UNK_12);
@@ -572,7 +567,7 @@ static int ov83_0223BCEC(UnkStruct_ov83_0223C344 *param0, UnkStruct_ov83_0223B78
     }
 
         if (param1->unk_1490 != 0) {
-            UnkStruct_0202B370 *v3 = sub_0202B370(param0->unk_10->unk_0C);
+            WiFiList *v3 = SaveData_GetWiFiList(param0->ctx->saveData);
             int v4;
             int v5, v6;
             int v7;
@@ -581,7 +576,7 @@ static int ov83_0223BCEC(UnkStruct_ov83_0223C344 *param0, UnkStruct_ov83_0223B78
             for (v4 = 0; v4 < param1->unk_1488; v4++) {
                 v5 = param1->unk_1494.unk_130[v4];
                 v8 = CommInfo_DWCFriendData(v5);
-                v6 = sub_0203909C(param0->unk_10->unk_0C, v8, &v7);
+                v6 = sub_0203909C(param0->ctx->saveData, v8, &v7);
 
                 switch (v6) {
                 case 0:
@@ -598,10 +593,10 @@ static int ov83_0223BCEC(UnkStruct_ov83_0223C344 *param0, UnkStruct_ov83_0223B78
         break;
     case 4:
         if (ov83_0223D570(param1->unk_148C) == 0) {
-            v0 = Poffin_malloc(param1->unk_00);
-            ov83_0223FFD4(&param1->unk_34C, v0, &param1->unk_1494, param1->unk_1488, param1->unk_00);
-            v1 = ov83_0223D508(28, v0, Poffin_sizeof(), param1->unk_148C);
-            Heap_FreeToHeap(v0);
+            v0 = Poffin_New(param1->heapID);
+            ov83_0223FFD4(&param1->unk_34C, v0, &param1->unk_1494, param1->unk_1488, param1->heapID);
+            v1 = ov83_0223D508(28, v0, Poffin_SizeOf(), param1->unk_148C);
+            Heap_Free(v0);
 
             if (v1 == 1) {
                 (*param2)++;
@@ -625,14 +620,14 @@ static int ov83_0223BCEC(UnkStruct_ov83_0223C344 *param0, UnkStruct_ov83_0223B78
     case 6:
         return param1->unk_0C + 1;
     default:
-        GF_ASSERT(0);
+        GF_ASSERT(FALSE);
         break;
     }
 
     return param1->unk_0C;
 }
 
-static int ov83_0223BF74(UnkStruct_ov83_0223C344 *param0, UnkStruct_ov83_0223B784 *param1, int *param2)
+static int ov83_0223BF74(PoffinBerrySelectionData *param0, UnkStruct_ov83_0223B784 *param1, int *param2)
 {
     u32 v0;
     BOOL v1;
@@ -647,12 +642,12 @@ static int ov83_0223BF74(UnkStruct_ov83_0223C344 *param0, UnkStruct_ov83_0223B78
 
         param1->unk_31C = 0;
 
-        ov83_0223F730(&param1->unk_1478, 128, 144, param1->unk_1494.unk_58.unk_0C, param1->unk_00);
-        sub_0200F174(3, 1, 0, 0x0, 6, 1, param1->unk_00);
+        ov83_0223F730(&param1->unk_1478, 128, 144, param1->unk_1494.unk_58.unk_0C, param1->heapID);
+        StartScreenFade(FADE_MAIN_ONLY, FADE_TYPE_BRIGHTNESS_IN, FADE_TYPE_BRIGHTNESS_OUT, COLOR_BLACK, 6, 1, param1->heapID);
         (*param2)++;
         break;
     case 1:
-        if (ScreenWipe_Done()) {
+        if (IsScreenFadeDone()) {
             (*param2)++;
             param1->unk_1C = (30 * 1);
         }
@@ -662,7 +657,7 @@ static int ov83_0223BF74(UnkStruct_ov83_0223C344 *param0, UnkStruct_ov83_0223B78
 
         if (param1->unk_1C < 0) {
             ov83_0223EC4C(&param1->unk_6A0, 1);
-            Sound_PlayEffect(1731);
+            Sound_PlayEffect(SEQ_SE_DP_NM14_sseq);
             (*param2)++;
             param1->unk_1C = (30 * 1);
         }
@@ -673,7 +668,7 @@ static int ov83_0223BF74(UnkStruct_ov83_0223C344 *param0, UnkStruct_ov83_0223B78
         if (param1->unk_1C < 0) {
             ov83_0223EC4C(&param1->unk_6A0, 2);
             ov83_0223F784(&param1->unk_1478);
-            Sound_PlayEffect(1731);
+            Sound_PlayEffect(SEQ_SE_DP_NM14_sseq);
             (*param2)++;
             param1->unk_1C = (30 * 20);
         }
@@ -681,7 +676,7 @@ static int ov83_0223BF74(UnkStruct_ov83_0223C344 *param0, UnkStruct_ov83_0223B78
     case 4:
         param1->unk_1C--;
 
-        if ((param1->unk_1C < 0) || (gCoreSys.touchPressed) || (gCoreSys.pressedKeys & (PAD_BUTTON_A | PAD_BUTTON_B))) {
+        if ((param1->unk_1C < 0) || (gSystem.touchPressed) || (gSystem.pressedKeys & (PAD_BUTTON_A | PAD_BUTTON_B))) {
             (*param2)++;
             break;
         }
@@ -699,7 +694,7 @@ static int ov83_0223BF74(UnkStruct_ov83_0223C344 *param0, UnkStruct_ov83_0223B78
     case 6:
         param1->unk_1C--;
 
-        if ((gCoreSys.touchPressed) || (param1->unk_1C < 0) || (gCoreSys.pressedKeys & (PAD_BUTTON_A | PAD_BUTTON_B))) {
+        if ((gSystem.touchPressed) || (param1->unk_1C < 0) || (gSystem.pressedKeys & (PAD_BUTTON_A | PAD_BUTTON_B))) {
             (*param2)++;
         }
         break;
@@ -711,16 +706,16 @@ static int ov83_0223BF74(UnkStruct_ov83_0223C344 *param0, UnkStruct_ov83_0223B78
     case 8:
         v0 = ov83_0223F7DC(&param1->unk_1480);
 
-        if ((v0 == 1) || (v0 == 2)) {
-            if (v0 == 1) {
-                if (sub_0202AC98(param0->unk_10->unk_08) >= 100) {
+        if (v0 == YES_NO_TOUCH_MENU_YES || v0 == YES_NO_TOUCH_MENU_NO) {
+            if (v0 == YES_NO_TOUCH_MENU_YES) {
+                if (PoffinCase_CountFilledSlots(param0->ctx->poffinCase) >= MAX_POFFINS) {
                     ov83_0223EC8C(&param1->unk_6A0, 2);
                     (*param2) = 10;
                     param1->unk_1C = (30 * 5);
                     break;
                 }
 
-                if (Bag_HasItemsInPocket(param0->unk_10->unk_14, 4) == 0) {
+                if (Bag_HasItemsInPocket(param0->ctx->bag, POCKET_BERRIES) == FALSE) {
                     ov83_0223EC8C(&param1->unk_6A0, 5);
                     (*param2) = 10;
                     param1->unk_1C = (30 * 5);
@@ -749,7 +744,7 @@ static int ov83_0223BF74(UnkStruct_ov83_0223C344 *param0, UnkStruct_ov83_0223B78
     case 10:
         param1->unk_1C--;
 
-        if ((gCoreSys.touchPressed) || (param1->unk_1C < 0) || (gCoreSys.pressedKeys & (PAD_BUTTON_A | PAD_BUTTON_B))) {
+        if ((gSystem.touchPressed) || (param1->unk_1C < 0) || (gSystem.pressedKeys & (PAD_BUTTON_A | PAD_BUTTON_B))) {
             if (param1->unk_1488 > 1) {
                 ov83_0223EC8C(&param1->unk_6A0, 6);
                 ov83_0223E9BC(&param1->unk_6A0);
@@ -766,27 +761,27 @@ static int ov83_0223BF74(UnkStruct_ov83_0223C344 *param0, UnkStruct_ov83_0223B78
         }
         break;
     default:
-        GF_ASSERT(0);
+        GF_ASSERT(FALSE);
         break;
     }
 
     return param1->unk_0C;
 }
 
-static int ov83_0223C24C(UnkStruct_ov83_0223C344 *param0, UnkStruct_ov83_0223B784 *param1, int *param2)
+static int ov83_0223C24C(PoffinBerrySelectionData *param0, UnkStruct_ov83_0223B784 *param1, int *param2)
 {
     return ov83_0223CB5C(param1, param2);
 }
 
-static int ov83_0223C258(UnkStruct_ov83_0223C344 *param0, UnkStruct_ov83_0223B784 *param1, int *param2)
+static int ov83_0223C258(PoffinBerrySelectionData *param0, UnkStruct_ov83_0223B784 *param1, int *param2)
 {
     switch (*param2) {
     case 0:
         if (param1->unk_1494.unk_145 == 1) {
             ov83_0223EC8C(&param1->unk_6A0, 3);
-            param0->unk_20 = 1;
+            param0->unk_20 = TRUE;
         } else {
-            param0->unk_20 = 0;
+            param0->unk_20 = FALSE;
 
             if (param1->unk_1488 <= 1) {
                 (*param2) = 2;
@@ -795,13 +790,11 @@ static int ov83_0223C258(UnkStruct_ov83_0223C344 *param0, UnkStruct_ov83_0223B78
                 ov83_0223EC8C(&param1->unk_6A0, 4);
             }
 
-            {
-                void *v0;
+            void *journalEntryOnlineEvent;
 
-                if (param1->unk_1490 == 1) {
-                    v0 = sub_0202C1E0(param1->unk_00);
-                    sub_0202B758(param0->unk_10->unk_1C, v0, 4);
-                }
+            if (param1->unk_1490 == 1) {
+                journalEntryOnlineEvent = JournalEntry_CreateEventMadePoffins(param1->heapID);
+                JournalEntry_SaveData(param0->ctx->journalEntry, journalEntryOnlineEvent, JOURNAL_ONLINE_EVENT);
             }
         }
 
@@ -816,11 +809,11 @@ static int ov83_0223C258(UnkStruct_ov83_0223C344 *param0, UnkStruct_ov83_0223B78
         }
         break;
     case 2:
-        sub_0200F174(0, 0, 0, 0x0, 6, 1, param1->unk_00);
+        StartScreenFade(FADE_BOTH_SCREENS, FADE_TYPE_BRIGHTNESS_OUT, FADE_TYPE_BRIGHTNESS_OUT, COLOR_BLACK, 6, 1, param1->heapID);
         (*param2)++;
         break;
     case 3:
-        if (ScreenWipe_Done()) {
+        if (IsScreenFadeDone()) {
             (*param2)++;
         }
         break;
@@ -834,7 +827,7 @@ static int ov83_0223C258(UnkStruct_ov83_0223C344 *param0, UnkStruct_ov83_0223B78
     return param1->unk_0C;
 }
 
-static int ov83_0223C344(UnkStruct_ov83_0223C344 *param0, UnkStruct_ov83_0223B784 *param1, int *param2)
+static int ov83_0223C344(PoffinBerrySelectionData *param0, UnkStruct_ov83_0223B784 *param1, int *param2)
 {
     ov83_0223DB30(&param1->unk_3C0);
     ov83_0223DEC4(&param1->unk_5B0);
@@ -927,14 +920,14 @@ static void ov83_0223C558(UnkStruct_ov83_0223B784 *param0)
                 ov83_0223F3A0(&param0->unk_AEC, 1);
                 param0->unk_328 = 1;
                 ov83_0223F3D0(&param0->unk_AEC, 3);
-                Sound_PlayEffect(1729);
+                Sound_PlayEffect(SEQ_SE_DP_NM12_2_sseq);
             }
         } else {
             if (param0->unk_328 != 2) {
                 ov83_0223F3A0(&param0->unk_AEC, 3);
                 param0->unk_328 = 2;
                 ov83_0223F3D0(&param0->unk_AEC, 1);
-                Sound_PlayEffect(1729);
+                Sound_PlayEffect(SEQ_SE_DP_NM12_2_sseq);
             }
         }
     }
@@ -1019,12 +1012,12 @@ static void ov83_0223C758(UnkStruct_ov83_0223B784 *param0)
         if (v0->unk_11 == 0) {
             ov83_0223F3A0(&param0->unk_AEC, 0);
             ov83_0223F3D0(&param0->unk_AEC, 2);
-            Sound_PlayEffect(1729);
+            Sound_PlayEffect(SEQ_SE_DP_NM12_2_sseq);
             param0->unk_324 = 1;
         } else {
             ov83_0223F3A0(&param0->unk_AEC, 2);
             ov83_0223F3D0(&param0->unk_AEC, 0);
-            Sound_PlayEffect(1729);
+            Sound_PlayEffect(SEQ_SE_DP_NM12_2_sseq);
             param0->unk_324 = 2;
         }
     }
@@ -1052,15 +1045,15 @@ static void ov83_0223C7FC(UnkStruct_ov83_0223B784 *param0)
 
     if (v0->unk_0F == 1) {
         ov83_0223F544(&param0->unk_B6C, v1, v2);
-        Sound_PlayEffect(1727);
+        Sound_PlayEffect(SEQ_SE_DP_NM11_sseq);
     }
 }
 
-static void ov83_0223C82C(UnkStruct_ov83_0223C344 *param0, UnkStruct_ov83_0223B784 *param1)
+static void ov83_0223C82C(PoffinBerrySelectionData *param0, UnkStruct_ov83_0223B784 *param1)
 {
     int v0;
 
-    param1->unk_1494.unk_100 = Poffin_malloc(param1->unk_00);
+    param1->unk_1494.unk_100 = Poffin_New(param1->heapID);
     param1->unk_1494.unk_144 = ov83_0223D570(param1->unk_148C);
 
     for (v0 = 0; v0 < 4; v0++) {
@@ -1073,11 +1066,11 @@ static void ov83_0223C82C(UnkStruct_ov83_0223C344 *param0, UnkStruct_ov83_0223B7
     }
 }
 
-static void ov83_0223C87C(UnkStruct_ov83_0223C344 *param0, UnkStruct_ov83_0223B784 *param1)
+static void ov83_0223C87C(PoffinBerrySelectionData *param0, UnkStruct_ov83_0223B784 *param1)
 {
     GF_ASSERT(param1->unk_1494.unk_100);
 
-    Heap_FreeToHeap(param1->unk_1494.unk_100);
+    Heap_Free(param1->unk_1494.unk_100);
     param1->unk_1494.unk_100 = NULL;
 
     if (param0->unk_26) {
@@ -1085,18 +1078,18 @@ static void ov83_0223C87C(UnkStruct_ov83_0223C344 *param0, UnkStruct_ov83_0223B7
     }
 }
 
-static BOOL ov83_0223C8B0(UnkStruct_ov83_0223C344 *param0, Poffin *param1, int param2)
+static BOOL ov83_0223C8B0(PoffinBerrySelectionData *param0, Poffin *param1, int param2)
 {
     int v0;
     u16 v1;
     int v2;
     BOOL v3 = 1;
-    TVBroadcast *v4 = SaveData_TVBroadcast(param0->unk_10->unk_0C);
+    TVBroadcast *broadcast = SaveData_GetTVBroadcast(param0->ctx->saveData);
 
     for (v0 = 0; v0 < param2; v0++) {
-        v1 = sub_0202AB74(param0->unk_10->unk_08, param1);
+        v1 = PoffinCase_AddPoffin(param0->ctx->poffinCase, param1);
 
-        if (v1 == 0xFFFF) {
+        if (v1 == POFFIN_NONE) {
             v3 = 0;
             break;
         }
@@ -1104,7 +1097,7 @@ static BOOL ov83_0223C8B0(UnkStruct_ov83_0223C344 *param0, Poffin *param1, int p
 
     if (param0->unk_26 == 0) {
         v2 = Poffin_GetAttribute(param1, 0);
-        sub_0206CFCC(v4, v2);
+        sub_0206CFCC(broadcast, v2);
     }
 
     return v3;

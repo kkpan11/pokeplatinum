@@ -1,9 +1,12 @@
 #!/usr/bin/env python3
 
 import argparse
+import os
 import pathlib
 import shutil
 import subprocess
+
+SPECIES_DIRS = os.environ['SPECIES'].split(';')
 
 argparser = argparse.ArgumentParser(
     prog='pl_poke_icon.narc packer',
@@ -12,9 +15,9 @@ argparser = argparse.ArgumentParser(
 argparser.add_argument('-n', '--nitrogfx',
                        required=True,
                        help='Path to nitrogfx executable')
-argparser.add_argument('-k', '--knarc',
+argparser.add_argument('-k', '--narc',
                        required=True,
-                       help='Path to knarc executable')
+                       help='Path to narc executable')
 argparser.add_argument('-s', '--source-dir',
                        required=True,
                        help='Path to the source directory (res/pokemon)')
@@ -24,9 +27,6 @@ argparser.add_argument('-p', '--private-dir',
 argparser.add_argument('-o', '--output-dir',
                        required=True,
                        help='Path to the output directory (where the NARC will be made)')
-argparser.add_argument('subdirs',
-                       nargs='+',
-                       help='List of subdirectories to process in-order')
 args = argparser.parse_args()
 
 source_dir = pathlib.Path(args.source_dir)
@@ -35,7 +35,7 @@ output_dir = pathlib.Path(args.output_dir)
 
 private_dir.mkdir(parents=True, exist_ok=True)
 
-for i, subdir in enumerate(args.subdirs):
+for i, subdir in enumerate(SPECIES_DIRS):
     # Do not attempt to process either egg or bad_egg
     if subdir in ['egg', 'bad_egg']:
         continue
@@ -51,16 +51,17 @@ for i, subdir in enumerate(args.subdirs):
                     args.nitrogfx,
                     source_file,
                     target_file,
-                    '-scanfronttoback'
+                    '-encodefronttoback',
+                    '-scan',
                 ])
             else:
                 subprocess.run(['touch', target_file])
 
             j += 1
 
-    if i == 0:  # species 000 has special palette files
-        shutil.copy(source_dir / '000/normal_pal.NCLR', private_dir / '0000-04.NCLR')
-        shutil.copy(source_dir / '000/shiny_pal.NCLR', private_dir / '0000-05.NCLR')
+    if i == 0:  # species none has special palette files
+        shutil.copy(source_dir / 'none/normal_pal.NCLR', private_dir / '0000-04.NCLR')
+        shutil.copy(source_dir / 'none/shiny_pal.NCLR', private_dir / '0000-05.NCLR')
         continue
 
     normal_pal_src = source_dir / subdir / 'normal.pal'
@@ -83,4 +84,9 @@ for i, subdir in enumerate(args.subdirs):
         '-comp', '10'
     ])
 
-subprocess.run([args.knarc, '-d', private_dir, '-p', output_dir / 'pl_pokegra.narc'])
+subprocess.run([
+    args.narc,
+    '--create',
+    '--file', output_dir / 'pl_pokegra.narc',
+    private_dir
+])

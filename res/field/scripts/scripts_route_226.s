@@ -1,23 +1,15 @@
-    .include "macros/scrcmd.inc"
+#include "macros/scrcmd.inc"
+#include "res/text/bank/route_226.h"
 
-    .data
 
-    ScriptEntry _000A
-    ScriptEntry _0021
-    .short 0xFD13
+    ScriptEntry Route226_ArrowSignpostSurvivalArea
+    ScriptEntry Route226_ArrowSignpostRt227Rt228
+    ScriptEntryEnd
 
-_000A:
-    ScrCmd_036 0, 1, 0, 0x800C
-    ScrCmd_038 3
-    ScrCmd_039
-    ScrCmd_03B 0x800C
-    CallCommonScript 0x7D0
+Route226_ArrowSignpostSurvivalArea:
+    ShowArrowSign Route226_Text_SignSurvivalArea
     End
 
-_0021:
-    ScrCmd_036 1, 1, 0, 0x800C
-    ScrCmd_038 3
-    ScrCmd_039
-    ScrCmd_03B 0x800C
-    CallCommonScript 0x7D0
+Route226_ArrowSignpostRt227Rt228:
+    ShowArrowSign Route226_Text_SignRt227Rt228
     End

@@ -1,6 +1,5 @@
-    .include "macros/btlcmd.inc"
+#include "macros/btlcmd.inc"
 
-    .data
 
 _000:
     CompareVarToValue OPCODE_FLAG_SET, BTLVAR_MOVE_STATUS_FLAGS, MOVE_STATUS_SEMI_INVULNERABLE, _051
@@ -15,7 +14,7 @@ _000:
     UpdateVarFromVar OPCODE_SET, BTLVAR_MSG_BATTLER_TEMP, BTLVAR_ATTACKER
     Call BATTLE_SUBSCRIPT_UPDATE_HP
     // {0} cut its own HP and laid a curse on {1}!
-    PrintMessage pl_msg_00000368_00417, TAG_NICKNAME_NICKNAME, BTLSCR_ATTACKER, BTLSCR_DEFENDER
+    PrintMessage BattleStrings_Text_PokemonCutItsOwnHPAndLaidACurseOnPokemon_AllyAlly, TAG_NICKNAME_NICKNAME, BTLSCR_ATTACKER, BTLSCR_DEFENDER
     Wait 
     WaitButtonABTime 30
     End 

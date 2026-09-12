@@ -1,86 +1,78 @@
-    .include "macros/scrcmd.inc"
+#include "macros/scrcmd.inc"
+#include "res/text/bank/route_216_house.h"
 
-    .data
 
-    ScriptEntry _000E
-    ScriptEntry _0071
-    ScriptEntry _0084
-    .short 0xFD13
+    ScriptEntry Route216House_Hiker
+    ScriptEntry Route216House_SnowpointNPCF
+    ScriptEntry Route216House_Bed
+    ScriptEntryEnd
 
-_000E:
-    PlayFanfare SEQ_SE_CONFIRM
+Route216House_Hiker:
+    PlaySE SE_CONFIRM_sseq_3
     LockAll
     FacePlayer
-    Message 0
-    ScrCmd_03E 0x800C
-    GoToIfEq 0x800C, 0, _0039
-    GoToIfEq 0x800C, 1, _0066
+    Message Route216House_Text_MakeYourselfAtHome
+    ShowYesNoMenu VAR_RESULT
+    GoToIfEq VAR_RESULT, MENU_YES, Route216House_HikerRest
+    GoToIfEq VAR_RESULT, MENU_NO, Route216House_YouCanNapInBed
     End
 
-_0039:
+Route216House_HikerRest:
     CloseMessage
-    FadeScreen 6, 1, 0, 0
+    FadeScreenOut
     WaitFadeScreen
-    ScrCmd_04E 0x48E
-    ScrCmd_04F
-    ScrCmd_14E
-    FadeScreen 6, 1, 1, 0
+    PlayFanfare SEQ_ASA_sseq
+    WaitFanfare
+    HealParty
+    FadeScreenIn
     WaitFadeScreen
-    Message 1
-    WaitABXPadPress
+    Message Route216House_Text_YourPokemonAreHealthy
+    WaitButton
     CloseMessage
     ReleaseAll
     End
 
-_0066:
-    Message 2
-    WaitABXPadPress
+Route216House_YouCanNapInBed:
+    Message Route216House_Text_YouCanNapInBed
+    WaitButton
     CloseMessage
     ReleaseAll
     End
 
-_0071:
-    PlayFanfare SEQ_SE_CONFIRM
+Route216House_SnowpointNPCF:
+    NPCMessage Route216House_Text_IDontHaveThickFat
+    End
+
+Route216House_Bed:
+    PlaySE SE_CONFIRM_sseq_3
     LockAll
-    FacePlayer
-    Message 3
-    WaitABXPadPress
-    CloseMessage
-    ReleaseAll
+    Message Route216House_Text_WantToRest
+    ShowYesNoMenu VAR_RESULT
+    GoToIfEq VAR_RESULT, MENU_YES, Route216House_RestInBed
+    GoToIfEq VAR_RESULT, MENU_NO, Route216House_DontRestInBed
     End
 
-_0084:
-    PlayFanfare SEQ_SE_CONFIRM
-    LockAll
-    Message 4
-    ScrCmd_03E 0x800C
-    GoToIfEq 0x800C, 0, _00AD
-    GoToIfEq 0x800C, 1, _00E3
-    End
-
-_00AD:
-    ScrCmd_0CD 0
-    Message 5
+Route216House_RestInBed:
+    BufferPlayerName 0
+    Message Route216House_Text_FellAsleepInBed
     CloseMessage
-    FadeScreen 6, 1, 0, 0
+    FadeScreenOut
     WaitFadeScreen
-    ScrCmd_04E 0x48E
-    ScrCmd_04F
-    ScrCmd_14E
-    FadeScreen 6, 1, 1, 0
+    PlayFanfare SEQ_ASA_sseq
+    WaitFanfare
+    HealParty
+    FadeScreenIn
     WaitFadeScreen
-    ScrCmd_0CD 0
-    Message 6
-    WaitABXPadPress
+    BufferPlayerName 0
+    Message Route216House_Text_BecameFullyHealed
+    WaitButton
     CloseMessage
     ReleaseAll
     End
 
-_00E3:
+Route216House_DontRestInBed:
     CloseMessage
     ReleaseAll
     End
 
-    .byte 0
-    .byte 0
-    .byte 0
+    .balign 4, 0

@@ -1,104 +1,82 @@
-    .include "macros/scrcmd.inc"
+#include "macros/scrcmd.inc"
+#include "res/text/bank/snowpoint_city_pokecenter_1f.h"
+#include "res/field/events/events_snowpoint_city_pokecenter_1f.h"
 
-    .data
 
-    ScriptEntry _0016
-    ScriptEntry _0022
-    ScriptEntry _0035
-    ScriptEntry _0048
-    ScriptEntry _0067
-    .short 0xFD13
+    ScriptEntry SnowpointCityPokecenter1F_Nurse
+    ScriptEntry SnowpointCityPokecenter1F_Lass
+    ScriptEntry SnowpointCityPokecenter1F_BattleGirl
+    ScriptEntry SnowpointCityPokecenter1F_Psyduck
+    ScriptEntry SnowpointCityPokecenter1F_Maylene
+    ScriptEntryEnd
 
-_0016:
-    SetVar 0x8007, 0
-    CallCommonScript 0x7D2
+SnowpointCityPokecenter1F_Nurse:
+    Common_CallPokecenterNurse LOCALID_SNOWPOINT_NURSE
     End
 
-_0022:
-    PlayFanfare SEQ_SE_CONFIRM
+SnowpointCityPokecenter1F_Lass:
+    NPCMessage SnowpointCityPokecenter1F_Text_IcePokemonAroundSnowpoint
+    End
+
+SnowpointCityPokecenter1F_BattleGirl:
+    NPCMessage SnowpointCityPokecenter1F_Text_SnowSwallowsSound
+    End
+
+SnowpointCityPokecenter1F_Psyduck:
+    PokemonCryAndMessage SPECIES_PSYDUCK, SnowpointCityPokecenter1F_Text_PsyduckCry
+    End
+
+SnowpointCityPokecenter1F_Maylene:
+    PlaySE SE_CONFIRM_sseq_3
     LockAll
     FacePlayer
-    Message 2
-    WaitABXPadPress
+    GoToIfBadgeAcquired BADGE_ID_ICICLE, SnowpointCityPokecenter1F_ThatsTheIcicleBadge
+    GetPlayerDir VAR_0x8000
+    CallIfEq VAR_0x8000, DIR_NORTH, SnowpointCityPokecenter1F_MayleneWalkOnSpotSouth
+    CallIfEq VAR_0x8000, DIR_SOUTH, SnowpointCityPokecenter1F_MayleneWalkOnSpotSouth
+    CallIfEq VAR_0x8000, DIR_WEST, SnowpointCityPokecenter1F_MayleneWalkOnSpotEast
+    CallIfEq VAR_0x8000, DIR_EAST, SnowpointCityPokecenter1F_MayleneWalkOnSpotWest
+    BufferPlayerName 0
+    Message SnowpointCityPokecenter1F_Text_IAdmireCandice
+    WaitButton
     CloseMessage
     ReleaseAll
     End
 
-_0035:
-    PlayFanfare SEQ_SE_CONFIRM
-    LockAll
-    FacePlayer
-    Message 3
-    WaitABXPadPress
-    CloseMessage
-    ReleaseAll
-    End
-
-_0048:
-    PlayFanfare SEQ_SE_CONFIRM
-    LockAll
-    FacePlayer
-    ScrCmd_04B 0x5DC
-    ScrCmd_04C 54, 0
-    Message 4
-    ScrCmd_04D
-    WaitABXPadPress
-    CloseMessage
-    ReleaseAll
-    End
-
-_0067:
-    PlayFanfare SEQ_SE_CONFIRM
-    LockAll
-    FacePlayer
-    ScrCmd_15B 6, 0x800C
-    GoToIfEq 0x800C, 1, _00EC
-    ScrCmd_1BD 0x8000
-    CallIfEq 0x8000, 0, _00C8
-    CallIfEq 0x8000, 1, _00C8
-    CallIfEq 0x8000, 2, _00D4
-    CallIfEq 0x8000, 3, _00E0
-    ScrCmd_0CD 0
-    Message 0
-    WaitABXPadPress
-    CloseMessage
-    ReleaseAll
-    End
-
-_00C8:
-    ApplyMovement 4, _00FC
+SnowpointCityPokecenter1F_MayleneWalkOnSpotSouth:
+    ApplyMovement LOCALID_SNOWPOINT_MAYLENE, SnowpointCityPokecenter1F_Movement_MayleneWalkOnSpotSouth
     WaitMovement
     Return
 
-_00D4:
-    ApplyMovement 4, _0104
+SnowpointCityPokecenter1F_MayleneWalkOnSpotEast:
+    ApplyMovement LOCALID_SNOWPOINT_MAYLENE, SnowpointCityPokecenter1F_Movement_MayleneWalkOnSpotEast
     WaitMovement
     Return
 
-_00E0:
-    ApplyMovement 4, _010C
+SnowpointCityPokecenter1F_MayleneWalkOnSpotWest:
+    ApplyMovement LOCALID_SNOWPOINT_MAYLENE, SnowpointCityPokecenter1F_Movement_MayleneWalkOnSpotWest
     WaitMovement
     Return
 
-_00EC:
-    ScrCmd_0CD 0
-    Message 1
-    WaitABXPadPress
+SnowpointCityPokecenter1F_ThatsTheIcicleBadge:
+    BufferPlayerName 0
+    Message SnowpointCityPokecenter1F_Text_ThatsTheIcicleBadge
+    WaitButton
     CloseMessage
     ReleaseAll
     End
 
     .balign 4, 0
-_00FC:
-    MoveAction_029 2
+SnowpointCityPokecenter1F_Movement_MayleneWalkOnSpotSouth:
+    WalkOnSpotFasterSouth 2
     EndMovement
 
     .balign 4, 0
-_0104:
-    MoveAction_02B 2
+SnowpointCityPokecenter1F_Movement_MayleneWalkOnSpotEast:
+    WalkOnSpotFasterEast 2
     EndMovement
 
     .balign 4, 0
-_010C:
-    MoveAction_02A 2
+SnowpointCityPokecenter1F_Movement_MayleneWalkOnSpotWest:
+    WalkOnSpotFasterWest 2
     EndMovement

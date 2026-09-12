@@ -1,4 +1,4 @@
-personal_files += files('data.json')
+species_data_files += files('data.json', 'sprite_data.json')
 
 poke_icon_files += files('icon.png')
 burmy_sandy_icon = files('forms/sandy/icon.png')
@@ -23,3 +23,5 @@ otherpoke_index += {
     '170': files('forms/trash/normal.pal'),
     '171': files('forms/trash/shiny.pal'),
 }
+
+pokefoot_files += files('footprint.png')

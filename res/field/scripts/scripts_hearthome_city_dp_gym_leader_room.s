@@ -1,140 +1,138 @@
-    .include "macros/scrcmd.inc"
+#include "macros/scrcmd.inc"
+#include "res/text/bank/hearthome_city_dp_gym_leader_room.h"
+#include "res/field/events/events_hearthome_city_dp_gym_leader_room.h"
 
-    .data
 
-    ScriptEntry _0014
-    ScriptEntry _012B
-    ScriptEntry _0169
-    ScriptEntry _0173
-    ScriptEntry _01DC
+    ScriptEntry HearthomeCityDPGymLeaderRoom_Fantina
+    ScriptEntry HearthomeCityDPGymLeaderRoom_TryGiveTM65
+    ScriptEntry HearthomeCityDPGymLeaderRoom_BagIsFull
+    ScriptEntry HearthomeCityDPGymLeaderRoom_FantinaPostBattle
+    ScriptEntry HearthomeCityDPGymLeaderRoom_BlackOut
 
-_0014:
-    PlayFanfare SEQ_SE_CONFIRM
+HearthomeCityDPGymLeaderRoom_Fantina:
+    PlaySE SE_CONFIRM_sseq_3
     LockAll
     FacePlayer
-    ScrCmd_1BD 0x800C
-    GoToIfEq 0x800C, 0, _0056
-    GoToIfEq 0x800C, 1, _0066
-    GoToIfEq 0x800C, 2, _0076
-    GoToIfEq 0x800C, 3, _0086
+    GetPlayerDir VAR_RESULT
+    GoToIfEq VAR_RESULT, DIR_NORTH, HearthomeCityDPGymLeaderRoom_FantinaSpinNorth
+    GoToIfEq VAR_RESULT, DIR_SOUTH, HearthomeCityDPGymLeaderRoom_FantinaSpinSouth
+    GoToIfEq VAR_RESULT, DIR_WEST, HearthomeCityDPGymLeaderRoom_FantinaSpinWest
+    GoToIfEq VAR_RESULT, DIR_EAST, HearthomeCityDPGymLeaderRoom_FantinaSpinEast
     End
 
-_0056:
-    ApplyMovement 0, _018C
+HearthomeCityDPGymLeaderRoom_FantinaSpinNorth:
+    ApplyMovement LOCALID_FANTINA, HearthomeCityDPGymLeaderRoom_Movement_FantinaSpinNorth
     WaitMovement
-    GoTo _0096
+    GoTo HearthomeCityDPGymLeaderRoom_FantinaBattle
 
-_0066:
-    ApplyMovement 0, _01A0
+HearthomeCityDPGymLeaderRoom_FantinaSpinSouth:
+    ApplyMovement LOCALID_FANTINA, HearthomeCityDPGymLeaderRoom_Movement_FantinaSpinSouth
     WaitMovement
-    GoTo _0096
+    GoTo HearthomeCityDPGymLeaderRoom_FantinaBattle
 
-_0076:
-    ApplyMovement 0, _01B4
+HearthomeCityDPGymLeaderRoom_FantinaSpinWest:
+    ApplyMovement LOCALID_FANTINA, HearthomeCityDPGymLeaderRoom_Movement_FantinaSpinWest
     WaitMovement
-    GoTo _0096
+    GoTo HearthomeCityDPGymLeaderRoom_FantinaBattle
 
-_0086:
-    ApplyMovement 0, _01C8
+HearthomeCityDPGymLeaderRoom_FantinaSpinEast:
+    ApplyMovement LOCALID_FANTINA, HearthomeCityDPGymLeaderRoom_Movement_FantinaSpinEast
     WaitMovement
-    GoTo _0096
+    GoTo HearthomeCityDPGymLeaderRoom_FantinaBattle
 
-_0096:
-    ScrCmd_15B 4, 0x800C
-    GoToIfEq 0x800C, 1, _0173
-    ScrCmd_1CD 9, 100, 0, 0, 0
-    Message 0
+HearthomeCityDPGymLeaderRoom_FantinaBattle:
+    GoToIfBadgeAcquired BADGE_ID_RELIC, HearthomeCityDPGymLeaderRoom_FantinaPostBattle
+    CreateJournalEvent LOCATION_EVENT_GYM_WAS_TOO_TOUGH, MAP_HEADER_HEARTHOME_CITY_DP_GYM_LEADER_ROOM
+    Message HearthomeCityDPGymLeaderRoom_Text_Dummy0
     CloseMessage
-    ScrCmd_0E5 0x13E, 0
-    ScrCmd_0EC 0x800C
-    GoToIfEq 0x800C, 0, _01DC
-    Message 1
-    ScrCmd_0CD 0
-    Message 2
-    ScrCmd_04E 0x489
-    ScrCmd_04F
-    ScrCmd_15C 4
-    ScrCmd_260 23
-    SetTrainerFlag 0x10A
-    SetTrainerFlag 0x118
-    SetTrainerFlag 0x11C
-    SetTrainerFlag 0x145
-    SetTrainerFlag 0x14A
-    SetTrainerFlag 0x154
-    SetTrainerFlag 0x157
-    SetTrainerFlag 0x165
-    ScrCmd_1CD 10, 100, 0x13E, 0, 0
-    SetVar 0x407B, 1
-    SetFlag 0x206
-    ClearFlag 0x207
-    Message 3
-    GoTo _012B
+    StartTrainerBattle TRAINER_LEADER_FANTINA
+    CheckWonBattle VAR_RESULT
+    GoToIfEq VAR_RESULT, FALSE, HearthomeCityDPGymLeaderRoom_BlackOut
+    Message HearthomeCityDPGymLeaderRoom_Text_Dummy1
+    BufferPlayerName 0
+    Message HearthomeCityDPGymLeaderRoom_Text_Dummy2
+    PlayFanfare SEQ_BADGE_sseq
+    WaitFanfare
+    GiveBadge BADGE_ID_RELIC
+    IncrementTrainerScore2 TRAINER_SCORE_EVENT_BADGE_EARNED
+    SetTrainerFlag TRAINER_CAMPER_DREW
+    SetTrainerFlag TRAINER_ACE_TRAINER_ALLEN
+    SetTrainerFlag TRAINER_ACE_TRAINER_CATHERINE
+    SetTrainerFlag TRAINER_LASS_MOLLY
+    SetTrainerFlag TRAINER_PICNICKER_CHEYENNE
+    SetTrainerFlag TRAINER_SCHOOL_KID_CHANCE
+    SetTrainerFlag TRAINER_SCHOOL_KID_MACKENZIE
+    SetTrainerFlag TRAINER_YOUNGSTER_DONNY
+    CreateJournalEvent LOCATION_EVENT_BEAT_GYM_LEADER, MAP_HEADER_HEARTHOME_CITY_DP_GYM_LEADER_ROOM, TRAINER_LEADER_FANTINA
+    SetVar VAR_ROUTE_209_GATE_TO_HEARTHOME_CITY_STATE, 1
+    SetFlag FLAG_HIDE_HEARTHOME_CITY_ROUTE_209_BLOCKADE
+    ClearFlag FLAG_HIDE_HEARTHOME_CITY_ROUTE_209_GATE_RIVAL
+    Message HearthomeCityDPGymLeaderRoom_Text_Dummy3
+    GoTo HearthomeCityDPGymLeaderRoom_TryGiveTM65
 
-_012B:
-    SetVar 0x8004, 0x188
-    SetVar 0x8005, 1
-    ScrCmd_07D 0x8004, 0x8005, 0x800C
-    GoToIfEq 0x800C, 0, _0169
-    CallCommonScript 0x7FC
-    SetFlag 125
-    ScrCmd_0D1 0, 0x8004
-    ScrCmd_0D3 1, 0x8004
-    Message 4
-    WaitABXPadPress
+HearthomeCityDPGymLeaderRoom_TryGiveTM65:
+    SetVar VAR_0x8004, ITEM_TM65
+    SetVar VAR_0x8005, 1
+    GoToIfCannotFitItem VAR_0x8004, VAR_0x8005, VAR_RESULT, HearthomeCityDPGymLeaderRoom_BagIsFull
+    Common_GiveItemQuantity
+    SetFlag FLAG_RECEIVED_FANTINA_TM65
+    BufferItemName 0, VAR_0x8004
+    BufferTMHMMoveName 1, VAR_0x8004
+    Message HearthomeCityDPGymLeaderRoom_Text_Dummy4
+    WaitButton
     CloseMessage
     ReleaseAll
     End
 
-_0169:
-    CallCommonScript 0x7E1
+HearthomeCityDPGymLeaderRoom_BagIsFull:
+    Common_MessageBagIsFull
     CloseMessage
     ReleaseAll
     End
 
-_0173:
-    GoToIfUnset 125, _012B
-    Message 5
-    WaitABXPadPress
+HearthomeCityDPGymLeaderRoom_FantinaPostBattle:
+    GoToIfUnset FLAG_RECEIVED_FANTINA_TM65, HearthomeCityDPGymLeaderRoom_TryGiveTM65
+    Message HearthomeCityDPGymLeaderRoom_Text_Dummy5
+    WaitButton
     CloseMessage
     ReleaseAll
     End
 
     .balign 4, 0
-_018C:
-    MoveAction_002 4
-    MoveAction_000 4
-    MoveAction_003 4
-    MoveAction_001 4
+HearthomeCityDPGymLeaderRoom_Movement_FantinaSpinNorth:
+    FaceWest 4
+    FaceNorth 4
+    FaceEast 4
+    FaceSouth 4
     EndMovement
 
     .balign 4, 0
-_01A0:
-    MoveAction_003 4
-    MoveAction_001 4
-    MoveAction_002 4
-    MoveAction_000 4
+HearthomeCityDPGymLeaderRoom_Movement_FantinaSpinSouth:
+    FaceEast 4
+    FaceSouth 4
+    FaceWest 4
+    FaceNorth 4
     EndMovement
 
     .balign 4, 0
-_01B4:
-    MoveAction_000 4
-    MoveAction_002 4
-    MoveAction_001 4
-    MoveAction_003 4
+HearthomeCityDPGymLeaderRoom_Movement_FantinaSpinWest:
+    FaceNorth 4
+    FaceWest 4
+    FaceSouth 4
+    FaceEast 4
     EndMovement
 
     .balign 4, 0
-_01C8:
-    MoveAction_000 4
-    MoveAction_003 4
-    MoveAction_001 4
-    MoveAction_002 4
+HearthomeCityDPGymLeaderRoom_Movement_FantinaSpinEast:
+    FaceNorth 4
+    FaceEast 4
+    FaceSouth 4
+    FaceWest 4
     EndMovement
 
-_01DC:
-    ScrCmd_0EB
+HearthomeCityDPGymLeaderRoom_BlackOut:
+    BlackOutFromBattle
     ReleaseAll
     End
 
-    .byte 0
-    .byte 0
+    .balign 4, 0

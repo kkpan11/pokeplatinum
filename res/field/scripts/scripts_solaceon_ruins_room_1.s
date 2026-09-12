@@ -1,23 +1,22 @@
-    .include "macros/scrcmd.inc"
+#include "macros/scrcmd.inc"
+#include "res/text/bank/solaceon_ruins_room_1.h"
 
-    .data
 
-    ScriptEntry _000A
-    ScriptEntry _0010
-    .short 0xFD13
+    ScriptEntry SolaceonRuinsRoom1_OnTransition
+    ScriptEntry SolaceonRuinsRoom1_Inscription
+    ScriptEntryEnd
 
-_000A:
-    SetFlag 0x9C9
+SolaceonRuinsRoom1_OnTransition:
+    SetFlag FLAG_FIRST_ARRIVAL_SOLACEON_RUINS
     End
 
-_0010:
-    PlayFanfare SEQ_SE_CONFIRM
+SolaceonRuinsRoom1_Inscription:
+    PlaySE SE_CONFIRM_sseq_3
     LockAll
-    ScrCmd_26D 0
-    WaitABXPadPress
+    MessageUnown SolaceonRuinsRoom1_Text_Directions
+    WaitButton
     CloseMessage
     ReleaseAll
     End
 
-    .byte 0
-    .byte 0
+    .balign 4, 0

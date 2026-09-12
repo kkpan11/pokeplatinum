@@ -1,212 +1,206 @@
-    .include "macros/scrcmd.inc"
+#include "macros/scrcmd.inc"
+#include "generated/hidden_locations.h"
+#include "res/text/bank/distortion_world_giratina_room.h"
 
-    .data
+    ScriptEntry DistortionWorldGiratinaRoom_OnTransition
+    ScriptEntry DistortionWorldGiratinaRoom_OnLoad
+    ScriptEntry DistortionWorldGiratinaRoom_Portal
+    ScriptEntry DistortionWorldGiratinaRoom_CoordEvent_WarpToB7F
+    ScriptEntry DistortionWorldGiratinaRoom_Giratina
+    ScriptEntry DistortionWorldGiratinaRoom_Cynthia
+    ScriptEntry DistortionWorldGiratinaRoom_CoordEvent_FirstShadow
+    ScriptEntry DistortionWorldGiratinaRoom_CoordEvent_GiratinaArrival
+    ScriptEntryEnd
 
-    ScriptEntry _0022
-    ScriptEntry _0026
-    ScriptEntry _0041
-    ScriptEntry _009E
-    ScriptEntry _00C4
-    ScriptEntry _020A
-    ScriptEntry _021D
-    ScriptEntry _0232
-    .short 0xFD13
-
-_0022:
-    ScrCmd_2F2
+DistortionWorldGiratinaRoom_OnTransition:
+    InitPersistedMapFeaturesForDistortionWorld
     End
 
-_0026:
-    GoToIfSet 142, _0033
+DistortionWorldGiratinaRoom_OnLoad:
+    GoToIfSet FLAG_MAP_LOCAL_REMOVE_OBJECT, DistortionWorldGiratinaRoom_RemoveGiratina
     End
 
-_0033:
-    ScrCmd_31F
-    SetVar 0x4055, 14
-    ScrCmd_065 128
+DistortionWorldGiratinaRoom_RemoveGiratina:
+    ResetDistortionWorldPersistedCameraAngles
+    SetVar VAR_DISTORTION_WORLD_PROGRESS, DIST_WORLD_PROGRESS_BATTLED_GIRATINA
+    RemoveObject DIST_WORLD_MAP_OBJECT_GIRATINA_ROOM_GIRATINA
     End
 
-_0041:
-    PlayFanfare SEQ_SE_CONFIRM
+DistortionWorldGiratinaRoom_Portal:
+    PlaySE SE_CONFIRM_sseq_3
     LockAll
-    Message 13
-    ScrCmd_03E 0x800C
-    GoToIfEq 0x800C, 0, _0061
+    Message DistortionWorldGiratinaRoom_Text_LeapIntoPortal
+    ShowYesNoMenu VAR_RESULT
+    GoToIfEq VAR_RESULT, MENU_YES, DistortionWorldGiratinaRoom_GoToSendoffSpring
     CloseMessage
     ReleaseAll
     End
 
-_0061:
-    ScrCmd_0CD 0
-    Message 14
+DistortionWorldGiratinaRoom_GoToSendoffSpring:
+    BufferPlayerName 0
+    Message DistortionWorldGiratinaRoom_Text_PlayerLeaptIntoPortal
     CloseMessage
-    ScrCmd_270 2, 1
-    SetVar 0x40AA, 1
-    PlayFanfare SEQ_SE_PL_SYUWA
-    FadeScreen 6, 1, 0, 0
+    EnableHiddenLocation HIDDEN_LOCATION_SPRING_PATH
+    SetVar VAR_EXITED_DISTORTION_WORLD_STATE, 1
+    PlaySE SEQ_SE_PL_SYUWA_sseq
+    FadeScreenOut
     WaitFadeScreen
-    ScrCmd_0BE 0x10B, 0, 32, 17, 1
-    FadeScreen 6, 1, 1, 0
-    WaitFadeScreen
-    End
-
-_009E:
-    FadeScreen 6, 1, 0, 0
-    WaitFadeScreen
-    ScrCmd_0BE 0x245, 0, 89, 57, 1
-    FadeScreen 6, 1, 1, 0
+    Warp MAP_HEADER_SENDOFF_SPRING, 32, 17, DIR_SOUTH
+    FadeScreenIn
     WaitFadeScreen
     End
 
-_00C4:
-    PlayFanfare SEQ_SE_CONFIRM
+DistortionWorldGiratinaRoom_CoordEvent_WarpToB7F:
+    FadeScreenOut
+    WaitFadeScreen
+    Warp MAP_HEADER_DISTORTION_WORLD_B7F, 89, 57, DIR_SOUTH
+    FadeScreenIn
+    WaitFadeScreen
+    End
+
+DistortionWorldGiratinaRoom_Giratina:
+    PlaySE SE_CONFIRM_sseq_3
     LockAll
-    ScrCmd_04C 0x1E7, 0
-    Message 2
-    ScrCmd_04D
+    PlayCry SPECIES_GIRATINA
+    Message DistortionWorldGiratinaRoom_Text_GiratinaCryGiygogagohgwooh
+    WaitCry
     CloseMessage
-    SetFlag 142
-    ScrCmd_319 0x1E7, 47
-    ClearFlag 142
-    ScrCmd_0EC 0x800C
-    ScrCmd_314 0x800C
-    GoToIfEq 0x800C, 2, _0204
-    GoToIfEq 0x800C, 3, _0204
-    GoToIfEq 0x800C, 5, _014E
-    GoToIfEq 0x800C, 6, _014E
-    GoToIfEq 0x800C, 4, _016E
-    ScrCmd_311 130
-    ScrCmd_311 129
-    ApplyMovement 129, _0250
+    SetFlag FLAG_MAP_LOCAL_REMOVE_OBJECT
+    StartGiratinaOriginBattle SPECIES_GIRATINA, 47
+    ClearFlag FLAG_MAP_LOCAL_REMOVE_OBJECT
+    CheckWonBattle VAR_RESULT
+    GetBattleResult VAR_RESULT
+    GoToIfEq VAR_RESULT, BATTLE_RESULT_LOSE, DistortionWorldGiratinaRoom_BlackOut
+    GoToIfEq VAR_RESULT, BATTLE_RESULT_DRAW, DistortionWorldGiratinaRoom_BlackOut
+    GoToIfEq VAR_RESULT, BATTLE_RESULT_PLAYER_FLED, DistortionWorldGiratinaRoom_PlayerRan
+    GoToIfEq VAR_RESULT, BATTLE_RESULT_ENEMY_FLED, DistortionWorldGiratinaRoom_PlayerRan
+    GoToIfEq VAR_RESULT, BATTLE_RESULT_CAPTURED_MON, DistortionWorldGiratinaRoom_CaughtGiratina
+    AddDistortionWorldMapObject DIST_WORLD_MAP_OBJECT_GIRATINA_ROOM_CYRUS
+    AddDistortionWorldMapObject DIST_WORLD_MAP_OBJECT_GIRATINA_ROOM_CYNTHIA
+    ApplyMovement DIST_WORLD_MAP_OBJECT_GIRATINA_ROOM_CYNTHIA, DistortionWorldGiratinaRoom_Movement_CynthiaJumpNorth
     WaitMovement
-    Message 3
+    Message DistortionWorldGiratinaRoom_Text_GiratinaUnderstoodUs
     CloseMessage
-    Message 4
-    GoTo _0194
+    Message DistortionWorldGiratinaRoom_Text_ThatPokemonWasDefeated
+    GoTo DistortionWorldGiratinaRoom_PostBattle
 
-_014E:
-    ScrCmd_311 130
-    ScrCmd_311 129
-    ApplyMovement 129, _0250
+DistortionWorldGiratinaRoom_PlayerRan:
+    AddDistortionWorldMapObject DIST_WORLD_MAP_OBJECT_GIRATINA_ROOM_CYRUS
+    AddDistortionWorldMapObject DIST_WORLD_MAP_OBJECT_GIRATINA_ROOM_CYNTHIA
+    ApplyMovement DIST_WORLD_MAP_OBJECT_GIRATINA_ROOM_CYNTHIA, DistortionWorldGiratinaRoom_Movement_CynthiaJumpNorth
     WaitMovement
-    Message 3
+    Message DistortionWorldGiratinaRoom_Text_GiratinaUnderstoodUs
     CloseMessage
-    Message 6
-    GoTo _0194
+    Message DistortionWorldGiratinaRoom_Text_YouRefusedToBattle
+    GoTo DistortionWorldGiratinaRoom_PostBattle
 
-_016E:
-    SetFlag 0x121
-    SetFlag 0x250
-    ClearFlag 0x278
-    ScrCmd_311 130
-    ScrCmd_311 129
-    ApplyMovement 129, _0250
+DistortionWorldGiratinaRoom_CaughtGiratina:
+    SetFlag FLAG_CAUGHT_GIRATINA
+    SetFlag FLAG_HIDE_TURNBACK_CAVE_GIRATINA_ROOM_GIRATINA
+    ClearFlag FLAG_HIDE_TURNBACK_CAVE_GIRATINA_ROOM_ITEM
+    AddDistortionWorldMapObject DIST_WORLD_MAP_OBJECT_GIRATINA_ROOM_CYRUS
+    AddDistortionWorldMapObject DIST_WORLD_MAP_OBJECT_GIRATINA_ROOM_CYNTHIA
+    ApplyMovement DIST_WORLD_MAP_OBJECT_GIRATINA_ROOM_CYNTHIA, DistortionWorldGiratinaRoom_Movement_CynthiaJumpNorth
     WaitMovement
-    Message 3
+    Message DistortionWorldGiratinaRoom_Text_GiratinaUnderstoodUs
     CloseMessage
-    Message 5
-_0194:
+    Message DistortionWorldGiratinaRoom_Text_ThatPokemonWasCaptured
+DistortionWorldGiratinaRoom_PostBattle:
     CloseMessage
-    ScrCmd_069 0x8004, 0x8005
-    ScrCmd_066 0x8004, 0x8005
-    ApplyMovement 241, _0280
-    ApplyMovement 130, _026C
-    ApplyMovement 129, _0258
-    ApplyMovement 0xFF, _0244
+    GetPlayerMapPos VAR_0x8004, VAR_0x8005
+    AddFreeCamera VAR_0x8004, VAR_0x8005
+    ApplyFreeCameraMovement DistortionWorldGiratinaRoom_Movement_CameraMoveSouth
+    ApplyMovement DIST_WORLD_MAP_OBJECT_GIRATINA_ROOM_CYRUS, DistortionWorldGiratinaRoom_Movement_CyrusEnter
+    ApplyMovement DIST_WORLD_MAP_OBJECT_GIRATINA_ROOM_CYNTHIA, DistortionWorldGiratinaRoom_Movement_CynthiaNoticeCyrus
+    ApplyMovement LOCALID_PLAYER, DistortionWorldGiratinaRoom_Movement_PlayerNoticeCyrus
     WaitMovement
-    Message 7
-    Message 8
-    Message 9
-    Message 10
+    Message DistortionWorldGiratinaRoom_Text_NewWorldCantBeMade
+    Message DistortionWorldGiratinaRoom_Text_PokemonUniteUs
+    Message DistortionWorldGiratinaRoom_Text_BigSilence
+    Message DistortionWorldGiratinaRoom_Text_EnoughBlathering
     CloseMessage
-    ApplyMovement 130, _0274
+    ApplyMovement DIST_WORLD_MAP_OBJECT_GIRATINA_ROOM_CYRUS, DistortionWorldGiratinaRoom_Movement_CyrusLeave
     WaitMovement
-    ScrCmd_312 130
-    ApplyMovement 241, _0288
+    DeleteDistortionWorldMapObject DIST_WORLD_MAP_OBJECT_GIRATINA_ROOM_CYRUS
+    ApplyFreeCameraMovement DistortionWorldGiratinaRoom_Movement_CameraMoveNorth
     WaitMovement
-    ScrCmd_067
-    Message 11
-    ApplyMovement 129, _0264
+    RestoreCamera
+    Message DistortionWorldGiratinaRoom_Text_WeCanFeelJoy
+    ApplyMovement DIST_WORLD_MAP_OBJECT_GIRATINA_ROOM_CYNTHIA, DistortionWorldGiratinaRoom_Movement_CynthiaWalkOnSpotNorth
     WaitMovement
-    Message 12
-    WaitABXPadPress
+    Message DistortionWorldGiratinaRoom_Text_LetsGoBackHome
+    WaitButton
     CloseMessage
     ReleaseAll
     End
 
-_0204:
-    ScrCmd_0EB
+DistortionWorldGiratinaRoom_BlackOut:
+    BlackOutFromBattle
     ReleaseAll
     End
 
-_020A:
-    PlayFanfare SEQ_SE_CONFIRM
-    LockAll
-    FacePlayer
-    Message 12
-    WaitABXPadPress
-    CloseMessage
-    ReleaseAll
+DistortionWorldGiratinaRoom_Cynthia:
+    NPCMessage DistortionWorldGiratinaRoom_Text_LetsGoBackHome
     End
 
-_021D:
+DistortionWorldGiratinaRoom_CoordEvent_FirstShadow:
     LockAll
-    ScrCmd_04C 0x1E7, 0
-    Message 0
-    ScrCmd_04D
+    PlayCry SPECIES_GIRATINA
+    Message DistortionWorldGiratinaRoom_Text_GiratinaCryGiygogagogwoh
+    WaitCry
     WaitABPadPress
     CloseMessage
     ReleaseAll
     End
 
-_0232:
+DistortionWorldGiratinaRoom_CoordEvent_GiratinaArrival:
     LockAll
-    ScrCmd_0CD 0
-    Message 1
+    BufferPlayerName 0
+    Message DistortionWorldGiratinaRoom_Text_GiratinaIsEyeingPlayer
     WaitABPadPress
     CloseMessage
     ReleaseAll
     End
 
     .balign 4, 0
-_0244:
-    MoveAction_021
-    MoveAction_04B
+DistortionWorldGiratinaRoom_Movement_PlayerNoticeCyrus:
+    WalkOnSpotNormalSouth
+    EmoteExclamationMark
     EndMovement
 
     .balign 4, 0
-_0250:
-    MoveAction_075 2
+DistortionWorldGiratinaRoom_Movement_CynthiaJumpNorth:
+    JumpDistortionWorldNorth 2
     EndMovement
 
     .balign 4, 0
-_0258:
-    MoveAction_021
-    MoveAction_04B
+DistortionWorldGiratinaRoom_Movement_CynthiaNoticeCyrus:
+    WalkOnSpotNormalSouth
+    EmoteExclamationMark
     EndMovement
 
     .balign 4, 0
-_0264:
-    MoveAction_020
+DistortionWorldGiratinaRoom_Movement_CynthiaWalkOnSpotNorth:
+    WalkOnSpotNormalNorth
     EndMovement
 
     .balign 4, 0
-_026C:
-    MoveAction_075
+DistortionWorldGiratinaRoom_Movement_CyrusEnter:
+    JumpDistortionWorldNorth
     EndMovement
 
     .balign 4, 0
-_0274:
-    MoveAction_076
-    MoveAction_00D 5
+DistortionWorldGiratinaRoom_Movement_CyrusLeave:
+    JumpDistortionWorldSouth
+    WalkNormalSouth 5
     EndMovement
 
     .balign 4, 0
-_0280:
-    MoveAction_00D 5
+DistortionWorldGiratinaRoom_Movement_CameraMoveSouth:
+    WalkNormalSouth 5
     EndMovement
 
     .balign 4, 0
-_0288:
-    MoveAction_00C 5
+DistortionWorldGiratinaRoom_Movement_CameraMoveNorth:
+    WalkNormalNorth 5
     EndMovement

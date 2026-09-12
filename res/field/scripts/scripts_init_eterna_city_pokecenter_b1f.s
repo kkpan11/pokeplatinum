@@ -1,16 +1,13 @@
-    .include "macros/scrcmd.inc"
+#include "macros/scrcmd.inc"
 
-    .data
 
-    .byte 4
-    .short 0x23F3, 0
-    .byte 1
-    ScriptEntry _000B
-    .byte 0
+    InitScriptEntry_OnLoad 0x23F3
+    InitScriptEntry_OnFrameTable InitScriptFrameTable
+    InitScriptEntryEnd
 
-_000B:
-    .short 0x40D4, 0, 0x23F0
-    .short 0x4080, 1, 0x23F5
-    .short 0
+InitScriptFrameTable:
+    InitScriptGoToIfEqual VAR_VISITED_POKEMON_CENTER_B1F, 0, 0x23F0
+    InitScriptGoToIfEqual VAR_ENTERED_WIFI_PLAZA, 1, 0x23F5
+    InitScriptFrameTableEnd
 
-    .balign 4, 0
+    InitScriptEnd

@@ -6,7 +6,7 @@
 
 #include "constants/heap.h"
 
-#include "struct_decls/struct_02006C24_decl.h"
+#include "narc.h"
 
 enum RotationAxis {
     ROTATION_AXIS_X = 0,
@@ -39,11 +39,11 @@ typedef struct Easy3DObject {
     u8 padding_76[2];
 } Easy3DObject;
 
-void Easy3DModel_Load(Easy3DModel *model, u32 narcIndex, u32 memberIndex, u32 heapID);
+void Easy3DModel_Load(Easy3DModel *model, enum NarcID narcID, u32 memberIndex, enum HeapID heapID);
 void Easy3DModel_LoadFrom(Easy3DModel *model, NARC *narc, u32 memberIndex, u32 heapID);
 void Easy3DModel_Release(Easy3DModel *model);
 
-void Easy3DAnim_LoadFrom(Easy3DAnim *anim, const Easy3DModel *model, NARC *narc, u32 memberIndex, u32 heapID, NNSFndAllocator *allocator);
+void Easy3DAnim_LoadFrom(Easy3DAnim *anim, const Easy3DModel *model, NARC *narc, u32 memberIndex, enum HeapID heapID, NNSFndAllocator *allocator);
 void Easy3DAnim_LoadFromData(Easy3DAnim *anim, const Easy3DModel *model, void *data, NNSFndAllocator *allocator);
 void Easy3DAnim_Release(Easy3DAnim *anim, NNSFndAllocator *allocator);
 void Easy3DAnim_UpdateLooped(Easy3DAnim *anim, fx32 frameDelta);
@@ -57,8 +57,8 @@ void Easy3DObject_AddAnim(Easy3DObject *obj, Easy3DAnim *anim);
 void Easy3DObject_RemoveAnim(Easy3DObject *obj, Easy3DAnim *anim);
 void Easy3DObject_Draw(Easy3DObject *obj);
 void Easy3DObject_DrawRotated(Easy3DObject *obj, const MtxFx33 *rotation);
-void Easy3DObject_SetVisibility(Easy3DObject *obj, BOOL visible);
-BOOL Easy3DObject_GetVisibility(const Easy3DObject *obj);
+void Easy3DObject_SetVisible(Easy3DObject *obj, BOOL visible);
+BOOL Easy3DObject_IsVisible(const Easy3DObject *obj);
 void Easy3DObject_SetPosition(Easy3DObject *obj, fx32 x, fx32 y, fx32 z);
 void Easy3DObject_GetPosition(const Easy3DObject *obj, fx32 *outX, fx32 *outY, fx32 *outZ);
 void Easy3DObject_SetScale(Easy3DObject *obj, fx32 x, fx32 y, fx32 z);

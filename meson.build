@@ -1,6 +1,6 @@
 project('pokeplatinum', ['c', 'cpp', 'nasm'],
     version: '1.0',
-    meson_version: '>=1.3.0',
+    meson_version: '>=1.12.0',
     default_options : [
         'buildtype=plain',
         'warning_level=0'
@@ -12,17 +12,16 @@ fs = import('fs')
 ############################################################
 ###                    INCLUDE PATHS                     ###
 ############################################################
-public_includes = include_directories('include', 'asm', 'res')
+public_includes = include_directories('include', 'asm')
+toplevel_includes = include_directories('.')
 
 
 ############################################################
 ###                    COMPILER FLAGS                    ###
 ############################################################
-c_args = [
-    '-O4,p',
+shared_args = [
     '-proc', 'arm946e',
     '-enum', 'int',
-    '-lang', 'c99',
     '-Cpp_exceptions', 'off',
     '-gccext,on',
     '-msgstyle', 'gcc',
@@ -32,19 +31,58 @@ c_args = [
     '-char', 'signed',
     '-nosyspath',
     '-stdinc',
-    '-sym', 'on'
+    '-sym', 'on',
+    '-DPOKEPLATINUM_GENERATED_ENUM',
+    '-D_MSL_RESTRICT=',
 ]
+
+if get_option('revision') == '0'
+    shared_args += [
+        '-DPOKEPLATINUM_REVISION=0'
+    ]
+else
+    shared_args += [
+        '-DPOKEPLATINUM_REVISION=1'
+    ]
+endif
+
+if get_option('gdb_debugging')
+    shared_args += [
+        '-O1,p',
+#        '-inline', 'off' todo: figure out why this makes the rom crash after the copyright screen
+    ]
+else
+    shared_args += '-O4,p'
+endif
+
+c_args = shared_args + ['-lang', 'c99']
+cpp_args = shared_args + ['-RTTI', 'off']
 
 add_global_arguments(c_args,
     language: 'c',
     native: false
 )
 
+add_global_arguments(cpp_args,
+    language: 'cpp',
+    native: false
+)
+
 pokeplatinum_args = [
     '-DPM_KEEP_ASSERTS',
-    '-DGAME_VERSION=PLATINUM',
-    '-DGAME_LANGUAGE=ENGLISH'
+    '-DGAME_VERSION=VERSION_PLATINUM',
+    '-DGAME_LANGUAGE=LANGUAGE_ENGLISH'
 ]
+
+if get_option('gdb_debugging')
+    pokeplatinum_args += '-DGDB_DEBUGGING'
+endif
+
+if get_option('logging_enabled')
+    pokeplatinum_args += [
+        '-DLOGGING_ENABLED',
+    ]
+endif
 
 asm_args = [
     '-proc', 'arm5TE',
@@ -66,47 +104,49 @@ link_args = [
     '-sym', 'on'
 ]
 
-
-############################################################
-###                        TOOLS                         ###
-############################################################
-subdir('tools')
-
-
 ############################################################
 ###                     DEPENDENCIES                     ###
 ############################################################
 nitrosdk_dep = dependency('NitroSDK',
     default_options: {
-        'mwrap_ver': '2.0/sp1p2',
+        'mwrap_sdk': '2.0/sp1p2',
         'sp1p3_conditionals': true
     }
 )
 
 nitrosystem_dep = dependency('NitroSystem',
     default_options: {
-        'mwrap_ver': '2.0/sp2'
+        'mwrap_sdk': '2.0/sp2',
     }
 )
 
 nitrowifi_dep = dependency('NitroWiFi',
     default_options: {
-        'mwrap_ver': '2.0/sp1p2',
+        'mwrap_sdk': '2.0/sp1p2',
         'sp1p3_conditionals': true
     }
 )
 
 nitrodwc_dep = dependency('NitroDWC',
     default_options: {
-        'mwrap_ver': '2.0/sp2p2',
+        'mwrap_sdk': '2.0/sp2p2',
         'link_ppwlobby': true
     }
 )
 
 libvct_dep = dependency('libvct')
-libcrypto_dep = dependency('libcrypto')
 libsyscall_dep = dependency('libsyscall')
-ppwlobby_dep = dependency('ppwlobby')
+
+############################################################
+###                       CONSTS                         ###
+############################################################
+subdir('generated')
+
+
+############################################################
+###                        TOOLS                         ###
+############################################################
+subdir('tools')
 
 
 ############################################################
@@ -122,44 +162,55 @@ subdir('lib')
 
 
 ############################################################
-###                       CONSTS                         ###
-############################################################
-subdir('consts')
-
-
-############################################################
 ###                     FILE SYSTEM                      ###
 ############################################################
 subdir('res')
-
 
 ############################################################
 ###                     ARM9 BINARY                      ###
 ############################################################
 subdir('src')
-subdir('asm')
+
+trainer_ai_o = custom_target(
+    'trainer_ai_script.o',
+    output: 'trainer_ai_script.o',
+    input: files('src/battle/trainer_ai/script.s'),
+    command: [
+        arm_none_eabi_gcc_exe,
+        '-I', meson.global_source_root() / 'include',
+        '-I', meson.global_source_root() / 'asm',
+        '-I', meson.global_build_root(),
+        '-x', 'assembler-with-cpp',
+        '-MD', '-MF', '@DEPFILE@',
+        '-c', '-o', '@OUTPUT@',
+        '@INPUT@',
+    ],
+    depfile: '@BASENAME@.d',
+)
+
+libmslc = fs.copyfile('tools/metroskrew/lib/metroskrew/sdk/ds/2.0/sp2/msl/MSL_C/MSL_ARM/Lib/MSL_C_NITRO_Ai_LE.a')
+libmslcpp = fs.copyfile('tools/metroskrew/lib/metroskrew/sdk/ds/2.0/sp2/msl/MSL_C++/MSL_ARM/Lib/MSL_CPP_NITRO_Ai_LE.a')
 
 main = executable('main',
     sources: [
         pokeplatinum_c,
-        pokeplatinum_asm,
         c_consts_generators,
-        asm_consts_generators,
         naix_headers,
-        gen_species_headers,
-        tutorable_moves_h,
+        h_headers,
+        embed_headers,
     ],
+    objects: trainer_ai_o,
     c_args: [
         pokeplatinum_args,
         '-thumb'
     ],
-    nasm_args: asm_args,
     c_pch: 'include/pch/global_pch.h',
     include_directories: [
         public_includes,
+        libcrypto_public_includes,
         libgds_public_includes,
         libspl_public_includes,
-        gmm_header_includes,
+        ppwlobby_public_includes,
     ],
     dependencies: [
         nitrosdk_dep,
@@ -167,13 +218,18 @@ main = executable('main',
         nitrowifi_dep,
         nitrodwc_dep,
         libvct_dep,
-        libcrypto_dep,
         libsyscall_dep,
-	    ppwlobby_dep
     ],
     link_with: [
+        libcrypto_ov97,
+        libcrypto_static,
         libgds,
-        libspl
+        libspl,
+        libmslc,
+        libmslcpp,
+        libdwcenc,
+        libdwcppwlobby,
+        libdwcilobby
     ],
     link_args: [
         link_args,
@@ -190,43 +246,57 @@ main = executable('main',
 ichneumon_sub = subproject('NitroSDK'
     ).get_variable('ichneumon_sub')
 
-ichneumon_sub_defs = subproject('NitroSDK'
-    ).get_variable('ichneumon_sub_defs')
-
 
 ############################################################
 ###                        DS ROM                        ###
 ############################################################
 pokeplatinum_nds = custom_target('pokeplatinum.us.nds',
-    output: [
-        'pokeplatinum.us.nds',
-        'pokeplatinum.us.nlf'
-    ],
+    output: 'pokeplatinum.us.nds',
     input: [
         main,
-        banner_bnr,
         rom_header_template,
-        rom_rsf,
+        icon_png,
         ichneumon_sub,
-        ichneumon_sub_defs,
-        fixrom_exe,
-        nitrofs_files # Make sure this is always listed last
+        nitrofs_files,
     ],
     command : [
-        'sh', '-c',
-        '"$@" && @INPUT6@ @OUTPUT0@ --secure-crc 0xF8B8 --game-code CPUE',
-        '--',
-        makerom_exe,
-        '-DTITLE_NAME=POKEMON PL',
-        '-DBNR=@INPUT1@',
-        '-DHEADER_TEMPLATE=@INPUT2@',
-        '-DARM7=@INPUT4@',
-        '-DARM7_DEFS=@INPUT5@',
-        '@INPUT3@',
-        '@OUTPUT0@',
-        '@OUTPUT1@'
+        nitrorom_exe,
+        'pack',
+        '-DHEADER_TEMPLATE=@INPUT1@', # rom_header_template
+        '-DICON_PNG=@INPUT2@',        # icon_png
+        '-DARM7_NEF=@INPUT3@',        # ichneumon_sub
+        '--output=@OUTPUT0@',         # pokeplatinum.us.nds
+        rom_ini,
+        filesys_csv,
     ],
     build_by_default: true
+)
+
+############################################################
+###                   GDB HELPERS                        ###
+############################################################
+nef_fixer = custom_target('debug.nef',
+    output: [
+        'debug.nef'
+    ],
+    input: [
+        main
+    ],
+    command : [
+        nef_fixer_py, '@INPUT@', '@OUTPUT@'
+    ]
+)
+
+ovly_mapper = custom_target('overlay.map',
+    output: [
+        'overlay.map'
+    ],
+    input: [
+        main_lsf
+    ],
+    command : [
+        overlay_mapper_py, '@INPUT@', '@OUTPUT@'
+    ]
 )
 
 
@@ -235,9 +305,19 @@ pokeplatinum_nds = custom_target('pokeplatinum.us.nds',
 ############################################################
 sha1sum = find_program(['sha1sum', 'shasum'], native: true)
 
-test('SBIN Checksums',
+test('SBIN Checksums - Shared',
     sha1sum,
     args: ['-c', '--quiet', sbins_sha1]
+)
+
+test('SBIN Checksums - For Revision',
+    sha1sum,
+    args: ['-c', '--quiet', sbins_for_rev_sha1]
+)
+
+test('SBIN Checksums - ARM7',
+    sha1sum,
+    args: ['-c', '--quiet', sbins_arm7_sha1]
 )
 
 test('Filesystem Checksums',

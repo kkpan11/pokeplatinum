@@ -1,172 +1,16 @@
 #include <nitro.h>
 #include <string.h>
 
-#include "struct_decls/struct_02061AB4_decl.h"
+#include "generated/movement_actions.h"
+
+#include "struct_decls/map_object.h"
 #include "struct_defs/struct_020EDF0C.h"
 
+#include "berry_patch_graphics.h"
 #include "map_object.h"
 #include "unk_0206450C.h"
-#include "unk_020677F4.h"
+#include "unk_020655F4.h"
 #include "unk_02069BE0.h"
-
-#include "constdata/const_020EE31C.h"
-#include "constdata/const_020EE3A8.h"
-#include "constdata/const_020EE4B8.h"
-
-extern int (*const Unk_020EEC78[])(MapObject *);
-extern int (*const Unk_020EEC48[])(MapObject *);
-extern int (*const Unk_020EEC88[])(MapObject *);
-extern int (*const Unk_020EEC80[])(MapObject *);
-extern int (*const Unk_020EF59C[])(MapObject *);
-extern int (*const Unk_020EF590[])(MapObject *);
-extern int (*const Unk_020EF584[])(MapObject *);
-extern int (*const Unk_020EF578[])(MapObject *);
-extern int (*const Unk_020EF56C[])(MapObject *);
-extern int (*const Unk_020EF560[])(MapObject *);
-extern int (*const Unk_020EF554[])(MapObject *);
-extern int (*const Unk_020EF548[])(MapObject *);
-extern int (*const Unk_020EF53C[])(MapObject *);
-extern int (*const Unk_020EF530[])(MapObject *);
-extern int (*const Unk_020EF524[])(MapObject *);
-extern int (*const Unk_020EF518[])(MapObject *);
-extern int (*const Unk_020EF50C[])(MapObject *);
-extern int (*const Unk_020EF500[])(MapObject *);
-extern int (*const Unk_020EF4F4[])(MapObject *);
-extern int (*const Unk_020EF4E8[])(MapObject *);
-extern int (*const Unk_020EF4DC[])(MapObject *);
-extern int (*const Unk_020EF4D0[])(MapObject *);
-extern int (*const Unk_020EF4C4[])(MapObject *);
-extern int (*const Unk_020EF4B8[])(MapObject *);
-extern int (*const Unk_020EF4AC[])(MapObject *);
-extern int (*const Unk_020EF4A0[])(MapObject *);
-extern int (*const Unk_020EF494[])(MapObject *);
-extern int (*const Unk_020EF488[])(MapObject *);
-extern int (*const Unk_020EF194[])(MapObject *);
-extern int (*const Unk_020EF224[])(MapObject *);
-extern int (*const Unk_020EF440[])(MapObject *);
-extern int (*const Unk_020EF470[])(MapObject *);
-extern int (*const Unk_020EF47C[])(MapObject *);
-extern int (*const Unk_020EF230[])(MapObject *);
-extern int (*const Unk_020EF458[])(MapObject *);
-extern int (*const Unk_020EF464[])(MapObject *);
-extern int (*const Unk_020EF5A8[])(MapObject *);
-extern int (*const Unk_020EF5B4[])(MapObject *);
-extern int (*const Unk_020EF434[])(MapObject *);
-extern int (*const Unk_020EF428[])(MapObject *);
-extern int (*const Unk_020EF41C[])(MapObject *);
-extern int (*const Unk_020EF410[])(MapObject *);
-extern int (*const Unk_020EF404[])(MapObject *);
-extern int (*const Unk_020EF3F8[])(MapObject *);
-extern int (*const Unk_020EF3EC[])(MapObject *);
-extern int (*const Unk_020EF3E0[])(MapObject *);
-extern int (*const Unk_020EF3D4[])(MapObject *);
-extern int (*const Unk_020EF3C8[])(MapObject *);
-extern int (*const Unk_020EF3BC[])(MapObject *);
-extern int (*const Unk_020EF3B0[])(MapObject *);
-extern int (*const Unk_020EF3A4[])(MapObject *);
-extern int (*const Unk_020EF398[])(MapObject *);
-extern int (*const Unk_020EF38C[])(MapObject *);
-extern int (*const Unk_020EF380[])(MapObject *);
-extern int (*const Unk_020EF374[])(MapObject *);
-extern int (*const Unk_020EF368[])(MapObject *);
-extern int (*const Unk_020EF35C[])(MapObject *);
-extern int (*const Unk_020EF350[])(MapObject *);
-extern int (*const Unk_020EF344[])(MapObject *);
-extern int (*const Unk_020EF338[])(MapObject *);
-extern int (*const Unk_020EF32C[])(MapObject *);
-extern int (*const Unk_020EF320[])(MapObject *);
-extern int (*const Unk_020EF314[])(MapObject *);
-extern int (*const Unk_020EF308[])(MapObject *);
-extern int (*const Unk_020EF2FC[])(MapObject *);
-extern int (*const Unk_020EF2F0[])(MapObject *);
-extern int (*const Unk_020EF2E4[])(MapObject *);
-extern int (*const Unk_020EF2D8[])(MapObject *);
-extern int (*const Unk_020EEC98[])(MapObject *);
-extern int (*const Unk_020EF2C0[])(MapObject *);
-extern int (*const Unk_020EF2B4[])(MapObject *);
-extern int (*const Unk_020EF2A8[])(MapObject *);
-extern int (*const Unk_020EF020[])(MapObject *);
-extern int (*const Unk_020EF17C[])(MapObject *);
-extern int (*const Unk_020EF1A0[])(MapObject *);
-extern int (*const Unk_020EF44C[])(MapObject *);
-extern int (*const Unk_020EF29C[])(MapObject *);
-extern int (*const Unk_020EF290[])(MapObject *);
-extern int (*const Unk_020EF284[])(MapObject *);
-extern int (*const Unk_020EF278[])(MapObject *);
-extern int (*const Unk_020EF26C[])(MapObject *);
-extern int (*const Unk_020EF260[])(MapObject *);
-extern int (*const Unk_020EF254[])(MapObject *);
-extern int (*const Unk_020EF248[])(MapObject *);
-extern int (*const Unk_020EF23C[])(MapObject *);
-extern int (*const Unk_020EEC70[])(MapObject *);
-extern int (*const Unk_020EEC68[])(MapObject *);
-extern int (*const Unk_020EEC50[])(MapObject *);
-extern int (*const Unk_020EEC90[])(MapObject *);
-extern int (*const Unk_020EEC58[])(MapObject *);
-extern int (*const Unk_020EEC60[])(MapObject *);
-extern int (*const Unk_020EF218[])(MapObject *);
-extern int (*const Unk_020EF20C[])(MapObject *);
-extern int (*const Unk_020EF200[])(MapObject *);
-extern int (*const Unk_020EF1F4[])(MapObject *);
-extern int (*const Unk_020EF1E8[])(MapObject *);
-extern int (*const Unk_020EF1DC[])(MapObject *);
-extern int (*const Unk_020EF1D0[])(MapObject *);
-extern int (*const Unk_020EF1C4[])(MapObject *);
-extern int (*const Unk_020EF1B8[])(MapObject *);
-extern int (*const Unk_020EF188[])(MapObject *);
-extern int (*const Unk_020EF5C0[])(MapObject *);
-extern int (*const Unk_020EF164[])(MapObject *);
-extern int (*const Unk_020EF158[])(MapObject *);
-extern int (*const Unk_020EF14C[])(MapObject *);
-extern int (*const Unk_020EF140[])(MapObject *);
-extern int (*const Unk_020EF134[])(MapObject *);
-extern int (*const Unk_020EF128[])(MapObject *);
-extern int (*const Unk_020EF11C[])(MapObject *);
-extern int (*const Unk_020EF110[])(MapObject *);
-extern int (*const Unk_020EF104[])(MapObject *);
-extern int (*const Unk_020EF0F8[])(MapObject *);
-extern int (*const Unk_020EF0EC[])(MapObject *);
-extern int (*const Unk_020EF0E0[])(MapObject *);
-extern int (*const Unk_020EF0D4[])(MapObject *);
-extern int (*const Unk_020EF0C8[])(MapObject *);
-extern int (*const Unk_020EF0BC[])(MapObject *);
-extern int (*const Unk_020EF2CC[])(MapObject *);
-extern int (*const Unk_020EF0A4[])(MapObject *);
-extern int (*const Unk_020EF098[])(MapObject *);
-extern int (*const Unk_020EF08C[])(MapObject *);
-extern int (*const Unk_020EF080[])(MapObject *);
-extern int (*const Unk_020EF074[])(MapObject *);
-extern int (*const Unk_020EF068[])(MapObject *);
-extern int (*const Unk_020EF05C[])(MapObject *);
-extern int (*const Unk_020EF050[])(MapObject *);
-extern int (*const Unk_020EF044[])(MapObject *);
-extern int (*const Unk_020EF038[])(MapObject *);
-extern int (*const Unk_020EF014[])(MapObject *);
-extern int (*const Unk_020EF5CC[])(MapObject *);
-extern int (*const Unk_020EEFF0[])(MapObject *);
-extern int (*const Unk_020EEFE4[])(MapObject *);
-extern int (*const Unk_020EEFD8[])(MapObject *);
-extern int (*const Unk_020EEFCC[])(MapObject *);
-extern int (*const Unk_020EEFC0[])(MapObject *);
-extern int (*const Unk_020EEFB4[])(MapObject *);
-extern int (*const Unk_020EEFA8[])(MapObject *);
-extern int (*const Unk_020EF0B0[])(MapObject *);
-extern int (*const Unk_020EEF90[])(MapObject *);
-extern int (*const Unk_020EEF84[])(MapObject *);
-extern int (*const Unk_020EEF6C[])(MapObject *);
-extern int (*const Unk_020EEF78[])(MapObject *);
-extern int (*const Unk_020EF008[])(MapObject *);
-extern int (*const Unk_020EF02C[])(MapObject *);
-extern int (*const Unk_020EF1AC[])(MapObject *);
-extern int (*const Unk_020EF5D8[])(MapObject *);
-extern int (*const Unk_020EECBC[])(MapObject *);
-extern int (*const Unk_020EECB0[])(MapObject *);
-extern int (*const Unk_020EECA4[])(MapObject *);
-extern int (*const Unk_020EEF9C[])(MapObject *);
-extern int (*const Unk_020EEF60[])(MapObject *);
-extern int (*const Unk_020EEFFC[])(MapObject *);
-extern int (*const Unk_020EF170[])(MapObject *);
-extern int (*const Unk_020EF5E4[])(MapObject *);
 
 static const UnkStruct_020EDF0C Unk_020EDF0C = {
     0x0,
@@ -562,9 +406,9 @@ static const UnkStruct_020EDF0C Unk_020EDE1C = {
 
 static const UnkStruct_020EDF0C Unk_020EDE30 = {
     0x2f,
-    sub_02067840,
-    sub_02067850,
-    sub_0206786C,
+    BerryPatchGraphics_NewData,
+    BerryPatchGraphics_UpdateGrowthStage,
+    BerryPatchGraphics_NoOp,
     sub_020633EC
 };
 
@@ -783,427 +627,427 @@ const UnkStruct_020EDF0C *const Unk_020EE3A8[] = {
     &Unk_020EE2B8
 };
 
-int (*const *const Unk_020EE4B8[0x9a])(MapObject *) = {
-    Unk_020EEC78,
-    Unk_020EEC48,
-    Unk_020EEC88,
-    Unk_020EEC80,
-    Unk_020EF59C,
-    Unk_020EF590,
-    Unk_020EF584,
-    Unk_020EF578,
-    Unk_020EF56C,
-    Unk_020EF560,
-    Unk_020EF554,
-    Unk_020EF548,
-    Unk_020EF53C,
-    Unk_020EF530,
-    Unk_020EF524,
-    Unk_020EF518,
-    Unk_020EF50C,
-    Unk_020EF500,
-    Unk_020EF4F4,
-    Unk_020EF4E8,
-    Unk_020EF4DC,
-    Unk_020EF4D0,
-    Unk_020EF4C4,
-    Unk_020EF4B8,
-    Unk_020EF47C,
-    Unk_020EF230,
-    Unk_020EF458,
-    Unk_020EF464,
-    Unk_020EF5A8,
-    Unk_020EF5B4,
-    Unk_020EF434,
-    Unk_020EF428,
-    Unk_020EF41C,
-    Unk_020EF410,
-    Unk_020EF404,
-    Unk_020EF3F8,
-    Unk_020EF3EC,
-    Unk_020EF3E0,
-    Unk_020EF3D4,
-    Unk_020EF3C8,
-    Unk_020EF3BC,
-    Unk_020EF3B0,
-    Unk_020EF3A4,
-    Unk_020EF398,
-    Unk_020EF38C,
-    Unk_020EF380,
-    Unk_020EF374,
-    Unk_020EF368,
-    Unk_020EF35C,
-    Unk_020EF350,
-    Unk_020EF344,
-    Unk_020EF338,
-    Unk_020EF32C,
-    Unk_020EF320,
-    Unk_020EF314,
-    Unk_020EF308,
-    Unk_020EF2FC,
-    Unk_020EF2F0,
-    Unk_020EF2E4,
-    Unk_020EF2D8,
-    Unk_020EF29C,
-    Unk_020EF290,
-    Unk_020EF284,
-    Unk_020EF278,
-    Unk_020EF26C,
-    Unk_020EF260,
-    Unk_020EF254,
-    Unk_020EF248,
-    Unk_020EF23C,
-    Unk_020EEC70,
-    Unk_020EEC68,
-    Unk_020EEC50,
-    Unk_020EEC90,
-    Unk_020EEC58,
-    Unk_020EEC60,
-    Unk_020EF218,
-    Unk_020EF200,
-    Unk_020EF1F4,
-    Unk_020EF1E8,
-    Unk_020EF1DC,
-    Unk_020EF1D0,
-    Unk_020EF1C4,
-    Unk_020EF1B8,
-    Unk_020EF188,
-    Unk_020EF4AC,
-    Unk_020EF4A0,
-    Unk_020EF494,
-    Unk_020EF488,
-    Unk_020EF194,
-    Unk_020EF224,
-    Unk_020EF440,
-    Unk_020EF470,
-    Unk_020EEC98,
-    Unk_020EF2C0,
-    Unk_020EF2B4,
-    Unk_020EF2A8,
-    Unk_020EF5C0,
-    Unk_020EF164,
-    Unk_020EF158,
-    Unk_020EF14C,
-    Unk_020EF140,
-    Unk_020EF134,
-    Unk_020EF128,
-    Unk_020EF20C,
-    Unk_020EF11C,
-    Unk_020EF110,
-    Unk_020EF104,
-    Unk_020EF0F8,
-    Unk_020EF0EC,
-    Unk_020EF0E0,
-    Unk_020EF0D4,
-    Unk_020EF0C8,
-    Unk_020EF0BC,
-    Unk_020EF2CC,
-    Unk_020EF0A4,
-    Unk_020EF098,
-    Unk_020EF08C,
-    Unk_020EF020,
-    Unk_020EF17C,
-    Unk_020EF1A0,
-    Unk_020EF44C,
-    Unk_020EF5CC,
-    Unk_020EEFF0,
-    Unk_020EEFE4,
-    Unk_020EEFD8,
-    Unk_020EEFCC,
-    Unk_020EEFC0,
-    Unk_020EEFB4,
-    Unk_020EEFA8,
-    Unk_020EF0B0,
-    Unk_020EEF90,
-    Unk_020EEF84,
-    Unk_020EEF6C,
-    Unk_020EEF78,
-    Unk_020EF008,
-    Unk_020EF02C,
-    Unk_020EF1AC,
-    Unk_020EF5D8,
-    Unk_020EECBC,
-    Unk_020EECB0,
-    Unk_020EECA4,
-    Unk_020EEF9C,
-    Unk_020EEF60,
-    Unk_020EEFFC,
-    Unk_020EF170,
-    Unk_020EF080,
-    Unk_020EF074,
-    Unk_020EF068,
-    Unk_020EF05C,
-    Unk_020EF050,
-    Unk_020EF044,
-    Unk_020EF038,
-    Unk_020EF014,
-    Unk_020EF5E4
+BOOL (*const *const gMovementActionFuncs[MAX_MOVEMENT_ACTION])(MapObject *) = {
+    [MOVEMENT_ACTION_FACE_NORTH] = gMovementActionFuncs_FaceNorth,
+    [MOVEMENT_ACTION_FACE_SOUTH] = gMovementActionFuncs_FaceSouth,
+    [MOVEMENT_ACTION_FACE_WEST] = gMovementActionFuncs_FaceWest,
+    [MOVEMENT_ACTION_FACE_EAST] = gMovementActionFuncs_FaceEast,
+    [MOVEMENT_ACTION_WALK_SLOWER_NORTH] = gMovementActionFuncs_WalkSlowerNorth,
+    [MOVEMENT_ACTION_WALK_SLOWER_SOUTH] = gMovementActionFuncs_WalkSlowerSouth,
+    [MOVEMENT_ACTION_WALK_SLOWER_WEST] = gMovementActionFuncs_WalkSlowerWest,
+    [MOVEMENT_ACTION_WALK_SLOWER_EAST] = gMovementActionFuncs_WalkSlowerEast,
+    [MOVEMENT_ACTION_WALK_SLOW_NORTH] = gMovementActionFuncs_WalkSlowNorth,
+    [MOVEMENT_ACTION_WALK_SLOW_SOUTH] = gMovementActionFuncs_WalkSlowSouth,
+    [MOVEMENT_ACTION_WALK_SLOW_WEST] = gMovementActionFuncs_WalkSlowWest,
+    [MOVEMENT_ACTION_WALK_SLOW_EAST] = gMovementActionFuncs_WalkSlowEast,
+    [MOVEMENT_ACTION_WALK_NORMAL_NORTH] = gMovementActionFuncs_WalkNormalNorth,
+    [MOVEMENT_ACTION_WALK_NORMAL_SOUTH] = gMovementActionFuncs_WalkNormalSouth,
+    [MOVEMENT_ACTION_WALK_NORMAL_WEST] = gMovementActionFuncs_WalkNormalWest,
+    [MOVEMENT_ACTION_WALK_NORMAL_EAST] = gMovementActionFuncs_WalkNormalEast,
+    [MOVEMENT_ACTION_WALK_FAST_NORTH] = gMovementActionFuncs_WalkFastNorth,
+    [MOVEMENT_ACTION_WALK_FAST_SOUTH] = gMovementActionFuncs_WalkFastSouth,
+    [MOVEMENT_ACTION_WALK_FAST_WEST] = gMovementActionFuncs_WalkFastWest,
+    [MOVEMENT_ACTION_WALK_FAST_EAST] = gMovementActionFuncs_WalkFastEast,
+    [MOVEMENT_ACTION_WALK_FASTER_NORTH] = gMovementActionFuncs_WalkFasterNorth,
+    [MOVEMENT_ACTION_WALK_FASTER_SOUTH] = gMovementActionFuncs_WalkFasterSouth,
+    [MOVEMENT_ACTION_WALK_FASTER_WEST] = gMovementActionFuncs_WalkFasterWest,
+    [MOVEMENT_ACTION_WALK_FASTER_EAST] = gMovementActionFuncs_WalkFasterEast,
+    [MOVEMENT_ACTION_WALK_ON_SPOT_SLOWER_NORTH] = gMovementActionFuncs_WalkOnSpotSlowerNorth,
+    [MOVEMENT_ACTION_WALK_ON_SPOT_SLOWER_SOUTH] = gMovementActionFuncs_WalkOnSpotSlowerSouth,
+    [MOVEMENT_ACTION_WALK_ON_SPOT_SLOWER_WEST] = gMovementActionFuncs_WalkOnSpotSlowerWest,
+    [MOVEMENT_ACTION_WALK_ON_SPOT_SLOWER_EAST] = gMovementActionFuncs_WalkOnSpotSlowerEast,
+    [MOVEMENT_ACTION_WALK_ON_SPOT_SLOW_NORTH] = gMovementActionFuncs_WalkOnSpotSlowNorth,
+    [MOVEMENT_ACTION_WALK_ON_SPOT_SLOW_SOUTH] = gMovementActionFuncs_WalkOnSpotSlowSouth,
+    [MOVEMENT_ACTION_WALK_ON_SPOT_SLOW_WEST] = gMovementActionFuncs_WalkOnSpotSlowWest,
+    [MOVEMENT_ACTION_WALK_ON_SPOT_SLOW_EAST] = gMovementActionFuncs_WalkOnSpotSlowEast,
+    [MOVEMENT_ACTION_WALK_ON_SPOT_NORMAL_NORTH] = gMovementActionFuncs_WalkOnSpotNormalNorth,
+    [MOVEMENT_ACTION_WALK_ON_SPOT_NORMAL_SOUTH] = gMovementActionFuncs_WalkOnSpotNormalSouth,
+    [MOVEMENT_ACTION_WALK_ON_SPOT_NORMAL_WEST] = gMovementActionFuncs_WalkOnSpotNormalWest,
+    [MOVEMENT_ACTION_WALK_ON_SPOT_NORMAL_EAST] = gMovementActionFuncs_WalkOnSpotNormalEast,
+    [MOVEMENT_ACTION_WALK_ON_SPOT_FAST_NORTH] = gMovementActionFuncs_WalkOnSpotFastNorth,
+    [MOVEMENT_ACTION_WALK_ON_SPOT_FAST_SOUTH] = gMovementActionFuncs_WalkOnSpotFastSouth,
+    [MOVEMENT_ACTION_WALK_ON_SPOT_FAST_WEST] = gMovementActionFuncs_WalkOnSpotFastWest,
+    [MOVEMENT_ACTION_WALK_ON_SPOT_FAST_EAST] = gMovementActionFuncs_WalkOnSpotFastEast,
+    [MOVEMENT_ACTION_WALK_ON_SPOT_FASTER_NORTH] = gMovementActionFuncs_WalkOnSpotFasterNorth,
+    [MOVEMENT_ACTION_WALK_ON_SPOT_FASTER_SOUTH] = gMovementActionFuncs_WalkOnSpotFasterSouth,
+    [MOVEMENT_ACTION_WALK_ON_SPOT_FASTER_WEST] = gMovementActionFuncs_WalkOnSpotFasterWest,
+    [MOVEMENT_ACTION_WALK_ON_SPOT_FASTER_EAST] = gMovementActionFuncs_WalkOnSpotFasterEast,
+    [MOVEMENT_ACTION_JUMP_ON_SPOT_SLOW_NORTH] = gMovementActionFuncs_JumpOnSpotSlowNorth,
+    [MOVEMENT_ACTION_JUMP_ON_SPOT_SLOW_SOUTH] = gMovementActionFuncs_JumpOnSpotSlowSouth,
+    [MOVEMENT_ACTION_JUMP_ON_SPOT_SLOW_WEST] = gMovementActionFuncs_JumpOnSpotSlowWest,
+    [MOVEMENT_ACTION_JUMP_ON_SPOT_SLOW_EAST] = gMovementActionFuncs_JumpOnSpotSlowEast,
+    [MOVEMENT_ACTION_JUMP_ON_SPOT_FAST_NORTH] = gMovementActionFuncs_JumpOnSpotFastNorth,
+    [MOVEMENT_ACTION_JUMP_ON_SPOT_FAST_SOUTH] = gMovementActionFuncs_JumpOnSpotFastSouth,
+    [MOVEMENT_ACTION_JUMP_ON_SPOT_FAST_WEST] = gMovementActionFuncs_JumpOnSpotFastWest,
+    [MOVEMENT_ACTION_JUMP_ON_SPOT_FAST_EAST] = gMovementActionFuncs_JumpOnSpotFastEast,
+    [MOVEMENT_ACTION_JUMP_NEAR_FAST_NORTH] = gMovementActionFuncs_JumpNearFastNorth,
+    [MOVEMENT_ACTION_JUMP_NEAR_FAST_SOUTH] = gMovementActionFuncs_JumpNearFastSouth,
+    [MOVEMENT_ACTION_JUMP_NEAR_FAST_WEST] = gMovementActionFuncs_JumpNearFastWest,
+    [MOVEMENT_ACTION_JUMP_NEAR_FAST_EAST] = gMovementActionFuncs_JumpNearFastEast,
+    [MOVEMENT_ACTION_JUMP_FAR_NORTH] = gMovementActionFuncs_JumpFarNorth,
+    [MOVEMENT_ACTION_JUMP_FAR_SOUTH] = gMovementActionFuncs_JumpFarSouth,
+    [MOVEMENT_ACTION_JUMP_FAR_WEST] = gMovementActionFuncs_JumpFarWest,
+    [MOVEMENT_ACTION_JUMP_FAR_EAST] = gMovementActionFuncs_JumpFarEast,
+    [MOVEMENT_ACTION_DELAY_1] = gMovementActionFuncs_Delay1,
+    [MOVEMENT_ACTION_DELAY_2] = gMovementActionFuncs_Delay2,
+    [MOVEMENT_ACTION_DELAY_4] = gMovementActionFuncs_Delay4,
+    [MOVEMENT_ACTION_DELAY_8] = gMovementActionFuncs_Delay8,
+    [MOVEMENT_ACTION_DELAY_15] = gMovementActionFuncs_Delay15,
+    [MOVEMENT_ACTION_DELAY_16] = gMovementActionFuncs_Delay16,
+    [MOVEMENT_ACTION_DELAY_32] = gMovementActionFuncs_Delay32,
+    [MOVEMENT_ACTION_WARP_OUT] = gMovementActionFuncs_WarpOut,
+    [MOVEMENT_ACTION_WARP_IN] = gMovementActionFuncs_WarpIn,
+    [MOVEMENT_ACTION_SET_INVISIBLE] = gMovementActionFuncs_SetInvisible,
+    [MOVEMENT_ACTION_SET_VISIBLE] = gMovementActionFuncs_SetVisible,
+    [MOVEMENT_ACTION_LOCK_DIR] = gMovementActionFuncs_LockDir,
+    [MOVEMENT_ACTION_UNLOCK_DIR] = gMovementActionFuncs_UnlockDir,
+    [MOVEMENT_ACTION_PAUSE_ANIMATION] = gMovementActionFuncs_PauseAnimation,
+    [MOVEMENT_ACTION_RESUME_ANIMATION] = gMovementActionFuncs_ResumeAnimation,
+    [MOVEMENT_ACTION_EMOTE_EXCLAMATION_MARK] = gMovementActionFuncs_EmoteExclamationMark,
+    [MOVEMENT_ACTION_WALK_SLIGHTLY_FAST_NORTH] = gMovementActionFuncs_WalkSlightlyFastNorth,
+    [MOVEMENT_ACTION_WALK_SLIGHTLY_FAST_SOUTH] = gMovementActionFuncs_WalkSlightlyFastSouth,
+    [MOVEMENT_ACTION_WALK_SLIGHTLY_FAST_WEST] = gMovementActionFuncs_WalkSlightlyFastWest,
+    [MOVEMENT_ACTION_WALK_SLIGHTLY_FAST_EAST] = gMovementActionFuncs_WalkSlightlyFastEast,
+    [MOVEMENT_ACTION_WALK_SLIGHTLY_FASTER_NORTH] = gMovementActionFuncs_WalkSlightlyFasterNorth,
+    [MOVEMENT_ACTION_WALK_SLIGHTLY_FASTER_SOUTH] = gMovementActionFuncs_WalkSlightlyFasterSouth,
+    [MOVEMENT_ACTION_WALK_SLIGHTLY_FASTER_WEST] = gMovementActionFuncs_WalkSlightlyFasterWest,
+    [MOVEMENT_ACTION_WALK_SLIGHTLY_FASTER_EAST] = gMovementActionFuncs_WalkSlightlyFasterEast,
+    [MOVEMENT_ACTION_WALK_FASTEST_NORTH] = gMovementActionFuncs_WalkFastestNorth,
+    [MOVEMENT_ACTION_WALK_FASTEST_SOUTH] = gMovementActionFuncs_WalkFastestSouth,
+    [MOVEMENT_ACTION_WALK_FASTEST_WEST] = gMovementActionFuncs_WalkFastestWest,
+    [MOVEMENT_ACTION_WALK_FASTEST_EAST] = gMovementActionFuncs_WalkFastestEast,
+    [MOVEMENT_ACTION_RUN_NORTH] = gMovementActionFuncs_RunNorth,
+    [MOVEMENT_ACTION_RUN_SOUTH] = gMovementActionFuncs_RunSouth,
+    [MOVEMENT_ACTION_RUN_WEST] = gMovementActionFuncs_RunWest,
+    [MOVEMENT_ACTION_RUN_EAST] = gMovementActionFuncs_RunEast,
+    [MOVEMENT_ACTION_JUMP_NEAR_SLOW_WEST] = gMovementActionFuncs_JumpNearSlowWest,
+    [MOVEMENT_ACTION_JUMP_NEAR_SLOW_EAST] = gMovementActionFuncs_JumpNearSlowEast,
+    [MOVEMENT_ACTION_JUMP_FARTHER_WEST] = gMovementActionFuncs_JumpFartherWest,
+    [MOVEMENT_ACTION_JUMP_FARTHER_EAST] = gMovementActionFuncs_JumpFartherEast,
+    [MOVEMENT_ACTION_WALK_EVER_SO_SLIGHTLY_FAST_NORTH] = gMovementActionFuncs_WalkEverSoSlightlyFastNorth,
+    [MOVEMENT_ACTION_WALK_EVER_SO_SLIGHTLY_FAST_SOUTH] = gMovementActionFuncs_WalkEverSoSlightlyFastSouth,
+    [MOVEMENT_ACTION_WALK_EVER_SO_SLIGHTLY_FAST_WEST] = gMovementActionFuncs_WalkEverSoSlightlyFastWest,
+    [MOVEMENT_ACTION_WALK_EVER_SO_SLIGHTLY_FAST_EAST] = gMovementActionFuncs_WalkEverSoSlightlyFastEast,
+    [MOVEMENT_ACTION_POKECENTER_NURSE_BOW] = gMovementActionFuncs_PokecenterNurseBow,
+    [MOVEMENT_ACTION_REVEAL_TRAINER] = gMovementActionFuncs_RevealTrainer,
+    [MOVEMENT_ACTION_PLAYER_GIVE] = gMovementActionFuncs_PlayerGive,
+    [MOVEMENT_ACTION_EMOTE_DOUBLE_EXCLAMATION_MARK] = gMovementActionFuncs_EmoteDoubleExclamationMark,
+    [MOVEMENT_ACTION_PLAYER_RECEIVE] = gMovementActionFuncs_PlayerReceive,
+    [MOVEMENT_ACTION_105] = gMovementActionFuncs_105,
+    [MOVEMENT_ACTION_106] = gMovementActionFuncs_106,
+    [MOVEMENT_ACTION_107] = gMovementActionFuncs_107,
+    [MOVEMENT_ACTION_108] = gMovementActionFuncs_108,
+    [MOVEMENT_ACTION_109] = gMovementActionFuncs_109,
+    [MOVEMENT_ACTION_110] = gMovementActionFuncs_110,
+    [MOVEMENT_ACTION_111] = gMovementActionFuncs_111,
+    [MOVEMENT_ACTION_112] = gMovementActionFuncs_112,
+    [MOVEMENT_ACTION_113] = gMovementActionFuncs_113,
+    [MOVEMENT_ACTION_114] = gMovementActionFuncs_114,
+    [MOVEMENT_ACTION_115] = gMovementActionFuncs_115,
+    [MOVEMENT_ACTION_116] = gMovementActionFuncs_116,
+    [MOVEMENT_ACTION_JUMP_DISTORTION_WORLD_NORTH] = gMovementActionFuncs_JumpDistortionWorldNorth,
+    [MOVEMENT_ACTION_JUMP_DISTORTION_WORLD_SOUTH] = gMovementActionFuncs_JumpDistortionWorldSouth,
+    [MOVEMENT_ACTION_JUMP_DISTORTION_WORLD_WEST] = gMovementActionFuncs_JumpDistortionWorldWest,
+    [MOVEMENT_ACTION_JUMP_DISTORTION_WORLD_EAST] = gMovementActionFuncs_JumpDistortionWorldEast,
+    [MOVEMENT_ACTION_121] = gMovementActionFuncs_121,
+    [MOVEMENT_ACTION_122] = gMovementActionFuncs_122,
+    [MOVEMENT_ACTION_123] = gMovementActionFuncs_123,
+    [MOVEMENT_ACTION_124] = gMovementActionFuncs_124,
+    [MOVEMENT_ACTION_125] = gMovementActionFuncs_125,
+    [MOVEMENT_ACTION_126] = gMovementActionFuncs_126,
+    [MOVEMENT_ACTION_127] = gMovementActionFuncs_127,
+    [MOVEMENT_ACTION_128] = gMovementActionFuncs_128,
+    [MOVEMENT_ACTION_129] = gMovementActionFuncs_129,
+    [MOVEMENT_ACTION_130] = gMovementActionFuncs_130,
+    [MOVEMENT_ACTION_131] = gMovementActionFuncs_131,
+    [MOVEMENT_ACTION_132] = gMovementActionFuncs_132,
+    [MOVEMENT_ACTION_133] = gMovementActionFuncs_133,
+    [MOVEMENT_ACTION_134] = gMovementActionFuncs_134,
+    [MOVEMENT_ACTION_135] = gMovementActionFuncs_135,
+    [MOVEMENT_ACTION_136] = gMovementActionFuncs_136,
+    [MOVEMENT_ACTION_137] = gMovementActionFuncs_137,
+    [MOVEMENT_ACTION_138] = gMovementActionFuncs_138,
+    [MOVEMENT_ACTION_139] = gMovementActionFuncs_139,
+    [MOVEMENT_ACTION_140] = gMovementActionFuncs_140,
+    [MOVEMENT_ACTION_141] = gMovementActionFuncs_141,
+    [MOVEMENT_ACTION_142] = gMovementActionFuncs_142,
+    [MOVEMENT_ACTION_143] = gMovementActionFuncs_143,
+    [MOVEMENT_ACTION_144] = gMovementActionFuncs_144,
+    [MOVEMENT_ACTION_145] = gMovementActionFuncs_145,
+    [MOVEMENT_ACTION_146] = gMovementActionFuncs_146,
+    [MOVEMENT_ACTION_147] = gMovementActionFuncs_147,
+    [MOVEMENT_ACTION_148] = gMovementActionFuncs_148,
+    [MOVEMENT_ACTION_149] = gMovementActionFuncs_149,
+    [MOVEMENT_ACTION_150] = gMovementActionFuncs_150,
+    [MOVEMENT_ACTION_151] = gMovementActionFuncs_151,
+    [MOVEMENT_ACTION_152] = gMovementActionFuncs_152,
+    [MOVEMENT_ACTION_153] = gMovementActionFuncs_153,
 };
 
-static const int Unk_020EDD5C[] = {
-    0x0,
-    0x1,
-    0x2,
-    0x3
+static const int sMovementActionCodes_Face[] = {
+    [DIR_NORTH] = MOVEMENT_ACTION_FACE_NORTH,
+    [DIR_SOUTH] = MOVEMENT_ACTION_FACE_SOUTH,
+    [DIR_WEST] = MOVEMENT_ACTION_FACE_WEST,
+    [DIR_EAST] = MOVEMENT_ACTION_FACE_EAST,
 };
 
-static const int Unk_020EDCDC[] = {
-    0x4,
-    0x5,
-    0x6,
-    0x7
+static const int sMovementActionCodes_WalkSlower[] = {
+    [DIR_NORTH] = MOVEMENT_ACTION_WALK_SLOWER_NORTH,
+    [DIR_SOUTH] = MOVEMENT_ACTION_WALK_SLOWER_SOUTH,
+    [DIR_WEST] = MOVEMENT_ACTION_WALK_SLOWER_WEST,
+    [DIR_EAST] = MOVEMENT_ACTION_WALK_SLOWER_EAST,
 };
 
-static const int Unk_020EDC5C[] = {
-    0x8,
-    0x9,
-    0xA,
-    0xB
+static const int sMovementActionCodes_WalkSlow[] = {
+    [DIR_NORTH] = MOVEMENT_ACTION_WALK_SLOW_NORTH,
+    [DIR_SOUTH] = MOVEMENT_ACTION_WALK_SLOW_SOUTH,
+    [DIR_WEST] = MOVEMENT_ACTION_WALK_SLOW_WEST,
+    [DIR_EAST] = MOVEMENT_ACTION_WALK_SLOW_EAST,
 };
 
-static const int Unk_020EDCEC[] = {
-    0xC,
-    0xD,
-    0xE,
-    0xf
+static const int sMovementActionCodes_WalkNormal[] = {
+    [DIR_NORTH] = MOVEMENT_ACTION_WALK_NORMAL_NORTH,
+    [DIR_SOUTH] = MOVEMENT_ACTION_WALK_NORMAL_SOUTH,
+    [DIR_WEST] = MOVEMENT_ACTION_WALK_NORMAL_WEST,
+    [DIR_EAST] = MOVEMENT_ACTION_WALK_NORMAL_EAST,
 };
 
-static const int Unk_020EDD2C[] = {
-    0x10,
-    0x11,
-    0x12,
-    0x13
+static const int sMovementActionCodes_WalkFast[] = {
+    [DIR_NORTH] = MOVEMENT_ACTION_WALK_FAST_NORTH,
+    [DIR_SOUTH] = MOVEMENT_ACTION_WALK_FAST_SOUTH,
+    [DIR_WEST] = MOVEMENT_ACTION_WALK_FAST_WEST,
+    [DIR_EAST] = MOVEMENT_ACTION_WALK_FAST_EAST,
 };
 
-static const int Unk_020EDCFC[] = {
-    0x14,
-    0x15,
-    0x16,
-    0x17
+static const int sMovementActionCodes_WalkFaster[] = {
+    [DIR_NORTH] = MOVEMENT_ACTION_WALK_FASTER_NORTH,
+    [DIR_SOUTH] = MOVEMENT_ACTION_WALK_FASTER_SOUTH,
+    [DIR_WEST] = MOVEMENT_ACTION_WALK_FASTER_WEST,
+    [DIR_EAST] = MOVEMENT_ACTION_WALK_FASTER_EAST,
 };
 
-static const int Unk_020EDC3C[] = {
-    0x18,
-    0x19,
-    0x1A,
-    0x1B
+static const int sMovementActionCodes_WalkOnSpotSlower[] = {
+    [DIR_NORTH] = MOVEMENT_ACTION_WALK_ON_SPOT_SLOWER_NORTH,
+    [DIR_SOUTH] = MOVEMENT_ACTION_WALK_ON_SPOT_SLOWER_SOUTH,
+    [DIR_WEST] = MOVEMENT_ACTION_WALK_ON_SPOT_SLOWER_WEST,
+    [DIR_EAST] = MOVEMENT_ACTION_WALK_ON_SPOT_SLOWER_EAST,
 };
 
-static const int Unk_020EDBAC[] = {
-    0x1C,
-    0x1D,
-    0x1E,
-    0x1f
+static const int sMovementActionCodes_WalkOnSpotSlow[] = {
+    [DIR_NORTH] = MOVEMENT_ACTION_WALK_ON_SPOT_SLOW_NORTH,
+    [DIR_SOUTH] = MOVEMENT_ACTION_WALK_ON_SPOT_SLOW_SOUTH,
+    [DIR_WEST] = MOVEMENT_ACTION_WALK_ON_SPOT_SLOW_WEST,
+    [DIR_EAST] = MOVEMENT_ACTION_WALK_ON_SPOT_SLOW_EAST,
 };
 
-static const int Unk_020EDD0C[] = {
-    0x20,
-    0x21,
-    0x22,
-    0x23
+static const int sMovementActionCodes_WalkOnSpotNormal[] = {
+    [DIR_NORTH] = MOVEMENT_ACTION_WALK_ON_SPOT_NORMAL_NORTH,
+    [DIR_SOUTH] = MOVEMENT_ACTION_WALK_ON_SPOT_NORMAL_SOUTH,
+    [DIR_WEST] = MOVEMENT_ACTION_WALK_ON_SPOT_NORMAL_WEST,
+    [DIR_EAST] = MOVEMENT_ACTION_WALK_ON_SPOT_NORMAL_EAST,
 };
 
-static const int Unk_020EDD9C[] = {
-    0x24,
-    0x25,
-    0x26,
-    0x27
+static const int sMovementActionCodes_WalkOnSpotFast[] = {
+    [DIR_NORTH] = MOVEMENT_ACTION_WALK_ON_SPOT_FAST_NORTH,
+    [DIR_SOUTH] = MOVEMENT_ACTION_WALK_ON_SPOT_FAST_SOUTH,
+    [DIR_WEST] = MOVEMENT_ACTION_WALK_ON_SPOT_FAST_WEST,
+    [DIR_EAST] = MOVEMENT_ACTION_WALK_ON_SPOT_FAST_EAST,
 };
 
-static const int Unk_020EDC8C[] = {
-    0x28,
-    0x29,
-    0x2A,
-    0x2B
+static const int sMovementActionCodes_WalkOnSpotFaster[] = {
+    [DIR_NORTH] = MOVEMENT_ACTION_WALK_ON_SPOT_FASTER_NORTH,
+    [DIR_SOUTH] = MOVEMENT_ACTION_WALK_ON_SPOT_FASTER_SOUTH,
+    [DIR_WEST] = MOVEMENT_ACTION_WALK_ON_SPOT_FASTER_WEST,
+    [DIR_EAST] = MOVEMENT_ACTION_WALK_ON_SPOT_FASTER_EAST,
 };
 
-static const int Unk_020EDDBC[] = {
-    0x2C,
-    0x2D,
-    0x2E,
-    0x2f
+static const int sMovementActionCodes_JumpOnSpotSlow[] = {
+    [DIR_NORTH] = MOVEMENT_ACTION_JUMP_ON_SPOT_SLOW_NORTH,
+    [DIR_SOUTH] = MOVEMENT_ACTION_JUMP_ON_SPOT_SLOW_SOUTH,
+    [DIR_WEST] = MOVEMENT_ACTION_JUMP_ON_SPOT_SLOW_WEST,
+    [DIR_EAST] = MOVEMENT_ACTION_JUMP_ON_SPOT_SLOW_EAST,
 };
 
-static const int Unk_020EDC9C[] = {
-    0x30,
-    0x31,
-    0x32,
-    0x33
+static const int sMovementActionCodes_JumpOnSpotFast[] = {
+    [DIR_NORTH] = MOVEMENT_ACTION_JUMP_ON_SPOT_FAST_NORTH,
+    [DIR_SOUTH] = MOVEMENT_ACTION_JUMP_ON_SPOT_FAST_SOUTH,
+    [DIR_WEST] = MOVEMENT_ACTION_JUMP_ON_SPOT_FAST_WEST,
+    [DIR_EAST] = MOVEMENT_ACTION_JUMP_ON_SPOT_FAST_EAST,
 };
 
-static const int Unk_020EDCBC[] = {
-    0x34,
-    0x35,
-    0x36,
-    0x37
+static const int sMovementActionCodes_JumpNearFast[] = {
+    [DIR_NORTH] = MOVEMENT_ACTION_JUMP_NEAR_FAST_NORTH,
+    [DIR_SOUTH] = MOVEMENT_ACTION_JUMP_NEAR_FAST_SOUTH,
+    [DIR_WEST] = MOVEMENT_ACTION_JUMP_NEAR_FAST_WEST,
+    [DIR_EAST] = MOVEMENT_ACTION_JUMP_NEAR_FAST_EAST,
 };
 
-static const int Unk_020EDBFC[] = {
-    0x38,
-    0x39,
-    0x3A,
-    0x3B
+static const int sMovementActionCodes_JumpFar[] = {
+    [DIR_NORTH] = MOVEMENT_ACTION_JUMP_FAR_NORTH,
+    [DIR_SOUTH] = MOVEMENT_ACTION_JUMP_FAR_SOUTH,
+    [DIR_WEST] = MOVEMENT_ACTION_JUMP_FAR_WEST,
+    [DIR_EAST] = MOVEMENT_ACTION_JUMP_FAR_EAST,
 };
 
-static const int Unk_020EDC7C[] = {
-    0x4C,
-    0x4D,
-    0x4E,
-    0x4f
+static const int sMovementActionCodes_WalkSlightlyFast[] = {
+    [DIR_NORTH] = MOVEMENT_ACTION_WALK_SLIGHTLY_FAST_NORTH,
+    [DIR_SOUTH] = MOVEMENT_ACTION_WALK_SLIGHTLY_FAST_SOUTH,
+    [DIR_WEST] = MOVEMENT_ACTION_WALK_SLIGHTLY_FAST_WEST,
+    [DIR_EAST] = MOVEMENT_ACTION_WALK_SLIGHTLY_FAST_EAST,
 };
 
-static const int Unk_020EDD7C[] = {
-    0x50,
-    0x51,
-    0x52,
-    0x53
+static const int sMovementActionCodes_WalkSlightlyFaster[] = {
+    [DIR_NORTH] = MOVEMENT_ACTION_WALK_SLIGHTLY_FASTER_NORTH,
+    [DIR_SOUTH] = MOVEMENT_ACTION_WALK_SLIGHTLY_FASTER_SOUTH,
+    [DIR_WEST] = MOVEMENT_ACTION_WALK_SLIGHTLY_FASTER_WEST,
+    [DIR_EAST] = MOVEMENT_ACTION_WALK_SLIGHTLY_FASTER_EAST,
 };
 
-static const int Unk_020EDC6C[] = {
-    0x54,
-    0x55,
-    0x56,
-    0x57
+static const int sMovementActionCodes_WalkFastest[] = {
+    [DIR_NORTH] = MOVEMENT_ACTION_WALK_FASTEST_NORTH,
+    [DIR_SOUTH] = MOVEMENT_ACTION_WALK_FASTEST_SOUTH,
+    [DIR_WEST] = MOVEMENT_ACTION_WALK_FASTEST_WEST,
+    [DIR_EAST] = MOVEMENT_ACTION_WALK_FASTEST_EAST,
 };
 
-static const int Unk_020EDBEC[] = {
-    0x58,
-    0x59,
-    0x5A,
-    0x5B
+static const int sMovementActionCodes_Run[] = {
+    [DIR_NORTH] = MOVEMENT_ACTION_RUN_NORTH,
+    [DIR_SOUTH] = MOVEMENT_ACTION_RUN_SOUTH,
+    [DIR_WEST] = MOVEMENT_ACTION_RUN_WEST,
+    [DIR_EAST] = MOVEMENT_ACTION_RUN_EAST,
 };
 
-static const int Unk_020EDD3C[] = {
-    0x5C,
-    0x5D,
-    0x5C,
-    0x5D
+static const int sMovementActionCodes_JumpNearSlow[] = {
+    [DIR_NORTH] = MOVEMENT_ACTION_JUMP_NEAR_SLOW_WEST,
+    [DIR_SOUTH] = MOVEMENT_ACTION_JUMP_NEAR_SLOW_EAST,
+    [DIR_WEST] = MOVEMENT_ACTION_JUMP_NEAR_SLOW_WEST,
+    [DIR_EAST] = MOVEMENT_ACTION_JUMP_NEAR_SLOW_EAST,
 };
 
-static const int Unk_020EDC4C[] = {
-    0x5E,
-    0x5f,
-    0x5E,
-    0x5f
+static const int sMovementActionCodes_JumpFarther[] = {
+    [DIR_NORTH] = MOVEMENT_ACTION_JUMP_FARTHER_WEST,
+    [DIR_SOUTH] = MOVEMENT_ACTION_JUMP_FARTHER_EAST,
+    [DIR_WEST] = MOVEMENT_ACTION_JUMP_FARTHER_WEST,
+    [DIR_EAST] = MOVEMENT_ACTION_JUMP_FARTHER_EAST,
 };
 
-static const int Unk_020EDBDC[] = {
-    0x60,
-    0x61,
-    0x62,
-    0x63
+static const int sMovementActionCodes_WalkEverSoSlightlyFast[] = {
+    [DIR_NORTH] = MOVEMENT_ACTION_WALK_EVER_SO_SLIGHTLY_FAST_NORTH,
+    [DIR_SOUTH] = MOVEMENT_ACTION_WALK_EVER_SO_SLIGHTLY_FAST_SOUTH,
+    [DIR_WEST] = MOVEMENT_ACTION_WALK_EVER_SO_SLIGHTLY_FAST_WEST,
+    [DIR_EAST] = MOVEMENT_ACTION_WALK_EVER_SO_SLIGHTLY_FAST_EAST,
 };
 
-static const int Unk_020EDC2C[] = {
-    0x75,
-    0x76,
-    0x77,
-    0x78
+static const int sMovementActionCodes_JumpDistortionWorld[] = {
+    [DIR_NORTH] = MOVEMENT_ACTION_JUMP_DISTORTION_WORLD_NORTH,
+    [DIR_SOUTH] = MOVEMENT_ACTION_JUMP_DISTORTION_WORLD_SOUTH,
+    [DIR_WEST] = MOVEMENT_ACTION_JUMP_DISTORTION_WORLD_WEST,
+    [DIR_EAST] = MOVEMENT_ACTION_JUMP_DISTORTION_WORLD_EAST,
 };
 
 static const int Unk_020EDCCC[] = {
-    0x69,
-    0x6A,
-    0x6B,
-    0x6C
+    [DIR_NORTH] = MOVEMENT_ACTION_105,
+    [DIR_SOUTH] = MOVEMENT_ACTION_106,
+    [DIR_WEST] = MOVEMENT_ACTION_107,
+    [DIR_EAST] = MOVEMENT_ACTION_108,
 };
 
 static const int Unk_020EDC0C[] = {
-    0x6D,
-    0x6E,
-    0x6f,
-    0x70
+    [DIR_NORTH] = MOVEMENT_ACTION_109,
+    [DIR_SOUTH] = MOVEMENT_ACTION_110,
+    [DIR_WEST] = MOVEMENT_ACTION_111,
+    [DIR_EAST] = MOVEMENT_ACTION_112,
 };
 
 static const int Unk_020EDCAC[] = {
-    0x71,
-    0x72,
-    0x73,
-    0x74
+    [DIR_NORTH] = MOVEMENT_ACTION_113,
+    [DIR_SOUTH] = MOVEMENT_ACTION_114,
+    [DIR_WEST] = MOVEMENT_ACTION_115,
+    [DIR_EAST] = MOVEMENT_ACTION_116,
 };
 
 static const int Unk_020EDC1C[] = {
-    0x91,
-    0x92,
-    0x93,
-    0x94
+    [DIR_NORTH] = MOVEMENT_ACTION_145,
+    [DIR_SOUTH] = MOVEMENT_ACTION_146,
+    [DIR_WEST] = MOVEMENT_ACTION_147,
+    [DIR_EAST] = MOVEMENT_ACTION_148,
 };
 
 static const int Unk_020EDD8C[] = {
-    0x95,
-    0x96,
-    0x97,
-    0x98
+    [DIR_NORTH] = MOVEMENT_ACTION_149,
+    [DIR_SOUTH] = MOVEMENT_ACTION_150,
+    [DIR_WEST] = MOVEMENT_ACTION_151,
+    [DIR_EAST] = MOVEMENT_ACTION_152,
 };
 
 static const int Unk_020EDD4C[] = {
-    0x79,
-    0x7A,
-    0x7B,
-    0x7C
+    [DIR_NORTH] = MOVEMENT_ACTION_121,
+    [DIR_SOUTH] = MOVEMENT_ACTION_122,
+    [DIR_WEST] = MOVEMENT_ACTION_123,
+    [DIR_EAST] = MOVEMENT_ACTION_124,
 };
 
 static const int Unk_020EDD1C[] = {
-    0x7D,
-    0x7E,
-    0x7f,
-    0x80
+    [DIR_NORTH] = MOVEMENT_ACTION_125,
+    [DIR_SOUTH] = MOVEMENT_ACTION_126,
+    [DIR_WEST] = MOVEMENT_ACTION_127,
+    [DIR_EAST] = MOVEMENT_ACTION_128,
 };
 
 static const int Unk_020EDD6C[] = {
-    0x81,
-    0x82,
-    0x83,
-    0x84
+    [DIR_NORTH] = MOVEMENT_ACTION_129,
+    [DIR_SOUTH] = MOVEMENT_ACTION_130,
+    [DIR_WEST] = MOVEMENT_ACTION_131,
+    [DIR_EAST] = MOVEMENT_ACTION_132,
 };
 
 static const int Unk_020EDBCC[] = {
-    0x85,
-    0x86,
-    0x87,
-    0x88
+    [DIR_NORTH] = MOVEMENT_ACTION_133,
+    [DIR_SOUTH] = MOVEMENT_ACTION_134,
+    [DIR_WEST] = MOVEMENT_ACTION_135,
+    [DIR_EAST] = MOVEMENT_ACTION_136,
 };
 
 static const int Unk_020EDDAC[] = {
-    0x89,
-    0x8A,
-    0x8B,
-    0x8C
+    [DIR_NORTH] = MOVEMENT_ACTION_137,
+    [DIR_SOUTH] = MOVEMENT_ACTION_138,
+    [DIR_WEST] = MOVEMENT_ACTION_139,
+    [DIR_EAST] = MOVEMENT_ACTION_140,
 };
 
 static const int Unk_020EDBBC[] = {
-    0x8D,
-    0x8E,
-    0x8f,
-    0x90
+    [DIR_NORTH] = MOVEMENT_ACTION_141,
+    [DIR_SOUTH] = MOVEMENT_ACTION_142,
+    [DIR_WEST] = MOVEMENT_ACTION_143,
+    [DIR_EAST] = MOVEMENT_ACTION_144,
 };
 
-const int *const Unk_020EE31C[] = {
-    Unk_020EDD5C,
-    Unk_020EDCDC,
-    Unk_020EDC5C,
-    Unk_020EDCEC,
-    Unk_020EDD2C,
-    Unk_020EDCFC,
-    Unk_020EDC3C,
-    Unk_020EDBAC,
-    Unk_020EDD0C,
-    Unk_020EDD9C,
-    Unk_020EDC8C,
-    Unk_020EDDBC,
-    Unk_020EDC9C,
-    Unk_020EDCBC,
-    Unk_020EDBFC,
-    Unk_020EDC7C,
-    Unk_020EDD7C,
-    Unk_020EDC6C,
-    Unk_020EDBEC,
-    Unk_020EDD3C,
-    Unk_020EDC4C,
-    Unk_020EDBDC,
+const int *const gMovementActionCodes[] = {
+    sMovementActionCodes_Face,
+    sMovementActionCodes_WalkSlower,
+    sMovementActionCodes_WalkSlow,
+    sMovementActionCodes_WalkNormal,
+    sMovementActionCodes_WalkFast,
+    sMovementActionCodes_WalkFaster,
+    sMovementActionCodes_WalkOnSpotSlower,
+    sMovementActionCodes_WalkOnSpotSlow,
+    sMovementActionCodes_WalkOnSpotNormal,
+    sMovementActionCodes_WalkOnSpotFast,
+    sMovementActionCodes_WalkOnSpotFaster,
+    sMovementActionCodes_JumpOnSpotSlow,
+    sMovementActionCodes_JumpOnSpotFast,
+    sMovementActionCodes_JumpNearFast,
+    sMovementActionCodes_JumpFar,
+    sMovementActionCodes_WalkSlightlyFast,
+    sMovementActionCodes_WalkSlightlyFaster,
+    sMovementActionCodes_WalkFastest,
+    sMovementActionCodes_Run,
+    sMovementActionCodes_JumpNearSlow,
+    sMovementActionCodes_JumpFarther,
+    sMovementActionCodes_WalkEverSoSlightlyFast,
     Unk_020EDCCC,
     Unk_020EDC0C,
-    Unk_020EDC2C,
+    sMovementActionCodes_JumpDistortionWorld,
     Unk_020EDCAC,
     Unk_020EDD4C,
     Unk_020EDD1C,

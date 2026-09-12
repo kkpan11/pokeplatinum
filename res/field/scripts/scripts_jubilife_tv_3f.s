@@ -1,125 +1,113 @@
-    .include "macros/scrcmd.inc"
+#include "macros/scrcmd.inc"
+#include "res/text/bank/jubilife_tv_3f.h"
+#include "res/field/events/events_jubilife_tv_3f.h"
 
-    .data
 
-    ScriptEntry _0012
-    ScriptEntry _0054
-    ScriptEntry _0067
-    ScriptEntry _007A
-    .short 0xFD13
+    ScriptEntry JubilifeTV3F_Beauty1
+    ScriptEntry JubilifeTV3F_Beauty2
+    ScriptEntry JubilifeTV3F_GymGuide1
+    ScriptEntry JubilifeTV3F_GymGuide2
+    ScriptEntryEnd
 
-_0012:
-    PlayFanfare SEQ_SE_CONFIRM
+JubilifeTV3F_Beauty1:
+    PlaySE SE_CONFIRM_sseq_3
     LockAll
     FacePlayer
-    ApplyMovement 0, _0044
+    ApplyMovement LOCALID_BEAUTY_1, JubilifeTV3F_Movement_BeautyFaceEastGroupRankingRoom
     WaitMovement
-    Message 0
+    Message JubilifeTV3F_Text_ClosestToStairsIsGroupRankingRoom
     CloseMessage
-    WaitTime 8, 0x800C
-    ApplyMovement 0, _004C
+    WaitTime 8, VAR_RESULT
+    ApplyMovement LOCALID_BEAUTY_1, JubilifeTV3F_Movement_BeautyFaceWestGlobalRankingRoom
     WaitMovement
-    Message 1
-    WaitABXPadPress
+    Message JubilifeTV3F_Text_OppositeSideIsGlobalRankingRoom
+    WaitButton
     CloseMessage
     ReleaseAll
     End
 
     .balign 4, 0
-_0044:
-    MoveAction_003
+JubilifeTV3F_Movement_BeautyFaceEastGroupRankingRoom:
+    FaceEast
     EndMovement
 
     .balign 4, 0
-_004C:
-    MoveAction_002
+JubilifeTV3F_Movement_BeautyFaceWestGlobalRankingRoom:
+    FaceWest
     EndMovement
 
-_0054:
-    PlayFanfare SEQ_SE_CONFIRM
+JubilifeTV3F_Beauty2:
+    NPCMessage JubilifeTV3F_Text_BetterOddsOfWinningLottery
+    End
+
+JubilifeTV3F_GymGuide1:
+    NPCMessage JubilifeTV3F_Text_RecordsAreFineThings
+    End
+
+JubilifeTV3F_GymGuide2:
+    PlaySE SE_CONFIRM_sseq_3
     LockAll
     FacePlayer
-    Message 2
-    WaitABXPadPress
-    CloseMessage
-    ReleaseAll
-    End
+    Message JubilifeTV3F_Text_TellMeYourOpinionOnTV
+    ShowYesNoMenu VAR_RESULT
+    GoToIfEq VAR_RESULT, MENU_YES, JubilifeTV3F_ChooseCustomMessageWords
+    GoTo JubilifeTV3F_OhAllRight
 
-_0067:
-    PlayFanfare SEQ_SE_CONFIRM
-    LockAll
-    FacePlayer
-    Message 3
-    WaitABXPadPress
-    CloseMessage
-    ReleaseAll
-    End
-
-_007A:
-    PlayFanfare SEQ_SE_CONFIRM
-    LockAll
-    FacePlayer
-    Message 4
-    ScrCmd_03E 0x800C
-    GoToIfEq 0x800C, 0, _009C
-    GoTo _015B
-
-_009C:
-    FadeScreen 6, 1, 0, 0
+JubilifeTV3F_ChooseCustomMessageWords:
+    FadeScreenOut
     WaitFadeScreen
     CloseMessage
-    ScrCmd_244 0, 0x800C, 0x8000, 0x8001
-    ScrCmd_0A1
-    FadeScreen 6, 1, 1, 0
+    ChooseTwoCustomMessageWords VAR_RESULT, VAR_0x8000, VAR_0x8001
+    ReturnToField
+    FadeScreenIn
     WaitFadeScreen
-    GoToIfEq 0x800C, 0, _015B
-    Message 5
-    FadeScreen 6, 1, 0, 0
+    GoToIfEq VAR_RESULT, FALSE, JubilifeTV3F_OhAllRight
+    Message JubilifeTV3F_Text_WhatFeedbackCanYouGive
+    FadeScreenOut
     WaitFadeScreen
     CloseMessage
-    ScrCmd_244 0, 0x800C, 0x8002, 0x8003
-    ScrCmd_0A1
-    FadeScreen 6, 1, 1, 0
+    ChooseTwoCustomMessageWords VAR_RESULT, VAR_0x8002, VAR_0x8003
+    ReturnToField
+    FadeScreenIn
     WaitFadeScreen
-    GoToIfEq 0x800C, 0, _015B
-    ScrCmd_249 0x800C, 0x8000, 0x8001, 0x8002, 0x8003
-    GoToIfEq 0x800C, 0xFF, _0131
-    GoToIfEq 0x800C, 0, _0131
-    GoTo _0166
+    GoToIfEq VAR_RESULT, FALSE, JubilifeTV3F_OhAllRight
+    GetWallpaperFromCustomMessageWords VAR_RESULT, VAR_0x8000, VAR_0x8001, VAR_0x8002, VAR_0x8003
+    GoToIfEq VAR_RESULT, 0xFF, JubilifeTV3F_CheckIsMysteryGiftPhrase
+    GoToIfEq VAR_RESULT, 0, JubilifeTV3F_CheckIsMysteryGiftPhrase
+    GoTo JubilifeTV3F_DealForNewPCBoxesWallpaper
 
-_0131:
-    ScrCmd_2AA 0x800C, 0x8000, 0x8001, 0x8002, 0x8003
-    GoToIfEq 0x800C, 0, _0150
-    GoTo _0171
+JubilifeTV3F_CheckIsMysteryGiftPhrase:
+    CheckIsMysteryGiftPhrase VAR_RESULT, VAR_0x8000, VAR_0x8001, VAR_0x8002, VAR_0x8003
+    GoToIfEq VAR_RESULT, FALSE, JubilifeTV3F_ThanksForAnsweringMyQuestion
+    GoTo JubilifeTV3F_DealForMysteryGift
 
-_0150:
-    Message 6
-    WaitABXPadPress
+JubilifeTV3F_ThanksForAnsweringMyQuestion:
+    Message JubilifeTV3F_Text_ThanksForAnsweringMyQuestion
+    WaitButton
     CloseMessage
     ReleaseAll
     End
 
-_015B:
-    Message 7
-    WaitABXPadPress
+JubilifeTV3F_OhAllRight:
+    Message JubilifeTV3F_Text_OhAllRight
+    WaitButton
     CloseMessage
     ReleaseAll
     End
 
-_0166:
-    Message 8
-    WaitABXPadPress
+JubilifeTV3F_DealForNewPCBoxesWallpaper:
+    Message JubilifeTV3F_Text_DealForNewPCBoxesWallpaper
+    WaitButton
     CloseMessage
     ReleaseAll
     End
 
-_0171:
-    Message 9
-    WaitABXPadPress
-    ScrCmd_2AC
+JubilifeTV3F_DealForMysteryGift:
+    Message JubilifeTV3F_Text_DealForMysteryGift
+    WaitButton
+    UnlockMysteryGift
     CloseMessage
     ReleaseAll
     End
 
-    .byte 0
-    .byte 0
+    .balign 4, 0

@@ -1,171 +1,135 @@
-    .include "macros/scrcmd.inc"
+#include "macros/scrcmd.inc"
+#include "res/text/bank/floaroma_town.h"
+#include "res/field/events/events_floaroma_town.h"
 
-    .data
+    ScriptEntry FloaromaTown_OnTransition
+    ScriptEntry FloaromaTown_Grunts
+    ScriptEntry FloaromaTown_SchoolKidM
+    ScriptEntry FloaromaTown_LassWest
+    ScriptEntry FloaromaTown_PokemonBreederF
+    ScriptEntry FloaromaTown_LassEast
+    ScriptEntry FloaromaTown_Camper
+    ScriptEntry FloaromaTown_MapSignpost
+    ScriptEntry FloaromaTown_SignboardFlowerShop
+    ScriptEntry FloaromaTown_SignboardFloaromaMeadow
+    ScriptEntry FloaromaTown_Beauty
+    ScriptEntryEnd
 
-    ScriptEntry _002E
-    ScriptEntry _0030
-    ScriptEntry _006C
-    ScriptEntry _00B0
-    ScriptEntry _00C3
-    ScriptEntry _00D6
-    ScriptEntry _00E9
-    ScriptEntry _00FC
-    ScriptEntry _0113
-    ScriptEntry _012A
-    ScriptEntry _0141
-    .short 0xFD13
-
-_002E:
+FloaromaTown_OnTransition:
     End
 
-_0030:
-    PlayFanfare SEQ_SE_CONFIRM
+FloaromaTown_Grunts:
+    PlaySE SE_CONFIRM_sseq_3
     LockAll
-    ApplyMovement 7, _005C
+    ApplyMovement LOCALID_GRUNT_M_WEST, FloaromaTown_Movement_WalkOnSpotEast
     WaitMovement
-    Message 0
+    Message FloaromaTown_Text_ThisDoesntSeemCool
     CloseMessage
-    ApplyMovement 8, _0064
+    ApplyMovement LOCALID_GRUNT_M_EAST, FloaromaTown_Movement_WalkOnSpotWest
     WaitMovement
-    Message 1
-    WaitABXPadPress
+    Message FloaromaTown_Text_DontComplain
+    WaitButton
     CloseMessage
     ReleaseAll
     End
 
     .balign 4, 0
-_005C:
-    MoveAction_023
+FloaromaTown_Movement_WalkOnSpotEast:
+    WalkOnSpotNormalEast
     EndMovement
 
     .balign 4, 0
-_0064:
-    MoveAction_022
+FloaromaTown_Movement_WalkOnSpotWest:
+    WalkOnSpotNormalWest
     EndMovement
 
-_006C:
-    PlayFanfare SEQ_SE_CONFIRM
+FloaromaTown_SchoolKidM:
+    PlaySE SE_CONFIRM_sseq_3
     LockAll
     FacePlayer
-    GoToIfGe 0x40CF, 2, _0099
-    Message 2
-    ApplyMovement 2, _00A4
+    GoToIfGe VAR_VALLEY_WINDWORKS_TEAM_GALACTIC_STATE, 2, FloaromaTown_OddlyPleasantMood
+    Message FloaromaTown_Text_IWantedToGetFlowers
+    ApplyMovement LOCALID_SCHOOL_KID_M, FloaromaTown_Movement_SchoolKidMFaceNorth
     WaitMovement
-    Message 3
-    WaitABXPadPress
+    Message FloaromaTown_Text_GalacticGuysWentToMeadow
+    WaitButton
     CloseMessage
     ReleaseAll
     End
 
-_0099:
-    Message 4
-    WaitABXPadPress
+FloaromaTown_OddlyPleasantMood:
+    Message FloaromaTown_Text_OddlyPleasantMood
+    WaitButton
     CloseMessage
     ReleaseAll
     End
 
     .balign 4, 0
-_00A4:
-    MoveAction_000
-    MoveAction_03F 3
+FloaromaTown_Movement_SchoolKidMFaceNorth:
+    FaceNorth
+    Delay8 3
     EndMovement
 
-_00B0:
-    PlayFanfare SEQ_SE_CONFIRM
+FloaromaTown_LassWest:
+    NPCMessage FloaromaTown_Text_ISimplyLoveItHere
+    End
+
+FloaromaTown_PokemonBreederF:
+    NPCMessage FloaromaTown_Text_WelcomeToFloaroma
+    End
+
+FloaromaTown_LassEast:
+    NPCMessage FloaromaTown_Text_BerriesCanBeFoodForPokemon
+    End
+
+FloaromaTown_Camper:
+    NPCMessage FloaromaTown_Text_DrawnHereByHoney
+    End
+
+FloaromaTown_MapSignpost:
+    ShowMapSign FloaromaTown_Text_MapSign
+    End
+
+FloaromaTown_SignboardFlowerShop:
+    ShowLandmarkSign FloaromaTown_Text_SignFlowerShop
+    End
+
+FloaromaTown_SignboardFloaromaMeadow:
+    ShowLandmarkSign FloaromaTown_Text_SignFlowerMeadow
+    End
+
+FloaromaTown_Beauty:
+    PlaySE SE_CONFIRM_sseq_3
     LockAll
     FacePlayer
-    Message 5
-    WaitABXPadPress
+    FindPartySlotWithFatefulEncounterSpecies VAR_RESULT, SPECIES_SHAYMIN
+    GoToIfEq VAR_RESULT, 0xFF, FloaromaTown_DoYouKnowGracideaFlowers
+    CheckPartyHasSpecies VAR_RESULT, SPECIES_SHAYMIN
+    GoToIfEq VAR_RESULT, FALSE, FloaromaTown_DoYouKnowGracideaFlowers
+    CheckItem ITEM_GRACIDEA, 1, VAR_RESULT
+    GoToIfNe VAR_RESULT, FALSE, FloaromaTown_GracideaFlowersBeenAroundLongTime
+    Message FloaromaTown_Text_HaveGracideaFlowers
+    SetVar VAR_0x8004, ITEM_GRACIDEA
+    SetVar VAR_0x8005, 1
+    Common_GiveItemQuantityNoLineFeed
     CloseMessage
     ReleaseAll
     End
 
-_00C3:
-    PlayFanfare SEQ_SE_CONFIRM
-    LockAll
-    FacePlayer
-    Message 6
-    WaitABXPadPress
+FloaromaTown_DoYouKnowGracideaFlowers:
+    Message FloaromaTown_Text_DoYouKnowGracideaFlowers
+    GoTo FloaromaTown_BeautyEnd
+    End
+
+FloaromaTown_GracideaFlowersBeenAroundLongTime:
+    Message FloaromaTown_Text_GracideaFlowersBeenAroundLongTime
+    GoTo FloaromaTown_BeautyEnd
+    End
+
+FloaromaTown_BeautyEnd:
+    WaitButton
     CloseMessage
     ReleaseAll
     End
 
-_00D6:
-    PlayFanfare SEQ_SE_CONFIRM
-    LockAll
-    FacePlayer
-    Message 7
-    WaitABXPadPress
-    CloseMessage
-    ReleaseAll
-    End
-
-_00E9:
-    PlayFanfare SEQ_SE_CONFIRM
-    LockAll
-    FacePlayer
-    Message 8
-    WaitABXPadPress
-    CloseMessage
-    ReleaseAll
-    End
-
-_00FC:
-    ScrCmd_036 12, 0, 0, 0x800C
-    ScrCmd_038 3
-    ScrCmd_039
-    ScrCmd_03B 0x800C
-    CallCommonScript 0x7D0
-    End
-
-_0113:
-    ScrCmd_036 13, 2, 0, 0x800C
-    ScrCmd_038 3
-    ScrCmd_039
-    ScrCmd_03B 0x800C
-    CallCommonScript 0x7D0
-    End
-
-_012A:
-    ScrCmd_036 14, 2, 0, 0x800C
-    ScrCmd_038 3
-    ScrCmd_039
-    ScrCmd_03B 0x800C
-    CallCommonScript 0x7D0
-    End
-
-_0141:
-    PlayFanfare SEQ_SE_CONFIRM
-    LockAll
-    FacePlayer
-    ScrCmd_31C 0x800C, 0x1EC
-    GoToIfEq 0x800C, 0xFF, _019D
-    ScrCmd_1C0 0x800C, 0x1EC
-    GoToIfEq 0x800C, 0, _019D
-    ScrCmd_07E 0x1D2, 1, 0x800C
-    GoToIfNe 0x800C, 0, _01A8
-    Message 9
-    SetVar 0x8004, 0x1D2
-    SetVar 0x8005, 1
-    CallCommonScript 0x7E0
-    CloseMessage
-    ReleaseAll
-    End
-
-_019D:
-    Message 11
-    GoTo _01B3
-    End
-
-_01A8:
-    Message 10
-    GoTo _01B3
-    End
-
-_01B3:
-    WaitABXPadPress
-    CloseMessage
-    ReleaseAll
-    End
-
-    .byte 0
+    .balign 4, 0

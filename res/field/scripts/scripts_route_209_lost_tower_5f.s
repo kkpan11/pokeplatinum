@@ -1,73 +1,71 @@
-    .include "macros/scrcmd.inc"
+#include "macros/scrcmd.inc"
+#include "res/text/bank/route_209_lost_tower_5f.h"
 
-    .data
 
-    ScriptEntry _000A
-    ScriptEntry _0072
-    .short 0xFD13
+    ScriptEntry Route209LostTower5F_OldWoman1
+    ScriptEntry Route209LostTower5F_OldWoman2
+    ScriptEntryEnd
 
-_000A:
-    PlayFanfare SEQ_SE_CONFIRM
+Route209LostTower5F_OldWoman1:
+    PlaySE SE_CONFIRM_sseq_3
     LockAll
     FacePlayer
-    GoToIfUnset 123, _0067
-    GoToIfSet 161, _005C
-    Message 0
-    SetVar 0x8004, 247
-    SetVar 0x8005, 1
-    ScrCmd_07D 0x8004, 0x8005, 0x800C
-    GoToIfEq 0x800C, 0, _00CF
-    CallCommonScript 0x7FC
-    SetFlag 161
-    GoTo _005C
+    GoToIfUnset FLAG_USED_DEFOG_IN_ROUTE_209_LOST_TOWER_5F, Route209LostTower5F_ThisFogObscuresEverything
+    GoToIfSet FLAG_RECEIVED_ROUTE_209_LOST_TOWER_5F_SPELL_TAG, Route209LostTower5F_FantinaIsARegularVisitor
+    Message Route209LostTower5F_Text_DontBeShyTakeIt
+    SetVar VAR_0x8004, ITEM_SPELL_TAG
+    SetVar VAR_0x8005, 1
+    GoToIfCannotFitItem VAR_0x8004, VAR_0x8005, VAR_RESULT, Route209LostTower5F_BagIsFull
+    Common_GiveItemQuantity
+    SetFlag FLAG_RECEIVED_ROUTE_209_LOST_TOWER_5F_SPELL_TAG
+    GoTo Route209LostTower5F_FantinaIsARegularVisitor
     End
 
-_005C:
-    Message 1
-    WaitABXPadPress
+Route209LostTower5F_FantinaIsARegularVisitor:
+    Message Route209LostTower5F_Text_FantinaIsARegularVisitor
+    WaitButton
     CloseMessage
     ReleaseAll
     End
 
-_0067:
-    Message 2
-    WaitABXPadPress
+Route209LostTower5F_ThisFogObscuresEverything:
+    Message Route209LostTower5F_Text_ThisFogObscuresEverything
+    WaitButton
     CloseMessage
     ReleaseAll
     End
 
-_0072:
-    PlayFanfare SEQ_SE_CONFIRM
+Route209LostTower5F_OldWoman2:
+    PlaySE SE_CONFIRM_sseq_3
     LockAll
     FacePlayer
-    GoToIfUnset 123, _00D9
-    GoToIfSet 0x116, _00C4
-    Message 3
-    SetVar 0x8004, 224
-    SetVar 0x8005, 1
-    ScrCmd_07D 0x8004, 0x8005, 0x800C
-    GoToIfEq 0x800C, 0, _00CF
-    CallCommonScript 0x7FC
-    SetFlag 0x116
-    GoTo _00C4
+    GoToIfUnset FLAG_USED_DEFOG_IN_ROUTE_209_LOST_TOWER_5F, Route209LostTower5F_ThisFogObscuresEverything2
+    GoToIfSet FLAG_RECEIVED_ROUTE_209_LOST_TOWER_5F_CLEANSE_TAG, Route209LostTower5F_PokemonFindSolaceHere
+    Message Route209LostTower5F_Text_TakeThis
+    SetVar VAR_0x8004, ITEM_CLEANSE_TAG
+    SetVar VAR_0x8005, 1
+    GoToIfCannotFitItem VAR_0x8004, VAR_0x8005, VAR_RESULT, Route209LostTower5F_BagIsFull
+    Common_GiveItemQuantity
+    SetFlag FLAG_RECEIVED_ROUTE_209_LOST_TOWER_5F_CLEANSE_TAG
+    GoTo Route209LostTower5F_PokemonFindSolaceHere
     End
 
-_00C4:
-    Message 4
-    WaitABXPadPress
+Route209LostTower5F_PokemonFindSolaceHere:
+    Message Route209LostTower5F_Text_PokemonFindSolaceHere
+    WaitButton
     CloseMessage
     ReleaseAll
     End
 
-_00CF:
-    CallCommonScript 0x7E1
+Route209LostTower5F_BagIsFull:
+    Common_MessageBagIsFull
     CloseMessage
     ReleaseAll
     End
 
-_00D9:
-    Message 5
-    WaitABXPadPress
+Route209LostTower5F_ThisFogObscuresEverything2:
+    Message Route209LostTower5F_Text_ThisFogObscuresEverything2
+    WaitButton
     CloseMessage
     ReleaseAll
     End

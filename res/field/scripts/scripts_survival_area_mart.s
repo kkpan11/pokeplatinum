@@ -1,42 +1,24 @@
-    .include "macros/scrcmd.inc"
+#include "macros/scrcmd.inc"
+#include "res/text/bank/survival_area_mart.h"
 
-    .data
 
-    ScriptEntry _0012
-    ScriptEntry _0028
-    ScriptEntry _002A
-    ScriptEntry _003D
-    .short 0xFD13
+    ScriptEntry SurvivalAreaMart_CommonVendor
+    ScriptEntry SurvivalAreaMart_Dummy2
+    ScriptEntry SurvivalAreaMart_Hiker
+    ScriptEntry SurvivalAreaMart_AceTrainerF
+    ScriptEntryEnd
 
-_0012:
-    PlayFanfare SEQ_SE_CONFIRM
-    LockAll
-    FacePlayer
-    CallCommonScript 0x7E3
-    ScrCmd_035
-    ScrCmd_147 1
-    ReleaseAll
+SurvivalAreaMart_CommonVendor:
+    PokeMartCommonWithGreeting
     End
 
-_0028:
+SurvivalAreaMart_Dummy2:
     End
 
-_002A:
-    PlayFanfare SEQ_SE_CONFIRM
-    LockAll
-    FacePlayer
-    Message 0
-    WaitABXPadPress
-    CloseMessage
-    ReleaseAll
+SurvivalAreaMart_Hiker:
+    NPCMessage SurvivalAreaMart_Text_WordOfAdvice
     End
 
-_003D:
-    PlayFanfare SEQ_SE_CONFIRM
-    LockAll
-    FacePlayer
-    Message 1
-    WaitABXPadPress
-    CloseMessage
-    ReleaseAll
+SurvivalAreaMart_AceTrainerF:
+    NPCMessage SurvivalAreaMart_Text_WasOn54WinStreak
     End

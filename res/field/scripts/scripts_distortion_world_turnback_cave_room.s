@@ -1,34 +1,34 @@
-    .include "macros/scrcmd.inc"
+#include "macros/scrcmd.inc"
+#include "res/text/bank/distortion_world_turnback_cave_room.h"
 
-    .data
 
-    ScriptEntry _000A
-    ScriptEntry _000E
-    .short 0xFD13
+    ScriptEntry DistortionWorldTurnbackCaveRoom_OnTransition
+    ScriptEntry DistortionWorldTurnbackCaveRoom_Portal
+    ScriptEntryEnd
 
-_000A:
-    ScrCmd_2F2
+DistortionWorldTurnbackCaveRoom_OnTransition:
+    InitPersistedMapFeaturesForDistortionWorld
     End
 
-_000E:
-    PlayFanfare SEQ_SE_CONFIRM
+DistortionWorldTurnbackCaveRoom_Portal:
+    PlaySE SE_CONFIRM_sseq_3
     LockAll
-    Message 0
-    ScrCmd_03E 0x800C
-    GoToIfEq 0x800C, 0, _002E
+    Message DistortionWorldTurnbackCaveRoom_Text_LeapIntoPortal
+    ShowYesNoMenu VAR_RESULT
+    GoToIfEq VAR_RESULT, MENU_YES, DistortionWorldTurnbackCaveRoom_GoToTurnbackCave
     CloseMessage
     ReleaseAll
     End
 
-_002E:
-    ScrCmd_0CD 0
-    Message 1
+DistortionWorldTurnbackCaveRoom_GoToTurnbackCave:
+    BufferPlayerName 0
+    Message DistortionWorldTurnbackCaveRoom_Text_PlayerLeaptIntoPortal
     CloseMessage
-    PlayFanfare SEQ_SE_PL_SYUWA
-    ScrCmd_328 0
-    FadeScreen 6, 1, 0, 0
+    PlaySE SEQ_SE_PL_SYUWA_sseq
+    SetPartyGiratinaForm GIRATINA_FORM_ALTERED
+    FadeScreenOut
     WaitFadeScreen
-    ScrCmd_0BE 0x10E, 0, 11, 15, 1
-    FadeScreen 6, 1, 1, 0
+    Warp MAP_HEADER_TURNBACK_CAVE_GIRATINA_ROOM, 11, 15, DIR_SOUTH
+    FadeScreenIn
     WaitFadeScreen
     End

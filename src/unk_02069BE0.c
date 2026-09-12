@@ -3,22 +3,23 @@
 #include <nitro.h>
 #include <string.h>
 
-#include "struct_decls/struct_0205E884_decl.h"
-#include "struct_decls/struct_02061830_decl.h"
-#include "struct_decls/struct_02061AB4_decl.h"
+#include "generated/movement_actions.h"
+
+#include "struct_decls/map_object.h"
+#include "struct_decls/map_object_manager.h"
 
 #include "field/field_system.h"
-#include "overlay005/ov5_021DF440.h"
+#include "overlay005/field_effect_manager.h"
 #include "overlay005/ov5_021F3D00.h"
-#include "overlay101/struct_ov101_021D5D90_decl.h"
 
 #include "map_object.h"
 #include "map_object_move.h"
+#include "map_tile_behavior.h"
+#include "overworld_anim_manager.h"
 #include "player_avatar.h"
-#include "unk_02054D00.h"
-#include "unk_0205DAC8.h"
+#include "terrain_collision_manager.h"
+#include "trainer_encounter.h"
 #include "unk_020655F4.h"
-#include "unk_02067A84.h"
 
 typedef struct {
     u8 unk_00;
@@ -42,7 +43,7 @@ typedef struct {
     u8 unk_01;
     u8 unk_02;
     u8 unk_03;
-    UnkStruct_ov101_021D5D90 *unk_04;
+    OverworldAnimManager *unk_04;
 } UnkStruct_0206A0BC;
 
 typedef struct {
@@ -79,7 +80,7 @@ void sub_02069BE0(MapObject *mapObj)
     UnkStruct_02069CA8 *v0 = sub_02062A54(mapObj, (sizeof(UnkStruct_02069CA8)));
 
     sub_02069CA8(mapObj, v0);
-    sub_02062A0C(mapObj, 0x0);
+    sub_02062A0C(mapObj, 0);
     sub_02062D10(mapObj);
     sub_02062D80(mapObj, 0);
 }
@@ -107,7 +108,7 @@ void sub_02069C44(MapObject *mapObj)
 static int sub_02069C48(MapObject *mapObj, UnkStruct_02069CA8 *param1)
 {
     sub_02062D10(mapObj);
-    sub_02062D34(mapObj);
+    MapObject_SetEndMovementOff(mapObj);
 
     if (sub_02069CFC(mapObj, param1) == 1) {
         sub_02069D30(mapObj, param1);
@@ -115,11 +116,11 @@ static int sub_02069C48(MapObject *mapObj, UnkStruct_02069CA8 *param1)
         if (sub_02069D8C(mapObj) == 1) {
             sub_02062D04(mapObj);
             param1->unk_00++;
-            return 1;
+            return TRUE;
         }
     }
 
-    return 0;
+    return FALSE;
 }
 
 static int sub_02069C8C(MapObject *mapObj, UnkStruct_02069CA8 *param1)
@@ -140,7 +141,7 @@ static int (*const Unk_020EF8D4[])(MapObject *, UnkStruct_02069CA8 *) = {
 static int sub_02069CA8(MapObject *mapObj, UnkStruct_02069CA8 *param1)
 {
     const MapObjectManager *v0 = MapObject_MapObjectManager(mapObj);
-    MapObject *v1 = sub_0205EA24(v0);
+    MapObject *v1 = MapObjectMan_GetPlayerMapObject(v0);
 
     if (v1 == NULL) {
         param1->unk_01 = 0;
@@ -157,22 +158,22 @@ static int sub_02069CA8(MapObject *mapObj, UnkStruct_02069CA8 *param1)
 static void sub_02069CD4(MapObject *mapObj, UnkStruct_02069CA8 *param1)
 {
     FieldSystem *fieldSystem = MapObject_FieldSystem(mapObj);
-    PlayerAvatar *playerAvatar = sub_0205EF3C(fieldSystem);
+    PlayerAvatar *playerAvatar = FieldSystem_GetPlayerAvatar(fieldSystem);
 
     param1->unk_01 = 1;
-    param1->unk_02 = Player_GetXPos(playerAvatar);
-    param1->unk_04 = Player_GetZPos(playerAvatar);
+    param1->unk_02 = PlayerAvatar_GetXPos(playerAvatar);
+    param1->unk_04 = PlayerAvatar_GetZPos(playerAvatar);
     param1->unk_06 = 0xff;
 }
 
 static int sub_02069CFC(MapObject *mapObj, UnkStruct_02069CA8 *param1)
 {
     FieldSystem *fieldSystem = MapObject_FieldSystem(mapObj);
-    PlayerAvatar *playerAvatar = sub_0205EF3C(fieldSystem);
+    PlayerAvatar *playerAvatar = FieldSystem_GetPlayerAvatar(fieldSystem);
 
     if (playerAvatar != NULL) {
-        int v2 = Player_GetXPos(playerAvatar);
-        int v3 = Player_GetZPos(playerAvatar);
+        int v2 = PlayerAvatar_GetXPos(playerAvatar);
+        int v3 = PlayerAvatar_GetZPos(playerAvatar);
 
         if ((v2 != param1->unk_02) || (v3 != param1->unk_04)) {
             return 1;
@@ -185,19 +186,19 @@ static int sub_02069CFC(MapObject *mapObj, UnkStruct_02069CA8 *param1)
 static void sub_02069D30(MapObject *mapObj, UnkStruct_02069CA8 *param1)
 {
     FieldSystem *fieldSystem = MapObject_FieldSystem(mapObj);
-    PlayerAvatar *playerAvatar = sub_0205EF3C(fieldSystem);
+    PlayerAvatar *playerAvatar = FieldSystem_GetPlayerAvatar(fieldSystem);
 
-    param1->unk_02 = Player_GetXPos(playerAvatar);
-    param1->unk_04 = Player_GetZPos(playerAvatar);
+    param1->unk_02 = PlayerAvatar_GetXPos(playerAvatar);
+    param1->unk_04 = PlayerAvatar_GetZPos(playerAvatar);
 }
 
 static u32 sub_02069D50(MapObject *mapObj)
 {
     u32 v0;
     FieldSystem *fieldSystem = MapObject_FieldSystem(mapObj);
-    PlayerAvatar *playerAvatar = sub_0205EF3C(fieldSystem);
+    PlayerAvatar *playerAvatar = FieldSystem_GetPlayerAvatar(fieldSystem);
 
-    v0 = sub_0205EC14(playerAvatar);
+    v0 = PlayerAvatar_GetMovementAction(playerAvatar);
 
     switch (v0) {
     case 0x58:
@@ -220,17 +221,17 @@ static u32 sub_02069D50(MapObject *mapObj)
 static int sub_02069D8C(MapObject *mapObj)
 {
     FieldSystem *fieldSystem = MapObject_FieldSystem(mapObj);
-    PlayerAvatar *playerAvatar = sub_0205EF3C(fieldSystem);
-    int v2 = MapObject_GetXPos(mapObj);
-    int v3 = MapObject_GetZPos(mapObj);
-    int v4 = PlayerAvatar_XPosPrev(playerAvatar);
-    int v5 = PlayerAvatar_ZPosPrev(playerAvatar);
+    PlayerAvatar *playerAvatar = FieldSystem_GetPlayerAvatar(fieldSystem);
+    int xCur = MapObject_GetX(mapObj);
+    int zCur = MapObject_GetZ(mapObj);
+    int xPrev = PlayerAvatar_XPosPrev(playerAvatar);
+    int zPrev = PlayerAvatar_ZPosPrev(playerAvatar);
 
-    if ((v2 != v4) || (v3 != v5)) {
+    if (xCur != xPrev || zCur != zPrev) {
         u32 v6 = sub_02069D50(mapObj);
-        int v7 = sub_02064488(v2, v3, v4, v5);
+        int dir = GetDirectionBetweenPoints(xCur, zCur, xPrev, zPrev);
 
-        v6 = sub_02065838(v7, v6);
+        v6 = MovementAction_TurnActionTowardsDir(dir, v6);
         sub_02065668(mapObj, v6);
 
         return 1;
@@ -277,7 +278,7 @@ void sub_02069E50(MapObject *mapObj)
 static int sub_02069E5C(MapObject *mapObj, UnkStruct_02069F48 *param1)
 {
     sub_02062D10(mapObj);
-    sub_02062D34(mapObj);
+    MapObject_SetEndMovementOff(mapObj);
 
     if (sub_02069FE8(mapObj, param1) == 1) {
         if (sub_0206A034(mapObj, param1) == 1) {
@@ -309,9 +310,9 @@ static int (*const Unk_020EF8EC[])(MapObject *, UnkStruct_02069F48 *) = {
 MapObject *sub_02069EB8(MapObject *mapObj)
 {
     int v0 = 0;
-    int v1 = MapObject_GetEventType(mapObj);
-    int v2 = sub_02062918(mapObj);
-    u32 v3 = sub_02067F24(mapObj);
+    int v1 = MapObject_GetTrainerType(mapObj);
+    enum MapHeaderID mapHeaderID = MapObject_GetMapHeaderID(mapObj);
+    u32 v3 = MapObject_GetTrainerID(mapObj);
     const MapObjectManager *mapObjMan = MapObject_MapObjectManager(mapObj);
     MapObject *v5;
 
@@ -324,9 +325,9 @@ MapObject *sub_02069EB8(MapObject *mapObj)
     case 0x6:
     case 0x7:
     case 0x8:
-        while (sub_020625B0(mapObjMan, &v5, &v0, (1 << 0)) == 1) {
-            if ((mapObj != v5) && (sub_02062918(v5) == v2)) {
-                if (sub_02067F24(v5) == v3) {
+        while (MapObjectMan_FindObjectWithStatus(mapObjMan, &v5, &v0, (1 << 0)) == 1) {
+            if ((mapObj != v5) && (MapObject_GetMapHeaderID(v5) == mapHeaderID)) {
+                if (MapObject_GetTrainerID(v5) == v3) {
                     return v5;
                 }
             }
@@ -338,17 +339,18 @@ MapObject *sub_02069EB8(MapObject *mapObj)
 
 static int sub_02069F48(MapObject *mapObj, UnkStruct_02069F48 *param1)
 {
-    int v0, v1;
+    int v0;
+    enum MapHeaderID v1;
     u32 v2;
     MapObject *v3;
     const MapObjectManager *mapObjMan = MapObject_MapObjectManager(mapObj);
 
     v0 = 0;
-    v1 = sub_02062918(mapObj);
-    v2 = sub_02067F24(mapObj);
+    v1 = MapObject_GetMapHeaderID(mapObj);
+    v2 = MapObject_GetTrainerID(mapObj);
 
-    while (sub_020625B0(mapObjMan, &v3, &v0, (1 << 0)) == 1) {
-        if ((mapObj != v3) && (sub_02062918(v3) == v1) && (sub_02067F24(v3) == v2)) {
+    while (MapObjectMan_FindObjectWithStatus(mapObjMan, &v3, &v0, (1 << 0)) == 1) {
+        if ((mapObj != v3) && (MapObject_GetMapHeaderID(v3) == v1) && (MapObject_GetTrainerID(v3) == v2)) {
             if (param1->unk_01 == 0) {
                 sub_02069FC4(mapObj, param1, v3);
             }
@@ -364,8 +366,8 @@ static int sub_02069F48(MapObject *mapObj, UnkStruct_02069F48 *param1)
 static void sub_02069FC4(MapObject *mapObj, UnkStruct_02069F48 *param1, MapObject *param2)
 {
     param1->unk_01 = 1;
-    param1->unk_02 = MapObject_GetXPos(param2);
-    param1->unk_04 = MapObject_GetZPos(param2);
+    param1->unk_02 = MapObject_GetX(param2);
+    param1->unk_04 = MapObject_GetZ(param2);
     param1->unk_06 = 0xff;
     param1->unk_08 = param2;
 }
@@ -373,12 +375,12 @@ static void sub_02069FC4(MapObject *mapObj, UnkStruct_02069F48 *param1, MapObjec
 static int sub_02069FE8(MapObject *mapObj, UnkStruct_02069F48 *param1)
 {
     MapObject *v0 = param1->unk_08;
-    int v1 = MapObject_GetXPos(mapObj);
-    int v2 = MapObject_GetZPos(mapObj);
-    int v3 = MapObject_XPosPrev(v0);
-    int v4 = MapObject_ZPosPrev(v0);
+    int v1 = MapObject_GetX(mapObj);
+    int v2 = MapObject_GetZ(mapObj);
+    int v3 = MapObject_GetXPrev(v0);
+    int v4 = MapObject_GetZPrev(v0);
 
-    if (((v1 != v3) || (v2 != v4)) && ((MapObject_IsMoving(v0) == 1) || (MapObject_CheckStatus(v0, ((1 << 11) | (1 << 12) | (1 << 6))) == 0))) {
+    if (((v1 != v3) || (v2 != v4)) && ((MapObject_IsMoving(v0) == 1) || (!MapObject_CheckStatus(v0, (MAP_OBJ_STATUS_11 | MAP_OBJ_STATUS_12 | MAP_OBJ_STATUS_PAUSE_MOVEMENT))))) {
         return 1;
     }
 
@@ -387,26 +389,26 @@ static int sub_02069FE8(MapObject *mapObj, UnkStruct_02069F48 *param1)
 
 static int sub_0206A034(MapObject *mapObj, UnkStruct_02069F48 *param1)
 {
-    int v0 = MapObject_GetXPos(mapObj);
-    int v1 = MapObject_GetZPos(mapObj);
-    int v2 = MapObject_GetXPos(param1->unk_08);
-    int v3 = MapObject_GetZPos(param1->unk_08);
-    int v4 = MapObject_XPosPrev(param1->unk_08);
-    int v5 = MapObject_ZPosPrev(param1->unk_08);
+    int v0 = MapObject_GetX(mapObj);
+    int v1 = MapObject_GetZ(mapObj);
+    int v2 = MapObject_GetX(param1->unk_08);
+    int v3 = MapObject_GetZ(param1->unk_08);
+    int v4 = MapObject_GetXPrev(param1->unk_08);
+    int v5 = MapObject_GetZPrev(param1->unk_08);
     int v6;
 
     if ((v0 == v2) && (v1 == v3)) {
         return 0;
     }
 
-    v6 = sub_02064488(v0, v1, v4, v5);
+    v6 = GetDirectionBetweenPoints(v0, v1, v4, v5);
     v0 += MapObject_GetDxFromDir(v6);
-    v1 += MapObject_GetDyFromDir(v6);
+    v1 += MapObject_GetDzFromDir(v6);
 
     if ((v0 != v2) || (v1 != v3)) {
         u32 v7 = 0xc;
 
-        v7 = sub_02065838(v6, v7);
+        v7 = MovementAction_TurnActionTowardsDir(v6, v7);
         sub_02065668(mapObj, v7);
         return 1;
     }
@@ -424,11 +426,9 @@ static void sub_0206A0BC(MapObject *mapObj, int param1)
     sub_02062D10(mapObj);
     MapObject_SetStatusFlagOn(mapObj, MAP_OBJ_STATUS_HIDE_SHADOW);
 
-    {
-        VecFx32 v1 = { 0, (FX32_ONE * -32), 0 };
+    VecFx32 v1 = { 0, FX32_ONE * -32, 0 };
 
-        sub_02063088(mapObj, &v1);
-    }
+    MapObject_SetSpriteJumpOffset(mapObj, &v1);
 }
 
 void sub_0206A104(MapObject *mapObj)
@@ -462,10 +462,10 @@ void sub_0206A134(MapObject *mapObj)
 
 void sub_0206A158(MapObject *mapObj)
 {
-    UnkStruct_ov101_021D5D90 *v0 = sub_0206A224(mapObj);
+    OverworldAnimManager *v0 = sub_0206A224(mapObj);
 
     if (v0 != NULL) {
-        ov5_021DF74C(v0);
+        FieldEffectManager_FinishAnimManager(v0);
     }
 }
 
@@ -479,7 +479,7 @@ void sub_0206A168(MapObject *mapObj)
     if (v0->unk_02 == 0) {
         VecFx32 v1 = { 0, (FX32_ONE * -32), 0 };
 
-        sub_02063088(mapObj, &v1);
+        MapObject_SetSpriteJumpOffset(mapObj, &v1);
         MapObject_SetStatusFlagOn(mapObj, MAP_OBJ_STATUS_HIDE_SHADOW);
     }
 }
@@ -487,13 +487,13 @@ void sub_0206A168(MapObject *mapObj)
 static int sub_0206A1AC(MapObject *mapObj, UnkStruct_0206A0BC *param1)
 {
     if (param1->unk_02 == 0) {
-        UnkStruct_ov101_021D5D90 *v0 = ov5_021F3D90(mapObj, param1->unk_01);
+        OverworldAnimManager *v0 = ov5_021F3D90(mapObj, param1->unk_01);
 
         sub_0206A218(mapObj, v0);
     }
 
     sub_02062D10(mapObj);
-    sub_02062D34(mapObj);
+    MapObject_SetEndMovementOff(mapObj);
     param1->unk_00++;
 
     return 0;
@@ -502,7 +502,7 @@ static int sub_0206A1AC(MapObject *mapObj, UnkStruct_0206A0BC *param1)
 static int sub_0206A1DC(MapObject *mapObj, UnkStruct_0206A0BC *param1)
 {
     if (param1->unk_02 == 0) {
-        UnkStruct_ov101_021D5D90 *v0 = sub_0206A224(mapObj);
+        OverworldAnimManager *v0 = sub_0206A224(mapObj);
 
         if (v0 == NULL) {
             if (sub_02062DFC(mapObj) == 1) {
@@ -522,13 +522,13 @@ static int (*const Unk_020EF8DC[])(MapObject *, UnkStruct_0206A0BC *) = {
     sub_0206A1DC
 };
 
-void sub_0206A218(MapObject *mapObj, UnkStruct_ov101_021D5D90 *param1)
+void sub_0206A218(MapObject *mapObj, OverworldAnimManager *param1)
 {
     UnkStruct_0206A0BC *v0 = sub_02062A78(mapObj);
     v0->unk_04 = param1;
 }
 
-UnkStruct_ov101_021D5D90 *sub_0206A224(MapObject *mapObj)
+OverworldAnimManager *sub_0206A224(MapObject *mapObj)
 {
     UnkStruct_0206A0BC *v0 = sub_02062A78(mapObj);
     return v0->unk_04;
@@ -549,7 +549,7 @@ static void sub_0206A23C(MapObject *mapObj, int param1, u32 param2)
     v0->unk_01 = -1;
     v0->unk_02 = param2;
 
-    MapObject_SetDir(mapObj, 0);
+    MapObject_TryFace(mapObj, 0);
 }
 
 void sub_0206A25C(MapObject *mapObj)
@@ -603,13 +603,13 @@ void sub_0206A2BC(MapObject *mapObj)
 
 static int sub_0206A2E0(MapObject *mapObj, UnkStruct_0206A23C *param1)
 {
-    int v0 = MapObject_Dir(mapObj);
+    int v0 = MapObject_GetFacingDir(mapObj);
 
-    v0 = sub_02065838(v0, 0x0);
+    v0 = MovementAction_TurnActionTowardsDir(v0, MOVEMENT_ACTION_FACE_NORTH);
 
     sub_02065668(mapObj, v0);
     sub_02062D10(mapObj);
-    sub_02062D34(mapObj);
+    MapObject_SetEndMovementOff(mapObj);
 
     param1->unk_00 = 1;
     return 1;
@@ -630,11 +630,11 @@ static int sub_0206A324(MapObject *mapObj, UnkStruct_0206A23C *param1)
     if (param1->unk_01 == -1) {
         FieldSystem *fieldSystem = MapObject_FieldSystem(mapObj);
 
-        param1->unk_01 = PlayerAvatar_GetDir(fieldSystem->playerAvatar);
+        param1->unk_01 = PlayerAvatar_GetFacingDir(fieldSystem->playerAvatar);
     }
 
     sub_02062D10(mapObj);
-    sub_02062D34(mapObj);
+    MapObject_SetEndMovementOff(mapObj);
 
     param1->unk_00 = 3;
     return 1;
@@ -642,9 +642,9 @@ static int sub_0206A324(MapObject *mapObj, UnkStruct_0206A23C *param1)
 
 static u32 sub_0206A354(MapObject *mapObj, int param1)
 {
-    u32 v0 = sub_02064238(mapObj, param1);
+    u32 v0 = MapObject_GetTileBehaviorFromDir(mapObj, param1);
 
-    if (sub_0205DAD4(v0) == 0) {
+    if (TileBehavior_IsVeryTallGrass(v0) == 0) {
         v0 = (1 << 1);
     }
 
@@ -663,9 +663,9 @@ static void sub_0206A37C(MapObject *mapObj, int param1, int param2, u32 param3)
     }
 
     if (v0 != 0) {
-        param2 = sub_02065838(param1, 0x0);
+        param2 = MovementAction_TurnActionTowardsDir(param1, MOVEMENT_ACTION_FACE_NORTH);
     } else {
-        param2 = sub_02065838(param1, param2);
+        param2 = MovementAction_TurnActionTowardsDir(param1, param2);
         sub_02062D04(mapObj);
     }
 
@@ -676,29 +676,29 @@ static int sub_0206A3BC(MapObject *mapObj, UnkStruct_0206A23C *param1)
 {
     int v0;
     FieldSystem *fieldSystem = MapObject_FieldSystem(mapObj);
-    int v2 = PlayerAvatar_GetDir(fieldSystem->playerAvatar);
-    u32 v3 = sub_0205EC1C(fieldSystem->playerAvatar);
+    int v2 = PlayerAvatar_GetFacingDir(fieldSystem->playerAvatar);
+    u32 v3 = PlayerAvatar_GetMovementActionSpeed(fieldSystem->playerAvatar);
 
     switch (v3) {
-    case 0:
-    case 1:
-        v0 = sub_02065838(v2, 0x0);
+    case PLAYER_ACTION_SPEED_NONE:
+    case PLAYER_ACTION_SPEED_NOT_MOVING:
+        v0 = MovementAction_TurnActionTowardsDir(v2, MOVEMENT_ACTION_FACE_NORTH);
         sub_02065668(mapObj, v0);
         break;
-    case 2:
-        sub_0206A37C(mapObj, v2, 0x4, param1->unk_02);
+    case PLAYER_ACTION_SPEED_SLOWER:
+        sub_0206A37C(mapObj, v2, MOVEMENT_ACTION_WALK_SLOWER_NORTH, param1->unk_02);
         break;
-    case 3:
-        sub_0206A37C(mapObj, v2, 0x8, param1->unk_02);
+    case PLAYER_ACTION_SPEED_SLOW:
+        sub_0206A37C(mapObj, v2, MOVEMENT_ACTION_WALK_SLOW_NORTH, param1->unk_02);
         break;
-    case 4:
-        sub_0206A37C(mapObj, v2, 0xc, param1->unk_02);
+    case PLAYER_ACTION_SPEED_NORMAL:
+        sub_0206A37C(mapObj, v2, MOVEMENT_ACTION_WALK_NORMAL_NORTH, param1->unk_02);
         break;
-    case 5:
-        sub_0206A37C(mapObj, v2, 0x10, param1->unk_02);
+    case PLAYER_ACTION_SPEED_FAST:
+        sub_0206A37C(mapObj, v2, MOVEMENT_ACTION_WALK_FAST_NORTH, param1->unk_02);
         break;
-    case 6:
-        sub_0206A37C(mapObj, v2, 0x14, param1->unk_02);
+    case PLAYER_ACTION_SPEED_FASTER:
+        sub_0206A37C(mapObj, v2, MOVEMENT_ACTION_WALK_FASTER_NORTH, param1->unk_02);
         break;
     }
 
@@ -713,7 +713,7 @@ static int sub_0206A454(MapObject *mapObj, UnkStruct_0206A23C *param1)
     }
 
     sub_02062D10(mapObj);
-    sub_02062D34(mapObj);
+    MapObject_SetEndMovementOff(mapObj);
 
     param1->unk_00 = 2;
     return 0;
@@ -850,7 +850,7 @@ static BOOL sub_0206A524(FieldSystem *fieldSystem, int param1, int param2, int p
     param1 += Unk_020EF92C[param3][param4];
     param2 += Unk_020EF94C[param3][param4];
 
-    v0 = FieldSystem_CheckCollision(fieldSystem, param1, param2);
+    v0 = TerrainCollisionManager_CheckCollision(fieldSystem, param1, param2);
     return v0;
 }
 
@@ -861,15 +861,15 @@ static BOOL sub_0206A54C(FieldSystem *fieldSystem, int param1, int param2, int p
     param1 += Unk_020EF98C[param3][param4];
     param2 += Unk_020EF9AC[param3][param4];
 
-    v0 = FieldSystem_CheckCollision(fieldSystem, param1, param2);
+    v0 = TerrainCollisionManager_CheckCollision(fieldSystem, param1, param2);
     return v0;
 }
 
 static int sub_0206A574(MapObject *mapObj, int param1, int param2)
 {
     FieldSystem *fieldSystem = MapObject_FieldSystem(mapObj);
-    int v1 = MapObject_GetXPos(mapObj);
-    int v2 = MapObject_GetZPos(mapObj);
+    int v1 = MapObject_GetX(mapObj);
+    int v2 = MapObject_GetZ(mapObj);
     BOOL v3 = sub_0206A524(fieldSystem, v1, v2, param1, param2);
 
     return v3;
@@ -878,8 +878,8 @@ static int sub_0206A574(MapObject *mapObj, int param1, int param2)
 static int sub_0206A5A4(MapObject *mapObj, int param1, int param2)
 {
     FieldSystem *fieldSystem = MapObject_FieldSystem(mapObj);
-    int v1 = MapObject_GetXPos(mapObj);
-    int v2 = MapObject_GetZPos(mapObj);
+    int v1 = MapObject_GetX(mapObj);
+    int v2 = MapObject_GetZ(mapObj);
     BOOL v3 = sub_0206A54C(fieldSystem, v1, v2, param1, param2);
 
     return v3;
@@ -916,40 +916,40 @@ static int sub_0206A630(MapObject *mapObj, UnkStruct_0206A47C *param1, int param
 {
     u32 v0;
     int v1 = param1->unk_08;
-    int v2 = MapObject_Dir(mapObj);
+    int dir = MapObject_GetFacingDir(mapObj);
 
-    v0 = sub_0206A60C(mapObj, &v2, v1);
+    v0 = sub_0206A60C(mapObj, &dir, v1);
 
-    if (v2 == -1) {
-        v2 = MapObject_Dir(mapObj);
-        param2 = sub_02065838(v2, 0x1c);
+    if (dir == -1) {
+        dir = MapObject_GetFacingDir(mapObj);
+        param2 = MovementAction_TurnActionTowardsDir(dir, MOVEMENT_ACTION_WALK_ON_SPOT_SLOW_NORTH);
         sub_02065668(mapObj, param2);
         return 0;
     }
 
     if (v0 == 0) {
-        param2 = sub_02065838(v2, param2);
+        param2 = MovementAction_TurnActionTowardsDir(dir, param2);
         sub_02062D04(mapObj);
         sub_02065668(mapObj, param2);
         return 1;
     }
 
     if ((v0 & (1 << 0)) && (param1->unk_04 == 2)) {
-        v2 = Direction_GetOpposite(MapObject_Dir(mapObj));
+        dir = Direction_GetOpposite(MapObject_GetFacingDir(mapObj));
         v1 = Unk_020EF8E4[v1];
         param1->unk_08 = v1;
 
-        v0 = sub_0206A60C(mapObj, &v2, v1);
+        v0 = sub_0206A60C(mapObj, &dir, v1);
 
-        if (v2 == -1) {
-            v2 = MapObject_Dir(mapObj);
-            param2 = sub_02065838(v2, 0x1c);
+        if (dir == -1) {
+            dir = MapObject_GetFacingDir(mapObj);
+            param2 = MovementAction_TurnActionTowardsDir(dir, MOVEMENT_ACTION_WALK_ON_SPOT_SLOW_NORTH);
             sub_02065668(mapObj, param2);
             return 0;
         }
 
         if (v0 == 0) {
-            param2 = sub_02065838(v2, param2);
+            param2 = MovementAction_TurnActionTowardsDir(dir, param2);
             sub_02062D04(mapObj);
             sub_02065668(mapObj, param2);
             return 1;
@@ -957,26 +957,26 @@ static int sub_0206A630(MapObject *mapObj, UnkStruct_0206A47C *param1, int param
     }
 
     if (v0 & (1 << 1)) {
-        v2 = Unk_020EF9CC[v2][v1];
-        v0 = sub_0206A60C(mapObj, &v2, v1);
+        dir = Unk_020EF9CC[dir][v1];
+        v0 = sub_0206A60C(mapObj, &dir, v1);
 
-        if (v2 == -1) {
-            v2 = MapObject_Dir(mapObj);
-            param2 = sub_02065838(v2, 0x1c);
+        if (dir == -1) {
+            dir = MapObject_GetFacingDir(mapObj);
+            param2 = MovementAction_TurnActionTowardsDir(dir, MOVEMENT_ACTION_WALK_ON_SPOT_SLOW_NORTH);
             sub_02065668(mapObj, param2);
             return 0;
         }
 
         if (v0 == 0) {
-            param2 = sub_02065838(v2, param2);
+            param2 = MovementAction_TurnActionTowardsDir(dir, param2);
             sub_02062D04(mapObj);
             sub_02065668(mapObj, param2);
             return 1;
         }
     }
 
-    v2 = MapObject_Dir(mapObj);
-    param2 = sub_02065838(v2, 0x1c);
+    dir = MapObject_GetFacingDir(mapObj);
+    param2 = MovementAction_TurnActionTowardsDir(dir, MOVEMENT_ACTION_WALK_ON_SPOT_SLOW_NORTH);
 
     sub_02065668(mapObj, param2);
     return 0;

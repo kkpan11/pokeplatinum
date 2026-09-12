@@ -75,7 +75,7 @@ void GetCurrentDateTime(RTCDate *date, RTCTime *time)
     *time = sRTCState.time;
 }
 
-void GetCurrentTime(RTCTime *time)
+void RTC_GetCurrentTime(RTCTime *time)
 {
     GF_ASSERT(sRTCState.valid == 1);
     *time = sRTCState.time;
@@ -102,14 +102,25 @@ s64 GetTimestamp(void)
 int DayNumberForDate(const RTCDate *date)
 {
     int year, days;
-    static const u16 monthStart[12] = {
-        0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334
+    static const u16 monthStart[MONTH_COUNT] = {
+        [MONTH_JAN - 1] = DAY_OF_YEAR_JAN_01 - 1,
+        [MONTH_FEB - 1] = DAY_OF_YEAR_FEB_01 - 1,
+        [MONTH_MAR - 1] = DAY_OF_YEAR_MAR_01 - 2,
+        [MONTH_APR - 1] = DAY_OF_YEAR_APR_01 - 2,
+        [MONTH_MAY - 1] = DAY_OF_YEAR_MAY_01 - 2,
+        [MONTH_JUN - 1] = DAY_OF_YEAR_JUN_01 - 2,
+        [MONTH_JUL - 1] = DAY_OF_YEAR_JUL_01 - 2,
+        [MONTH_AUG - 1] = DAY_OF_YEAR_AUG_01 - 2,
+        [MONTH_SEP - 1] = DAY_OF_YEAR_SEP_01 - 2,
+        [MONTH_OCT - 1] = DAY_OF_YEAR_OCT_01 - 2,
+        [MONTH_NOV - 1] = DAY_OF_YEAR_NOV_01 - 2,
+        [MONTH_DEC - 1] = DAY_OF_YEAR_DEC_01 - 2,
     };
 
     days = date->day;
     days += monthStart[date->month - 1];
 
-    if (date->month >= 3) {
+    if (date->month >= MONTH_MAR) {
         year = date->year;
 
         if (((year % 4 == 0) && (year % 100 != 0)) || (year % 400 == 0)) {
@@ -123,49 +134,49 @@ int DayNumberForDate(const RTCDate *date)
 BOOL IsNight(void)
 {
     switch (GetTimeOfDay()) {
-    case TOD_LATE_NIGHT:
-    case TOD_NIGHT:
-        return 1;
+    case TIMEOFDAY_LATE_NIGHT:
+    case TIMEOFDAY_NIGHT:
+        return TRUE;
     }
 
-    return 0;
+    return FALSE;
 }
 
 enum TimeOfDay GetTimeOfDay(void)
 {
     RTCTime time;
 
-    GetCurrentTime(&time);
+    RTC_GetCurrentTime(&time);
     return TimeOfDayForHour(time.hour);
 }
 
 enum TimeOfDay TimeOfDayForHour(int hour)
 {
     static const u8 lookup[24] = {
-        TOD_LATE_NIGHT,
-        TOD_LATE_NIGHT,
-        TOD_LATE_NIGHT,
-        TOD_LATE_NIGHT,
-        TOD_MORNING,
-        TOD_MORNING,
-        TOD_MORNING,
-        TOD_MORNING,
-        TOD_MORNING,
-        TOD_MORNING,
-        TOD_DAY,
-        TOD_DAY,
-        TOD_DAY,
-        TOD_DAY,
-        TOD_DAY,
-        TOD_DAY,
-        TOD_DAY,
-        TOD_TWILIGHT,
-        TOD_TWILIGHT,
-        TOD_TWILIGHT,
-        TOD_NIGHT,
-        TOD_NIGHT,
-        TOD_NIGHT,
-        TOD_NIGHT,
+        TIMEOFDAY_LATE_NIGHT,
+        TIMEOFDAY_LATE_NIGHT,
+        TIMEOFDAY_LATE_NIGHT,
+        TIMEOFDAY_LATE_NIGHT,
+        TIMEOFDAY_MORNING,
+        TIMEOFDAY_MORNING,
+        TIMEOFDAY_MORNING,
+        TIMEOFDAY_MORNING,
+        TIMEOFDAY_MORNING,
+        TIMEOFDAY_MORNING,
+        TIMEOFDAY_DAY,
+        TIMEOFDAY_DAY,
+        TIMEOFDAY_DAY,
+        TIMEOFDAY_DAY,
+        TIMEOFDAY_DAY,
+        TIMEOFDAY_DAY,
+        TIMEOFDAY_DAY,
+        TIMEOFDAY_TWILIGHT,
+        TIMEOFDAY_TWILIGHT,
+        TIMEOFDAY_TWILIGHT,
+        TIMEOFDAY_NIGHT,
+        TIMEOFDAY_NIGHT,
+        TIMEOFDAY_NIGHT,
+        TIMEOFDAY_NIGHT,
     };
 
     GF_ASSERT(0 <= hour && hour < 24);

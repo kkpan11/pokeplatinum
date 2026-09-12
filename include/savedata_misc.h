@@ -4,14 +4,11 @@
 #include "constants/savedata/save_table.h"
 #include "constants/string.h"
 
-#include "struct_decls/struct_02027854_decl.h"
-#include "struct_decls/struct_02027860_decl.h"
-#include "struct_defs/sentence.h"
-#include "struct_defs/struct_02027854.h"
-#include "struct_defs/struct_02027860.h"
-
+#include "berry_patches.h"
+#include "easy_chat_sentence.h"
+#include "persisted_map_features.h"
 #include "savedata.h"
-#include "strbuf.h"
+#include "string_gf.h"
 
 typedef struct ExtraSaveKey {
     u32 keys[EXTRA_SAVE_TABLE_ENTRY_MAX - 1];
@@ -21,8 +18,8 @@ typedef struct ExtraSaveKey {
 } ExtraSaveKey;
 
 typedef struct MiscSaveBlock {
-    UnkStruct_02027854 unk_00[128];
-    UnkStruct_02027860 unk_680;
+    BerryPatch berryPatches[MAX_BERRY_PATCHES];
+    PersistedMapFeatures persistedMapFeatures;
     u16 rivalName[TRAINER_NAME_LEN + 1];
     u16 tabletName[TABLET_NAME_LEN + 1]; // used in shaymin event
     u16 favoriteMon;
@@ -32,7 +29,7 @@ typedef struct MiscSaveBlock {
     u8 vsRecorderColor : 4;
     u8 padding : 3;
     u32 unused;
-    Sentence introMsg;
+    EasyChatSentence introMsg;
     ExtraSaveKey extraKey;
 } MiscSaveBlock;
 
@@ -40,18 +37,18 @@ int MiscSaveBlock_SaveSize(void);
 void MiscSaveBlock_Init(MiscSaveBlock *miscSave);
 MiscSaveBlock *SaveData_MiscSaveBlock(SaveData *saveData);
 const MiscSaveBlock *SaveData_MiscSaveBlockConst(const SaveData *saveData);
-UnkStruct_02027854 *sub_02027854(SaveData *saveData);
-UnkStruct_02027860 *sub_02027860(SaveData *saveData);
+BerryPatch *MiscSaveBlock_GetBerryPatches(SaveData *saveData);
+PersistedMapFeatures *MiscSaveBlock_GetPersistedMapFeatures(SaveData *saveData);
 const u16 *MiscSaveBlock_RivalName(const MiscSaveBlock *miscSave);
-void MiscSaveBlock_SetRivalName(MiscSaveBlock *miscSave, Strbuf *name);
+void MiscSaveBlock_SetRivalName(MiscSaveBlock *miscSave, String *name);
 const u16 *MiscSaveBlock_TabletName(const MiscSaveBlock *miscSave);
-void MiscSaveBlock_SetTabletName(MiscSaveBlock *miscSave, Strbuf *name);
+void MiscSaveBlock_SetTabletName(MiscSaveBlock *miscSave, String *name);
 void MiscSaveBlock_SetInitFlag(MiscSaveBlock *miscSave);
 u32 MiscSaveBlock_InitFlag(const MiscSaveBlock *miscSave);
 void MiscSaveBlock_SetFavoriteMon(MiscSaveBlock *miscSave, int species, int form, int isEgg);
-void MiscSaveBlock_FavoriteMon(const MiscSaveBlock *miscSave, int *species, int *form, int *isEgg);
-void MiscSaveBlock_IntroMsg(const MiscSaveBlock *miscSave, Sentence *message);
-void MiscSaveBlock_SetIntroMsg(MiscSaveBlock *miscSave, const Sentence *message);
+void MiscSaveBlock_GetFavoriteMon(const MiscSaveBlock *miscSave, int *species, int *form, int *isEgg);
+void MiscSaveBlock_IntroMsg(const MiscSaveBlock *miscSave, EasyChatSentence *message);
+void MiscSaveBlock_SetIntroMsg(MiscSaveBlock *miscSave, const EasyChatSentence *message);
 void MiscSaveBlock_VsRecorderColor(const MiscSaveBlock *miscSave, u8 *color);
 void MiscSaveBlock_SetVsRecorderColor(MiscSaveBlock *miscSave, u8 color);
 void MiscSaveBlock_ExtraSaveKey(const MiscSaveBlock *miscSave, int saveTableID, u32 *currKey, u32 *oldKey, u8 *keyFlag);

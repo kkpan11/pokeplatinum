@@ -1,6 +1,5 @@
-    .include "macros/btlcmd.inc"
+#include "macros/btlcmd.inc"
 
-    .data
 
 _000:
     CompareVarToValue OPCODE_FLAG_SET, BTLVAR_MOVE_STATUS_FLAGS, MOVE_STATUS_MISSED|MOVE_STATUS_SEMI_INVULNERABLE, _156
@@ -40,7 +39,7 @@ _120:
 
 _148:
     // {0} swapped abilities with its target!
-    PrintMessage pl_msg_00000368_00559, TAG_NICKNAME, BTLSCR_ATTACKER
+    PrintMessage BattleStrings_Text_PokemonSwappedAbilitiesWithItsTarget_Ally, TAG_NICKNAME, BTLSCR_ATTACKER
     Wait 
     WaitButtonABTime 30
     End 

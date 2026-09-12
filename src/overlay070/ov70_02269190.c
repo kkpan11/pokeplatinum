@@ -3,8 +3,6 @@
 #include <nitro.h>
 #include <string.h>
 
-#include "struct_decls/struct_02006C24_decl.h"
-
 #include "overlay063/struct_ov63_0222CC3C.h"
 #include "overlay066/struct_ov66_0222DFF8_decl.h"
 #include "overlay070/ov70_0225C700.h"
@@ -16,12 +14,12 @@
 #include "overlay070/struct_ov70_0225CC54_decl.h"
 #include "overlay070/struct_ov70_02260AD4_decl.h"
 
-#include "core_sys.h"
 #include "easy3d_object.h"
+#include "graphics.h"
 #include "heap.h"
 #include "narc.h"
-#include "unk_02005474.h"
-#include "unk_02006E3C.h"
+#include "sound_playback.h"
+#include "system.h"
 
 typedef struct {
     u16 unk_00;
@@ -154,8 +152,7 @@ static void ov70_02269488(const UnkStruct_ov70_022692B4 *param0, fx32 *param1, f
 static void ov70_0226949C(UnkStruct_ov70_0226949C *param0, u16 param1, u16 param2, fx32 param3);
 static void ov70_022694D0(UnkStruct_ov70_0226949C *param0);
 static void ov70_02269508(const UnkStruct_ov70_0226949C *param0, fx32 *param1);
-static void ov70_02269510(UnkStruct_ov70_02269204 *param0, UnkStruct_ov70_02269800 *param1, u32 param2);
-static void ov70_02269540(UnkStruct_ov70_02269204 *param0, NARC *param1, u32 param2);
+static void ov70_02269540(UnkStruct_ov70_02269204 *param0, NARC *param1, u32 heapID);
 static void ov70_022695C4(UnkStruct_ov70_02269204 *param0);
 static void ov70_022695E0(UnkStruct_ov70_02269204 *param0, NARC *param1, u32 param2);
 static void ov70_02269608(UnkStruct_ov70_02269204 *param0);
@@ -628,11 +625,9 @@ static const UnkStruct_ov70_0226E5A4 Unk_ov70_0226E5A4[39] = {
     },
 };
 
-UnkStruct_ov70_02269204 *ov70_02269190(UnkStruct_ov66_0222DFF8 *param0, UnkStruct_ov70_0225C894 *param1, UnkStruct_ov70_02260AD4 *param2, UnkStruct_ov70_0225CA20 *param3, u32 param4, u32 param5)
+UnkStruct_ov70_02269204 *ov70_02269190(UnkStruct_ov66_0222DFF8 *param0, UnkStruct_ov70_0225C894 *param1, UnkStruct_ov70_02260AD4 *param2, UnkStruct_ov70_0225CA20 *param3, enum HeapID heapID, u32 heapID2)
 {
-    UnkStruct_ov70_02269204 *v0;
-
-    v0 = Heap_AllocFromHeap(param4, sizeof(UnkStruct_ov70_02269204));
+    UnkStruct_ov70_02269204 *v0 = Heap_Alloc(heapID, sizeof(UnkStruct_ov70_02269204));
     memset(v0, 0, sizeof(UnkStruct_ov70_02269204));
 
     v0->unk_00 = param0;
@@ -643,13 +638,13 @@ UnkStruct_ov70_02269204 *ov70_02269190(UnkStruct_ov66_0222DFF8 *param0, UnkStruc
     {
         NARC *v1;
 
-        v1 = NARC_ctor(NARC_INDEX_GRAPHIC__WIFI_LOBBY_OTHER, param4);
+        v1 = NARC_ctor(NARC_INDEX_GRAPHIC__WIFI_LOBBY_OTHER, heapID);
 
-        Heap_FndInitAllocatorForExpHeap(&v0->unk_1081C, param5, 4);
+        HeapExp_FndInitAllocator(&v0->unk_1081C, heapID2, 4);
 
-        ov70_02269540(v0, v1, param5);
-        ov70_022695E0(v0, v1, param5);
-        ov70_0226965C(v0, v1, param5);
+        ov70_02269540(v0, v1, heapID2);
+        ov70_022695E0(v0, v1, heapID2);
+        ov70_0226965C(v0, v1, heapID2);
 
         NARC_dtor(v1);
     }
@@ -665,7 +660,7 @@ void ov70_02269204(UnkStruct_ov70_02269204 *param0)
         ov70_02269700(param0);
     }
 
-    Heap_FreeToHeap(param0);
+    Heap_Free(param0);
 }
 
 void ov70_02269220(UnkStruct_ov70_02269204 *param0)
@@ -681,9 +676,7 @@ void ov70_02269240(UnkStruct_ov70_02269204 *param0)
 {
     int v0;
     BOOL v1;
-    UnkStruct_ov70_0225CC54 *v2;
-
-    v2 = ov70_0225CCAC(param0->unk_04);
+    UnkStruct_ov70_0225CC54 *v2 = ov70_0225CCAC(param0->unk_04);
 
     for (v0 = 0; v0 < 20; v0++) {
         ov70_022697C8(param0, &param0->unk_10[v0]);
@@ -781,23 +774,23 @@ static void ov70_02269508(const UnkStruct_ov70_0226949C *param0, fx32 *param1)
     *param1 = param0->unk_08;
 }
 
-static void ov70_02269510(UnkStruct_ov70_02269204 *param0, UnkStruct_ov70_02269800 *param1, u32 param2)
+static void ov70_02269510(UnkStruct_ov70_02269204 *param0, UnkStruct_ov70_02269800 *param1, u32 seqID)
 {
     if (param1->unk_08 == ov70_0225CCAC(param0->unk_04)) {
-        sub_02005770(param2, 5);
+        Sound_PlayEffectOnPlayer(seqID, 5);
     } else {
         if (ov70_0225CE70(param1->unk_08) == 0) {
-            Sound_PlayEffect(param2);
+            Sound_PlayEffect(seqID);
         }
     }
 }
 
-static void ov70_02269540(UnkStruct_ov70_02269204 *param0, NARC *param1, u32 param2)
+static void ov70_02269540(UnkStruct_ov70_02269204 *param0, NARC *param1, u32 heapID)
 {
     int v0;
 
     for (v0 = 0; v0 < 15; v0++) {
-        param0->unk_10550[v0].data = sub_0200723C(param1, 129 + v0, 0, param2, 0);
+        param0->unk_10550[v0].data = LoadMemberFromOpenNARC(param1, 129 + v0, 0, heapID, 0);
         param0->unk_10550[v0].set = NNS_G3dGetMdlSet(param0->unk_10550[v0].data);
         param0->unk_10550[v0].model = NNS_G3dGetMdlByIdx(param0->unk_10550[v0].set, 0);
         param0->unk_10550[v0].texture = NULL;
@@ -811,16 +804,16 @@ static void ov70_022695C4(UnkStruct_ov70_02269204 *param0)
     int v0;
 
     for (v0 = 0; v0 < 15; v0++) {
-        Heap_FreeToHeap(param0->unk_10550[v0].data);
+        Heap_Free(param0->unk_10550[v0].data);
     }
 }
 
-static void ov70_022695E0(UnkStruct_ov70_02269204 *param0, NARC *param1, u32 param2)
+static void ov70_022695E0(UnkStruct_ov70_02269204 *param0, NARC *param1, u32 heapID)
 {
     int v0;
 
     for (v0 = 0; v0 < 39; v0++) {
-        ov70_0225C730(&param0->unk_10640[v0], param1, 144 + v0, param2);
+        ov70_0225C730(&param0->unk_10640[v0], param1, 144 + v0, heapID);
     }
 }
 
@@ -841,7 +834,7 @@ static void ov70_02269608(UnkStruct_ov70_02269204 *param0)
 
         v3 = NNS_G3dPlttReleasePlttKey(v4);
         NNS_GfdFreePlttVram(v3);
-        Heap_FreeToHeap(param0->unk_10640[v0]);
+        Heap_Free(param0->unk_10640[v0]);
     }
 }
 
@@ -906,33 +899,33 @@ static void ov70_02269738(UnkStruct_ov70_02269204 *param0, UnkStruct_ov70_022698
     };
 
     static const u32 v1[27] = {
-        1413,
-        1414,
-        1415,
-        1419,
-        1420,
-        1421,
-        1416,
-        1417,
-        1418,
-        1427,
-        1428,
-        1429,
-        1433,
-        1434,
-        1435,
-        1422,
-        1423,
-        1424,
-        1439,
-        1440,
-        1441,
-        1442,
-        1443,
-        1444,
-        1426,
-        1426,
-        1426
+        SEQ_SE_PL_HIROBA01_4_sseq,
+        SEQ_SE_PL_HIROBA01_5_sseq,
+        SEQ_SE_PL_HIROBA01_6_sseq,
+        SEQ_SE_PL_HIROBA03_sseq,
+        SEQ_SE_PL_HIROBA03_2_sseq,
+        SEQ_SE_PL_HIROBA03_3_sseq,
+        SEQ_SE_PL_HIROBA02_4_sseq,
+        SEQ_SE_PL_HIROBA02_5_sseq,
+        SEQ_SE_PL_HIROBA02_6_sseq,
+        SEQ_SE_PL_HIROBA70_sseq,
+        SEQ_SE_PL_HIROBA70_2_sseq,
+        SEQ_SE_PL_HIROBA70_3_sseq,
+        SEQ_SE_PL_HIROBA100_sseq,
+        SEQ_SE_PL_HIROBA100_2_sseq,
+        SEQ_SE_PL_HIROBA100_3_sseq,
+        SEQ_SE_PL_HIROBA05_sseq,
+        SEQ_SE_PL_HIROBA05_2_sseq,
+        SEQ_SE_PL_HIROBA05_3_sseq,
+        SEQ_SE_PL_W030_sseq,
+        SEQ_SE_PL_W030_2_sseq,
+        SEQ_SE_PL_W030_3_sseq,
+        SEQ_SE_PL_W019_sseq,
+        SEQ_SE_PL_W019_2_sseq,
+        SEQ_SE_PL_W019_3_sseq,
+        SEQ_SE_PL_HIROBA30_sseq,
+        SEQ_SE_PL_HIROBA30_sseq,
+        SEQ_SE_PL_HIROBA30_sseq
     };
 
     GF_ASSERT(param3 < 27);
@@ -1047,7 +1040,7 @@ static void ov70_02269878(UnkStruct_ov70_02269204 *param0, UnkStruct_ov70_022698
 
     GF_ASSERT(param1->unk_87C[param2] != NULL);
 
-    if (Easy3DObject_GetVisibility(&param1->unk_0C[param2]) == 0) {
+    if (Easy3DObject_IsVisible(&param1->unk_0C[param2]) == 0) {
         return;
     }
 
@@ -1101,9 +1094,7 @@ static BOOL ov70_022699D0(UnkStruct_ov70_02269204 *param0, UnkStruct_ov70_022698
 static void ov70_022699E4(UnkStruct_ov70_02269204 *param0, UnkStruct_ov70_02269800 *param1, u32 param2, u32 param3, fx32 param4)
 {
     fx32 v0;
-    Easy3DAnim *v1;
-
-    v1 = &param0->unk_106DC[param1->unk_87C[param2]->unk_02[param3]];
+    Easy3DAnim *v1 = &param0->unk_106DC[param1->unk_87C[param2]->unk_02[param3]];
     v0 = Easy3DAnim_GetFrameCount(v1);
 
     if ((param1->unk_8C4[param2][param3] + param4) < v0) {
@@ -1117,9 +1108,7 @@ static BOOL ov70_02269A3C(UnkStruct_ov70_02269204 *param0, UnkStruct_ov70_022698
 {
     fx32 v0;
     BOOL v1;
-    Easy3DAnim *v2;
-
-    v2 = &param0->unk_106DC[param1->unk_87C[param2]->unk_02[param3]];
+    Easy3DAnim *v2 = &param0->unk_106DC[param1->unk_87C[param2]->unk_02[param3]];
     v0 = Easy3DAnim_GetFrameCount(v2);
 
     if ((param1->unk_8C4[param2][param3] + param4) < v0) {
@@ -1136,9 +1125,7 @@ static BOOL ov70_02269A3C(UnkStruct_ov70_02269204 *param0, UnkStruct_ov70_022698
 static void ov70_02269A90(UnkStruct_ov70_02269204 *param0, UnkStruct_ov70_02269800 *param1, u32 param2, u32 param3, fx32 param4)
 {
     fx32 v0;
-    Easy3DAnim *v1;
-
-    v1 = &param0->unk_106DC[param1->unk_87C[param2]->unk_02[param3]];
+    Easy3DAnim *v1 = &param0->unk_106DC[param1->unk_87C[param2]->unk_02[param3]];
     v0 = Easy3DAnim_GetFrameCount(v1);
 
     if (v0 < param4) {
@@ -1151,9 +1138,7 @@ static void ov70_02269A90(UnkStruct_ov70_02269204 *param0, UnkStruct_ov70_022698
 static fx32 ov70_02269AE8(const UnkStruct_ov70_02269204 *param0, const UnkStruct_ov70_02269800 *param1, u32 param2, u32 param3)
 {
     fx32 v0;
-    const Easy3DAnim *v1;
-
-    v1 = &param0->unk_106DC[param1->unk_87C[param2]->unk_02[param3]];
+    const Easy3DAnim *v1 = &param0->unk_106DC[param1->unk_87C[param2]->unk_02[param3]];
     return Easy3DAnim_GetFrame(v1);
 }
 
@@ -1201,7 +1186,7 @@ static void ov70_02269B58(UnkStruct_ov70_02269204 *param0, UnkStruct_ov70_022698
         v1.y += (FX32_CONST(8)) + (FX_Mul(FX32_ONE * v0, (FX32_CONST(0))));
 
         Easy3DObject_SetPosition(&param1->unk_0C[v0], v1.x, v1.y, v1.z);
-        Easy3DObject_SetVisibility(&param1->unk_0C[v0], 0);
+        Easy3DObject_SetVisible(&param1->unk_0C[v0], 0);
     }
 
     param1->unk_954.val5.unk_00 = 0xff;
@@ -1214,7 +1199,7 @@ static void ov70_02269BB8(UnkStruct_ov70_02269204 *param0, UnkStruct_ov70_022698
 
     ov70_02269828(param0, param1, 1, &Unk_ov70_0226E5A4[9]);
     ov70_02269828(param0, param1, 0, &Unk_ov70_0226E5A4[12]);
-    Easy3DObject_SetVisibility(&param1->unk_0C[1], 0);
+    Easy3DObject_SetVisible(&param1->unk_0C[1], 0);
     ov70_0225D054(param1->unk_08, &v0);
 
     v0.y += (FX32_CONST(16));
@@ -1265,7 +1250,7 @@ static void ov70_02269CFC(UnkStruct_ov70_02269204 *param0, UnkStruct_ov70_022698
     ov70_02269828(param0, param1, 1, &Unk_ov70_0226E5A4[9]);
     ov70_02269828(param0, param1, 0, &Unk_ov70_0226E5A4[12]);
     ov70_02269828(param0, param1, 2, &Unk_ov70_0226E5A4[10]);
-    Easy3DObject_SetVisibility(&param1->unk_0C[1], 0);
+    Easy3DObject_SetVisible(&param1->unk_0C[1], 0);
     ov70_0225D054(param1->unk_08, &v0);
 
     v0.y += (FX32_CONST(16));
@@ -1333,7 +1318,7 @@ static void ov70_02269F30(UnkStruct_ov70_02269204 *param0, UnkStruct_ov70_022698
     ov70_02269828(param0, param1, 2, &Unk_ov70_0226E5A4[10]);
     ov70_02269828(param0, param1, 3, &Unk_ov70_0226E5A4[11]);
 
-    Easy3DObject_SetVisibility(&param1->unk_0C[1], 0);
+    Easy3DObject_SetVisible(&param1->unk_0C[1], 0);
 
     param1->unk_954.val2.unk_04[0] = 8;
     param1->unk_954.val2.unk_04[1] = 8;
@@ -1552,7 +1537,7 @@ static BOOL ov70_0226A520(UnkStruct_ov70_02269204 *param0, UnkStruct_ov70_022698
         v3 = v0 % 3;
 
         if (v3 < param1->unk_954.val4.unk_00) {
-            Easy3DObject_SetVisibility(&param1->unk_0C[v3], 1);
+            Easy3DObject_SetVisible(&param1->unk_0C[v3], 1);
         }
     }
 
@@ -1561,11 +1546,11 @@ static BOOL ov70_0226A520(UnkStruct_ov70_02269204 *param0, UnkStruct_ov70_022698
     v1 = 1;
 
     for (v0 = 0; v0 < param1->unk_954.val4.unk_00; v0++) {
-        if (Easy3DObject_GetVisibility(&param1->unk_0C[v0]) == 1) {
+        if (Easy3DObject_IsVisible(&param1->unk_0C[v0]) == 1) {
             v1 = ov70_022699D0(param0, param1, v0, 0);
 
             if (v1) {
-                Easy3DObject_SetVisibility(&param1->unk_0C[v0], 0);
+                Easy3DObject_SetVisible(&param1->unk_0C[v0], 0);
                 ov70_02269A90(param0, param1, v0, 0, 0);
             }
         }
@@ -1606,10 +1591,10 @@ static BOOL ov70_0226A614(UnkStruct_ov70_02269204 *param0, UnkStruct_ov70_022698
 
         if (param1->unk_954.val6.unk_02 > v0) {
             if (v0 > 0) {
-                Easy3DObject_SetVisibility(&param1->unk_0C[v0 - 1], 0);
+                Easy3DObject_SetVisible(&param1->unk_0C[v0 - 1], 0);
             }
 
-            Easy3DObject_SetVisibility(&param1->unk_0C[v0], 1);
+            Easy3DObject_SetVisible(&param1->unk_0C[v0], 1);
         }
     }
 
@@ -1620,7 +1605,7 @@ static BOOL ov70_0226A614(UnkStruct_ov70_02269204 *param0, UnkStruct_ov70_022698
     v2 = 0;
 
     for (v1 = 0; v1 < param1->unk_954.val6.unk_02; v1++) {
-        if (Easy3DObject_GetVisibility(&param1->unk_0C[v1])) {
+        if (Easy3DObject_IsVisible(&param1->unk_0C[v1])) {
             if (v1 == param1->unk_954.val6.unk_02 - 1) {
                 v2 = ov70_022699D0(param0, param1, v1, 0);
             } else {
@@ -1642,11 +1627,11 @@ static BOOL ov70_0226A6C8(UnkStruct_ov70_02269204 *param0, UnkStruct_ov70_022698
 
     if (param1->unk_954.val2.unk_00 > 0) {
         param1->unk_954.val2.unk_00--;
-        Easy3DObject_SetVisibility(&param1->unk_0C[0], 0);
+        Easy3DObject_SetVisible(&param1->unk_0C[0], 0);
     } else {
         if (param1->unk_02 < 3) {
             if (ov70_02269810(param1, param1->unk_02 + 1) == 1) {
-                Easy3DObject_SetVisibility(&param1->unk_0C[0], 1);
+                Easy3DObject_SetVisible(&param1->unk_0C[0], 1);
                 v0 = ov70_022699D0(param0, param1, 0, 0);
 
                 if (v0 == 1) {
@@ -1656,7 +1641,7 @@ static BOOL ov70_0226A6C8(UnkStruct_ov70_02269204 *param0, UnkStruct_ov70_022698
                     if (param1->unk_02 < 3) {
                         ov70_02269A90(param0, param1, 0, 0, 0);
                     } else {
-                        Easy3DObject_SetVisibility(&param1->unk_0C[0], 0);
+                        Easy3DObject_SetVisible(&param1->unk_0C[0], 0);
                     }
                 }
             }
@@ -1668,7 +1653,7 @@ static BOOL ov70_0226A6C8(UnkStruct_ov70_02269204 *param0, UnkStruct_ov70_022698
     for (v2 = 1; v2 <= 3; v2++) {
         if (ov70_02269810(param1, v2) == 1) {
             if (param1->unk_02 > (v2 - 1)) {
-                Easy3DObject_SetVisibility(&param1->unk_0C[v2], 1);
+                Easy3DObject_SetVisible(&param1->unk_0C[v2], 1);
                 v0 = ov70_02269A3C(param0, param1, v2, 0, FX32_CONST(2.50f));
 
                 if (v0 == 0) {
@@ -1680,7 +1665,7 @@ static BOOL ov70_0226A6C8(UnkStruct_ov70_02269204 *param0, UnkStruct_ov70_022698
                     v4 = v2 - 1;
 
                     if (param1->unk_954.val2.unk_04[v4] == 0) {
-                        Easy3DObject_SetVisibility(&param1->unk_0C[v2], 0);
+                        Easy3DObject_SetVisible(&param1->unk_0C[v2], 0);
                         NNS_G3dMdlSetMdlAlphaAll(param0->unk_10550[param1->unk_87C[v2]->unk_00].model, 31);
                     } else {
                         param1->unk_954.val2.unk_04[v4]--;
@@ -1741,18 +1726,18 @@ static BOOL ov70_0226A858(UnkStruct_ov70_02269204 *param0, UnkStruct_ov70_022698
         v1 += param1->unk_954.val3.unk_01 * 4;
 
         for (v2 = param1->unk_954.val3.unk_03; v2 < v1; v2++) {
-            Easy3DObject_SetVisibility(&param1->unk_0C[v2], 1);
+            Easy3DObject_SetVisible(&param1->unk_0C[v2], 1);
         }
 
         param1->unk_954.val3.unk_03 = v1;
     }
 
     for (v2 = 0; v2 < param1->unk_954.val3.unk_03; v2++) {
-        if (Easy3DObject_GetVisibility(&param1->unk_0C[v2]) == 1) {
+        if (Easy3DObject_IsVisible(&param1->unk_0C[v2]) == 1) {
             v0 = ov70_0226B8C4(param0, param1, v2);
 
             if (v0 == 1) {
-                Easy3DObject_SetVisibility(&param1->unk_0C[v2], 0);
+                Easy3DObject_SetVisible(&param1->unk_0C[v2], 0);
             }
         }
     }
@@ -1766,9 +1751,7 @@ static BOOL ov70_0226A858(UnkStruct_ov70_02269204 *param0, UnkStruct_ov70_022698
 
 static BOOL ov70_0226A930(UnkStruct_ov70_02269204 *param0, UnkStruct_ov70_02269800 *param1)
 {
-    u32 v0;
-
-    v0 = ov70_0226BCC0(&param1->unk_954, param1->unk_02);
+    u32 v0 = ov70_0226BCC0(&param1->unk_954, param1->unk_02);
     param1->unk_02++;
 
     if (v0 == 2) {
@@ -1938,19 +1921,19 @@ static BOOL ov70_0226AC24(UnkStruct_ov70_02269204 *param0, UnkStruct_ov70_022698
     if (param1->unk_08 == ov70_0225CCAC(param0->unk_04)) {
         u32 v4 = 4;
 
-        if (gCoreSys.pressedKeys & PAD_KEY_UP) {
+        if (gSystem.pressedKeys & PAD_KEY_UP) {
             v4 = 0;
         }
 
-        if (gCoreSys.pressedKeys & PAD_KEY_DOWN) {
+        if (gSystem.pressedKeys & PAD_KEY_DOWN) {
             v4 = 1;
         }
 
-        if (gCoreSys.pressedKeys & PAD_KEY_RIGHT) {
+        if (gSystem.pressedKeys & PAD_KEY_RIGHT) {
             v4 = 3;
         }
 
-        if (gCoreSys.pressedKeys & PAD_KEY_LEFT) {
+        if (gSystem.pressedKeys & PAD_KEY_LEFT) {
             v4 = 2;
         }
 
@@ -2111,7 +2094,7 @@ static BOOL ov70_0226AF7C(UnkStruct_ov70_02269204 *param0, UnkStruct_ov70_022698
             param1->unk_954.val1.unk_02 = 0;
             param1->unk_954.val1.unk_04 = v3.y;
 
-            ov70_02269510(param0, param1, 1451);
+            ov70_02269510(param0, param1, SEQ_SE_PL_SUTYA2_sseq_1);
         }
     } break;
     case 4: {
@@ -2166,7 +2149,7 @@ static BOOL ov70_0226AF7C(UnkStruct_ov70_02269204 *param0, UnkStruct_ov70_022698
                 v10 = ov70_0226B714(param0, param1, v0, 4);
 
                 if (v10 == 1) {
-                    ov70_02269510(param0, param1, 1425);
+                    ov70_02269510(param0, param1, SEQ_SE_PL_HIROBA20_sseq);
                 }
             }
         }
@@ -2187,7 +2170,7 @@ static BOOL ov70_0226B1D0(UnkStruct_ov70_02269204 *param0, UnkStruct_ov70_022698
 
     switch (param1->unk_954.val1.unk_00) {
     case 0:
-        ov70_02269510(param0, param1, 1425);
+        ov70_02269510(param0, param1, SEQ_SE_PL_HIROBA20_sseq);
 
         for (v0 = 0; v0 < param1->unk_954.val1.unk_01; v0++) {
             ov70_0226B714(param0, param1, v0, 4);
@@ -2231,7 +2214,7 @@ static BOOL ov70_0226B1D0(UnkStruct_ov70_02269204 *param0, UnkStruct_ov70_022698
             param1->unk_954.val1.unk_02 = 0;
             param1->unk_954.val1.unk_04 = v3.y;
 
-            ov70_02269510(param0, param1, 1451);
+            ov70_02269510(param0, param1, SEQ_SE_PL_SUTYA2_sseq_1);
             ov70_0225D030(param1->unk_08, 1);
 
             {
@@ -2309,9 +2292,7 @@ static BOOL ov70_0226B714(UnkStruct_ov70_02269204 *param0, UnkStruct_ov70_022698
 static void ov70_0226B744(UnkStruct_ov70_02269204 *param0, UnkStruct_ov70_02269800 *param1, u32 param2)
 {
     fx32 v0;
-    u32 v1;
-
-    v1 = param1->unk_954.val1.unk_0C[param2];
+    u32 v1 = param1->unk_954.val1.unk_0C[param2];
 
     if (param1->unk_954.val1.unk_08[param2] <= 0) {
         v0 = ov70_02269AE8(param0, param1, param2, 0);
@@ -2322,7 +2303,7 @@ static void ov70_0226B744(UnkStruct_ov70_02269204 *param0, UnkStruct_ov70_022698
             if (v1 != 4) {
                 v0 = (v1 * (FX32_ONE * 2));
             } else {
-                Easy3DObject_SetVisibility(&param1->unk_0C[param2], 0);
+                Easy3DObject_SetVisible(&param1->unk_0C[param2], 0);
             }
         }
 
@@ -2358,7 +2339,7 @@ static void ov70_0226B7B0(UnkStruct_ov70_02269204 *param0, UnkStruct_ov70_022698
             VEC_Add(&v2, &Unk_ov70_0226E370[v1], &v3);
             VEC_Add(&v3, &Unk_ov70_0226E3A0[v1], &v4);
             Easy3DObject_SetPosition(&param1->unk_0C[v5], v3.x, v3.y, v3.z);
-            Easy3DObject_SetVisibility(&param1->unk_0C[v5], 0);
+            Easy3DObject_SetVisible(&param1->unk_0C[v5], 0);
             param1->unk_954.val3.unk_04[v5] = 0;
             ov70_022692B4(&param1->unk_954.val3.unk_14[v5], v3.x, v4.x, v3.y, v4.y, v3.z, v4.z, 14);
         }
@@ -2399,7 +2380,7 @@ static void ov70_0226B92C(UnkStruct_ov70_02269204 *param0, UnkStruct_ov70_022698
         v1.z += (FX32_CONST(6));
 
         Easy3DObject_SetPosition(&param1->unk_0C[v0], v1.x, v1.y, v1.z);
-        Easy3DObject_SetVisibility(&param1->unk_0C[v0], 0);
+        Easy3DObject_SetVisible(&param1->unk_0C[v0], 0);
     }
 
     param1->unk_954.val4.unk_00 = param2;
@@ -2418,7 +2399,7 @@ static BOOL ov70_0226B998(UnkStruct_ov70_02269204 *param0, UnkStruct_ov70_022698
 
         if (v1 > 0) {
             v2 = Unk_ov70_0226E514[param2][v1 - 1];
-            Easy3DObject_SetVisibility(&param1->unk_0C[v2.unk_00], 0);
+            Easy3DObject_SetVisible(&param1->unk_0C[v2.unk_00], 0);
         }
 
         v2 = Unk_ov70_0226E514[param2][v1];
@@ -2426,9 +2407,9 @@ static BOOL ov70_0226B998(UnkStruct_ov70_02269204 *param0, UnkStruct_ov70_022698
         if (0 != v2.unk_02) {
             ov70_02269A90(param0, param1, v2.unk_00, 0, FX32_CONST(v2.unk_02));
             ov70_02269A90(param0, param1, v2.unk_00, 1, FX32_CONST(v2.unk_02));
-            Easy3DObject_SetVisibility(&param1->unk_0C[v2.unk_00], 1);
+            Easy3DObject_SetVisible(&param1->unk_0C[v2.unk_00], 1);
         } else {
-            Easy3DObject_SetVisibility(&param1->unk_0C[v2.unk_00], 0);
+            Easy3DObject_SetVisible(&param1->unk_0C[v2.unk_00], 0);
         }
     }
 
@@ -2455,7 +2436,7 @@ static void ov70_0226BAC8(UnkStruct_ov70_02269204 *param0, UnkStruct_ov70_022698
         v1.y += (FX32_CONST(8));
 
         Easy3DObject_SetPosition(&param1->unk_0C[v0], v1.x, v1.y, v1.z);
-        Easy3DObject_SetVisibility(&param1->unk_0C[v0], 0);
+        Easy3DObject_SetVisible(&param1->unk_0C[v0], 0);
     }
 
     param1->unk_954.val6.unk_00 = 0xff;
@@ -2487,7 +2468,7 @@ static void ov70_0226BBA8(UnkStruct_ov70_02269204 *param0, UnkStruct_ov70_022698
     param1->unk_954.val7.unk_3BA = 0;
 
     for (v0 = 0; v0 < 2; v0++) {
-        Easy3DObject_SetVisibility(&param1->unk_0C[v0 + 16], 1);
+        Easy3DObject_SetVisible(&param1->unk_0C[v0 + 16], 1);
     }
 }
 
@@ -2509,7 +2490,7 @@ static void ov70_0226BBDC(UnkStruct_ov70_02269204 *param0, UnkStruct_ov70_022698
         if (param1->unk_954.val7.unk_3BA < 13) {
             ov70_022699BC(param0, param1, v0 + 16, 0);
         } else {
-            Easy3DObject_SetVisibility(&param1->unk_0C[v0 + 16], 0);
+            Easy3DObject_SetVisible(&param1->unk_0C[v0 + 16], 0);
         }
     }
 }
@@ -2584,7 +2565,7 @@ static void ov70_0226BDA0(UnkStruct_ov70_0226BD64 *param0, u32 param1)
     };
 
     for (v0 = 0; v0 < param1; v0++) {
-        Easy3DObject_SetVisibility(param0->unk_D8[v0], 1);
+        Easy3DObject_SetVisible(param0->unk_D8[v0], 1);
     }
 
     param0->unk_00 = 0;
@@ -2613,7 +2594,7 @@ static BOOL ov70_0226BDE8(UnkStruct_ov70_0226BD64 *param0)
 
     if (v1 == 1) {
         for (v0 = 0; v0 < param0->unk_04; v0++) {
-            Easy3DObject_SetVisibility(param0->unk_D8[v0], 0);
+            Easy3DObject_SetVisible(param0->unk_D8[v0], 0);
         }
 
         param0->unk_06 = 0;

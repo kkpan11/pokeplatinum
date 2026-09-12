@@ -1,9 +1,9 @@
 #ifndef POKEPLATINUM_UNK_02038F8C_H
 #define POKEPLATINUM_UNK_02038F8C_H
 
-#include "struct_decls/struct_0202C878_decl.h"
+#include "struct_defs/wi_fi_history.h"
 
-void sub_02038F8C(UnkStruct_0202C878 *param0);
-void sub_02038FDC(UnkStruct_0202C878 *param0, int param1, int param2, int param3);
+void WiFiHistory_FlagGeonetLinkInfo(WiFiHistory *wiFiHistory);
+void WiFiHistory_FlagGeonetCommunicatedWith(WiFiHistory *wiFiHistory, int country, int region, int language);
 
 #endif // POKEPLATINUM_UNK_02038F8C_H

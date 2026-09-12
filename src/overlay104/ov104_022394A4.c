@@ -1,77 +1,77 @@
 #include <nitro.h>
 #include <string.h>
 
-#include "struct_defs/struct_0204AFC4.h"
+#include "generated/battle_tower_modes.h"
 
-#include "overlay104/ov104_0222DCE0.h"
+#include "struct_defs/battle_tower.h"
+
+#include "overlay104/frontier_opponents.h"
 #include "overlay104/ov104_0223A0C4.h"
 
 #include "savedata.h"
 #include "unk_0206B9D8.h"
 
-void ov104_022394A4(UnkStruct_0204AFC4 *param0, SaveData *param1);
-u16 ov104_02239588(UnkStruct_0204AFC4 *param0, u16 param1);
-void ov104_022395A0(UnkStruct_0204AFC4 *param0, u16 param1);
-u16 ov104_022395B4(UnkStruct_0204AFC4 *param0);
-u16 ov104_022395D8(UnkStruct_0204AFC4 *param0);
+u16 BattleTower_GetObjectIDFromOpponentIDInFrontierScript(BattleTower *battleTower, u16 opponentID);
+void BattleTower_SetBeatPalmer(BattleTower *battleTower, u16 value);
+u16 ov104_022395B4(BattleTower *battleTower);
+u16 ov104_022395D8(BattleTower *battleTower);
 
-void ov104_022394A4(UnkStruct_0204AFC4 *param0, SaveData *param1)
+void BattleTower_CreateOpponentParties(BattleTower *battleTower, SaveData *saveData)
 {
-    int v0;
-    u16 v1[2];
-    u16 v2[2];
-
-    switch (param0->unk_0F) {
-    case 4:
-    case 5:
-        ov104_0223A30C(param1, param0->unk_78, param0->unk_0C - 1);
+    switch (battleTower->challengeMode) {
+    case BATTLE_TOWER_MODE_WIFI:
+    case BATTLE_TOWER_MODE_5:
+        BattleTower_CreateWiFiTrainerParty(saveData, battleTower->opponentsDataDTO, battleTower->nextOpponentNum - 1);
         break;
-    case 2:
-    case 3:
-    case 6:
-        ov104_0223A0C4(param0, &(param0->unk_78[0]), param0->unk_3E[(param0->unk_0C - 1) * 2 + 0], param0->unk_0E, NULL, NULL, NULL, param0->unk_04);
+    case BATTLE_TOWER_MODE_MULTI:
+    case BATTLE_TOWER_MODE_LINK_MULTI:
+    case BATTLE_TOWER_MODE_6:
+        BattleTower_CreateTrainerParty(battleTower, &(battleTower->opponentsDataDTO[0]), battleTower->trainerIDs[(battleTower->nextOpponentNum - 1) * 2 + 0], battleTower->partySize, NULL, NULL, NULL, battleTower->heapID);
 
-        for (v0 = 0; v0 < param0->unk_0E; v0++) {
-            v1[v0] = param0->unk_78[0].unk_30[v0].unk_00_val1_0;
-            v2[v0] = param0->unk_78[0].unk_30[v0].unk_02;
+        u16 species[2];
+        u16 items[2];
+
+        for (int v0 = 0; v0 < battleTower->partySize; v0++) {
+            species[v0] = battleTower->opponentsDataDTO[0].pokemon[v0].species;
+            items[v0] = battleTower->opponentsDataDTO[0].pokemon[v0].item;
         }
 
-        ov104_0223A0C4(param0, &(param0->unk_78[1]), param0->unk_3E[(param0->unk_0C - 1) * 2 + 1], param0->unk_0E, v1, v2, NULL, param0->unk_04);
+        BattleTower_CreateTrainerParty(battleTower, &(battleTower->opponentsDataDTO[1]), battleTower->trainerIDs[(battleTower->nextOpponentNum - 1) * 2 + 1], battleTower->partySize, species, items, NULL, battleTower->heapID);
         break;
-    case 1:
-    case 0:
+    case BATTLE_TOWER_MODE_DOUBLE:
+    case BATTLE_TOWER_MODE_SINGLE:
     default:
-        ov104_0223A0C4(param0, &(param0->unk_78[0]), param0->unk_3E[param0->unk_0C - 1], param0->unk_0E, NULL, NULL, NULL, param0->unk_04);
+        BattleTower_CreateTrainerParty(battleTower, &(battleTower->opponentsDataDTO[0]), battleTower->trainerIDs[battleTower->nextOpponentNum - 1], battleTower->partySize, NULL, NULL, NULL, battleTower->heapID);
         break;
     }
 }
 
-u16 ov104_02239588(UnkStruct_0204AFC4 *param0, u16 param1)
+u16 BattleTower_GetObjectIDFromOpponentIDInFrontierScript(BattleTower *battleTower, u16 opponentID)
 {
-    return ov104_0222E10C(param0->unk_78[param1].unk_00.unk_04);
+    return BattleFrontier_GetObjectIDFromTrainerClass(battleTower->opponentsDataDTO[opponentID].trainer.trainerType);
 }
 
-void ov104_022395A0(UnkStruct_0204AFC4 *param0, u16 param1)
+void BattleTower_SetBeatPalmer(BattleTower *battleTower, u16 value)
 {
-    param0->unk_10_1 = param1;
+    battleTower->beatPalmer = value;
 }
 
-u16 ov104_022395B4(UnkStruct_0204AFC4 *param0)
+u16 ov104_022395B4(BattleTower *battleTower)
 {
-    ++param0->unk_0D;
+    ++battleTower->unk_0D;
 
-    if (param0->unk_0F != 6) {
-        param0->unk_08 = sub_0206BFF0(param0->unk_08);
+    if (battleTower->challengeMode != BATTLE_TOWER_MODE_6) {
+        battleTower->unk_08 = sub_0206BFF0(battleTower->unk_08);
     }
 
-    return ++param0->unk_0C;
+    return ++battleTower->nextOpponentNum;
 }
 
-u16 ov104_022395D8(UnkStruct_0204AFC4 *param0)
+u16 ov104_022395D8(BattleTower *battleTower)
 {
-    if ((u32)param0->unk_1A + param0->unk_0D > 0xFFFF) {
+    if ((u32)battleTower->unk_1A + battleTower->unk_0D > 0xFFFF) {
         return 0xFFFF;
     } else {
-        return param0->unk_1A + param0->unk_0D;
+        return battleTower->unk_1A + battleTower->unk_0D;
     }
 }

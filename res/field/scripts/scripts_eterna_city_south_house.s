@@ -1,105 +1,105 @@
-    .include "macros/scrcmd.inc"
+#include "macros/scrcmd.inc"
+#include "res/text/bank/eterna_city_south_house.h"
+#include "res/field/events/events_eterna_city_south_house.h"
 
-    .data
 
-    ScriptEntry _0006
-    .short 0xFD13
+    ScriptEntry EternaCitySouthHouse_ProfOak
+    ScriptEntryEnd
 
-_0006:
-    PlayFanfare SEQ_SE_CONFIRM
+EternaCitySouthHouse_ProfOak:
+    PlaySE SE_CONFIRM_sseq_3
     LockAll
     FacePlayer
-    GoToIfSet 152, _0113
-    Call _0119
-    GoToIfEq 0x800C, 1, _0106
-    GoToIfSet 153, _00B3
-    GoToIfSet 0x119, _008B
-    ScrCmd_0CD 0
-    Message 0
+    GoToIfSet FLAG_CAUGHT_ROAMING_LEGENDARY_BIRDS, EternaCitySouthHouse_PokedexRatingsCheckOak2
+    Call EternaCitySouthHouse_CheckCaughtAllRoamingLegendaryBirds
+    GoToIfEq VAR_RESULT, TRUE, EternaCitySouthHouse_CaughtAllRoamingLegendaryBirds
+    GoToIfSet FLAG_ACTIVATED_ROAMING_LEGENDARY_BIRDS, EternaCitySouthHouse_TryReactivateRoamingLegendaryBirds
+    GoToIfSet FLAG_RECEIVED_ETERNA_CITY_SOUTH_HOUSE_UPGRADE, EternaCitySouthHouse_PokedexRatingsCheckOak
+    BufferPlayerName 0
+    Message EternaCitySouthHouse_Text_HowIsYourPokedex
     CloseMessage
-    ApplyMovement 0, _0158
+    ApplyMovement LOCALID_PROF_OAK, EternaCitySouthHouse_Movement_EmoteExclamationMark
     WaitMovement
-    Message 1
-    SetVar 0x8004, 252
-    SetVar 0x8005, 1
-    ScrCmd_07D 0x8004, 0x8005, 0x800C
-    GoToIfEq 0x800C, 0, _0091
-    CallCommonScript 0x7FC
-    SetFlag 0x119
-    Message 2
-    GoTo _009B
+    Message EternaCitySouthHouse_Text_AcquaintanceSentSomething
+    SetVar VAR_0x8004, ITEM_UPGRADE
+    SetVar VAR_0x8005, 1
+    GoToIfCannotFitItem VAR_0x8004, VAR_0x8005, VAR_RESULT, EternaCitySouthHouse_BagIsFull
+    Common_GiveItemQuantity
+    SetFlag FLAG_RECEIVED_ETERNA_CITY_SOUTH_HOUSE_UPGRADE
+    Message EternaCitySouthHouse_Text_PokemonThatEvolvesTradingWithUpgrade
+    GoTo EternaCitySouthHouse_ActivateRoamingLegendaryBirds
     End
 
-_008B:
+EternaCitySouthHouse_PokedexRatingsCheckOak:
     CallCommonScript 0x26E0
     End
 
-_0091:
-    CallCommonScript 0x7E1
+EternaCitySouthHouse_BagIsFull:
+    Common_MessageBagIsFull
     CloseMessage
     ReleaseAll
     End
 
-_009B:
-    ScrCmd_21C 3
-    ScrCmd_21C 4
-    ScrCmd_21C 5
-    SetFlag 153
-    Message 3
-    GoTo _0150
+EternaCitySouthHouse_ActivateRoamingLegendaryBirds:
+    ActivateRoamingPokemon ROAMING_SLOT_MOLTRES
+    ActivateRoamingPokemon ROAMING_SLOT_ZAPDOS
+    ActivateRoamingPokemon ROAMING_SLOT_ARTICUNO
+    SetFlag FLAG_ACTIVATED_ROAMING_LEGENDARY_BIRDS
+    Message EternaCitySouthHouse_Text_SightingsOfLegendaryBirds
+    GoTo EternaCitySouthHouse_ProfOakEnd
     End
 
-_00B3:
-    CallIfEq 0x405E, 3, _00E5
-    CallIfEq 0x405F, 3, _00F0
-    CallIfEq 0x4060, 3, _00FB
-    Message 4
-    GoTo _0150
+EternaCitySouthHouse_TryReactivateRoamingLegendaryBirds:
+    CallIfEq VAR_ROAMING_MOLTRES_STATE, ROAMER_STATE_RESET, EternaCitySouthHouse_ReactivateRoamingMoltres
+    CallIfEq VAR_ROAMING_ZAPDOS_STATE, ROAMER_STATE_RESET, EternaCitySouthHouse_ReactivateRoamingZapdos
+    CallIfEq VAR_ROAMING_ARTICUNO_STATE, ROAMER_STATE_RESET, EternaCitySouthHouse_ReactivateRoamingArticuno
+    Message EternaCitySouthHouse_Text_LegendaryBirdsExtremelyRare
+    GoTo EternaCitySouthHouse_ProfOakEnd
     End
 
-_00E5:
-    SetVar 0x405E, 0
-    ScrCmd_21C 3
+EternaCitySouthHouse_ReactivateRoamingMoltres:
+    SetVar VAR_ROAMING_MOLTRES_STATE, ROAMER_STATE_ROAMING
+    ActivateRoamingPokemon ROAMING_SLOT_MOLTRES
     Return
 
-_00F0:
-    SetVar 0x405F, 0
-    ScrCmd_21C 4
+EternaCitySouthHouse_ReactivateRoamingZapdos:
+    SetVar VAR_ROAMING_ZAPDOS_STATE, ROAMER_STATE_ROAMING
+    ActivateRoamingPokemon ROAMING_SLOT_ZAPDOS
     Return
 
-_00FB:
-    SetVar 0x4060, 0
-    ScrCmd_21C 5
+EternaCitySouthHouse_ReactivateRoamingArticuno:
+    SetVar VAR_ROAMING_ARTICUNO_STATE, ROAMER_STATE_ROAMING
+    ActivateRoamingPokemon ROAMING_SLOT_ARTICUNO
     Return
 
-_0106:
-    Message 5
-    SetFlag 152
+EternaCitySouthHouse_CaughtAllRoamingLegendaryBirds:
+    Message EternaCitySouthHouse_Text_YouveCaughtLegendaryBirds
+    SetFlag FLAG_CAUGHT_ROAMING_LEGENDARY_BIRDS
     CallCommonScript 0x26E1
     End
 
-_0113:
+EternaCitySouthHouse_PokedexRatingsCheckOak2:
     CallCommonScript 0x26E0
     End
 
-_0119:
-    GoToIfNe 0x405E, 1, _0148
-    GoToIfNe 0x405F, 1, _0148
-    GoToIfNe 0x4060, 1, _0148
-    SetVar 0x800C, 1
+EternaCitySouthHouse_CheckCaughtAllRoamingLegendaryBirds:
+    GoToIfNe VAR_ROAMING_MOLTRES_STATE, ROAMER_STATE_CAPTURED, EternaCitySouthHouse_DidNotCatchAllRoamingLegendaryBirds
+    GoToIfNe VAR_ROAMING_ZAPDOS_STATE, ROAMER_STATE_CAPTURED, EternaCitySouthHouse_DidNotCatchAllRoamingLegendaryBirds
+    GoToIfNe VAR_ROAMING_ARTICUNO_STATE, ROAMER_STATE_CAPTURED, EternaCitySouthHouse_DidNotCatchAllRoamingLegendaryBirds
+    SetVar VAR_RESULT, TRUE
     Return
 
-_0148:
-    SetVar 0x800C, 0
+EternaCitySouthHouse_DidNotCatchAllRoamingLegendaryBirds:
+    SetVar VAR_RESULT, FALSE
     Return
 
-_0150:
-    WaitABXPadPress
+EternaCitySouthHouse_ProfOakEnd:
+    WaitButton
     CloseMessage
     ReleaseAll
     End
 
     .balign 4, 0
-_0158:
-    MoveAction_04B
+EternaCitySouthHouse_Movement_EmoteExclamationMark:
+    EmoteExclamationMark
     EndMovement

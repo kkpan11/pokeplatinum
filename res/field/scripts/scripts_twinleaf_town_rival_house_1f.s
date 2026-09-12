@@ -1,73 +1,72 @@
-    .include "macros/scrcmd.inc"
+#include "macros/scrcmd.inc"
+#include "res/text/bank/twinleaf_town_rival_house_1f.h"
 
-    .data
 
-    ScriptEntry _0006
-    .short 0xFD13
+    ScriptEntry TwinleafTownRivalHouse1F_RivalsMom
+    ScriptEntryEnd
 
-_0006:
-    PlayFanfare SEQ_SE_CONFIRM
+TwinleafTownRivalHouse1F_RivalsMom:
+    PlaySE SE_CONFIRM_sseq_3
     LockAll
     FacePlayer
-    GoToIfSet 144, _00B0
-    GoToIfGe 0x4095, 1, _0082
-    GoToIfSet 110, _0090
-    GoToIfSet 234, _009E
-    ScrCmd_14D 0x800C
-    GoToIfEq 0x800C, 0, _005C
-    GoToIfEq 0x800C, 1, _006B
+    GoToIfSet FLAG_HAS_POKEDEX, TwinleafTownRivalHouse1F_TookOffLikeUsual
+    GoToIfGe VAR_VISITED_LAKE_VERITY_WITH_RIVAL, 1, TwinleafTownRivalHouse1F_FriendsWithPokemonToo
+    GoToIfSet FLAG_TALKED_TO_RIVAL_HOUSE_RIVAL_MOM_RIVAL_LEFT, TwinleafTownRivalHouse1F_HeShouldBeOnRoute201
+    GoToIfSet FLAG_RIVAL_LEFT_HOME, TwinleafTownRivalHouse1F_RocketedOffLikeUsual
+    GetPlayerGender VAR_RESULT
+    GoToIfEq VAR_RESULT, GENDER_MALE, TwinleafTownRivalHouse1F_LookingForRival
+    GoToIfEq VAR_RESULT, GENDER_FEMALE, TwinleafTownRivalHouse1F_ComeCallingOnRival
     End
 
-_005C:
-    ScrCmd_0CD 0
-    ScrCmd_0CE 1
-    Message 0
-    GoTo _007A
+TwinleafTownRivalHouse1F_LookingForRival:
+    BufferPlayerName 0
+    BufferRivalName 1
+    Message TwinleafTownRivalHouse1F_Text_LookingForRival
+    GoTo TwinleafTownRivalHouse1F_Release
 
-_006B:
-    ScrCmd_0CD 0
-    ScrCmd_0CE 1
-    Message 1
-    GoTo _007A
+TwinleafTownRivalHouse1F_ComeCallingOnRival:
+    BufferPlayerName 0
+    BufferRivalName 1
+    Message TwinleafTownRivalHouse1F_Text_ComeCallingOnRival
+    GoTo TwinleafTownRivalHouse1F_Release
 
-_007A:
-    WaitABXPadPress
+TwinleafTownRivalHouse1F_Release:
+    WaitButton
     CloseMessage
     ReleaseAll
     End
 
-_0082:
-    ScrCmd_0CE 1
-    Message 4
-    WaitABXPadPress
+TwinleafTownRivalHouse1F_FriendsWithPokemonToo:
+    BufferRivalName 1
+    Message TwinleafTownRivalHouse1F_Text_FriendsWithPokemonToo
+    WaitButton
     CloseMessage
     ReleaseAll
     End
 
-_0090:
-    ScrCmd_0CE 1
-    Message 3
-    WaitABXPadPress
+TwinleafTownRivalHouse1F_HeShouldBeOnRoute201:
+    BufferRivalName 1
+    Message TwinleafTownRivalHouse1F_Text_HeShouldBeOnRoute201
+    WaitButton
     CloseMessage
     ReleaseAll
     End
 
-_009E:
-    SetFlag 110
-    ScrCmd_0CE 1
-    Message 2
-    WaitABXPadPress
+TwinleafTownRivalHouse1F_RocketedOffLikeUsual:
+    SetFlag FLAG_TALKED_TO_RIVAL_HOUSE_RIVAL_MOM_RIVAL_LEFT
+    BufferRivalName 1
+    Message TwinleafTownRivalHouse1F_Text_RocketedOffLikeUsual
+    WaitButton
     CloseMessage
     ReleaseAll
     End
 
-_00B0:
-    ScrCmd_0CE 1
-    Message 5
-    WaitABXPadPress
+TwinleafTownRivalHouse1F_TookOffLikeUsual:
+    BufferRivalName 1
+    Message TwinleafTownRivalHouse1F_Text_TookOffLikeUsual
+    WaitButton
     CloseMessage
     ReleaseAll
     End
 
-    .byte 0
-    .byte 0
+    .balign 4, 0

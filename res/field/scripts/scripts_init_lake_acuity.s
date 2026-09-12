@@ -1,13 +1,11 @@
-    .include "macros/scrcmd.inc"
+#include "macros/scrcmd.inc"
 
-    .data
 
-    .byte 1
-    ScriptEntry _0006
-    .byte 0
+    InitScriptEntry_OnFrameTable InitScriptFrameTable
+    InitScriptEntryEnd
 
-_0006:
-    .short 0x40D3, 1, 1
-    .short 0
+InitScriptFrameTable:
+    InitScriptGoToIfEqual VAR_LAKE_ACUITY_STATE, 1, 1
+    InitScriptFrameTableEnd
 
-    .balign 4, 0
+    InitScriptEnd

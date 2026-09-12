@@ -1,761 +1,733 @@
-    .include "macros/scrcmd.inc"
+#include "macros/scrcmd.inc"
+#include "res/text/bank/menu_entries.h"
+#include "res/text/bank/pal_park_lobby.h"
+#include "res/field/events/events_pal_park_lobby.h"
+#include "constants/pokemon.h"
+#include "constants/versions.h"
 
-    .data
 
-    ScriptEntry _0036
-    ScriptEntry _007E
-    ScriptEntry _02F8
-    ScriptEntry _0400
-    ScriptEntry _0413
-    ScriptEntry _045F
-    ScriptEntry _0475
-    ScriptEntry _0488
-    ScriptEntry _049B
-    ScriptEntry _04B4
-    ScriptEntry _057C
-    ScriptEntry _02D8
-    ScriptEntry _0662
-    .short 0xFD13
+    ScriptEntry PalParkLobby_OnTransition
+    ScriptEntry PalParkLobby_Worker
+    ScriptEntry PalParkLobby_OnFrame_TallyScore
+    ScriptEntry PalParkLobby_Record_Unused
+    ScriptEntry PalParkLobby_Daughter
+    ScriptEntry PalParkLobby_Dad
+    ScriptEntry PalParkLobby_ShowWatcherBoy
+    ScriptEntry PalParkLobby_ComplaintsLady
+    ScriptEntry PalParkLobby_RecordGuy
+    ScriptEntry PalParkLobby_OnFrame_ProfOak
+    ScriptEntry PalParkLobby_PoketchAppLady
+    ScriptEntry PalParkLobby_OnFrame_ExitPalPark
+    ScriptEntry PalParkLobby_GBASlotGiftLady
+    ScriptEntryEnd
 
-_0036:
-    ClearFlag 0x995
-    SetFlag 0x9F3
-    GoToIfNe 0x40F3, 0, _004D
+PalParkLobby_OnTransition:
+    ClearFlag FLAG_ALT_MUSIC_PAL_PARK
+    SetFlag FLAG_FIRST_ARRIVAL_POKE_PARK_FRONT_GATE
+    GoToIfNe VAR_PAL_PARK_STATE, 0, PalParkLobby_SetWorkerPosAndDir
     End
 
-_004D:
-    ScrCmd_186 7, 8, 9
-    ScrCmd_189 7, 2
+PalParkLobby_SetWorkerPosAndDir:
+    SetObjectEventPos LOCALID_WORKER, 8, 9
+    SetObjectEventDir LOCALID_WORKER, DIR_WEST
     End
 
-_005D:
-    GoToIfEq 0x40E0, 0x7D0, _0074
-    ScrCmd_0CD 1
-    ScrCmd_0D5 2, 0x40E0
+PalParkLobby_BufferRecord:
+    GoToIfEq VAR_CATCHING_SHOW_RECORD, 2000, PalParkLobby_BufferRivalRecord
+    BufferPlayerName 1
+    BufferNumber 2, VAR_CATCHING_SHOW_RECORD
     Return
 
-_0074:
-    ScrCmd_0CE 1
-    ScrCmd_0D5 2, 0x40E0
+PalParkLobby_BufferRivalRecord:
+    BufferRivalName 1
+    BufferNumber 2, VAR_CATCHING_SHOW_RECORD
     Return
 
-_007E:
-    PlayFanfare SEQ_SE_CONFIRM
+PalParkLobby_Worker:
+    PlaySE SE_CONFIRM_sseq_3
     LockAll
     FacePlayer
-    ScrCmd_14D 0x800C
-    GoToIfEq 0x800C, 0, _009D
-    GoTo _00D2
+    GetPlayerGender VAR_RESULT
+    GoToIfEq VAR_RESULT, GENDER_MALE, PalParkLobby_Worker_PlayerMale
+    GoTo PalParkLobby_Worker_PlayerFemale
 
-_009D:
-    GoToIfSet 211, _01D6
-    SetFlag 211
-    ScrCmd_0CD 0
-    Message 21
-    ScrCmd_03E 0x800C
-    GoToIfEq 0x800C, 0, _0107
-    GoToIfEq 0x800C, 1, _01CB
+PalParkLobby_Worker_PlayerMale:
+    GoToIfSet FLAG_TALKED_TO_PAL_PARK_LOBBY_RECEPTIONIST, PalParkLobby_Worker_Greeting_PlayerMale
+    SetFlag FLAG_TALKED_TO_PAL_PARK_LOBBY_RECEPTIONIST
+    BufferPlayerName 0
+    Message PalParkLobby_Text_WelcomeToPalPark_PlayerMale
+    ShowYesNoMenu VAR_RESULT
+    GoToIfEq VAR_RESULT, MENU_YES, PalParkLobby_Manual_FirstTime
+    GoToIfEq VAR_RESULT, MENU_NO, PalParkLobby_Worker_DontParticipate
     End
 
-_00D2:
-    GoToIfSet 211, _01E2
-    SetFlag 211
-    ScrCmd_0CD 0
-    Message 22
-    ScrCmd_03E 0x800C
-    GoToIfEq 0x800C, 0, _0107
-    GoToIfEq 0x800C, 1, _01CB
+PalParkLobby_Worker_PlayerFemale:
+    GoToIfSet FLAG_TALKED_TO_PAL_PARK_LOBBY_RECEPTIONIST, PalParkLobby_Worker_Greeting_PlayerFemale
+    SetFlag FLAG_TALKED_TO_PAL_PARK_LOBBY_RECEPTIONIST
+    BufferPlayerName 0
+    Message PalParkLobby_Text_WelcomeToPalPark_PlayerFemale
+    ShowYesNoMenu VAR_RESULT
+    GoToIfEq VAR_RESULT, MENU_YES, PalParkLobby_Manual_FirstTime
+    GoToIfEq VAR_RESULT, MENU_NO, PalParkLobby_Worker_DontParticipate
     End
 
-_0107:
-    Message 23
-    GoTo _012B
+PalParkLobby_Manual_FirstTime:
+    Message PalParkLobby_Text_LetMeExplainPalPark
+    GoTo PalParkLobby_OpenManualMenu
 
-_0110:
-    Message 24
-    GoTo _012B
+PalParkLobby_Manual_BasicRules:
+    Message PalParkLobby_Text_Manual_BasicRules
+    GoTo PalParkLobby_OpenManualMenu
 
-_0119:
-    Message 25
-    GoTo _012B
+PalParkLobby_Manual_CatchingShow:
+    Message PalParkLobby_Text_Manual_CatchingShow
+    GoTo PalParkLobby_OpenManualMenu
 
-_0122:
-    Message 26
-    GoTo _012B
+PalParkLobby_Manual_StockingPokemon:
+    Message PalParkLobby_Text_Manual_StockingPokemon
+    GoTo PalParkLobby_OpenManualMenu
 
-_012B:
-    ScrCmd_040 1, 1, 0, 1, 0x800C
-    ScrCmd_042 198, 0
-    ScrCmd_042 199, 1
-    ScrCmd_042 200, 2
-    ScrCmd_042 202, 4
-    ScrCmd_043
-    GoToIfEq 0x800C, 0, _0110
-    GoToIfEq 0x800C, 1, _0119
-    GoToIfEq 0x800C, 2, _0122
-    GoTo _0172
+PalParkLobby_OpenManualMenu:
+    InitGlobalTextMenu 1, 1, 0, VAR_RESULT
+    AddMenuEntryImm MenuEntries_Text_PalPark_BasicRules, 0
+    AddMenuEntryImm MenuEntries_Text_PalPark_CatchingShow, 1
+    AddMenuEntryImm MenuEntries_Text_PalPark_StockingPokemon, 2
+    AddMenuEntryImm MenuEntries_Text_PalPark_Understood, 4
+    ShowMenu
+    GoToIfEq VAR_RESULT, 0, PalParkLobby_Manual_BasicRules
+    GoToIfEq VAR_RESULT, 1, PalParkLobby_Manual_CatchingShow
+    GoToIfEq VAR_RESULT, 2, PalParkLobby_Manual_StockingPokemon
+    GoTo PalParkLobby_Worker_AskParticipateFromManual
 
-_0172:
-    Message 28
-    ScrCmd_03E 0x800C
-    GoToIfEq 0x800C, 1, _01CB
-_0186:
-    SetVar 0x800C, 0
-    ScrCmd_252 0x800C
-    GoToIfLt 0x800C, 6, _02AD
-    SetVar 0x800C, 0
-    ScrCmd_254 0x800C
-    GoToIfEq 0x800C, 0, _0299
-    ScrCmd_14D 0x800C
-    GoToIfEq 0x800C, 0, _0231
-    GoTo _0245
+PalParkLobby_Worker_AskParticipateFromManual:
+    Message PalParkLobby_Text_TakePartInCatchingShow
+    ShowYesNoMenu VAR_RESULT
+    GoToIfEq VAR_RESULT, MENU_NO, PalParkLobby_Worker_DontParticipate
+PalParkLobby_Worker_CheckIfCanParticipate:
+    SetVar VAR_RESULT, 0
+    GetPCBoxesFreeSlotCount VAR_RESULT
+    GoToIfLt VAR_RESULT, CATCHING_SHOW_MONS, PalParkLobby_Worker_PCBoxesFilled
+    SetVar VAR_RESULT, 0
+    GoToIfNotEnoughMonForCatchingShow PalParkLobby_Worker_NotEnoughPokemonMigrated
+    GetPlayerGender VAR_RESULT
+    GoToIfEq VAR_RESULT, GENDER_MALE, PalParkLobby_Worker_GiveParkBalls_PlayerMale
+    GoTo PalParkLobby_Worker_GiveParkBalls_PlayerFemale
 
-_01CB:
-    Message 29
-    WaitABXPadPress
+PalParkLobby_Worker_DontParticipate:
+    Message PalParkLobby_Text_AwwThatsTooBad
+    WaitButton
     CloseMessage
     ReleaseAll
     End
 
-_01D6:
-    ScrCmd_0CD 0
-    Message 30
-    GoTo _01EE
+PalParkLobby_Worker_Greeting_PlayerMale:
+    BufferPlayerName 0
+    Message PalParkLobby_Text_Greeting_PlayerMale
+    GoTo PalParkLobby_Worker_OpenCatchingShowMenu
 
-_01E2:
-    ScrCmd_0CD 0
-    Message 31
-    GoTo _01EE
+PalParkLobby_Worker_Greeting_PlayerFemale:
+    BufferPlayerName 0
+    Message PalParkLobby_Text_Greeting_PlayerFemale
+    GoTo PalParkLobby_Worker_OpenCatchingShowMenu
 
-_01EE:
-    ScrCmd_040 1, 1, 0, 1, 0x800C
-    ScrCmd_042 203, 0
-    ScrCmd_042 204, 1
-    ScrCmd_042 205, 2
-    ScrCmd_043
-    GoToIfEq 0x800C, 0, _0186
-    GoToIfEq 0x800C, 1, _02A4
-    GoToIfEq 0x800C, 2, _01CB
-    GoTo _01CB
+PalParkLobby_Worker_OpenCatchingShowMenu:
+    InitGlobalTextMenu 1, 1, 0, VAR_RESULT
+    AddMenuEntryImm MenuEntries_Text_PalPark_Enter, 0
+    AddMenuEntryImm MenuEntries_Text_PalPark_Info, 1
+    AddMenuEntryImm MenuEntries_Text_PalPark_Exit, 2
+    ShowMenu
+    GoToIfEq VAR_RESULT, 0, PalParkLobby_Worker_CheckIfCanParticipate
+    GoToIfEq VAR_RESULT, 1, PalParkLobby_Manual
+    GoToIfEq VAR_RESULT, 2, PalParkLobby_Worker_DontParticipate
+    GoTo PalParkLobby_Worker_DontParticipate
 
-_0231:
-    Call _005D
-    ScrCmd_0CD 0
-    Message 32
+PalParkLobby_Worker_GiveParkBalls_PlayerMale:
+    Call PalParkLobby_BufferRecord
+    BufferPlayerName 0
+    Message PalParkLobby_Text_HereParkBalls_PlayerMale
     CloseMessage
-    GoTo _0259
+    GoTo PalParkLobby_WalkInAndWarp
 
-_0245:
-    Call _005D
-    ScrCmd_0CD 0
-    Message 33
+PalParkLobby_Worker_GiveParkBalls_PlayerFemale:
+    Call PalParkLobby_BufferRecord
+    BufferPlayerName 0
+    Message PalParkLobby_Text_HereParkBalls_PlayerFemale
     CloseMessage
-    GoTo _0259
+    GoTo PalParkLobby_WalkInAndWarp
 
-_0259:
-    ApplyMovement 7, _02B8
+PalParkLobby_WalkInAndWarp:
+    ApplyMovement LOCALID_WORKER, PalParkLobby_Movement_WorkerMoveAside
     WaitMovement
-    ApplyMovement 0xFF, _02CC
+    ApplyMovement LOCALID_PLAYER, PalParkLobby_Movement_PlayerEnterPalPark
     WaitMovement
-    PlayFanfare SEQ_SE_DP_KAIDAN2
-    FadeScreen 6, 1, 0, 0
+    PlaySE SEQ_SE_DP_KAIDAN2_sseq
+    FadeScreenOut
     WaitFadeScreen
-    ScrCmd_0BE 251, 0, 24, 47, 0
-    FadeScreen 6, 1, 1, 0
+    Warp MAP_HEADER_PAL_PARK, 24, 47, DIR_NORTH
+    FadeScreenIn
     WaitFadeScreen
     ReleaseAll
     End
 
-_0299:
-    Message 34
-    WaitABXPadPress
+PalParkLobby_Worker_NotEnoughPokemonMigrated:
+    Message PalParkLobby_Text_NotEnoughPokemonMigrated
+    WaitButton
     CloseMessage
     ReleaseAll
     End
 
-_02A4:
-    Message 35
-    GoTo _012B
+PalParkLobby_Manual:
+    Message PalParkLobby_Text_IllReadManual
+    GoTo PalParkLobby_OpenManualMenu
 
-_02AD:
-    Message 37
-    WaitABXPadPress
+PalParkLobby_Worker_PCBoxesFilled:
+    Message PalParkLobby_Text_PCBoxesFilled
+    WaitButton
     CloseMessage
     ReleaseAll
     End
 
     .balign 4, 0
-_02B8:
-    MoveAction_024
-    MoveAction_00C 2
-    MoveAction_00F
-    MoveAction_026
+PalParkLobby_Movement_WorkerMoveAside:
+    WalkOnSpotFastNorth
+    WalkNormalNorth 2
+    WalkNormalEast
+    WalkOnSpotFastWest
     EndMovement
 
     .balign 4, 0
-_02CC:
-    MoveAction_00C 5
-    MoveAction_045
+PalParkLobby_Movement_PlayerEnterPalPark:
+    WalkNormalNorth 5
+    SetInvisible
     EndMovement
 
-_02D8:
+PalParkLobby_OnFrame_ExitPalPark:
     LockAll
-    SetVar 0x40F3, 0
-    ApplyMovement 0xFF, _03E4
+    SetVar VAR_PAL_PARK_STATE, 0
+    ApplyMovement LOCALID_PLAYER, PalParkLobby_Movement_PlayerExitPalPark
     WaitMovement
-    ApplyMovement 7, _03D8
+    ApplyMovement LOCALID_WORKER, PalParkLobby_Movement_WorkerMoveBack
     WaitMovement
     ReleaseAll
     End
 
-_02F8:
+PalParkLobby_OnFrame_TallyScore:
     LockAll
-    SetVar 0x40F3, 0
-    ApplyMovement 0xFF, _03EC
+    SetVar VAR_PAL_PARK_STATE, 0
+    ApplyMovement LOCALID_PLAYER, PalParkLobby_Movement_PlayerWalkToWorker
     WaitMovement
-    ScrCmd_256 0, 0x800C
-    ScrCmd_0D5 0, 0x800C
-    ScrCmd_256 1, 0x800C
-    ScrCmd_0D5 1, 0x800C
-    ScrCmd_256 2, 0x800C
-    ScrCmd_0D5 2, 0x800C
-    ScrCmd_256 3, 0x800C
-    ScrCmd_0D5 3, 0x800C
-    Message 38
-    ScrCmd_256 3, 0x800C
-    GoToIfGt 0x800C, 0x40E0, _035B
-    Message 40
-    Call _07BE
-    GoTo _0370
+    CalcCatchingShowPoints CATCHING_SHOW_CATCHING_POINTS, VAR_RESULT
+    BufferNumber 0, VAR_RESULT
+    CalcCatchingShowPoints CATCHING_SHOW_TIME_POINTS, VAR_RESULT
+    BufferNumber 1, VAR_RESULT
+    CalcCatchingShowPoints CATCHING_SHOW_TYPE_POINTS, VAR_RESULT
+    BufferNumber 2, VAR_RESULT
+    CalcCatchingShowPoints CATCHING_SHOW_TOTAL_POINTS, VAR_RESULT
+    BufferNumber 3, VAR_RESULT
+    Message PalParkLobby_Text_AllSixPokemonCaught
+    CalcCatchingShowPoints CATCHING_SHOW_TOTAL_POINTS, VAR_RESULT
+    GoToIfGt VAR_RESULT, VAR_CATCHING_SHOW_RECORD, PalParkLobby_Worker_RecordBroken
+    Message PalParkLobby_Text_DecentRecord
+    Call PalParkLobby_Worker_SetPrize
+    GoTo PalParkLobby_Worker_AskStoreCaughtMon
 
-_035B:
-    Message 39
-    Call _07BE
-    ScrCmd_256 3, 0x40E0
-    GoTo _0370
+PalParkLobby_Worker_RecordBroken:
+    Message PalParkLobby_Text_OutstandingRecord
+    Call PalParkLobby_Worker_SetPrize
+    CalcCatchingShowPoints CATCHING_SHOW_TOTAL_POINTS, VAR_CATCHING_SHOW_RECORD
+    GoTo PalParkLobby_Worker_AskStoreCaughtMon
 
-_0370:
-    Message 41
-    ScrCmd_03E 0x800C
-    GoToIfEq 0x800C, 0, _03AB
-    Message 46
-    ScrCmd_03E 0x800C
-    GoToIfEq 0x800C, 0, _039E
-    GoTo _0370
+PalParkLobby_Worker_AskStoreCaughtMon:
+    Message PalParkLobby_Text_AskStoreCaughtMon
+    ShowYesNoMenu VAR_RESULT
+    GoToIfEq VAR_RESULT, MENU_YES, PalParkLobby_Worker_StoreCaughtMon
+    Message PalParkLobby_Text_AskRedoCatchingShow
+    ShowYesNoMenu VAR_RESULT
+    GoToIfEq VAR_RESULT, MENU_YES, PalParkLobby_Worker_DontStoreCaughtMon
+    GoTo PalParkLobby_Worker_AskStoreCaughtMon
 
-_039E:
-    Message 43
+PalParkLobby_Worker_DontStoreCaughtMon:
+    Message PalParkLobby_Text_GoForBetterScore
     WaitABPress
     CloseMessage
-    GoTo _03BD
+    GoTo PalParkLobby_Worker_End
 
-_03AB:
-    ScrCmd_255
-    Message 42
-    Message 44
+PalParkLobby_Worker_StoreCaughtMon:
+    MoveCatchingShowMonsToPCBoxes
+    Message PalParkLobby_Text_PokemonHaveBeenBoxed
+    Message PalParkLobby_Text_ComeSeeUsAgain
     WaitABPress
     CloseMessage
-    GoTo _03BD
+    GoTo PalParkLobby_Worker_End
 
-_03BD:
-    ApplyMovement 0xFF, _03F8
+PalParkLobby_Worker_End:
+    ApplyMovement LOCALID_PLAYER, PalParkLobby_Movement_PlayerLeaveCounter
     WaitMovement
-    ApplyMovement 7, _03D8
+    ApplyMovement LOCALID_WORKER, PalParkLobby_Movement_WorkerMoveBack
     WaitMovement
     ReleaseAll
     End
 
     .balign 4, 0
-_03D8:
-    MoveAction_00E
-    MoveAction_00D 2
+PalParkLobby_Movement_WorkerMoveBack:
+    WalkNormalWest
+    WalkNormalSouth 2
     EndMovement
 
     .balign 4, 0
-_03E4:
-    MoveAction_00D 5
+PalParkLobby_Movement_PlayerExitPalPark:
+    WalkNormalSouth 5
     EndMovement
 
     .balign 4, 0
-_03EC:
-    MoveAction_00D 2
-    MoveAction_027
+PalParkLobby_Movement_PlayerWalkToWorker:
+    WalkNormalSouth 2
+    WalkOnSpotFastEast
     EndMovement
 
     .balign 4, 0
-_03F8:
-    MoveAction_00D 4
+PalParkLobby_Movement_PlayerLeaveCounter:
+    WalkNormalSouth 4
     EndMovement
 
-_0400:
-    PlayFanfare SEQ_SE_CONFIRM
+PalParkLobby_Record_Unused:
+    NPCMessage PalParkLobby_Text_CurrentRecordHolder
+    End
+
+PalParkLobby_Daughter:
+    PlaySE SE_CONFIRM_sseq_3
     LockAll
     FacePlayer
-    Message 57
-    WaitABXPadPress
+    BufferPlayerName 0
+    GoToIfEq VAR_RESULT, 2, PalParkLobby_Daughter_IHopeYouDoBetter
+    GoToIfEq VAR_RESULT, 1, PalParkLobby_Daughter_YourCatchingShowWasFantastic
+    GoTo PalParkLobby_Daughter_CameToSeeCatchingShow
+
+PalParkLobby_Daughter_CameToSeeCatchingShow:
+    Message PalParkLobby_Text_CameToSeeCatchingShow
+    WaitButton
     CloseMessage
     ReleaseAll
     End
 
-_0413:
-    PlayFanfare SEQ_SE_CONFIRM
+PalParkLobby_Daughter_YourCatchingShowWasFantastic:
+    Message PalParkLobby_Text_YourCatchingShowWasFantastic
+    WaitButton
+    CloseMessage
+    ReleaseAll
+    End
+
+PalParkLobby_Daughter_IHopeYouDoBetter:
+    Message PalParkLobby_Text_IHopeYouDoBetter
+    WaitButton
+    CloseMessage
+    ReleaseAll
+    End
+
+PalParkLobby_Dad:
+    BufferPlayerName 0
+    NPCMessage PalParkLobby_Text_DaughterIsBigFan
+    End
+
+PalParkLobby_ShowWatcherBoy:
+    NPCMessage PalParkLobby_Text_RareAndExoticPokemon
+    End
+
+PalParkLobby_ComplaintsLady:
+    NPCMessage PalParkLobby_Text_RarePokemonTakeLonger
+    End
+
+PalParkLobby_RecordGuy:
+    Call PalParkLobby_BufferRecord
+    NPCMessage PalParkLobby_Text_CurrentRecordHolder
+    End
+
+PalParkLobby_OnFrame_ProfOak:
     LockAll
-    FacePlayer
-    ScrCmd_0CD 0
-    GoToIfEq 0x800C, 2, _0454
-    GoToIfEq 0x800C, 1, _0449
-    GoTo _043E
-
-_043E:
-    Message 52
-    WaitABXPadPress
-    CloseMessage
-    ReleaseAll
-    End
-
-_0449:
-    Message 53
-    WaitABXPadPress
-    CloseMessage
-    ReleaseAll
-    End
-
-_0454:
-    Message 54
-    WaitABXPadPress
-    CloseMessage
-    ReleaseAll
-    End
-
-_045F:
-    ScrCmd_0CD 0
-    PlayFanfare SEQ_SE_CONFIRM
-    LockAll
-    FacePlayer
-    Message 55
-    WaitABXPadPress
-    CloseMessage
-    ReleaseAll
-    End
-
-_0475:
-    PlayFanfare SEQ_SE_CONFIRM
-    LockAll
-    FacePlayer
-    Message 56
-    WaitABXPadPress
-    CloseMessage
-    ReleaseAll
-    End
-
-_0488:
-    PlayFanfare SEQ_SE_CONFIRM
-    LockAll
-    FacePlayer
-    Message 65
-    WaitABXPadPress
-    CloseMessage
-    ReleaseAll
-    End
-
-_049B:
-    Call _005D
-    PlayFanfare SEQ_SE_CONFIRM
-    LockAll
-    FacePlayer
-    Message 57
-    WaitABXPadPress
-    CloseMessage
-    ReleaseAll
-    End
-
-_04B4:
-    LockAll
-    ClearFlag 0x242
-    SetVar 0x40E0, 0x7D0
-    ApplyMovement 1, _0548
+    ClearFlag FLAG_HIDE_ETERNA_CITY_SOUTH_HOUSE_PROF_OAK
+    SetVar VAR_CATCHING_SHOW_RECORD, 2000
+    ApplyMovement LOCALID_PROF_OAK, PalParkLobby_Movement_ProfOakNoticePlayer
     WaitMovement
-    ScrCmd_14D 0x4000
-    ScrCmd_0CD 0
-    GoToIfEq 0x4000, 0, _04E4
-    GoTo _04ED
+    GetPlayerGender VAR_MAP_LOCAL_0x00
+    BufferPlayerName 0
+    GoToIfEq VAR_MAP_LOCAL_0x00, GENDER_MALE, PalParkLobby_ThisIsPalPark_PlayerMale
+    GoTo PalParkLobby_ThisIsPalPark_PlayerFemale
 
-_04E4:
-    Message 0
-    GoTo _04F6
+PalParkLobby_ThisIsPalPark_PlayerMale:
+    Message PalParkLobby_Text_Oak_ThisIsPalPark_PlayerMale
+    GoTo PalParkLobby_PokemonFromAroundTheCountry
 
-_04ED:
-    Message 1
-    GoTo _04F6
+PalParkLobby_ThisIsPalPark_PlayerFemale:
+    Message PalParkLobby_Text_Oak_ThisIsPalPark_PlayerFemale
+    GoTo PalParkLobby_PokemonFromAroundTheCountry
 
-_04F6:
-    Message 2
+PalParkLobby_PokemonFromAroundTheCountry:
+    Message PalParkLobby_Text_Oak_PokemonFromAroundTheCountry
     CloseMessage
-    ApplyMovement 1, _0558
+    ApplyMovement LOCALID_PROF_OAK, PalParkLobby_Movement_ProfOakExclamationMark
     WaitMovement
-    Message 3
-    SetVar 0x8004, 19
-    CallCommonScript 0x7D9
-    Message 4
+    Message PalParkLobby_Text_Oak_GiftTrainerCounterApp
+    SetVar VAR_0x8004, POKETCH_APPID_TRAINERCOUNTER
+    Common_GivePoketchApp
+    Message PalParkLobby_Text_Oak_InEternaForSomeTime
     CloseMessage
-    WaitTime 15, 0x800C
-    ApplyMovement 0xFF, _0570
+    WaitTime 15, VAR_RESULT
+    ApplyMovement LOCALID_PLAYER, PalParkLobby_Movement_PlayerMoveAside
     WaitMovement
-    ApplyMovement 1, _0564
+    ApplyMovement LOCALID_PROF_OAK, PalParkLobby_Movement_ProfOakLeave
     WaitMovement
-    PlayFanfare SEQ_SE_DP_KAIDAN2
-    ScrCmd_065 1
-    ScrCmd_04B 0x603
-    SetVar 0x40C6, 1
+    PlaySE SEQ_SE_DP_KAIDAN2_sseq
+    RemoveObject LOCALID_PROF_OAK
+    WaitSE SEQ_SE_DP_KAIDAN2_sseq
+    SetVar VAR_PAL_PARK_LOBBY_STATE, 1
     ReleaseAll
     End
 
     .balign 4, 0
-_0548:
-    MoveAction_04B
-    MoveAction_03F
-    MoveAction_00D 3
+PalParkLobby_Movement_ProfOakNoticePlayer:
+    EmoteExclamationMark
+    Delay8
+    WalkNormalSouth 3
     EndMovement
 
     .balign 4, 0
-_0558:
-    MoveAction_04B
-    MoveAction_03F
+PalParkLobby_Movement_ProfOakExclamationMark:
+    EmoteExclamationMark
+    Delay8
     EndMovement
 
     .balign 4, 0
-_0564:
-    MoveAction_00D
-    MoveAction_021
+PalParkLobby_Movement_ProfOakLeave:
+    WalkNormalSouth
+    WalkOnSpotNormalSouth
     EndMovement
 
     .balign 4, 0
-_0570:
-    MoveAction_00F
-    MoveAction_022
+PalParkLobby_Movement_PlayerMoveAside:
+    WalkNormalEast
+    WalkOnSpotNormalWest
     EndMovement
 
-_057C:
-    PlayFanfare SEQ_SE_CONFIRM
+PalParkLobby_PoketchAppLady:
+    PlaySE SE_CONFIRM_sseq_3
     LockAll
     FacePlayer
-    GoToIfEq 0x400A, 1, _062C
-    GoToIfEq 0x400A, 2, _063C
-    ScrCmd_134 21, 0x800C
-    GoToIfEq 0x800C, 1, _0657
-    Message 5
-    Message 6
-    ScrCmd_134 20, 0x800C
-    GoToIfEq 0x800C, 1, _05FB
-    Message 10
-    ScrCmd_1C0 0x800C, 143
-    GoToIfEq 0x800C, 0, _064C
-    Message 11
-    SetVar 0x8004, 20
-    CallCommonScript 0x7D9
-    WaitABXPadPress
-    SetVar 0x400A, 1
+    GoToIfEq VAR_MAP_LOCAL_0x0A, 1, PalParkLobby_PoketchAppLady_JustReceivedKitchenTimer
+    GoToIfEq VAR_MAP_LOCAL_0x0A, 2, PalParkLobby_PoketchAppLady_JustReceivedColorChanger
+    CheckPoketchAppRegistered POKETCH_APPID_COLORCHANGER, VAR_RESULT
+    GoToIfEq VAR_RESULT, 1, PalParkLobby_PoketchAppLady_ReceivedAllPoketchApps
+    Message PalParkLobby_Text_PalParkIsScintillating
+    Message PalParkLobby_Text_NeverSeenPokemon
+    CheckPoketchAppRegistered POKETCH_APPID_KITCHENTIMER, VAR_RESULT
+    GoToIfEq VAR_RESULT, 1, PalParkLobby_PoketchAppLady_CheckKecleon
+    Message PalParkLobby_Text_PokemonThatJustEatsAndSleeps
+    CheckPartyHasSpecies VAR_RESULT, SPECIES_SNORLAX
+    GoToIfEq VAR_RESULT, 0, PalParkLobby_PoketchAppLady_DoesntHaveSpecies
+    Message PalParkLobby_Text_ShowSnorlaxForApp
+    SetVar VAR_0x8004, POKETCH_APPID_KITCHENTIMER
+    Common_GivePoketchApp
+    WaitButton
+    SetVar VAR_MAP_LOCAL_0x0A, 1
     CloseMessage
     ReleaseAll
     End
 
-_05FB:
-    Message 13
-    ScrCmd_1C0 0x800C, 0x160
-    GoToIfEq 0x800C, 0, _064C
-    Message 14
-    SetVar 0x8004, 21
-    CallCommonScript 0x7D9
-    WaitABXPadPress
-    SetVar 0x400A, 2
+PalParkLobby_PoketchAppLady_CheckKecleon:
+    Message PalParkLobby_Text_PokemonThatChangesColor
+    CheckPartyHasSpecies VAR_RESULT, SPECIES_KECLEON
+    GoToIfEq VAR_RESULT, 0, PalParkLobby_PoketchAppLady_DoesntHaveSpecies
+    Message PalParkLobby_Text_ShowKecleonForApp
+    SetVar VAR_0x8004, POKETCH_APPID_COLORCHANGER
+    Common_GivePoketchApp
+    WaitButton
+    SetVar VAR_MAP_LOCAL_0x0A, 2
     CloseMessage
     ReleaseAll
     End
 
-_062C:
-    ScrCmd_0D7 0, 20
-    Message 12
-    WaitABXPadPress
+PalParkLobby_PoketchAppLady_JustReceivedKitchenTimer:
+    BufferPoketchAppName 0, POKETCH_APPID_KITCHENTIMER
+    Message PalParkLobby_Text_KitchenTimerMakesYouCook
+    WaitButton
     CloseMessage
     ReleaseAll
     End
 
-_063C:
-    ScrCmd_0D7 0, 21
-    Message 15
-    WaitABXPadPress
+PalParkLobby_PoketchAppLady_JustReceivedColorChanger:
+    BufferPoketchAppName 0, POKETCH_APPID_COLORCHANGER
+    Message PalParkLobby_Text_ColorsChangeMood
+    WaitButton
     CloseMessage
     ReleaseAll
     End
 
-_064C:
-    Message 19
-    WaitABXPadPress
+PalParkLobby_PoketchAppLady_DoesntHaveSpecies:
+    Message PalParkLobby_Text_WhatWasPokemonsName
+    WaitButton
     CloseMessage
     ReleaseAll
     End
 
-_0657:
-    Message 20
-    WaitABXPadPress
+PalParkLobby_PoketchAppLady_ReceivedAllPoketchApps:
+    Message PalParkLobby_Text_AreYouTakingChallenge
+    WaitButton
     CloseMessage
     ReleaseAll
     End
 
-_0662:
-    PlayFanfare SEQ_SE_CONFIRM
+PalParkLobby_GBASlotGiftLady:
+    PlaySE SE_CONFIRM_sseq_3
     LockAll
     FacePlayer
-    GoToIfEq 0x4009, 1, _06CF
-    ScrCmd_26E 0x800C
-    GoToIfEq 0x800C, 4, _06DA
-    GoToIfEq 0x800C, 5, _0706
-    GoToIfEq 0x800C, 1, _0732
-    GoToIfEq 0x800C, 2, _0756
-    GoToIfEq 0x800C, 3, _077A
-    GoTo _06C4
+    GoToIfEq VAR_MAP_LOCAL_0x09, 1, PalParkLobby_GBASlotGiftLady_JustReceivedGift
+    GetGBACartridgeVersion VAR_RESULT
+    GoToIfEq VAR_RESULT, VERSION_FIRERED, PalParkLobby_GBASlotGiftLady_FireRed
+    GoToIfEq VAR_RESULT, VERSION_LEAFGREEN, PalParkLobby_GBASlotGiftLady_LeafGreen
+    GoToIfEq VAR_RESULT, VERSION_SAPPHIRE, PalParkLobby_GBASlotGiftLady_Sapphire
+    GoToIfEq VAR_RESULT, VERSION_RUBY, PalParkLobby_GBASlotGiftLady_Ruby
+    GoToIfEq VAR_RESULT, VERSION_EMERALD, PalParkLobby_GBASlotGiftLady_Emerald
+    GoTo PalParkLobby_GBASlotGiftLady_NoGBAGame
     End
 
-_06C4:
-    Message 66
-    WaitABXPadPress
+PalParkLobby_GBASlotGiftLady_NoGBAGame:
+    Message PalParkLobby_Text_ClashTrainerAndPokemon
+    WaitButton
     CloseMessage
     ReleaseAll
     End
 
-_06CF:
-    Message 72
-    WaitABXPadPress
+PalParkLobby_GBASlotGiftLady_JustReceivedGift:
+    Message PalParkLobby_Text_CatchingShowsAndContests
+    WaitButton
     CloseMessage
     ReleaseAll
     End
 
-_06DA:
-    SetVar 0x8004, 97
-    SetVar 0x8005, 1
-    ScrCmd_1D3 0x8004, 0x8005, 0x800C
-    GoToIfEq 0x800C, 0, _06C4
-    Message 67
-    GoTo _079E
+PalParkLobby_GBASlotGiftLady_FireRed:
+    SetVar VAR_0x8004, ACCESSORY_CROWN
+    SetVar VAR_0x8005, 1
+    CanFitAccessory VAR_0x8004, VAR_0x8005, VAR_RESULT
+    GoToIfEq VAR_RESULT, FALSE, PalParkLobby_GBASlotGiftLady_NoGBAGame
+    Message PalParkLobby_Text_MustCrownYou
+    GoTo PalParkLobby_GBASlotGiftLady_GiveAccessory
     End
 
-_0706:
-    SetVar 0x8004, 98
-    SetVar 0x8005, 1
-    ScrCmd_1D3 0x8004, 0x8005, 0x800C
-    GoToIfEq 0x800C, 0, _06C4
-    Message 68
-    GoTo _079E
+PalParkLobby_GBASlotGiftLady_LeafGreen:
+    SetVar VAR_0x8004, ACCESSORY_TIARA
+    SetVar VAR_0x8005, 1
+    CanFitAccessory VAR_0x8004, VAR_0x8005, VAR_RESULT
+    GoToIfEq VAR_RESULT, FALSE, PalParkLobby_GBASlotGiftLady_NoGBAGame
+    Message PalParkLobby_Text_CompelledToGiveTiara
+    GoTo PalParkLobby_GBASlotGiftLady_GiveAccessory
     End
 
-_0732:
-    SetVar 0x8004, 14
-    ScrCmd_1D6 0x8004, 0x800C
-    GoToIfEq 0x800C, 1, _06C4
-    Message 69
-    GoTo _07AE
+PalParkLobby_GBASlotGiftLady_Sapphire:
+    SetVar VAR_0x8004, BACKDROP_SEAFLOOR
+    CheckBackdrop VAR_0x8004, VAR_RESULT
+    GoToIfEq VAR_RESULT, TRUE, PalParkLobby_GBASlotGiftLady_NoGBAGame
+    Message PalParkLobby_Text_TakeThisSeafloorBackdrop
+    GoTo PalParkLobby_GBASlotGiftLady_GiveBackdrop
     End
 
-_0756:
-    SetVar 0x8004, 15
-    ScrCmd_1D6 0x8004, 0x800C
-    GoToIfEq 0x800C, 1, _06C4
-    Message 70
-    GoTo _07AE
+PalParkLobby_GBASlotGiftLady_Ruby:
+    SetVar VAR_0x8004, BACKDROP_UNDERGROUND
+    CheckBackdrop VAR_0x8004, VAR_RESULT
+    GoToIfEq VAR_RESULT, TRUE, PalParkLobby_GBASlotGiftLady_NoGBAGame
+    Message PalParkLobby_Text_TakeThisUndergroundBackdrop
+    GoTo PalParkLobby_GBASlotGiftLady_GiveBackdrop
     End
 
-_077A:
-    SetVar 0x8004, 16
-    ScrCmd_1D6 0x8004, 0x800C
-    GoToIfEq 0x800C, 1, _06C4
-    Message 71
-    GoTo _07AE
+PalParkLobby_GBASlotGiftLady_Emerald:
+    SetVar VAR_0x8004, BACKDROP_SKY
+    CheckBackdrop VAR_0x8004, VAR_RESULT
+    GoToIfEq VAR_RESULT, TRUE, PalParkLobby_GBASlotGiftLady_NoGBAGame
+    Message PalParkLobby_Text_TakeThisSkyBackdrop
+    GoTo PalParkLobby_GBASlotGiftLady_GiveBackdrop
     End
 
-_079E:
-    CallCommonScript 0x7DF
-    SetVar 0x4009, 1
+PalParkLobby_GBASlotGiftLady_GiveAccessory:
+    Common_GiveAccessoryWaitForConfirm
+    SetVar VAR_MAP_LOCAL_0x09, 1
     CloseMessage
     ReleaseAll
     End
 
-_07AE:
-    CallCommonScript 0x7F4
-    SetVar 0x4009, 1
+PalParkLobby_GBASlotGiftLady_GiveBackdrop:
+    Common_ObtainContestBackdropWaitForConfirm
+    SetVar VAR_MAP_LOCAL_0x09, 1
     CloseMessage
     ReleaseAll
     End
 
-_07BE:
-    ScrCmd_256 3, 0x800C
-    CallIfLt 0x800C, 0xBB8, _07FA
-    CallIfLt 0x800C, 0xCE4, _0870
-    CallIfLt 0x800C, 0xDAC, _08BF
-    CallIfLt 0x800C, 0x2710, _0928
+PalParkLobby_Worker_SetPrize:
+    CalcCatchingShowPoints CATCHING_SHOW_TOTAL_POINTS, VAR_RESULT
+    CallIfLt VAR_RESULT, 3000, PalParkLobby_Worker_SetPrize_Level1
+    CallIfLt VAR_RESULT, 3300, PalParkLobby_Worker_SetPrize_Level2
+    CallIfLt VAR_RESULT, 3500, PalParkLobby_Worker_SetPrize_Level3
+    CallIfLt VAR_RESULT, 10000, PalParkLobby_Worker_SetPrize_Level4
     Return
 
-_07FA:
-    ScrCmd_1B7 0x8006, 8
-    CallIfEq 0x8006, 0, _09B6
-    CallIfEq 0x8006, 1, _09BE
-    CallIfEq 0x8006, 2, _09C6
-    CallIfEq 0x8006, 3, _09CE
-    CallIfEq 0x8006, 4, _09D6
-    CallIfEq 0x8006, 5, _09DE
-    CallIfEq 0x8006, 6, _09E6
-    CallIfEq 0x8006, 7, _09EE
-    Call _0984
+PalParkLobby_Worker_SetPrize_Level1:
+    GetRandom VAR_0x8006, 8
+    CallIfEq VAR_0x8006, 0, PalParkLobby_SetPrize_CheriBerry
+    CallIfEq VAR_0x8006, 1, PalParkLobby_SetPrize_ChestoBerry
+    CallIfEq VAR_0x8006, 2, PalParkLobby_SetPrize_PechaBerry
+    CallIfEq VAR_0x8006, 3, PalParkLobby_SetPrize_RawstBerry
+    CallIfEq VAR_0x8006, 4, PalParkLobby_SetPrize_AspearBerry
+    CallIfEq VAR_0x8006, 5, PalParkLobby_SetPrize_LeppaBerry
+    CallIfEq VAR_0x8006, 6, PalParkLobby_SetPrize_OranBerry
+    CallIfEq VAR_0x8006, 7, PalParkLobby_SetPrize_PersimBerry
+    Call PalParkLobby_Worker_CheckIfCanGivePrize
     Return
 
-_0870:
-    ScrCmd_1B7 0x8006, 5
-    CallIfEq 0x8006, 0, _09F6
-    CallIfEq 0x8006, 1, _09FE
-    CallIfEq 0x8006, 2, _0A06
-    CallIfEq 0x8006, 3, _0A0E
-    CallIfEq 0x8006, 4, _0A16
-    Call _0984
+PalParkLobby_Worker_SetPrize_Level2:
+    GetRandom VAR_0x8006, 5
+    CallIfEq VAR_0x8006, 0, PalParkLobby_SetPrize_FigyBerry
+    CallIfEq VAR_0x8006, 1, PalParkLobby_SetPrize_WikiBerry
+    CallIfEq VAR_0x8006, 2, PalParkLobby_SetPrize_MagoBerry
+    CallIfEq VAR_0x8006, 3, PalParkLobby_SetPrize_AguavBerry
+    CallIfEq VAR_0x8006, 4, PalParkLobby_SetPrize_IapapaBerry
+    Call PalParkLobby_Worker_CheckIfCanGivePrize
     Return
 
-_08BF:
-    ScrCmd_1B7 0x8006, 7
-    CallIfEq 0x8006, 0, _0A1E
-    CallIfEq 0x8006, 1, _0A26
-    CallIfEq 0x8006, 2, _0A2E
-    CallIfEq 0x8006, 3, _0A36
-    CallIfEq 0x8006, 4, _0A3E
-    CallIfEq 0x8006, 5, _0A46
-    CallIfEq 0x8006, 6, _0A4E
-    Call _0984
+PalParkLobby_Worker_SetPrize_Level3:
+    GetRandom VAR_0x8006, 7
+    CallIfEq VAR_0x8006, 0, PalParkLobby_SetPrize_RazzBerry
+    CallIfEq VAR_0x8006, 1, PalParkLobby_SetPrize_BlukBerry
+    CallIfEq VAR_0x8006, 2, PalParkLobby_SetPrize_NanabBerry
+    CallIfEq VAR_0x8006, 3, PalParkLobby_SetPrize_WepearBerry
+    CallIfEq VAR_0x8006, 4, PalParkLobby_SetPrize_PinapBerry
+    CallIfEq VAR_0x8006, 5, PalParkLobby_SetPrize_LumBerry
+    CallIfEq VAR_0x8006, 6, PalParkLobby_SetPrize_SitrusBerry
+    Call PalParkLobby_Worker_CheckIfCanGivePrize
     Return
 
-_0928:
-    ScrCmd_1B7 0x8006, 6
-    CallIfEq 0x8006, 0, _0A56
-    CallIfEq 0x8006, 1, _0A5E
-    CallIfEq 0x8006, 2, _0A66
-    CallIfEq 0x8006, 3, _0A6E
-    CallIfEq 0x8006, 4, _0A76
-    CallIfEq 0x8006, 5, _0A7E
-    Call _0984
+PalParkLobby_Worker_SetPrize_Level4:
+    GetRandom VAR_0x8006, 6
+    CallIfEq VAR_0x8006, 0, PalParkLobby_SetPrize_PomegBerry
+    CallIfEq VAR_0x8006, 1, PalParkLobby_SetPrize_KelpsyBerry
+    CallIfEq VAR_0x8006, 2, PalParkLobby_SetPrize_QualotBerry
+    CallIfEq VAR_0x8006, 3, PalParkLobby_SetPrize_HondewBerry
+    CallIfEq VAR_0x8006, 4, PalParkLobby_SetPrize_GrepaBerry
+    CallIfEq VAR_0x8006, 5, PalParkLobby_SetPrize_TamatoBerry
+    Call PalParkLobby_Worker_CheckIfCanGivePrize
     Return
 
-_0984:
-    ScrCmd_07D 0x8006, 1, 0x8007
-    CallIfNe 0x8007, 0, _09A1
-    SetVar 0x800C, 0x2710
+PalParkLobby_Worker_CheckIfCanGivePrize:
+    CanFitItem VAR_0x8006, 1, VAR_0x8007
+    CallIfNe VAR_0x8007, 0, PalParkLobby_Worker_GivePrize
+    SetVar VAR_RESULT, 0x2710
     Return
 
-_09A1:
-    Message 45
-    SetVar 0x8004, 0x8006
-    SetVar 0x8005, 1
-    CallCommonScript 0x7FC
+PalParkLobby_Worker_GivePrize:
+    Message PalParkLobby_Text_TimeForPrize
+    SetVar VAR_0x8004, VAR_0x8006
+    SetVar VAR_0x8005, 1
+    Common_GiveItemQuantity
     Return
 
-_09B6:
-    SetVar 0x8006, 149
+PalParkLobby_SetPrize_CheriBerry:
+    SetVar VAR_0x8006, ITEM_CHERI_BERRY
     Return
 
-_09BE:
-    SetVar 0x8006, 150
+PalParkLobby_SetPrize_ChestoBerry:
+    SetVar VAR_0x8006, ITEM_CHESTO_BERRY
     Return
 
-_09C6:
-    SetVar 0x8006, 151
+PalParkLobby_SetPrize_PechaBerry:
+    SetVar VAR_0x8006, ITEM_PECHA_BERRY
     Return
 
-_09CE:
-    SetVar 0x8006, 152
+PalParkLobby_SetPrize_RawstBerry:
+    SetVar VAR_0x8006, ITEM_RAWST_BERRY
     Return
 
-_09D6:
-    SetVar 0x8006, 153
+PalParkLobby_SetPrize_AspearBerry:
+    SetVar VAR_0x8006, ITEM_ASPEAR_BERRY
     Return
 
-_09DE:
-    SetVar 0x8006, 154
+PalParkLobby_SetPrize_LeppaBerry:
+    SetVar VAR_0x8006, ITEM_LEPPA_BERRY
     Return
 
-_09E6:
-    SetVar 0x8006, 155
+PalParkLobby_SetPrize_OranBerry:
+    SetVar VAR_0x8006, ITEM_ORAN_BERRY
     Return
 
-_09EE:
-    SetVar 0x8006, 156
+PalParkLobby_SetPrize_PersimBerry:
+    SetVar VAR_0x8006, ITEM_PERSIM_BERRY
     Return
 
-_09F6:
-    SetVar 0x8006, 159
+PalParkLobby_SetPrize_FigyBerry:
+    SetVar VAR_0x8006, ITEM_FIGY_BERRY
     Return
 
-_09FE:
-    SetVar 0x8006, 160
+PalParkLobby_SetPrize_WikiBerry:
+    SetVar VAR_0x8006, ITEM_WIKI_BERRY
     Return
 
-_0A06:
-    SetVar 0x8006, 161
+PalParkLobby_SetPrize_MagoBerry:
+    SetVar VAR_0x8006, ITEM_MAGO_BERRY
     Return
 
-_0A0E:
-    SetVar 0x8006, 162
+PalParkLobby_SetPrize_AguavBerry:
+    SetVar VAR_0x8006, ITEM_AGUAV_BERRY
     Return
 
-_0A16:
-    SetVar 0x8006, 163
+PalParkLobby_SetPrize_IapapaBerry:
+    SetVar VAR_0x8006, ITEM_IAPAPA_BERRY
     Return
 
-_0A1E:
-    SetVar 0x8006, 164
+PalParkLobby_SetPrize_RazzBerry:
+    SetVar VAR_0x8006, ITEM_RAZZ_BERRY
     Return
 
-_0A26:
-    SetVar 0x8006, 165
+PalParkLobby_SetPrize_BlukBerry:
+    SetVar VAR_0x8006, ITEM_BLUK_BERRY
     Return
 
-_0A2E:
-    SetVar 0x8006, 166
+PalParkLobby_SetPrize_NanabBerry:
+    SetVar VAR_0x8006, ITEM_NANAB_BERRY
     Return
 
-_0A36:
-    SetVar 0x8006, 167
+PalParkLobby_SetPrize_WepearBerry:
+    SetVar VAR_0x8006, ITEM_WEPEAR_BERRY
     Return
 
-_0A3E:
-    SetVar 0x8006, 168
+PalParkLobby_SetPrize_PinapBerry:
+    SetVar VAR_0x8006, ITEM_PINAP_BERRY
     Return
 
-_0A46:
-    SetVar 0x8006, 157
+PalParkLobby_SetPrize_LumBerry:
+    SetVar VAR_0x8006, ITEM_LUM_BERRY
     Return
 
-_0A4E:
-    SetVar 0x8006, 158
+PalParkLobby_SetPrize_SitrusBerry:
+    SetVar VAR_0x8006, ITEM_SITRUS_BERRY
     Return
 
-_0A56:
-    SetVar 0x8006, 169
+PalParkLobby_SetPrize_PomegBerry:
+    SetVar VAR_0x8006, ITEM_POMEG_BERRY
     Return
 
-_0A5E:
-    SetVar 0x8006, 170
+PalParkLobby_SetPrize_KelpsyBerry:
+    SetVar VAR_0x8006, ITEM_KELPSY_BERRY
     Return
 
-_0A66:
-    SetVar 0x8006, 171
+PalParkLobby_SetPrize_QualotBerry:
+    SetVar VAR_0x8006, ITEM_QUALOT_BERRY
     Return
 
-_0A6E:
-    SetVar 0x8006, 172
+PalParkLobby_SetPrize_HondewBerry:
+    SetVar VAR_0x8006, ITEM_HONDEW_BERRY
     Return
 
-_0A76:
-    SetVar 0x8006, 173
+PalParkLobby_SetPrize_GrepaBerry:
+    SetVar VAR_0x8006, ITEM_GREPA_BERRY
     Return
 
-_0A7E:
-    SetVar 0x8006, 174
+PalParkLobby_SetPrize_TamatoBerry:
+    SetVar VAR_0x8006, ITEM_TAMATO_BERRY
     Return
 
-    .byte 0
-    .byte 0
+    .balign 4, 0

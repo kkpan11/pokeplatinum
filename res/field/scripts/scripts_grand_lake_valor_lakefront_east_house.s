@@ -1,35 +1,34 @@
-    .include "macros/scrcmd.inc"
+#include "macros/scrcmd.inc"
+#include "res/text/bank/grand_lake_valor_lakefront_east_house.h"
 
-    .data
 
-    ScriptEntry _0006
-    .short 0xFD13
+    ScriptEntry GrandLakeValorLakefrontEastHouse_Beauty
+    ScriptEntryEnd
 
-_0006:
-    PlayFanfare SEQ_SE_CONFIRM
+GrandLakeValorLakefrontEastHouse_Beauty:
+    PlaySE SE_CONFIRM_sseq_3
     LockAll
     FacePlayer
-    GoToIfSet 0x13A, _0055
-    Message 0
-    SetVar 0x8004, 69
-    SetVar 0x8005, 1
-    ScrCmd_07D 0x8004, 0x8005, 0x800C
-    GoToIfEq 0x800C, 0, _004B
-    SetFlag 0x13A
-    CallCommonScript 0x7E0
+    GoToIfSet FLAG_RECEIVED_GRAND_LAKE_VALOR_LAKEFRONT_EAST_HOUSE_WHITE_FLUTE, GrandLakeValorLakefrontEastHouse_BlowToAttractPokemon
+    Message GrandLakeValorLakefrontEastHouse_Text_ThanksForHelping
+    SetVar VAR_0x8004, ITEM_WHITE_FLUTE
+    SetVar VAR_0x8005, 1
+    GoToIfCannotFitItem VAR_0x8004, VAR_0x8005, VAR_RESULT, GrandLakeValorLakefrontEastHouse_BagIsFull
+    SetFlag FLAG_RECEIVED_GRAND_LAKE_VALOR_LAKEFRONT_EAST_HOUSE_WHITE_FLUTE
+    Common_GiveItemQuantityNoLineFeed
     CloseMessage
     ReleaseAll
     End
 
-_004B:
-    CallCommonScript 0x7E1
+GrandLakeValorLakefrontEastHouse_BagIsFull:
+    Common_MessageBagIsFull
     CloseMessage
     ReleaseAll
     End
 
-_0055:
-    Message 1
-    WaitABXPadPress
+GrandLakeValorLakefrontEastHouse_BlowToAttractPokemon:
+    Message GrandLakeValorLakefrontEastHouse_Text_BlowToAttractPokemon
+    WaitButton
     CloseMessage
     ReleaseAll
     End

@@ -1,17 +1,13 @@
-    .include "macros/scrcmd.inc"
+#include "macros/scrcmd.inc"
 
-    .data
 
-    .byte 2
-    .short 1, 0
-    .byte 4
-    .short 2, 0
-    .byte 1
-    ScriptEntry _0010
-    .byte 0
+    InitScriptEntry_OnTransition 1
+    InitScriptEntry_OnLoad 2
+    InitScriptEntry_OnFrameTable InitScriptFrameTable
+    InitScriptEntryEnd
 
-_0010:
-    .short 0x4095, 0, 3
-    .short 0
+InitScriptFrameTable:
+    InitScriptGoToIfEqual VAR_VISITED_LAKE_VERITY_WITH_RIVAL, 0, 3
+    InitScriptFrameTableEnd
 
-    .balign 4, 0
+    InitScriptEnd

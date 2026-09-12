@@ -1,255 +1,248 @@
-    .include "macros/scrcmd.inc"
+#include "macros/scrcmd.inc"
+#include "res/text/bank/solaceon_town_pokemon_news_press.h"
+#include "res/text/bank/menu_entries.h"
 
-    .data
 
-    ScriptEntry _000E
-    ScriptEntry _02BB
-    ScriptEntry _02CE
-    .short 0xFD13
+    ScriptEntry SolaceonTownPokemonNewsPress_GymGuide
+    ScriptEntry SolaceonTownPokemonNewsPress_PokemonBreederM
+    ScriptEntry SolaceonTownPokemonNewsPress_PC
+    ScriptEntryEnd
 
-_000E:
-    PlayFanfare SEQ_SE_CONFIRM
+SolaceonTownPokemonNewsPress_GymGuide:
+    PlaySE SE_CONFIRM_sseq_3
     LockAll
     FacePlayer
-    GoToIfSet 220, _0216
-    GoToIfSet 0xAB1, _02B0
-    GoToIfUnset 216, _004A
-    GoToIfEq 0x40E5, 0, _0057
-    GoTo _0081
+    GoToIfSet FLAG_COULD_NOT_RECEIVE_POKEMON_NEWS_PRESS_REWARD, SolaceonTownPokemonNewsPress_TryGiveReward
+    GoToIfSet FLAG_DAILY_RECEIVED_POKEMON_NEWS_PRESS_REWARD, SolaceonTownPokemonNewsPress_AnotherAssignmentTomorrow
+    GoToIfUnset FLAG_TALKED_TO_POKEMON_NEWS_PRESS_GYM_GUIDE, SolaceonTownPokemonNewsPress_ExpertWeveBeenLookingFor
+    GoToIfEq VAR_POKEMON_NEWS_PRESS_REQUESTED_POKEMON, 0, SolaceonTownPokemonNewsPress_HeresYourAssignment
+    GoTo SolaceonTownPokemonNewsPress_CheckBroughtRequestedPokemon
 
-_004A:
-    SetFlag 216
-    Message 0
-    GoTo _0060
+SolaceonTownPokemonNewsPress_ExpertWeveBeenLookingFor:
+    SetFlag FLAG_TALKED_TO_POKEMON_NEWS_PRESS_GYM_GUIDE
+    Message SolaceonTownPokemonNewsPress_Text_YoureTheExpert
+    GoTo SolaceonTownPokemonNewsPress_SetNewsPressRequestedPokemon
 
-_0057:
-    Message 1
-    GoTo _0060
+SolaceonTownPokemonNewsPress_HeresYourAssignment:
+    Message SolaceonTownPokemonNewsPress_Text_HeresYourAssignment
+    GoTo SolaceonTownPokemonNewsPress_SetNewsPressRequestedPokemon
 
-_0060:
-    ScrCmd_218 0x800C
-    SetVar 0x40E5, 0x800C
-    ScrCmd_219 1
-    ScrCmd_0DA 0, 0x40E5, 0, 0
-    Message 2
-    WaitABXPadPress
+SolaceonTownPokemonNewsPress_SetNewsPressRequestedPokemon:
+    GetRandomSeenSpecies VAR_RESULT
+    SetVar VAR_POKEMON_NEWS_PRESS_REQUESTED_POKEMON, VAR_RESULT
+    SetNewsPressDeadline 1
+    BufferSpeciesNameFromVar 0, VAR_POKEMON_NEWS_PRESS_REQUESTED_POKEMON, 0, 0
+    Message SolaceonTownPokemonNewsPress_Text_BringMeThisPokemon
+    WaitButton
     CloseMessage
     ReleaseAll
     End
 
-_0081:
-    Message 3
-    ScrCmd_21A 0x800C
-    GoToIfEq 0x800C, 0, _029F
-    ScrCmd_1C0 0x800C, 0x40E5
-    GoToIfEq 0x800C, 0, _0283
-    GoTo _00AE
+SolaceonTownPokemonNewsPress_CheckBroughtRequestedPokemon:
+    Message SolaceonTownPokemonNewsPress_Text_DidYouBringThePokemon
+    GetNewsPressDeadline VAR_RESULT
+    GoToIfEq VAR_RESULT, 0, SolaceonTownPokemonNewsPress_FailedAssignment
+    CheckPartyHasSpecies VAR_RESULT, VAR_POKEMON_NEWS_PRESS_REQUESTED_POKEMON
+    GoToIfEq VAR_RESULT, FALSE, SolaceonTownPokemonNewsPress_DidntBringPokemonYet
+    GoTo SolaceonTownPokemonNewsPress_SetReward
 
-_00AE:
-    ScrCmd_0DA 0, 0x40E5, 0, 0
-    Message 4
-    ScrCmd_1B7 0x800C, 12
-    CallIfEq 0x800C, 0, _0189
-    CallIfEq 0x800C, 1, _0191
-    CallIfEq 0x800C, 2, _0199
-    CallIfEq 0x800C, 3, _01A1
-    CallIfEq 0x800C, 4, _01A9
-    CallIfEq 0x800C, 5, _01B1
-    CallIfEq 0x800C, 6, _01B9
-    CallIfEq 0x800C, 7, _01C1
-    CallIfEq 0x800C, 8, _01C9
-    CallIfEq 0x800C, 9, _01D1
-    CallIfEq 0x800C, 10, _01D9
-    CallIfEq 0x800C, 11, _01E1
-    SetVar 0x8005, 3
-    ScrCmd_07D 93, 1, 0x800C
-    GoToIfNe 0x800C, 0, _01E9
-    SetFlag 0xAB1
-    GoToIfEq 0x800C, 0, _023F
+SolaceonTownPokemonNewsPress_SetReward:
+    BufferSpeciesNameFromVar 0, VAR_POKEMON_NEWS_PRESS_REQUESTED_POKEMON, 0, 0
+    Message SolaceonTownPokemonNewsPress_Text_ThatsItThanks
+    GetRandom VAR_RESULT, 12
+    CallIfEq VAR_RESULT, 0, SolaceonTownPokemonNewsPress_SetRewardUltraBall
+    CallIfEq VAR_RESULT, 1, SolaceonTownPokemonNewsPress_SetRewardGreatBall
+    CallIfEq VAR_RESULT, 2, SolaceonTownPokemonNewsPress_SetRewardPokeBall
+    CallIfEq VAR_RESULT, 3, SolaceonTownPokemonNewsPress_SetRewardNetBall
+    CallIfEq VAR_RESULT, 4, SolaceonTownPokemonNewsPress_SetRewardDiveBall
+    CallIfEq VAR_RESULT, 5, SolaceonTownPokemonNewsPress_SetRewardNestBall
+    CallIfEq VAR_RESULT, 6, SolaceonTownPokemonNewsPress_SetRewardRepeatBall
+    CallIfEq VAR_RESULT, 7, SolaceonTownPokemonNewsPress_SetRewardTimerBall
+    CallIfEq VAR_RESULT, 8, SolaceonTownPokemonNewsPress_SetRewardLuxuryBall
+    CallIfEq VAR_RESULT, 9, SolaceonTownPokemonNewsPress_SetRewardDuskBall
+    CallIfEq VAR_RESULT, 10, SolaceonTownPokemonNewsPress_SetRewardHealBall
+    CallIfEq VAR_RESULT, 11, SolaceonTownPokemonNewsPress_SetRewardQuickBall
+    SetVar VAR_0x8005, 3
+    CanFitItem ITEM_HEART_SCALE, 1, VAR_RESULT
+    GoToIfNe VAR_RESULT, FALSE, SolaceonTownPokemonNewsPress_GiveRewardHelpAgainTomorrow
+    SetFlag FLAG_DAILY_RECEIVED_POKEMON_NEWS_PRESS_REWARD
+    GoToIfEq VAR_RESULT, FALSE, SolaceonTownPokemonNewsPress_CouldntGiveReward
     End
 
-_0189:
-    SetVar 0x8004, 2
+SolaceonTownPokemonNewsPress_SetRewardUltraBall:
+    SetVar VAR_0x8004, ITEM_ULTRA_BALL
     Return
 
-_0191:
-    SetVar 0x8004, 3
+SolaceonTownPokemonNewsPress_SetRewardGreatBall:
+    SetVar VAR_0x8004, ITEM_GREAT_BALL
     Return
 
-_0199:
-    SetVar 0x8004, 4
+SolaceonTownPokemonNewsPress_SetRewardPokeBall:
+    SetVar VAR_0x8004, ITEM_POKE_BALL
     Return
 
-_01A1:
-    SetVar 0x8004, 6
+SolaceonTownPokemonNewsPress_SetRewardNetBall:
+    SetVar VAR_0x8004, ITEM_NET_BALL
     Return
 
-_01A9:
-    SetVar 0x8004, 7
+SolaceonTownPokemonNewsPress_SetRewardDiveBall:
+    SetVar VAR_0x8004, ITEM_DIVE_BALL
     Return
 
-_01B1:
-    SetVar 0x8004, 8
+SolaceonTownPokemonNewsPress_SetRewardNestBall:
+    SetVar VAR_0x8004, ITEM_NEST_BALL
     Return
 
-_01B9:
-    SetVar 0x8004, 9
+SolaceonTownPokemonNewsPress_SetRewardRepeatBall:
+    SetVar VAR_0x8004, ITEM_REPEAT_BALL
     Return
 
-_01C1:
-    SetVar 0x8004, 10
+SolaceonTownPokemonNewsPress_SetRewardTimerBall:
+    SetVar VAR_0x8004, ITEM_TIMER_BALL
     Return
 
-_01C9:
-    SetVar 0x8004, 11
+SolaceonTownPokemonNewsPress_SetRewardLuxuryBall:
+    SetVar VAR_0x8004, ITEM_LUXURY_BALL
     Return
 
-_01D1:
-    SetVar 0x8004, 13
+SolaceonTownPokemonNewsPress_SetRewardDuskBall:
+    SetVar VAR_0x8004, ITEM_DUSK_BALL
     Return
 
-_01D9:
-    SetVar 0x8004, 14
+SolaceonTownPokemonNewsPress_SetRewardHealBall:
+    SetVar VAR_0x8004, ITEM_HEAL_BALL
     Return
 
-_01E1:
-    SetVar 0x8004, 15
+SolaceonTownPokemonNewsPress_SetRewardQuickBall:
+    SetVar VAR_0x8004, ITEM_QUICK_BALL
     Return
 
-_01E9:
-    CallCommonScript 0x7FC
-    SetVar 0x8004, 93
-    SetVar 0x8005, 1
-    CallCommonScript 0x7FC
-    ClearFlag 220
-    SetVar 0x40E5, 0
-    SetFlag 0xAB1
-    Message 5
-    WaitABXPadPress
+SolaceonTownPokemonNewsPress_GiveRewardHelpAgainTomorrow:
+    Common_GiveItemQuantity
+    SetVar VAR_0x8004, ITEM_HEART_SCALE
+    SetVar VAR_0x8005, 1
+    Common_GiveItemQuantity
+    ClearFlag FLAG_COULD_NOT_RECEIVE_POKEMON_NEWS_PRESS_REWARD
+    SetVar VAR_POKEMON_NEWS_PRESS_REQUESTED_POKEMON, 0
+    SetFlag FLAG_DAILY_RECEIVED_POKEMON_NEWS_PRESS_REWARD
+    Message SolaceonTownPokemonNewsPress_Text_HelpAgainTomorrow
+    WaitButton
     CloseMessage
     ReleaseAll
     End
 
-_0216:
-    ScrCmd_07D 93, 1, 0x800C
-    GoToIfEq 0x800C, 0, _0251
-    SetVar 0x8004, 0x4117
-    SetVar 0x8005, 3
-    GoTo _025C
+SolaceonTownPokemonNewsPress_TryGiveReward:
+    GoToIfCannotFitItem ITEM_HEART_SCALE, 1, VAR_RESULT, SolaceonTownPokemonNewsPress_BagIsFull
+    SetVar VAR_0x8004, VAR_POKEMON_NEWS_PRESS_POKE_BALL_REWARD
+    SetVar VAR_0x8005, 3
+    GoTo SolaceonTownPokemonNewsPress_GiveReward
     End
 
-_023F:
-    SetVar 0x4117, 0x8004
-    SetFlag 220
-    GoTo _0251
+SolaceonTownPokemonNewsPress_CouldntGiveReward:
+    SetVar VAR_POKEMON_NEWS_PRESS_POKE_BALL_REWARD, VAR_0x8004
+    SetFlag FLAG_COULD_NOT_RECEIVE_POKEMON_NEWS_PRESS_REWARD
+    GoTo SolaceonTownPokemonNewsPress_BagIsFull
     End
 
-_0251:
-    Message 6
-    WaitABXPadPress
+SolaceonTownPokemonNewsPress_BagIsFull:
+    Message SolaceonTownPokemonNewsPress_Text_BagIsFull
+    WaitButton
     CloseMessage
     ReleaseAll
     End
 
-_025C:
-    Message 7
-    ClearFlag 220
-    SetVar 0x40E5, 0
-    CallCommonScript 0x7FC
-    SetVar 0x8004, 93
-    SetVar 0x8005, 1
-    CallCommonScript 0x7E0
+SolaceonTownPokemonNewsPress_GiveReward:
+    Message SolaceonTownPokemonNewsPress_Text_HeresYourReward
+    ClearFlag FLAG_COULD_NOT_RECEIVE_POKEMON_NEWS_PRESS_REWARD
+    SetVar VAR_POKEMON_NEWS_PRESS_REQUESTED_POKEMON, 0
+    Common_GiveItemQuantity
+    SetVar VAR_0x8004, ITEM_HEART_SCALE
+    SetVar VAR_0x8005, 1
+    Common_GiveItemQuantityNoLineFeed
     CloseMessage
     ReleaseAll
     End
 
-_0283:
-    ScrCmd_0DA 0, 0x40E5, 0, 0
-    ScrCmd_21A 0x800C
-    ScrCmd_0D5 1, 0x800C
-    Message 8
-    WaitABXPadPress
+SolaceonTownPokemonNewsPress_DidntBringPokemonYet:
+    BufferSpeciesNameFromVar 0, VAR_POKEMON_NEWS_PRESS_REQUESTED_POKEMON, 0, 0
+    GetNewsPressDeadline VAR_RESULT
+    BufferNumber 1, VAR_RESULT
+    Message SolaceonTownPokemonNewsPress_Text_StillHaventCaughtPokemon
+    WaitButton
     CloseMessage
     ReleaseAll
     End
 
-_029F:
-    Message 9
-    SetVar 0x40E5, 0
-    WaitABXPadPress
+SolaceonTownPokemonNewsPress_FailedAssignment:
+    Message SolaceonTownPokemonNewsPress_Text_FailedToBringPokemon
+    SetVar VAR_POKEMON_NEWS_PRESS_REQUESTED_POKEMON, 0
+    WaitButton
     CloseMessage
     ReleaseAll
     End
 
-_02B0:
-    Message 10
-    WaitABXPadPress
+SolaceonTownPokemonNewsPress_AnotherAssignmentTomorrow:
+    Message SolaceonTownPokemonNewsPress_Text_AnotherAssignmentTomorrow
+    WaitButton
     CloseMessage
     ReleaseAll
     End
 
-_02BB:
-    PlayFanfare SEQ_SE_CONFIRM
+SolaceonTownPokemonNewsPress_PokemonBreederM:
+    NPCMessage SolaceonTownPokemonNewsPress_Text_TheNewspaperIsTiny
+    End
+
+SolaceonTownPokemonNewsPress_PC:
+    PlaySE SE_CONFIRM_sseq_3
     LockAll
-    FacePlayer
-    Message 11
-    WaitABXPadPress
+    Message SolaceonTownPokemonNewsPress_Text_TopStory
+    Message SolaceonTownPokemonNewsPress_Text_ReadWhichArticle
+    InitGlobalTextMenu 1, 1, 0, VAR_RESULT
+    AddMenuEntry MenuEntries_Text_Article_DuskBall, 0
+    AddMenuEntry MenuEntries_Text_Article_HealBall, 1
+    AddMenuEntry MenuEntries_Text_Article_QuickBall, 2
+    AddMenuEntry MenuEntries_Text_Article_DiveBall, 3
+    AddMenuEntry MenuEntries_Text_Article_Exit, 4
+    ShowMenu
+    SetVar VAR_0x8008, VAR_RESULT
+    GoToIfEq VAR_0x8008, 0, SolaceonTownPokemonNewsPress_ArticleDuskBall
+    GoToIfEq VAR_0x8008, 1, SolaceonTownPokemonNewsPress_ArticleHealBall
+    GoToIfEq VAR_0x8008, 2, SolaceonTownPokemonNewsPress_ArticleQuickBall
+    GoToIfEq VAR_0x8008, 3, SolaceonTownPokemonNewsPress_ArticleDiveBall
+    GoTo SolaceonTownPokemonNewsPress_PCEnd
+    End
+
+SolaceonTownPokemonNewsPress_ArticleDuskBall:
+    Message SolaceonTownPokemonNewsPress_Text_ArticleDuskBall
+    WaitButton
     CloseMessage
     ReleaseAll
     End
 
-_02CE:
-    PlayFanfare SEQ_SE_CONFIRM
-    LockAll
-    Message 12
-    Message 13
-    ScrCmd_040 1, 1, 0, 1, 0x800C
-    ScrCmd_29D 0x107, 0
-    ScrCmd_29D 0x108, 1
-    ScrCmd_29D 0x109, 2
-    ScrCmd_29D 0x10B, 3
-    ScrCmd_29D 0x10A, 4
-    ScrCmd_043
-    SetVar 0x8008, 0x800C
-    GoToIfEq 0x8008, 0, _0344
-    GoToIfEq 0x8008, 1, _034F
-    GoToIfEq 0x8008, 2, _035A
-    GoToIfEq 0x8008, 3, _0365
-    GoTo _0370
-    End
-
-_0344:
-    Message 14
-    WaitABXPadPress
+SolaceonTownPokemonNewsPress_ArticleHealBall:
+    Message SolaceonTownPokemonNewsPress_Text_ArticleHealBall
+    WaitButton
     CloseMessage
     ReleaseAll
     End
 
-_034F:
-    Message 15
-    WaitABXPadPress
+SolaceonTownPokemonNewsPress_ArticleQuickBall:
+    Message SolaceonTownPokemonNewsPress_Text_ArticleQuickBall
+    WaitButton
     CloseMessage
     ReleaseAll
     End
 
-_035A:
-    Message 16
-    WaitABXPadPress
+SolaceonTownPokemonNewsPress_ArticleDiveBall:
+    Message SolaceonTownPokemonNewsPress_Text_ArticleDiveBall
+    WaitButton
     CloseMessage
     ReleaseAll
     End
 
-_0365:
-    Message 17
-    WaitABXPadPress
+SolaceonTownPokemonNewsPress_PCEnd:
     CloseMessage
     ReleaseAll
     End
 
-_0370:
-    CloseMessage
-    ReleaseAll
-    End
-
-    .byte 0
-    .byte 0
+    .balign 4, 0

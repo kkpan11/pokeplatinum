@@ -1,108 +1,52 @@
-    .include "macros/scrcmd.inc"
+#include "macros/scrcmd.inc"
+#include "res/text/bank/hearthome_city_northeast_house_1f.h"
 
-    .data
 
-    ScriptEntry _0026
-    ScriptEntry _0039
-    ScriptEntry _004A
-    ScriptEntry _005D
-    ScriptEntry _0070
-    ScriptEntry _0083
-    ScriptEntry _0096
-    ScriptEntry _00A9
-    ScriptEntry _00BC
-    .short 0xFD13
+    ScriptEntry HearthomeCityNortheastHouse1F_PokefanF
+    ScriptEntry HearthomeCityNortheastHouse1F_BabyInPram
+    ScriptEntry HearthomeCityNortheastHouse1F_BattleGirl
+    ScriptEntry HearthomeCityNortheastHouse1F_NinjaBoy
+    ScriptEntry HearthomeCityNortheastHouse1F_Twin
+    ScriptEntry HearthomeCityNortheastHouse1F_SchoolKidM
+    ScriptEntry HearthomeCityNortheastHouse1F_Lass
+    ScriptEntry HearthomeCityNortheastHouse1F_Dummy8
+    ScriptEntry HearthomeCityNortheastHouse1F_Pikachu
+    ScriptEntryEnd
 
-_0026:
-    PlayFanfare SEQ_SE_CONFIRM
-    LockAll
-    FacePlayer
-    Message 0
-    WaitABXPadPress
-    CloseMessage
-    ReleaseAll
+HearthomeCityNortheastHouse1F_PokefanF:
+    NPCMessage HearthomeCityNortheastHouse1F_Text_ThatMakesYouPapaAndMama
     End
 
-_0039:
-    PlayFanfare SEQ_SE_CONFIRM
-    LockAll
-    Message 1
-    WaitABXPadPress
-    CloseMessage
-    ReleaseAll
+HearthomeCityNortheastHouse1F_BabyInPram:
+    EventMessage HearthomeCityNortheastHouse1F_Text_KuufuFuu
     End
 
-_004A:
-    PlayFanfare SEQ_SE_CONFIRM
-    LockAll
-    FacePlayer
-    Message 2
-    WaitABXPadPress
-    CloseMessage
-    ReleaseAll
+HearthomeCityNortheastHouse1F_BattleGirl:
+    NPCMessage HearthomeCityNortheastHouse1F_Text_BabiesAndPokemonGetAlong
     End
 
-_005D:
-    PlayFanfare SEQ_SE_CONFIRM
-    LockAll
-    FacePlayer
-    Message 3
-    WaitABXPadPress
-    CloseMessage
-    ReleaseAll
+HearthomeCityNortheastHouse1F_NinjaBoy:
+    NPCMessage HearthomeCityNortheastHouse1F_Text_ImGoingToBeATrainerToo
     End
 
-_0070:
-    PlayFanfare SEQ_SE_CONFIRM
-    LockAll
-    FacePlayer
-    Message 4
-    WaitABXPadPress
-    CloseMessage
-    ReleaseAll
+HearthomeCityNortheastHouse1F_Twin:
+    NPCMessage HearthomeCityNortheastHouse1F_Text_IWantToBecomeACoordinator
     End
 
-_0083:
-    PlayFanfare SEQ_SE_CONFIRM
-    LockAll
-    FacePlayer
-    Message 5
-    WaitABXPadPress
-    CloseMessage
-    ReleaseAll
+HearthomeCityNortheastHouse1F_SchoolKidM:
+    NPCMessage HearthomeCityNortheastHouse1F_Text_NoOneEvenNoticesMe
     End
 
-_0096:
-    PlayFanfare SEQ_SE_CONFIRM
-    LockAll
-    FacePlayer
-    Message 6
-    WaitABXPadPress
-    CloseMessage
-    ReleaseAll
+HearthomeCityNortheastHouse1F_Lass:
+    NPCMessage HearthomeCityNortheastHouse1F_Text_WowYoureAPokemonTrainer
     End
 
-_00A9:
-    PlayFanfare SEQ_SE_CONFIRM
-    LockAll
-    FacePlayer
-    Message 7
-    WaitABXPadPress
-    CloseMessage
-    ReleaseAll
+HearthomeCityNortheastHouse1F_Dummy8:
+    NPCMessage HearthomeCityNortheastHouse1F_Text_Dummy7
     End
 
-_00BC:
-    PlayFanfare SEQ_SE_CONFIRM
-    LockAll
-    FacePlayer
-    ScrCmd_04B 0x5DC
-    ScrCmd_04C 25, 0
-    Message 8
-    ScrCmd_04D
-    WaitABXPadPress
-    CloseMessage
-    ReleaseAll
+HearthomeCityNortheastHouse1F_Pikachu:
+    PokemonCryAndMessage SPECIES_PIKACHU, HearthomeCityNortheastHouse1F_Text_PikachuCryPikapii
     End
 
-    .byte 0
+    .balign 4, 0

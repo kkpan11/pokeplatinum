@@ -1,46 +1,28 @@
-    .include "macros/scrcmd.inc"
+#include "macros/scrcmd.inc"
+#include "res/text/bank/sandgem_town_pokecenter_1f.h"
+#include "res/field/events/events_sandgem_town_pokecenter_1f.h"
 
-    .data
 
-    ScriptEntry _0012
-    ScriptEntry _001E
-    ScriptEntry _0031
-    ScriptEntry _0044
-    .short 0xFD13
+    ScriptEntry SandgemTownPokecenter1F_Nurse
+    ScriptEntry SandgemTownPokecenter1F_BreederM
+    ScriptEntry SandgemTownPokecenter1F_ExpertM
+    ScriptEntry SandgemTownPokecenter1F_Lass
+    ScriptEntryEnd
 
-_0012:
-    SetVar 0x8007, 3
-    CallCommonScript 0x7D2
+SandgemTownPokecenter1F_Nurse:
+    Common_CallPokecenterNurse LOCALID_SANDGEM_NURSE
     End
 
-_001E:
-    PlayFanfare SEQ_SE_CONFIRM
-    LockAll
-    FacePlayer
-    Message 0
-    WaitABXPadPress
-    CloseMessage
-    ReleaseAll
+SandgemTownPokecenter1F_BreederM:
+    NPCMessage SandgemTownPokecenter1F_Text_LadyAtCounterHealsPokemon
     End
 
-_0031:
-    PlayFanfare SEQ_SE_CONFIRM
-    LockAll
-    FacePlayer
-    Message 1
-    WaitABXPadPress
-    CloseMessage
-    ReleaseAll
+SandgemTownPokecenter1F_ExpertM:
+    NPCMessage SandgemTownPokecenter1F_Text_PCOverThere
     End
 
-_0044:
-    PlayFanfare SEQ_SE_CONFIRM
-    LockAll
-    FacePlayer
-    Message 2
-    WaitABXPadPress
-    CloseMessage
-    ReleaseAll
+SandgemTownPokecenter1F_Lass:
+    NPCMessage SandgemTownPokecenter1F_Text_TopFloorIsCommunicationClub
     End
 
-    .byte 0
+    .balign 4, 0

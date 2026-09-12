@@ -3,20 +3,19 @@
 #include <nitro.h>
 #include <string.h>
 
-#include "struct_defs/struct_0205AA50.h"
-
 #include "overlay005/struct_ov5_021DDF24_sub1.h"
 #include "overlay100/struct_ov100_021D4E3C.h"
 #include "overlay100/struct_ov100_021D4EBC.h"
 #include "overlay104/ov104_0223E894.h"
 
+#include "bg_window.h"
 #include "buffer_manager.h"
 #include "heap.h"
 #include "inlines.h"
 #include "screen_scroll_manager.h"
 #include "sys_task.h"
+#include "sys_task_extensions.h"
 #include "sys_task_manager.h"
-#include "unk_0200679C.h"
 
 typedef void (*UnkFuncPtr_ov104_0223F174)(void *);
 
@@ -74,9 +73,9 @@ static void ov100_021D4E18(SysTask *param0, void *param1)
     v0->unk_08++;
 }
 
-void ov100_021D4E3C(UnkStruct_ov100_021D4E3C *param0, u32 param1)
+void ov100_021D4E3C(UnkStruct_ov100_021D4E3C *param0, u32 heapID)
 {
-    param0->screenScrollMgr = ScreenScrollManager_New(param1);
+    param0->screenScrollMgr = ScreenScrollManager_New(heapID);
     param0->unk_08 = 0;
     param0->unk_04 = ov100_021D4E04(param0);
 }
@@ -99,11 +98,8 @@ void ov100_021D4E70(UnkStruct_ov100_021D4E3C *param0, u8 param1, u8 param2, u16 
 
 UnkStruct_ov100_021D4F9C *ov100_021D4EBC(UnkStruct_ov100_021D4EBC *param0)
 {
-    SysTask *v0;
-    UnkStruct_ov100_021D4F9C *v1;
-
-    v0 = SysTask_StartAndAllocateParam(ov100_021D4F9C, sizeof(UnkStruct_ov100_021D4F9C), 5, param0->unk_28);
-    v1 = SysTask_GetParam(v0);
+    SysTask *v0 = SysTask_StartAndAllocateParam(ov100_021D4F9C, sizeof(UnkStruct_ov100_021D4F9C), 5, param0->unk_28);
+    UnkStruct_ov100_021D4F9C *v1 = SysTask_GetParam(v0);
 
     v1->unk_04 = *param0;
     v1->unk_34 = v0;

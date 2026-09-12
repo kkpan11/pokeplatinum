@@ -1,16 +1,14 @@
-    .include "macros/scrcmd.inc"
+#include "macros/scrcmd.inc"
 
-    .data
 
-    ScriptEntry _000A
-    ScriptEntry _000C
-    .short 0xFD13
+    ScriptEntry EternaCityDPGym_OnTransition
+    ScriptEntry EternaCityDPGym_OnLoad
+    ScriptEntryEnd
 
-_000A:
+EternaCityDPGym_OnTransition:
     End
 
-_000C:
+EternaCityDPGym_OnLoad:
     End
 
-    .byte 0
-    .byte 0
+    .balign 4, 0

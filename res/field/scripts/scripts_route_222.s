@@ -1,115 +1,81 @@
-    .include "macros/scrcmd.inc"
+#include "macros/scrcmd.inc"
+#include "res/text/bank/route_222.h"
 
-    .data
 
-    ScriptEntry _00D7
-    ScriptEntry _007D
-    ScriptEntry _00EA
-    ScriptEntry _0101
-    ScriptEntry _0118
-    ScriptEntry _012F
-    ScriptEntry _0146
-    ScriptEntry _0022
-    .short 0xFD13
+    ScriptEntry Route222_Fisherman
+    ScriptEntry Route222_RichBoy
+    ScriptEntry Route222_ArrowSignpostHotelGrandLake
+    ScriptEntry Route222_ArrowSignpostSunyshoreCity
+    ScriptEntry Route222_SignboardPikachuFanClub
+    ScriptEntry Route222_SignboardPokemonSizeContest
+    ScriptEntry Route222_PolicemanThomas
+    ScriptEntry Route222_OnTransition
+    ScriptEntryEnd
 
-_0022:
-    GetTimeOfDay 0x4000
-    GoToIfEq 0x4000, 0, _0069
-    GoToIfEq 0x4000, 1, _0069
-    GoToIfEq 0x4000, 2, _0069
-    GoToIfEq 0x4000, 3, _0073
-    GoToIfEq 0x4000, 4, _0073
+Route222_OnTransition:
+    GetTimeOfDay VAR_MAP_LOCAL_0x00
+    GoToIfInRange VAR_MAP_LOCAL_0x00, TIMEOFDAY_MORNING, TIMEOFDAY_TWILIGHT, Route222_SetPolicemanThomasNoBattle
+    GoToIfInRange VAR_MAP_LOCAL_0x00, TIMEOFDAY_NIGHT, TIMEOFDAY_LATE_NIGHT, Route222_SetPolicemanThomasBattle
     End
 
-_0069:
-    ClearFlag 0x26A
-    SetFlag 0x26B
+Route222_SetPolicemanThomasNoBattle:
+    ClearFlag FLAG_HIDE_ROUTE_222_POLICEMAN_THOMAS_NO_BATTLE
+    SetFlag FLAG_HIDE_ROUTE_222_POLICEMAN_THOMAS
     End
 
-_0073:
-    ClearFlag 0x26B
-    SetFlag 0x26A
+Route222_SetPolicemanThomasBattle:
+    ClearFlag FLAG_HIDE_ROUTE_222_POLICEMAN_THOMAS
+    SetFlag FLAG_HIDE_ROUTE_222_POLICEMAN_THOMAS_NO_BATTLE
     End
 
-_007D:
-    PlayFanfare SEQ_SE_CONFIRM
+Route222_RichBoy:
+    PlaySE SE_CONFIRM_sseq_3
     LockAll
     FacePlayer
-    GoToIfSet 206, _00C2
-    Message 0
-    SetVar 0x8004, 0x17F
-    SetVar 0x8005, 1
-    ScrCmd_07D 0x8004, 0x8005, 0x800C
-    GoToIfEq 0x800C, 0, _00CD
-    CallCommonScript 0x7FC
-    SetFlag 206
-    GoTo _00C2
+    GoToIfSet FLAG_RECEIVED_ROUTE_222_TM56, Route222_ExplainFling
+    Message Route222_Text_IGiveTMFling
+    SetVar VAR_0x8004, ITEM_TM56
+    SetVar VAR_0x8005, 1
+    GoToIfCannotFitItem VAR_0x8004, VAR_0x8005, VAR_RESULT, Route222_BagIsFull
+    Common_GiveItemQuantity
+    SetFlag FLAG_RECEIVED_ROUTE_222_TM56
+    GoTo Route222_ExplainFling
 
-_00C2:
-    Message 1
-    WaitABXPadPress
+Route222_ExplainFling:
+    Message Route222_Text_ExplainFling
+    WaitButton
     CloseMessage
     ReleaseAll
     End
 
-_00CD:
-    CallCommonScript 0x7E1
+Route222_BagIsFull:
+    Common_MessageBagIsFull
     CloseMessage
     ReleaseAll
     End
 
-_00D7:
-    PlayFanfare SEQ_SE_CONFIRM
-    LockAll
-    FacePlayer
-    Message 2
-    WaitABXPadPress
-    CloseMessage
-    ReleaseAll
+Route222_Fisherman:
+    NPCMessage Route222_Text_CatchingMadeMeHappy
     End
 
-_00EA:
-    ScrCmd_036 4, 1, 0, 0x800C
-    ScrCmd_038 3
-    ScrCmd_039
-    ScrCmd_03B 0x800C
-    CallCommonScript 0x7D0
+Route222_ArrowSignpostHotelGrandLake:
+    ShowArrowSign Route222_Text_SignHotelGrandLake
     End
 
-_0101:
-    ScrCmd_036 5, 1, 0, 0x800C
-    ScrCmd_038 3
-    ScrCmd_039
-    ScrCmd_03B 0x800C
-    CallCommonScript 0x7D0
+Route222_ArrowSignpostSunyshoreCity:
+    ShowArrowSign Route222_Text_SignSunyshoreCity
     End
 
-_0118:
-    ScrCmd_036 6, 2, 0, 0x800C
-    ScrCmd_038 3
-    ScrCmd_039
-    ScrCmd_03B 0x800C
-    CallCommonScript 0x7D0
+Route222_SignboardPikachuFanClub:
+    ShowLandmarkSign Route222_Text_SignPikachuFanClub
     End
 
-_012F:
-    ScrCmd_036 7, 2, 0, 0x800C
-    ScrCmd_038 3
-    ScrCmd_039
-    ScrCmd_03B 0x800C
-    CallCommonScript 0x7D0
+Route222_SignboardPokemonSizeContest:
+    ShowLandmarkSign Route222_Text_SignPokemonSizeContest
     End
 
-_0146:
-    PlayFanfare SEQ_SE_CONFIRM
-    LockAll
-    FacePlayer
-    Message 3
-    WaitABXPadPress
-    CloseMessage
-    ReleaseAll
+Route222_PolicemanThomas:
+    NPCMessage Route222_Text_MoreAgitatedAtNight
     End
 
-    .byte 0
-    .byte 0
-    .byte 0
+    .balign 4, 0

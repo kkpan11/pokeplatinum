@@ -1,74 +1,56 @@
-    .include "macros/scrcmd.inc"
+#include "macros/scrcmd.inc"
+#include "res/text/bank/route_208.h"
 
-    .data
 
-    ScriptEntry _0016
-    ScriptEntry _002D
-    ScriptEntry _0044
-    ScriptEntry _0070
-    ScriptEntry _005B
-    .short 0xFD13
+    ScriptEntry Route208_ArrowSignpostMtCoronet
+    ScriptEntry Route208_ArrowSignpostHearthomeCity
+    ScriptEntry Route208_SignboardBerryMastersHouse
+    ScriptEntry Route208_BlackBelt
+    ScriptEntry Route208_TrainerTipsSignpost
+    ScriptEntryEnd
 
-_0016:
-    ScrCmd_036 2, 1, 0, 0x800C
-    ScrCmd_038 3
-    ScrCmd_039
-    ScrCmd_03B 0x800C
-    CallCommonScript 0x7D0
+Route208_ArrowSignpostMtCoronet:
+    ShowArrowSign Route208_Text_SignMtCoronet
     End
 
-_002D:
-    ScrCmd_036 3, 1, 0, 0x800C
-    ScrCmd_038 3
-    ScrCmd_039
-    ScrCmd_03B 0x800C
-    CallCommonScript 0x7D0
+Route208_ArrowSignpostHearthomeCity:
+    ShowArrowSign Route208_Text_SignHearthomeCity
     End
 
-_0044:
-    ScrCmd_036 4, 2, 0, 0x800C
-    ScrCmd_038 3
-    ScrCmd_039
-    ScrCmd_03B 0x800C
-    CallCommonScript 0x7D0
+Route208_SignboardBerryMastersHouse:
+    ShowLandmarkSign Route208_Text_SignBerryMastersHouse
     End
 
-_005B:
-    ScrCmd_037 3, 0
-    ScrCmd_038 3
-    ScrCmd_039
-    ScrCmd_03A 5, 0x800C
-    CallCommonScript 0x7D0
+Route208_TrainerTipsSignpost:
+    ShowScrollingSign Route208_Text_TrainerTipsWatchBerrySoilColor
     End
 
-_0070:
-    PlayFanfare SEQ_SE_CONFIRM
+Route208_BlackBelt:
+    PlaySE SE_CONFIRM_sseq_3
     LockAll
     FacePlayer
-    GoToIfSet 0x13F, _00B5
-    Message 0
-    SetVar 0x8004, 111
-    SetVar 0x8005, 1
-    ScrCmd_07D 0x8004, 0x8005, 0x800C
-    GoToIfEq 0x800C, 0, _00C0
-    SetFlag 0x13F
-    CallCommonScript 0x7E0
+    GoToIfSet FLAG_RECEIVED_ROUTE_208_ODD_KEYSTONE, Route208_GoToRoute209
+    Message Route208_Text_JustTakeIt
+    SetVar VAR_0x8004, ITEM_ODD_KEYSTONE
+    SetVar VAR_0x8005, 1
+    GoToIfCannotFitItem VAR_0x8004, VAR_0x8005, VAR_RESULT, Route208_BagIsFull
+    SetFlag FLAG_RECEIVED_ROUTE_208_ODD_KEYSTONE
+    Common_GiveItemQuantityNoLineFeed
     CloseMessage
     ReleaseAll
     End
 
-_00B5:
-    Message 1
-    WaitABXPadPress
+Route208_GoToRoute209:
+    Message Route208_Text_GoToRoute209
+    WaitButton
     CloseMessage
     ReleaseAll
     End
 
-_00C0:
-    CallCommonScript 0x7E1
+Route208_BagIsFull:
+    Common_MessageBagIsFull
     CloseMessage
     ReleaseAll
     End
 
-    .byte 0
-    .byte 0
+    .balign 4, 0

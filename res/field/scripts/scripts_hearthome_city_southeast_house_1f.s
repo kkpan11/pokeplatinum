@@ -1,55 +1,27 @@
-    .include "macros/scrcmd.inc"
+#include "macros/scrcmd.inc"
+#include "res/text/bank/hearthome_city_southeast_house_1f.h"
 
-    .data
 
-    ScriptEntry _0012
-    ScriptEntry _0025
-    ScriptEntry _0038
-    ScriptEntry _004B
-    .short 0xFD13
+    ScriptEntry HearthomeCitySoutheastHouse1F_MiddleAgedMan
+    ScriptEntry HearthomeCitySoutheastHouse1F_Lady
+    ScriptEntry HearthomeCitySoutheastHouse1F_Twin
+    ScriptEntry HearthomeCitySoutheastHouse1F_Shroomish
+    ScriptEntryEnd
 
-_0012:
-    PlayFanfare SEQ_SE_CONFIRM
-    LockAll
-    FacePlayer
-    Message 0
-    WaitABXPadPress
-    CloseMessage
-    ReleaseAll
+HearthomeCitySoutheastHouse1F_MiddleAgedMan:
+    NPCMessage HearthomeCitySoutheastHouse1F_Text_ThereAreTheContests
     End
 
-_0025:
-    PlayFanfare SEQ_SE_CONFIRM
-    LockAll
-    FacePlayer
-    Message 1
-    WaitABXPadPress
-    CloseMessage
-    ReleaseAll
+HearthomeCitySoutheastHouse1F_Lady:
+    NPCMessage HearthomeCitySoutheastHouse1F_Text_CaptivateTheWholeWorld
     End
 
-_0038:
-    PlayFanfare SEQ_SE_CONFIRM
-    LockAll
-    FacePlayer
-    Message 2
-    WaitABXPadPress
-    CloseMessage
-    ReleaseAll
+HearthomeCitySoutheastHouse1F_Twin:
+    NPCMessage HearthomeCitySoutheastHouse1F_Text_MyShroomishFindsBerries
     End
 
-_004B:
-    PlayFanfare SEQ_SE_CONFIRM
-    LockAll
-    FacePlayer
-    ScrCmd_04B 0x5DC
-    ScrCmd_04C 0x11D, 0
-    Message 3
-    ScrCmd_04D
-    WaitABXPadPress
-    CloseMessage
-    ReleaseAll
+HearthomeCitySoutheastHouse1F_Shroomish:
+    PokemonCryAndMessage SPECIES_SHROOMISH, HearthomeCitySoutheastHouse1F_Text_ShroomishCryPofwaaah
     End
 
-    .byte 0
-    .byte 0
+    .balign 4, 0

@@ -3,7 +3,7 @@
 #include <nitro.h>
 #include <string.h>
 
-#include "struct_defs/struct_02039A58.h"
+#include "struct_defs/comm_cmd_table.h"
 #include "struct_defs/struct_02095EAC_sub1.h"
 #include "struct_defs/struct_02095EAC_t.h"
 #include "struct_defs/struct_02095FE4.h"
@@ -11,12 +11,12 @@
 #include "overlay058/ov58_021D0D80.h"
 #include "overlay058/struct_ov58_021D2820.h"
 
+#include "bg_window.h"
+#include "comm_manager.h"
 #include "communication_system.h"
-#include "unk_02018340.h"
-#include "unk_02030EE0.h"
 #include "unk_02032798.h"
-#include "unk_020366A0.h"
 #include "unk_02099500.h"
+#include "wireless_manager.h"
 
 typedef struct UnkStruct_02095EAC_t UnkStruct_02095EAC;
 
@@ -129,12 +129,12 @@ static const CommCmdTable Unk_020F5A40[] = {
     { sub_0209610C, CommPacketSizeOf_NetId },
     { sub_02096110, CommPacketSizeOf_NetId },
     { sub_020960D8, CommPacketSizeOf_NetId },
-    { sub_02095F9C, sub_0203294C },
-    { sub_020960D4, sub_0203294C },
+    { sub_02095F9C, CommPacketSizeOf_Nothing },
+    { sub_020960D4, CommPacketSizeOf_Nothing },
     { sub_02095FE4, sub_020961E4 },
-    { sub_02096114, sub_0203294C },
-    { sub_0209612C, sub_0203294C },
-    { sub_02096170, sub_0203294C },
+    { sub_02096114, CommPacketSizeOf_Nothing },
+    { sub_0209612C, CommPacketSizeOf_Nothing },
+    { sub_02096170, CommPacketSizeOf_Nothing },
     { sub_02099510, CommPacketSizeOf_NetId, NULL },
     { sub_02099510, CommPacketSizeOf_NetId, NULL }
 };
@@ -158,8 +158,8 @@ void sub_02095EAC(int param0, int param1, void *param2, void *param3)
             MI_CpuCopyFast(v1->unk_00, &v0->unk_4434[v1->unk_3EC * 1000], 1000);
         }
 
-        MI_CpuCopyFast(v0->unk_4434, v0->unk_32C.unk_0C, 30 * 15 * 32);
-        sub_0201A954(&v0->unk_32C);
+        MI_CpuCopyFast(v0->unk_4434, v0->unk_32C.pixels, 30 * 15 * 32);
+        Window_CopyToVRAM(&v0->unk_32C);
     } else {
         UnkStruct_02095EAC_sub1 *v2 = (UnkStruct_02095EAC_sub1 *)param2;
 
@@ -213,7 +213,7 @@ void sub_02095F9C(int param0, int param1, void *param2, void *param3)
 
     if (CommSys_CurNetId() == 0) {
         v0->unk_37C = CommSys_ConnectedCount();
-        v0->unk_380 = sub_020318EC();
+        v0->unk_380 = WirelessManager_GetConnectedBitmap();
         v0->unk_9458 = 1;
     }
 }
@@ -222,9 +222,7 @@ void sub_02095FE4(int param0, int param1, void *param2, void *param3)
 {
     UnkStruct_02095EAC *v0 = (UnkStruct_02095EAC *)param3;
     UnkStruct_02095FE4 v1;
-    UnkStruct_02095FE4 *v2;
-
-    v2 = param2;
+    UnkStruct_02095FE4 *v2 = param2;
 
     if (param0 != 0) {
         if (CommSys_CurNetId() == 0) {
@@ -234,12 +232,12 @@ void sub_02095FE4(int param0, int param1, void *param2, void *param3)
 
             switch (v2->unk_02) {
             case 0:
-                if ((v0->unk_37C != CommSys_ConnectedCount()) || (v0->unk_37C != ov58_021D2A4C()) || (v0->unk_37C != MATH_CountPopulation(sub_020318EC()))) {
+                if ((v0->unk_37C != CommSys_ConnectedCount()) || (v0->unk_37C != ov58_021D2A4C()) || (v0->unk_37C != MATH_CountPopulation(WirelessManager_GetConnectedBitmap()))) {
                     v1.unk_03 = 0;
                 } else {
                     v0->unk_9418 |= 1 << param0;
                     v1.unk_03 = 1;
-                    sub_02037B58(CommSys_ConnectedCount());
+                    CommManager_SetMaxNumConnections(CommSys_ConnectedCount());
                 }
                 break;
             case 1:
@@ -275,9 +273,7 @@ void sub_020960D4(int param0, int param1, void *param2, void *param3)
 void sub_020960D8(int param0, int param1, void *param2, void *param3)
 {
     UnkStruct_02095EAC *v0 = (UnkStruct_02095EAC *)param3;
-    u8 v1;
-
-    v1 = *(u8 *)param2;
+    u8 v1 = *(u8 *)param2;
 
     ov58_021D2434(v0, 1, v1);
 
@@ -322,7 +318,7 @@ void sub_0209612C(int param0, int param1, void *param2, void *param3)
         }
     }
 
-    CommMan_SetErrorHandling(0, 1);
+    CommManager_SetErrorHandling(0, 1);
 }
 
 static void sub_02096170(int param0, int param1, void *param2, void *param3)
@@ -333,7 +329,7 @@ static void sub_02096170(int param0, int param1, void *param2, void *param3)
 
 static void sub_0209617C(UnkStruct_02095EAC *param0, int param1)
 {
-    u8 *v0 = (u8 *)param0->unk_32C.unk_0C;
+    u8 *v0 = (u8 *)param0->unk_32C.pixels;
 
     MI_CpuCopyFast(&v0[param1 * 1000], param0->unk_7C74.unk_00, 1000);
 
@@ -352,7 +348,7 @@ static void sub_0209617C(UnkStruct_02095EAC *param0, int param1)
 
     param0->unk_7C74.unk_3EC = param1;
 
-    sub_02035A3C(118, &param0->unk_7C74, sizeof(UnkStruct_02095EAC_sub1));
+    CommSys_SendDataHugeServer(118, &param0->unk_7C74, sizeof(UnkStruct_02095EAC_sub1));
 }
 
 static u8 *sub_020961D0(int param0, void *param1, int param2)

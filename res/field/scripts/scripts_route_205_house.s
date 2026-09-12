@@ -1,49 +1,43 @@
-    .include "macros/scrcmd.inc"
+#include "macros/scrcmd.inc"
+#include "res/text/bank/route_205_house.h"
 
-    .data
 
-    ScriptEntry _000A
-    ScriptEntry _006D
-    .short 0xFD13
+    ScriptEntry Route205House_PokefanF
+    ScriptEntry Route205House_BugCatcher
+    ScriptEntryEnd
 
-_000A:
-    PlayFanfare SEQ_SE_CONFIRM
+Route205House_PokefanF:
+    PlaySE SE_CONFIRM_sseq_3
     LockAll
     FacePlayer
-    Message 0
-    ScrCmd_03E 0x800C
-    GoToIfEq 0x800C, 0, _0035
-    GoToIfEq 0x800C, 1, _0062
+    Message Route205House_Text_RestAWhile
+    ShowYesNoMenu VAR_RESULT
+    GoToIfEq VAR_RESULT, MENU_YES, Route205House_Rest
+    GoToIfEq VAR_RESULT, MENU_NO, Route205House_DontPushYourself
     End
 
-_0035:
+Route205House_Rest:
     CloseMessage
-    FadeScreen 6, 1, 0, 0
+    FadeScreenOut
     WaitFadeScreen
-    ScrCmd_04E 0x48E
-    ScrCmd_04F
-    ScrCmd_14E
-    FadeScreen 6, 1, 1, 0
+    PlayFanfare SEQ_ASA_sseq
+    WaitFanfare
+    HealParty
+    FadeScreenIn
     WaitFadeScreen
-    Message 1
-    WaitABXPadPress
+    Message Route205House_Text_PokemonLookRefreshed
+    WaitButton
     CloseMessage
     ReleaseAll
     End
 
-_0062:
-    Message 2
-    WaitABXPadPress
+Route205House_DontPushYourself:
+    Message Route205House_Text_DontPushYourself
+    WaitButton
     CloseMessage
     ReleaseAll
     End
 
-_006D:
-    PlayFanfare SEQ_SE_CONFIRM
-    LockAll
-    FacePlayer
-    Message 3
-    WaitABXPadPress
-    CloseMessage
-    ReleaseAll
+Route205House_BugCatcher:
+    NPCMessage Route205House_Text_RepelsAreUseful
     End

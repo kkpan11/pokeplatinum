@@ -1,51 +1,42 @@
-    .include "macros/scrcmd.inc"
+#include "macros/scrcmd.inc"
+#include "res/text/bank/pastoria_city_southwest_house.h"
 
-    .data
 
-    ScriptEntry _000A
-    ScriptEntry _006A
-    .short 0xFD13
+    ScriptEntry PastoriaCitySouthwestHouse_PokemonBreederF
+    ScriptEntry PastoriaCitySouthwestHouse_Twin
+    ScriptEntryEnd
 
-_000A:
-    PlayFanfare SEQ_SE_CONFIRM
+PastoriaCitySouthwestHouse_PokemonBreederF:
+    PlaySE SE_CONFIRM_sseq_3
     LockAll
     FacePlayer
-    GoToIfSet 0xAA3, _0055
-    Message 0
-    ScrCmd_1B7 0x8004, 17
-    AddVar 0x8004, 184
-    SetVar 0x8005, 1
-    ScrCmd_07D 0x8004, 0x8005, 0x800C
-    GoToIfEq 0x800C, 0, _0060
-    SetFlag 0xAA3
-    CallCommonScript 0x7E0
+    GoToIfSet FLAG_DAILY_RECEIVED_PASTORIA_CITY_SOUTHWEST_HOUSE_RANDOM_BERRY, PastoriaCitySouthwestHouse_PlantingIsGood
+    Message PastoriaCitySouthwestHouse_Text_PlantThisBerry
+    GetRandom VAR_0x8004, 17
+    AddVar VAR_0x8004, ITEM_OCCA_BERRY /* Random type berry */
+    SetVar VAR_0x8005, 1
+    GoToIfCannotFitItem VAR_0x8004, VAR_0x8005, VAR_RESULT, PastoriaCitySouthwestHouse_BagIsFull
+    SetFlag FLAG_DAILY_RECEIVED_PASTORIA_CITY_SOUTHWEST_HOUSE_RANDOM_BERRY
+    Common_GiveItemQuantityNoLineFeed
     CloseMessage
     ReleaseAll
     End
 
-_0055:
-    Message 1
-    WaitABXPadPress
+PastoriaCitySouthwestHouse_PlantingIsGood:
+    Message PastoriaCitySouthwestHouse_Text_PlantingIsGood
+    WaitButton
     CloseMessage
     ReleaseAll
     End
 
-_0060:
-    CallCommonScript 0x7E1
+PastoriaCitySouthwestHouse_BagIsFull:
+    Common_MessageBagIsFull
     CloseMessage
     ReleaseAll
     End
 
-_006A:
-    PlayFanfare SEQ_SE_CONFIRM
-    LockAll
-    FacePlayer
-    Message 2
-    WaitABXPadPress
-    CloseMessage
-    ReleaseAll
+PastoriaCitySouthwestHouse_Twin:
+    NPCMessage PastoriaCitySouthwestHouse_Text_SisterGathersBerries
     End
 
-    .byte 0
-    .byte 0
-    .byte 0
+    .balign 4, 0

@@ -3,7 +3,6 @@
 
 #include "struct_decls/struct_0202F41C_decl.h"
 #include "struct_decls/struct_02030A80_decl.h"
-#include "struct_defs/struct_0205AA50.h"
 #include "struct_defs/struct_0208B878.h"
 #include "struct_defs/struct_0208BA84.h"
 #include "struct_defs/struct_0208C06C_sub1.h"
@@ -16,6 +15,7 @@
 #include "overlay062/struct_ov62_02233750.h"
 #include "overlay062/struct_ov62_02233828.h"
 
+#include "bg_window.h"
 #include "savedata.h"
 #include "sys_task_manager.h"
 
@@ -33,7 +33,7 @@ typedef struct {
     UnkStruct_ov62_02230C28 unk_6F8[6];
     const UnkStruct_020F3DCC *unk_818;
     const UnkStruct_020F3DCC *unk_81C[5];
-    SaveData *unk_830;
+    SaveData *saveData;
     u16 unk_834;
     u16 unk_836;
     UnkStruct_0208C06C_sub1 unk_838;

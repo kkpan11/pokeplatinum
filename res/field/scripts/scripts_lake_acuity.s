@@ -1,188 +1,189 @@
-    .include "macros/scrcmd.inc"
+#include "macros/scrcmd.inc"
+#include "res/text/bank/lake_acuity.h"
+#include "res/field/events/events_lake_acuity.h"
 
-    .data
 
-    ScriptEntry _0006
-    .short 0xFD13
+    ScriptEntry LakeAcuity_CoordEvent_JupiterRival
+    ScriptEntryEnd
 
-_0006:
+LakeAcuity_CoordEvent_JupiterRival:
     LockAll
-    ScrCmd_069 0x8004, 0x8005
-    ScrCmd_066 0x8004, 0x8005
-    ApplyMovement 241, _0228
+    GetPlayerMapPos VAR_0x8004, VAR_0x8005
+    AddFreeCamera VAR_0x8004, VAR_0x8005
+    ApplyFreeCameraMovement LakeAcuity_Movement_CameraMoveNorth
     WaitMovement
-    WaitTime 15, 0x800C
-    ApplyMovement 2, _01C4
+    WaitTime 15, VAR_RESULT
+    ApplyMovement LOCALID_RIVAL, LakeAcuity_Movement_RivalWalkOnSpotNorth
     WaitMovement
-    ScrCmd_0CE 0
-    Message 0
+    BufferRivalName 0
+    Message LakeAcuity_Text_YoureNotGettingAway
     CloseMessage
-    ApplyMovement 1, _01EC
+    ApplyMovement LOCALID_JUPITER, LakeAcuity_Movement_JupiterWalkOnSpotSouth
     WaitMovement
-    Message 1
+    Message LakeAcuity_Text_BackToVeilstoneCity
     CloseMessage
-    ScrCmd_069 0x8004, 0x8005
-    CallIfEq 0x8004, 14, _0136
-    CallIfEq 0x8004, 15, _0154
-    ScrCmd_067
-    Message 2
+    GetPlayerMapPos VAR_0x8004, VAR_0x8005
+    CallIfEq VAR_0x8004, 14, LakeAcuity_JupiterWalkToPlayerX14
+    CallIfEq VAR_0x8004, 15, LakeAcuity_JupiterWalkToPlayerX15
+    RestoreCamera
+    Message LakeAcuity_Text_DontWasteYourTime
     CloseMessage
-    ScrCmd_069 0x8004, 0x8005
-    CallIfEq 0x8004, 14, _0168
-    CallIfEq 0x8004, 15, _0174
-    PlayFanfare SEQ_SE_DP_KAIDAN2
-    ScrCmd_065 1
-    ScrCmd_04B 0x603
-    ScrCmd_069 0x8004, 0x8005
-    CallIfEq 0x8004, 14, _0180
-    CallIfEq 0x8004, 15, _018C
-    ApplyMovement 2, _01CC
+    GetPlayerMapPos VAR_0x8004, VAR_0x8005
+    CallIfEq VAR_0x8004, 14, LakeAcuity_JupiterLeaveX14
+    CallIfEq VAR_0x8004, 15, LakeAcuity_JupiterLeaveX15
+    PlaySE SEQ_SE_DP_KAIDAN2_sseq
+    RemoveObject LOCALID_JUPITER
+    WaitSE SEQ_SE_DP_KAIDAN2_sseq
+    GetPlayerMapPos VAR_0x8004, VAR_0x8005
+    CallIfEq VAR_0x8004, 14, LakeAcuity_PlayerWalkToRivalX14
+    CallIfEq VAR_0x8004, 15, LakeAcuity_PlayerWalkToRivalX15
+    ApplyMovement LOCALID_RIVAL, LakeAcuity_Movement_RivalWalkOnSpotWest
     WaitMovement
-    ScrCmd_0CE 0
-    Message 3
+    BufferRivalName 0
+    Message LakeAcuity_Text_ICouldntDoAnything
     CloseMessage
-    ApplyMovement 2, _01D4
+    ApplyMovement LOCALID_RIVAL, LakeAcuity_Movement_RivalWalkOnSpotNorth2
     WaitMovement
-    Message 4
+    Message LakeAcuity_Text_UxieWasSuffering
     CloseMessage
-    WaitTime 30, 0x800C
-    ApplyMovement 2, _01CC
+    WaitTime 30, VAR_RESULT
+    ApplyMovement LOCALID_RIVAL, LakeAcuity_Movement_RivalWalkOnSpotWest
     WaitMovement
-    Message 5
+    Message LakeAcuity_Text_IHaveToBeStronger
     CloseMessage
-    ApplyMovement 2, _01DC
-    ApplyMovement 0xFF, _01B8
+    ApplyMovement LOCALID_RIVAL, LakeAcuity_Movement_RivalLeave
+    ApplyMovement LOCALID_PLAYER, LakeAcuity_Movement_PlayerWatchRivalLeave
     WaitMovement
-    PlayFanfare SEQ_SE_DP_KAIDAN2
-    ScrCmd_065 2
-    ScrCmd_04B 0x603
-    SetFlag 0x98F
-    ClearFlag 0x223
-    SetVar 0x40D3, 2
-    ClearFlag 0x198
-    SetFlag 0x194
-    SetFlag 0x175
-    SetFlag 0x28D
-    SetFlag 0x28C
-    ClearFlag 168
+    PlaySE SEQ_SE_DP_KAIDAN2_sseq
+    RemoveObject LOCALID_RIVAL
+    WaitSE SEQ_SE_DP_KAIDAN2_sseq
+    SetFlag FLAG_ALT_MUSIC_LAKE_ACUITY
+    ClearFlag FLAG_HIDE_VEILSTONE_CITY_GRUNT_M_STORAGE_KEY
+    SetVar VAR_LAKE_ACUITY_STATE, 2
+    ClearFlag FLAG_HIDE_SANDGEM_TOWN_LAB_PROF_ROWAN
+    SetFlag FLAG_HIDE_LAKE_VERITY_LOW_WATER_COUNTERPART
+    SetFlag FLAG_HIDE_LAKE_VERITY_LOW_WATER_PROF_ROWAN
+    SetFlag FLAG_HIDE_LAKE_VERITY_COUNTERPART
+    SetFlag FLAG_HIDE_LAKE_VERITY_PROF_ROWAN
+    ClearFlag FLAG_LAKE_VALOR_EXPLODED
     ReleaseAll
     End
 
-_0136:
-    ApplyMovement 1, _01F4
-    ApplyMovement 241, _0230
+LakeAcuity_JupiterWalkToPlayerX14:
+    ApplyMovement LOCALID_JUPITER, LakeAcuity_Movement_JupiterWalkToPlayerX14
+    ApplyFreeCameraMovement LakeAcuity_Movement_CameraMoveSouth
     WaitMovement
-    ApplyMovement 0xFF, _01B0
-    WaitMovement
-    Return
-
-_0154:
-    ApplyMovement 1, _0204
-    ApplyMovement 241, _0230
+    ApplyMovement LOCALID_PLAYER, LakeAcuity_Movement_PlayerWalkOnSpotEast
     WaitMovement
     Return
 
-_0168:
-    ApplyMovement 1, _0210
+LakeAcuity_JupiterWalkToPlayerX15:
+    ApplyMovement LOCALID_JUPITER, LakeAcuity_Movement_JupiterWalkToPlayerX15
+    ApplyFreeCameraMovement LakeAcuity_Movement_CameraMoveSouth
     WaitMovement
     Return
 
-_0174:
-    ApplyMovement 1, _0218
+LakeAcuity_JupiterLeaveX14:
+    ApplyMovement LOCALID_JUPITER, LakeAcuity_Movement_JupiterLeaveX14
     WaitMovement
     Return
 
-_0180:
-    ApplyMovement 0xFF, _0198
+LakeAcuity_JupiterLeaveX15:
+    ApplyMovement LOCALID_JUPITER, LakeAcuity_Movement_JupiterLeaveX15
     WaitMovement
     Return
 
-_018C:
-    ApplyMovement 0xFF, _01A4
+LakeAcuity_PlayerWalkToRivalX14:
+    ApplyMovement LOCALID_PLAYER, LakeAcuity_Movement_PlayerWalkToRivalX14
+    WaitMovement
+    Return
+
+LakeAcuity_PlayerWalkToRivalX15:
+    ApplyMovement LOCALID_PLAYER, LakeAcuity_Movement_PlayerWalkToRivalX15
     WaitMovement
     Return
 
     .balign 4, 0
-_0198:
-    MoveAction_00C 5
-    MoveAction_00F 2
+LakeAcuity_Movement_PlayerWalkToRivalX14:
+    WalkNormalNorth 5
+    WalkNormalEast 2
     EndMovement
 
     .balign 4, 0
-_01A4:
-    MoveAction_00C 5
-    MoveAction_00F
+LakeAcuity_Movement_PlayerWalkToRivalX15:
+    WalkNormalNorth 5
+    WalkNormalEast
     EndMovement
 
     .balign 4, 0
-_01B0:
-    MoveAction_023
+LakeAcuity_Movement_PlayerWalkOnSpotEast:
+    WalkOnSpotNormalEast
     EndMovement
 
     .balign 4, 0
-_01B8:
-    MoveAction_03F
-    MoveAction_021
+LakeAcuity_Movement_PlayerWatchRivalLeave:
+    Delay8
+    WalkOnSpotNormalSouth
     EndMovement
 
     .balign 4, 0
-_01C4:
-    MoveAction_020
+LakeAcuity_Movement_RivalWalkOnSpotNorth:
+    WalkOnSpotNormalNorth
     EndMovement
 
     .balign 4, 0
-_01CC:
-    MoveAction_022
+LakeAcuity_Movement_RivalWalkOnSpotWest:
+    WalkOnSpotNormalWest
     EndMovement
 
     .balign 4, 0
-_01D4:
-    MoveAction_020
+LakeAcuity_Movement_RivalWalkOnSpotNorth2:
+    WalkOnSpotNormalNorth
     EndMovement
 
     .balign 4, 0
-_01DC:
-    MoveAction_00D 2
-    MoveAction_00E 2
-    MoveAction_00D 3
+LakeAcuity_Movement_RivalLeave:
+    WalkNormalSouth 2
+    WalkNormalWest 2
+    WalkNormalSouth 3
     EndMovement
 
     .balign 4, 0
-_01EC:
-    MoveAction_021
+LakeAcuity_Movement_JupiterWalkOnSpotSouth:
+    WalkOnSpotNormalSouth
     EndMovement
 
     .balign 4, 0
-_01F4:
-    MoveAction_00E 2
-    MoveAction_00D 6
-    MoveAction_022
+LakeAcuity_Movement_JupiterWalkToPlayerX14:
+    WalkNormalWest 2
+    WalkNormalSouth 6
+    WalkOnSpotNormalWest
     EndMovement
 
     .balign 4, 0
-_0204:
-    MoveAction_00E 2
-    MoveAction_00D 5
+LakeAcuity_Movement_JupiterWalkToPlayerX15:
+    WalkNormalWest 2
+    WalkNormalSouth 5
     EndMovement
 
     .balign 4, 0
-_0210:
-    MoveAction_021
+LakeAcuity_Movement_JupiterLeaveX14:
+    WalkOnSpotNormalSouth
     EndMovement
 
     .balign 4, 0
-_0218:
-    MoveAction_00E
-    MoveAction_00D
-    MoveAction_021
+LakeAcuity_Movement_JupiterLeaveX15:
+    WalkNormalWest
+    WalkNormalSouth
+    WalkOnSpotNormalSouth
     EndMovement
 
     .balign 4, 0
-_0228:
-    MoveAction_00C 5
+LakeAcuity_Movement_CameraMoveNorth:
+    WalkNormalNorth 5
     EndMovement
 
     .balign 4, 0
-_0230:
-    MoveAction_00D 5
+LakeAcuity_Movement_CameraMoveSouth:
+    WalkNormalSouth 5
     EndMovement

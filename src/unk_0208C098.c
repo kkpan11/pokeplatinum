@@ -3,14 +3,11 @@
 #include <nitro.h>
 #include <string.h>
 
-#include "struct_decls/struct_02006C24_decl.h"
-#include "struct_decls/struct_02018340_decl.h"
-
-#include "core_sys.h"
+#include "bg_window.h"
 #include "heap.h"
 #include "narc.h"
-#include "unk_0200F174.h"
-#include "unk_02018340.h"
+#include "screen_fade.h"
+#include "system.h"
 
 __attribute__((aligned(4))) static const u16 Unk_020F4030[] = {
     0x20,
@@ -35,9 +32,7 @@ int sub_0208C098(int param0)
 
 u32 sub_0208C0A4(u32 param0, u32 param1)
 {
-    u32 v0;
-
-    v0 = (param0 * param0) + (param1 * param1);
+    u32 v0 = (param0 * param0) + (param1 * param1);
     v0 = SVC_Sqrt(v0 << 4);
 
     return v0 >> 2;
@@ -82,22 +77,20 @@ u8 HealthBar_Color(u16 curHP, u16 maxHP, u32 barSize)
     return App_BarColor(App_PixelCount(curHP, maxHP, barSize), barSize);
 }
 
-void sub_0208C120(u8 param0, u32 param1)
+void App_StartScreenFade(u8 fadeOut, enum HeapID heapID)
 {
-    if (param0 == 0) {
-        sub_0200F174(0, 1, 1, 0x0, 6, 1, param1);
+    if (fadeOut == FALSE) {
+        StartScreenFade(FADE_BOTH_SCREENS, FADE_TYPE_BRIGHTNESS_IN, FADE_TYPE_BRIGHTNESS_IN, COLOR_BLACK, 6, 1, heapID);
     } else {
-        sub_0200F174(0, 0, 0, 0x0, 6, 1, param1);
+        StartScreenFade(FADE_BOTH_SCREENS, FADE_TYPE_BRIGHTNESS_OUT, FADE_TYPE_BRIGHTNESS_OUT, COLOR_BLACK, 6, 1, heapID);
     }
 }
 
 u8 sub_0208C15C(s16 *param0, u16 param1)
 {
-    s16 v0;
+    s16 v0 = *param0;
 
-    v0 = *param0;
-
-    if (gCoreSys.pressedKeysRepeatable & PAD_KEY_UP) {
+    if (gSystem.pressedKeysRepeatable & PAD_KEY_UP) {
         *param0 += 1;
 
         if (*param0 > param1) {
@@ -111,7 +104,7 @@ u8 sub_0208C15C(s16 *param0, u16 param1)
         return 1;
     }
 
-    if (gCoreSys.pressedKeysRepeatable & PAD_KEY_DOWN) {
+    if (gSystem.pressedKeysRepeatable & PAD_KEY_DOWN) {
         *param0 -= 1;
 
         if (*param0 <= 0) {
@@ -125,7 +118,7 @@ u8 sub_0208C15C(s16 *param0, u16 param1)
         return 2;
     }
 
-    if (gCoreSys.pressedKeysRepeatable & PAD_KEY_LEFT) {
+    if (gSystem.pressedKeysRepeatable & PAD_KEY_LEFT) {
         *param0 -= 10;
 
         if (*param0 <= 0) {
@@ -139,7 +132,7 @@ u8 sub_0208C15C(s16 *param0, u16 param1)
         return 2;
     }
 
-    if (gCoreSys.pressedKeysRepeatable & PAD_KEY_RIGHT) {
+    if (gSystem.pressedKeysRepeatable & PAD_KEY_RIGHT) {
         *param0 += 10;
 
         if (*param0 > param1) {
@@ -156,65 +149,62 @@ u8 sub_0208C15C(s16 *param0, u16 param1)
     return 0;
 }
 
-void sub_0208C210(BGL *param0, int param1, NARC *param2, int param3, int param4, int param5, int param6, u16 param7, u16 param8)
+void App_LoadGraphicMember(BgConfig *bgConfig, enum HeapID heapID, NARC *narc, int unused, int memberIndex, int bgLayer, enum GraphicMemberType memberType, u16 memberSize, u16 offset)
 {
-    u32 v0;
-    void *v1;
-    NNSG2dCharacterData *v2;
-    NNSG2dScreenData *v3;
-    NNSG2dPaletteData *v4;
+    u32 narcSize;
+    void *dest;
+    NNSG2dCharacterData *ppCharData;
+    NNSG2dScreenData *ppScrData;
+    NNSG2dPaletteData *ppPltData;
 
-    v0 = NARC_GetMemberSize(param2, param4);
-    v1 = Heap_AllocFromHeapAtEnd(param1, v0);
+    narcSize = NARC_GetMemberSize(narc, memberIndex);
+    dest = Heap_AllocAtEnd(heapID, narcSize);
 
-    NARC_ReadWholeMember(param2, param4, (void *)v1);
+    NARC_ReadWholeMember(narc, memberIndex, (void *)dest);
 
-    switch (param6) {
-    case 0:
-        NNS_G2dGetUnpackedCharacterData(v1, &v2);
+    switch (memberType) {
+    case GRAPHICSMEMBER_TILES:
+        NNS_G2dGetUnpackedCharacterData(dest, &ppCharData);
 
-        if (param7 == 0) {
-            param7 = v2->szByte;
+        if (memberSize == 0) {
+            memberSize = ppCharData->szByte;
         }
 
-        sub_0201958C(param0, param5, v2->pRawData, param7, param8);
+        Bg_LoadTiles(bgConfig, bgLayer, ppCharData->pRawData, memberSize, offset);
         break;
-    case 1:
-        NNS_G2dGetUnpackedScreenData(v1, &v3);
+    case GRAPHICSMEMBER_TILEMAP:
+        NNS_G2dGetUnpackedScreenData(dest, &ppScrData);
 
-        if (param7 == 0) {
-            param7 = v3->szByte;
+        if (memberSize == 0) {
+            memberSize = ppScrData->szByte;
         }
 
-        if (sub_02019FE4(param0, param5) != NULL) {
-            sub_02019574(param0, param5, v3->rawData, param7);
+        if (Bg_GetTilemapBuffer(bgConfig, bgLayer) != NULL) {
+            Bg_LoadTilemapBuffer(bgConfig, bgLayer, ppScrData->rawData, memberSize);
         }
 
-        sub_02019460(param0, param5, v3->rawData, param7, param8);
+        Bg_CopyTilemapBufferRangeToVRAM(bgConfig, bgLayer, ppScrData->rawData, memberSize, offset);
         break;
-    case 2:
-        NNS_G2dGetUnpackedPaletteData(v1, &v4);
+    case GRAPHICSMEMBER_PALETTE:
+        NNS_G2dGetUnpackedPaletteData(dest, &ppPltData);
 
-        if (param7 == 0) {
-            param7 = v4->szByte;
+        if (memberSize == 0) {
+            memberSize = ppPltData->szByte;
         }
 
-        sub_0201972C(param5, v4->pRawData, param7, param8);
+        Bg_LoadPalette(bgLayer, ppPltData->pRawData, memberSize, offset);
     }
 
-    Heap_FreeToHeap(v1);
+    Heap_Free(dest);
 }
 
-void *sub_0208C2F4(NARC *param0, int param1, int param2, NNSG2dScreenData **param3, int param4)
+void *App_LoadScreenData(NARC *narc, enum NarcID unused, int memberIdx, NNSG2dScreenData **dst, enum HeapID heapID)
 {
-    int v0;
-    void *v1;
+    int size = NARC_GetMemberSize(narc, memberIdx);
+    void *file = Heap_Alloc(heapID, size);
 
-    v0 = NARC_GetMemberSize(param0, param2);
-    v1 = Heap_AllocFromHeap(param4, v0);
+    NARC_ReadWholeMember(narc, memberIdx, file);
+    NNS_G2dGetUnpackedScreenData(file, dst);
 
-    NARC_ReadWholeMember(param0, param2, v1);
-    NNS_G2dGetUnpackedScreenData(v1, param3);
-
-    return v1;
+    return file;
 }

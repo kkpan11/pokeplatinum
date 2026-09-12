@@ -1,5 +1,4 @@
 {
-    "name": "Gastly",
     "base_stats": {
         "hp": 30,
         "attack": 35,
@@ -8,10 +7,7 @@
         "special_attack": 100,
         "special_defense": 35
     },
-    "types": [
-        "TYPE_GHOST",
-        "TYPE_POISON"
-    ],
+    "types": [ "TYPE_GHOST", "TYPE_POISON" ],
     "catch_rate": 190,
     "base_exp_reward": 95,
     "ev_yields": {
@@ -30,21 +26,30 @@
     "hatch_cycles": 20,
     "base_friendship": 70,
     "exp_rate": "EXP_RATE_MEDIUM_SLOW",
-    "egg_groups": [
-        "EGG_GROUP_AMORPHOUS",
-        "EGG_GROUP_AMORPHOUS"
-    ],
-    "abilities": [
-        "ABILITY_LEVITATE",
-        "ABILITY_NONE"
-    ],
-    "great_marsh_flee_rate": 0,
-    "sprite": {
-        "color": "MON_COLOR_PURPLE",
-        "flip_sprite": false
-    },
+    "egg_groups": [ "EGG_GROUP_AMORPHOUS", "EGG_GROUP_AMORPHOUS" ],
+    "abilities": [ "ABILITY_LEVITATE", "ABILITY_NONE" ],
+    "safari_flee_rate": 0,
+    "body_color": "MON_COLOR_PURPLE",
+    "flip_sprite": false,
+    "icon_palette": 2,
     "learnset": {
-        "tms": [
+        "by_level": [
+            [ 1, "MOVE_HYPNOSIS" ],
+            [ 1, "MOVE_LICK" ],
+            [ 5, "MOVE_SPITE" ],
+            [ 8, "MOVE_MEAN_LOOK" ],
+            [ 12, "MOVE_CURSE" ],
+            [ 15, "MOVE_NIGHT_SHADE" ],
+            [ 19, "MOVE_CONFUSE_RAY" ],
+            [ 22, "MOVE_SUCKER_PUNCH" ],
+            [ 26, "MOVE_PAYBACK" ],
+            [ 29, "MOVE_SHADOW_BALL" ],
+            [ 33, "MOVE_DREAM_EATER" ],
+            [ 36, "MOVE_DARK_PULSE" ],
+            [ 40, "MOVE_DESTINY_BOND" ],
+            [ 43, "MOVE_NIGHTMARE" ]
+        ],
+        "by_tm": [
             "TM06",
             "TM10",
             "TM11",
@@ -83,25 +88,7 @@
             "TM90",
             "TM92"
         ],
-        "level_up": {
-            "1": [
-                "MOVE_HYPNOSIS",
-                "MOVE_LICK"
-            ],
-            "5": "MOVE_SPITE",
-            "8": "MOVE_MEAN_LOOK",
-            "12": "MOVE_CURSE",
-            "15": "MOVE_NIGHT_SHADE",
-            "19": "MOVE_CONFUSE_RAY",
-            "22": "MOVE_SUCKER_PUNCH",
-            "26": "MOVE_PAYBACK",
-            "29": "MOVE_SHADOW_BALL",
-            "33": "MOVE_DREAM_EATER",
-            "36": "MOVE_DARK_PULSE",
-            "40": "MOVE_DESTINY_BOND",
-            "43": "MOVE_NIGHTMARE"
-        },
-        "tutor": [
+        "by_tutor": [
             "MOVE_ICY_WIND",
             "MOVE_THUNDER_PUNCH",
             "MOVE_FIRE_PUNCH",
@@ -113,17 +100,105 @@
             "MOVE_KNOCK_OFF",
             "MOVE_SUCKER_PUNCH",
             "MOVE_UPROAR"
+        ],
+        "egg_moves": [
+            "MOVE_PSYWAVE",
+            "MOVE_PERISH_SONG",
+            "MOVE_HAZE",
+            "MOVE_ASTONISH",
+            "MOVE_WILL_O_WISP",
+            "MOVE_GRUDGE",
+            "MOVE_EXPLOSION",
+            "MOVE_FIRE_PUNCH",
+            "MOVE_ICE_PUNCH",
+            "MOVE_THUNDER_PUNCH"
         ]
     },
     "evolutions": [
         [
-            "EVO_LEVEL_UP",
+            "EVO_LEVEL",
             25,
             "SPECIES_HAUNTER"
         ]
     ],
+    "offspring": "SPECIES_GASTLY",
     "footprint": {
-        "has_footprint": false,
-        "footprint_size": "FOOTPRINT_LARGE"
+        "has": false,
+        "size": "FOOTPRINT_LARGE",
+        "type": "FOOTPRINT_TYPE_SCARY"
+    },
+    "pokedex_data": {
+        "height_inches": 51,
+        "weight_pounds": 0.2,
+        "body_shape": "SHAPE_HEAD",
+        "trainer_scale_f": 272,
+        "pokemon_scale_f": 211,
+        "trainer_scale_m": 256,
+        "pokemon_scale_m": 211,
+        "trainer_pos_f": 8,
+        "pokemon_pos_f": 65534,
+        "trainer_pos_m": 9,
+        "pokemon_pos_m": 65534,
+        "en": {
+            "name": "GASTLY",
+            "category": "Gas Pokémon",
+            "entry_text": [
+                "Born from gases, anyone would\n",
+                "faint if engulfed by its gaseous\n",
+                "body, which contains poison."
+            ]
+        },
+        "fr": {
+            "name": "FANTOMINUS",
+            "category": "Pokémon Gaz",
+            "entry_text": [
+                "Le corps de ce Pokémon est\n",
+                "composé de gaz à 95%. Une\n",
+                "bourrasque suffit à le disperser."
+            ]
+        },
+        "de": {
+            "name": "NEBULAK",
+            "category": "Gas",
+            "entry_text": [
+                "Der Körper des Pokémon besteht zu\n",
+                "95 % aus Gasen, die fortgeweht\n",
+                "werden, wenn starker Wind geht."
+            ]
+        },
+        "it": {
+            "name": "GASTLY",
+            "category": "Pokémon Gas",
+            "entry_text": [
+                "Il corpo di questo Pokémon è costi-\n",
+                "tuito al 95% da gas che possono ve-\n",
+                "nir spazzati via da venti improvvisi."
+            ]
+        },
+        "es": {
+            "name": "GASTLY",
+            "category": "Pokémon Gas",
+            "entry_text": [
+                "El cuerpo de este Pokémon está\n",
+                "compuesto en un 95% de gases\n",
+                "que el viento puede arrastrar."
+            ]
+        },
+        "jp": {
+            "name": "ゴ－ス",
+            "category": "ガスじょうポケモン",
+            "entry_text": [
+                "からだの　９５パ－セントが\n",
+                "ガスで　できている　ポケモン。\n",
+                "きょうふうに　ふきとばされてしまう。"
+            ]
+        }
+    },
+    "catching_show": {
+        "pal_park_land_area": "PAL_PARK_AREA_LAND_NORTH_WEST",
+        "pal_park_water_area": "PAL_PARK_AREA_WATER_NONE",
+        "catching_points": 50,
+        "rarity": 30,
+        "unused": 1548
     }
 }

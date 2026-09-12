@@ -1,29 +1,27 @@
-    .include "macros/scrcmd.inc"
+#include "macros/scrcmd.inc"
+#include "constants/sunyshore_gym_buttons.h"
 
-    .data
 
-    ScriptEntry _0012
-    ScriptEntry _001D
-    ScriptEntry _0022
-    ScriptEntry _0027
-    .short 0xFD13
+    ScriptEntry SunyshoreGymRoom2_Init
+    ScriptEntry SunyshoreGymRoom2_BottomButton
+    ScriptEntry SunyshoreGymRoom2_TopButtons
+    ScriptEntry SunyshoreGymRoom2_Dummy4
+    ScriptEntryEnd
 
-_0012:
-    SetVar 0x4000, 0
-    ScrCmd_175 1
+SunyshoreGymRoom2_Init:
+    SetVar VAR_MAP_LOCAL_0x00, 0
+    InitPersistedMapFeaturesForSunyshoreGym 1
     End
 
-_001D:
-    ScrCmd_176 0
+SunyshoreGymRoom2_BottomButton:
+    PressSunyshoreGymButton SUNYSHORE_GYM_BUTTON_NORMAL
     End
 
-_0022:
-    ScrCmd_176 1
+SunyshoreGymRoom2_TopButtons:
+    PressSunyshoreGymButton SUNYSHORE_GYM_BUTTON_REVERSE
     End
 
-_0027:
+SunyshoreGymRoom2_Dummy4:
     End
 
-    .byte 0
-    .byte 0
-    .byte 0
+    .balign 4, 0

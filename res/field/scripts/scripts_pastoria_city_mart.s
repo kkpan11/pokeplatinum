@@ -1,63 +1,32 @@
-    .include "macros/scrcmd.inc"
+#include "macros/scrcmd.inc"
+#include "res/text/bank/pastoria_city_mart.h"
 
-    .data
 
-    ScriptEntry _0016
-    ScriptEntry _002C
-    ScriptEntry _0042
-    ScriptEntry _0055
-    ScriptEntry _0068
-    .short 0xFD13
+    ScriptEntry PastoriaCityMart_CommonVendor
+    ScriptEntry PastoriaCityMart_SpecialtyVendor
+    ScriptEntry PastoriaCityMart_BugCatcher
+    ScriptEntry PastoriaCityMart_SchoolGirl
+    ScriptEntry PastoriaCityMart_CroagunkCarving
+    ScriptEntryEnd
 
-_0016:
-    PlayFanfare SEQ_SE_CONFIRM
-    LockAll
-    FacePlayer
-    CallCommonScript 0x7E3
-    ScrCmd_035
-    ScrCmd_147 1
-    ReleaseAll
+PastoriaCityMart_CommonVendor:
+    PokeMartCommonWithGreeting
     End
 
-_002C:
-    PlayFanfare SEQ_SE_CONFIRM
-    LockAll
-    FacePlayer
-    CallCommonScript 0x7E3
-    ScrCmd_035
-    ScrCmd_148 7
-    ReleaseAll
+PastoriaCityMart_SpecialtyVendor:
+    PokeMartSpecialtiesWithGreeting MART_SPECIALTIES_ID_PASTORIA
     End
 
-_0042:
-    PlayFanfare SEQ_SE_CONFIRM
-    LockAll
-    FacePlayer
-    Message 0
-    WaitABXPadPress
-    CloseMessage
-    ReleaseAll
+PastoriaCityMart_BugCatcher:
+    NPCMessage PastoriaCityMart_Text_CroagunkIsOfficialCityMascot
     End
 
-_0055:
-    PlayFanfare SEQ_SE_CONFIRM
-    LockAll
-    FacePlayer
-    Message 1
-    WaitABXPadPress
-    CloseMessage
-    ReleaseAll
+PastoriaCityMart_SchoolGirl:
+    NPCMessage PastoriaCityMart_Text_AreYouUsingBallCapsules
     End
 
-_0068:
-    PlayFanfare SEQ_SE_CONFIRM
-    LockAll
-    Message 2
-    WaitABXPadPress
-    CloseMessage
-    ReleaseAll
+PastoriaCityMart_CroagunkCarving:
+    EventMessage PastoriaCityMart_Text_LooksLikeItsSeepingPoison
     End
 
-    .byte 0
-    .byte 0
-    .byte 0
+    .balign 4, 0

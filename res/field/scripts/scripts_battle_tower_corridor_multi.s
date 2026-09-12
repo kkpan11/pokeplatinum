@@ -1,146 +1,147 @@
-    .include "macros/scrcmd.inc"
+#include "macros/scrcmd.inc"
+#include "res/field/events/events_battle_tower_corridor_multi.h"
+#include "constants/map_object.h"
 
-    .data
 
-    ScriptEntry _000E
-    ScriptEntry _0068
-    ScriptEntry _008D
-    .short 0xFD13
+    ScriptEntry BattleTowerCorridorMulti_OnTransition
+    ScriptEntry BattleTowerCorridorMulti_OnResume
+    ScriptEntry BattleTowerCorridorMulti_OnFrame_EnterBattleRoom
+    ScriptEntryEnd
 
-_000E:
-    GoToIfEq 0x40DD, 0, _0048
-    ScrCmd_207 0x4000
-    GoToIfEq 0x4000, 1, _004A
-    ScrCmd_1DD 55, 0, 0x4000
-    SetVar 0x4020, 0x4000
-    ScrCmd_1DD 55, 1, 0x4000
-    SetVar 0x4021, 0x4000
-_0048:
+BattleTowerCorridorMulti_OnTransition:
+    GoToIfEq VAR_BATTLE_TOWER_CORRIDOR_MULTI_LOAD_ACTION, 0, BattleTowerCorridorMulti_OnTransitionEnd
+    GetCurNetID VAR_MAP_LOCAL_0x00
+    GoToIfEq VAR_MAP_LOCAL_0x00, 1, BattleTowerCorridorMulti_SetPlayer2Graphics
+    CallBattleTowerFunction BT_FUNC_GET_PARTNER_PARAM, BT_PARAM_PLAYER_GRAPHICS_ID, VAR_MAP_LOCAL_0x00
+    SetVar VAR_OBJ_GFX_ID_0, VAR_MAP_LOCAL_0x00
+    CallBattleTowerFunction BT_FUNC_GET_PARTNER_PARAM, BT_PARAM_PARTNER_GRAPHICS_ID, VAR_MAP_LOCAL_0x00
+    SetVar VAR_OBJ_GFX_ID_1, VAR_MAP_LOCAL_0x00
+BattleTowerCorridorMulti_OnTransitionEnd:
     End
 
-_004A:
-    ScrCmd_1DD 55, 0, 0x4000
-    SetVar 0x4021, 0x4000
-    ScrCmd_1DD 55, 1, 0x4000
-    SetVar 0x4020, 0x4000
+BattleTowerCorridorMulti_SetPlayer2Graphics:
+    CallBattleTowerFunction BT_FUNC_GET_PARTNER_PARAM, BT_PARAM_PLAYER_GRAPHICS_ID, VAR_MAP_LOCAL_0x00
+    SetVar VAR_OBJ_GFX_ID_1, VAR_MAP_LOCAL_0x00
+    CallBattleTowerFunction BT_FUNC_GET_PARTNER_PARAM, BT_PARAM_PARTNER_GRAPHICS_ID, VAR_MAP_LOCAL_0x00
+    SetVar VAR_OBJ_GFX_ID_0, VAR_MAP_LOCAL_0x00
     End
 
-_0068:
-    CallIfNe 0x40DD, 0, _007F
-    ScrCmd_1B2 2
-    ScrCmd_1B2 3
+BattleTowerCorridorMulti_OnResume:
+    CallIfNe VAR_BATTLE_TOWER_CORRIDOR_MULTI_LOAD_ACTION, 0, BattleTowerCorridorMulti_HidePlayerMoveCamera
+    HideObject LOCALID_LEADER
+    HideObject LOCALID_PARTNER
     End
 
-_007F:
-    ScrCmd_1B2 0xFF
-    ScrCmd_06B 8, 0, 0
+BattleTowerCorridorMulti_HidePlayerMoveCamera:
+    HideObject LOCALID_PLAYER
+    MoveCamera 8, 0, 0
     Return
 
-_008D:
+BattleTowerCorridorMulti_OnFrame_EnterBattleRoom:
     LockAll
-    Call _00C9
-    Call _012B
-    Call _014F
-    FadeScreen 6, 1, 0, 0
+    Call BattleTowerCorridorMulti_EnterCorridor
+    Call BattleTowerCorridorMulti_WalkToBattleRoom
+    Call BattleTowerCorridorMulti_EnterBattleRoom
+    FadeScreenOut
     WaitFadeScreen
-    ScrCmd_0BE 0x14B, 0, 7, 5, 0
-    FadeScreen 6, 1, 1, 0
+    Warp MAP_HEADER_BATTLE_TOWER_MULTI_BATTLE_ROOM, 7, 5, DIR_NORTH
+    FadeScreenIn
     WaitFadeScreen
     ReleaseAll
     End
 
-_00C9:
-    ScrCmd_168 0, 0, 3, 2, 77
-    ScrCmd_168 0, 0, 14, 2, 78
-    ScrCmd_16B 77
-    ScrCmd_16B 78
-    ScrCmd_169 77
-    ScrCmd_169 78
-    ApplyMovement 0, _0174
-    ApplyMovement 1, _0174
+BattleTowerCorridorMulti_EnterCorridor:
+    LoadDoorAnimation 0, 0, 3, 2, ANIMATION_TAG_DOOR_1
+    LoadDoorAnimation 0, 0, 14, 2, ANIMATION_TAG_DOOR_2
+    PlayDoorOpenAnimation ANIMATION_TAG_DOOR_1
+    PlayDoorOpenAnimation ANIMATION_TAG_DOOR_2
+    WaitForAnimation ANIMATION_TAG_DOOR_1
+    WaitForAnimation ANIMATION_TAG_DOOR_2
+    ApplyMovement LOCALID_ATTENDANT_LEFT, BattleTowerCorridorMulti_Movement_AttendantEnterCorridor
+    ApplyMovement LOCALID_ATTENDANT_RIGHT, BattleTowerCorridorMulti_Movement_AttendantEnterCorridor
     WaitMovement
-    ScrCmd_1B1 2
-    ScrCmd_1B1 3
-    ApplyMovement 2, _0180
-    ApplyMovement 3, _0180
+    ShowObject LOCALID_LEADER
+    ShowObject LOCALID_PARTNER
+    ApplyMovement LOCALID_LEADER, BattleTowerCorridorMulti_Movement_PlayerEnterCorridor
+    ApplyMovement LOCALID_PARTNER, BattleTowerCorridorMulti_Movement_PlayerEnterCorridor
     WaitMovement
-    ScrCmd_16C 77
-    ScrCmd_16C 78
-    ScrCmd_169 77
-    ScrCmd_169 78
-    ScrCmd_16A 77
-    ScrCmd_16A 78
+    PlayDoorCloseAnimation ANIMATION_TAG_DOOR_1
+    PlayDoorCloseAnimation ANIMATION_TAG_DOOR_2
+    WaitForAnimation ANIMATION_TAG_DOOR_1
+    WaitForAnimation ANIMATION_TAG_DOOR_2
+    UnloadAnimation ANIMATION_TAG_DOOR_1
+    UnloadAnimation ANIMATION_TAG_DOOR_2
     Return
 
-_012B:
-    ApplyMovement 0, _01AC
-    ApplyMovement 2, _0188
-    ApplyMovement 1, _01CC
-    ApplyMovement 3, _0194
-    WaitMovement
-    Return
-
-_014F:
-    ApplyMovement 0, _01EC
-    ApplyMovement 1, _01EC
-    ApplyMovement 2, _01A0
-    ApplyMovement 3, _01A0
+BattleTowerCorridorMulti_WalkToBattleRoom:
+    ApplyMovement LOCALID_ATTENDANT_LEFT, BattleTowerCorridorMulti_Movement_AttendantLeftWalkToBattleRoom
+    ApplyMovement LOCALID_LEADER, BattleTowerCorridorMulti_Movement_LeaderWalkToBattleRoom
+    ApplyMovement LOCALID_ATTENDANT_RIGHT, BattleTowerCorridorMulti_Movement_AttendantRightWalkToBattleRoom
+    ApplyMovement LOCALID_PARTNER, BattleTowerCorridorMulti_Movement_PartnerWalkToBattleRoom
     WaitMovement
     Return
 
+BattleTowerCorridorMulti_EnterBattleRoom:
+    ApplyMovement LOCALID_ATTENDANT_LEFT, BattleTowerCorridorMulti_Movement_AttendantEnterBattleRoom
+    ApplyMovement LOCALID_ATTENDANT_RIGHT, BattleTowerCorridorMulti_Movement_AttendantEnterBattleRoom
+    ApplyMovement LOCALID_LEADER, BattleTowerCorridorMulti_Movement_PlayerEnterBattleRoom
+    ApplyMovement LOCALID_PARTNER, BattleTowerCorridorMulti_Movement_PlayerEnterBattleRoom
+    WaitMovement
+    Return
+
     .balign 4, 0
-_0174:
-    MoveAction_00D 3
-    MoveAction_000
+BattleTowerCorridorMulti_Movement_AttendantEnterCorridor:
+    WalkNormalSouth 3
+    FaceNorth
     EndMovement
 
     .balign 4, 0
-_0180:
-    MoveAction_00D 2
+BattleTowerCorridorMulti_Movement_PlayerEnterCorridor:
+    WalkNormalSouth 2
     EndMovement
 
     .balign 4, 0
-_0188:
-    MoveAction_00D
-    MoveAction_00F 5
+BattleTowerCorridorMulti_Movement_LeaderWalkToBattleRoom:
+    WalkNormalSouth
+    WalkNormalEast 5
     EndMovement
 
     .balign 4, 0
-_0194:
-    MoveAction_00D
-    MoveAction_00E 5
+BattleTowerCorridorMulti_Movement_PartnerWalkToBattleRoom:
+    WalkNormalSouth
+    WalkNormalWest 5
     EndMovement
 
     .balign 4, 0
-_01A0:
-    MoveAction_00C 2
-    MoveAction_045
+BattleTowerCorridorMulti_Movement_PlayerEnterBattleRoom:
+    WalkNormalNorth 2
+    SetInvisible
     EndMovement
 
     .balign 4, 0
-_01AC:
-    MoveAction_00F 5
-    MoveAction_00C
-    MoveAction_03F
-    MoveAction_003
-    MoveAction_03E
-    MoveAction_000
-    MoveAction_03E
+BattleTowerCorridorMulti_Movement_AttendantLeftWalkToBattleRoom:
+    WalkNormalEast 5
+    WalkNormalNorth
+    Delay8
+    FaceEast
+    Delay4
+    FaceNorth
+    Delay4
     EndMovement
 
     .balign 4, 0
-_01CC:
-    MoveAction_00E 5
-    MoveAction_00C
-    MoveAction_03F
-    MoveAction_002
-    MoveAction_03E
-    MoveAction_000
-    MoveAction_03E
+BattleTowerCorridorMulti_Movement_AttendantRightWalkToBattleRoom:
+    WalkNormalWest 5
+    WalkNormalNorth
+    Delay8
+    FaceWest
+    Delay4
+    FaceNorth
+    Delay4
     EndMovement
 
     .balign 4, 0
-_01EC:
-    MoveAction_00C
-    MoveAction_045
+BattleTowerCorridorMulti_Movement_AttendantEnterBattleRoom:
+    WalkNormalNorth
+    SetInvisible
     EndMovement

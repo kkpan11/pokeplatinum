@@ -1,9 +1,8 @@
-    .include "macros/scrcmd.inc"
+#include "macros/scrcmd.inc"
 
-    .data
 
-    ScriptEntry _0006
-    .short 0xFD13
+    ScriptEntry SnowpointCityPokecenter2F_Dummy1
+    ScriptEntryEnd
 
-_0006:
+SnowpointCityPokecenter2F_Dummy1:
     End

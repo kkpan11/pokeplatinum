@@ -3,7 +3,6 @@
 #include <nitro.h>
 #include <string.h>
 
-#include "struct_decls/struct_02006C24_decl.h"
 #include "struct_defs/struct_020985E4.h"
 
 #include "overlay100/ov100_021D44C0.h"
@@ -11,54 +10,54 @@
 #include "overlay100/struct_ov100_021D4890.h"
 #include "overlay100/struct_ov100_021D49B4.h"
 #include "overlay100/struct_ov100_021D4DD8.h"
-#include "overlay115/camera_angle.h"
 
+#include "bg_window.h"
 #include "camera.h"
-#include "core_sys.h"
 #include "easy3d_object.h"
 #include "game_options.h"
 #include "gx_layers.h"
 #include "message.h"
-#include "strbuf.h"
+#include "narc.h"
+#include "palette.h"
+#include "render_window.h"
+#include "string_gf.h"
 #include "string_template.h"
+#include "system.h"
+#include "text.h"
 #include "trainer_info.h"
-#include "unk_02002F38.h"
-#include "unk_0200DA60.h"
-#include "unk_02018340.h"
-#include "unk_0201D670.h"
 
 int ov100_021D46C8(UnkStruct_ov100_021D46C8 *param0, UnkStruct_020985E4 *param1, int param2)
 {
     int v0;
     MessageLoader *v1;
-    Strbuf *v2;
-    Strbuf *v3 = Strbuf_Init(511, 111);
+    String *v2;
+    String *v3 = String_Init(511, HEAP_ID_111);
     u8 v4 = 0;
 
     v1 = param0->unk_2C;
-    v2 = MessageLoader_GetNewStrbuf(v1, param2);
+    v2 = MessageLoader_GetNewString(v1, param2);
 
     if (param2 == 22) {
-        Strbuf *v5 = TrainerInfo_NameNewStrbuf(param1->unk_08, 111);
-        StringTemplate *v6 = StringTemplate_Default(111);
+        String *v5 = TrainerInfo_NameNewString(param1->unk_08, 111);
+        StringTemplate *v6 = StringTemplate_Default(HEAP_ID_111);
 
-        StringTemplate_SetStrbuf(v6, 0, v5, 0, 1, GAME_LANGUAGE);
+        StringTemplate_SetString(v6, 0, v5, 0, 1, GAME_LANGUAGE);
         StringTemplate_Format(v6, v3, v2);
-        Strbuf_Free(v5);
+        String_Free(v5);
         StringTemplate_Free(v6);
     } else {
-        Strbuf_Copy(v3, v2);
+        String_Copy(v3, v2);
     }
 
-    v4 = Options_TextFrameDelay(param1->unk_04);
-    BGL_FillWindow(&param0->unk_30, 0xFF);
+    v4 = Options_TextFrameDelay(param1->options);
+    Window_FillTilemap(&param0->unk_30, 0xFF);
 
-    v0 = PrintStringSimple(&param0->unk_30, 1, v3, 0, 0, v4, NULL);
-    sub_0201A954(&param0->unk_30);
+    v0 = Text_AddPrinterWithParams(&param0->unk_30, FONT_MESSAGE, v3, 0, 0, v4, NULL);
+    Window_CopyToVRAM(&param0->unk_30);
 
-    sub_0200E060(&param0->unk_30, 0, 500, 15);
-    Strbuf_Free(v2);
-    Strbuf_Free(v3);
+    Window_DrawMessageBoxWithScrollCursor(&param0->unk_30, 0, 500, 15);
+    String_Free(v2);
+    String_Free(v3);
 
     param0->unk_40 = v0;
 
@@ -67,8 +66,8 @@ int ov100_021D46C8(UnkStruct_ov100_021D46C8 *param0, UnkStruct_020985E4 *param1,
 
 void ov100_021D4788(UnkStruct_ov100_021D46C8 *param0)
 {
-    sub_0200E084(&param0->unk_30, 1);
-    sub_0201ACF4(&param0->unk_30);
+    Window_EraseMessageBox(&param0->unk_30, 1);
+    Window_ClearAndCopyToVRAM(&param0->unk_30);
 }
 
 void ov100_021D47A0(UnkStruct_ov100_021D46C8 *param0)
@@ -215,11 +214,11 @@ void ov100_021D4AA4(UnkStruct_ov100_021D49B4 *param0, NNSFndAllocator *param1, i
 
 void ov100_021D4AC8(UnkStruct_ov100_021D49B4 *param0, int param1, NARC *param2)
 {
-    Easy3DModel_LoadFrom(&param0->unk_78, param2, param1, 111);
+    Easy3DModel_LoadFrom(&param0->unk_78, param2, param1, HEAP_ID_111);
     Easy3DObject_Init(&param0->unk_00, &param0->unk_78);
     Easy3DObject_SetPosition(&param0->unk_00, 0, 0, 0);
     Easy3DObject_SetScale(&param0->unk_00, FX32_CONST(1.00f), FX32_CONST(1.00f), FX32_CONST(1.00f));
-    Easy3DObject_SetVisibility(&param0->unk_00, 1);
+    Easy3DObject_SetVisible(&param0->unk_00, 1);
 
     param0->unk_174 = 1;
 }
@@ -229,7 +228,7 @@ void ov100_021D4B10(UnkStruct_ov100_021D49B4 *param0, UnkStruct_ov100_021D49B4 *
     Easy3DObject_Init(&param1->unk_00, &param0->unk_78);
     Easy3DObject_SetPosition(&param1->unk_00, 0, 0, 0);
     Easy3DObject_SetScale(&param1->unk_00, FX32_CONST(1.00f), FX32_CONST(1.00f), FX32_CONST(1.00f));
-    Easy3DObject_SetVisibility(&param1->unk_00, 1);
+    Easy3DObject_SetVisible(&param1->unk_00, 1);
 
     param1->unk_174 = 1;
 }
@@ -272,8 +271,8 @@ void ov100_021D4BF0(UnkStruct_ov100_021D46C8 *param0)
         }
     }
 
-    sub_020039B0(param0->unk_10, 1, 0, 4, param0->unk_C1 / 8, 0xCCCC);
-    sub_020039B0(param0->unk_10, 1, 4, 6, param0->unk_C1 / 8, 0xCCCC);
+    PaletteData_Blend(param0->unk_10, PLTTBUF_SUB_BG, 0, 4, param0->unk_C1 / 8, 0xCCCC);
+    PaletteData_Blend(param0->unk_10, PLTTBUF_SUB_BG, 4, 6, param0->unk_C1 / 8, 0xCCCC);
 }
 
 void ov100_021D4C94(UnkStruct_ov100_021D46C8 *param0, int param1)
@@ -331,12 +330,12 @@ void ov100_021D4C94(UnkStruct_ov100_021D46C8 *param0, int param1)
         }
     }
 
-    sub_020039B0(param0->unk_10, 1, v3[v0][0], v3[v0][1], param0->unk_C1 / v1[v0], v4[v0]);
+    PaletteData_Blend(param0->unk_10, PLTTBUF_SUB_BG, v3[v0][0], v3[v0][1], param0->unk_C1 / v1[v0], v4[v0]);
 }
 
 void ov100_021D4DC8(int param0)
 {
-    gCoreSys.unk_65 = param0;
+    gSystem.whichScreenIs3D = param0;
     GXLayers_SwapDisplay();
 }
 

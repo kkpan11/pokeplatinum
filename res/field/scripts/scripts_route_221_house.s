@@ -1,105 +1,98 @@
-    .include "macros/scrcmd.inc"
+#include "macros/scrcmd.inc"
+#include "res/text/bank/route_221_house.h"
 
-    .data
 
-    ScriptEntry _000A
-    ScriptEntry _017A
-    .short 0xFD13
+    ScriptEntry Route221House_ExpertM
+    ScriptEntry Route221House_BgSign
+    ScriptEntryEnd
 
-_000A:
-    PlayFanfare SEQ_SE_CONFIRM
+Route221House_ExpertM:
+    PlaySE SE_CONFIRM_sseq_3
     LockAll
     FacePlayer
-    GoToIfSet 0x137, _0114
-    GoToIfSet 0xAAE, _016F
-    ScrCmd_277 0x8000
-    ScrCmd_0D5 0, 0x8000
-    ScrCmd_177 0x8002
-    SetVar 0x8003, 0
-_003B:
-    ScrCmd_278 0x8001, 0x8003
-    GoToIfEq 0x8000, 0x8001, _006D
-    AddVar 0x8003, 1
-    SubVar 0x8002, 1
-    GoToIfNe 0x8002, 0, _003B
-    GoTo _0164
+    GoToIfSet FLAG_COULD_NOT_RECEIVE_ROUTE_221_HOUSE_REWARD, Route221House_TryGiveReward
+    GoToIfSet FLAG_DAILY_RECEIVED_ROUTE_221_HOUSE_REWARD, Route221House_ComeAgainTomorrow
+    GetDailyRandomLevel VAR_0x8000
+    BufferNumber 0, VAR_0x8000
+    GetPartyCount VAR_0x8002
+    SetVar VAR_0x8003, 0
+Route221House_CheckPartyMonLevel:
+    GetPartyMonLevel VAR_0x8001, VAR_0x8003
+    GoToIfEq VAR_0x8000, VAR_0x8001, Route221House_CorrectPartyMonLevel
+    AddVar VAR_0x8003, 1
+    SubVar VAR_0x8002, 1
+    GoToIfNe VAR_0x8002, 0, Route221House_CheckPartyMonLevel
+    GoTo Route221House_ShowThisLevelPokemon
 
-_006D:
-    CallIfEq 0x4108, 0, _00ED
-    CallIfEq 0x4108, 1, _00F5
-    CallIfEq 0x4108, 2, _00FD
-    ScrCmd_0D0 1, 0x8003
-    ScrCmd_0D1 2, 0x8004
-    Message 1
-    SetVar 0x8005, 1
-    ScrCmd_07D 0x8004, 0x8005, 0x800C
-    GoToIfEq 0x800C, 0, _0105
-    GoTo _00C2
+Route221House_CorrectPartyMonLevel:
+    CallIfEq VAR_ROUTE_221_HOUSE_REWARD_INDEX, 0, Route221House_SetRewardBlackBelt
+    CallIfEq VAR_ROUTE_221_HOUSE_REWARD_INDEX, 1, Route221House_SetRewardExpertBelt
+    CallIfEq VAR_ROUTE_221_HOUSE_REWARD_INDEX, 2, Route221House_SetRewardFocusSash
+    BufferPartyMonSpecies 1, VAR_0x8003
+    BufferItemName 2, VAR_0x8004
+    Message Route221House_Text_PokemonIsCorrectLevel
+    SetVar VAR_0x8005, 1
+    GoToIfCannotFitItem VAR_0x8004, VAR_0x8005, VAR_RESULT, Route221House_NoRoomInBag
+    GoTo Route221House_GiveReward
 
-_00C2:
-    CallCommonScript 0x7E0
-    ClearFlag 0x137
-    SetFlag 0xAAE
-    AddVar 0x4108, 1
-    GoToIfLt 0x4108, 3, _00E7
-    SetVar 0x4108, 0
-_00E7:
+Route221House_GiveReward:
+    Common_GiveItemQuantityNoLineFeed
+    ClearFlag FLAG_COULD_NOT_RECEIVE_ROUTE_221_HOUSE_REWARD
+    SetFlag FLAG_DAILY_RECEIVED_ROUTE_221_HOUSE_REWARD
+    AddVar VAR_ROUTE_221_HOUSE_REWARD_INDEX, 1
+    GoToIfLt VAR_ROUTE_221_HOUSE_REWARD_INDEX, 3, Route221House_ExpertMEnd
+    SetVar VAR_ROUTE_221_HOUSE_REWARD_INDEX, 0
+Route221House_ExpertMEnd:
     CloseMessage
     ReleaseAll
     End
 
-_00ED:
-    SetVar 0x8004, 241
+Route221House_SetRewardBlackBelt:
+    SetVar VAR_0x8004, ITEM_BLACK_BELT
     Return
 
-_00F5:
-    SetVar 0x8004, 0x10C
+Route221House_SetRewardExpertBelt:
+    SetVar VAR_0x8004, ITEM_EXPERT_BELT
     Return
 
-_00FD:
-    SetVar 0x8004, 0x113
+Route221House_SetRewardFocusSash:
+    SetVar VAR_0x8004, ITEM_FOCUS_SASH
     Return
 
-_0105:
-    SetFlag 0x137
-    Message 2
-    WaitABXPadPress
+Route221House_NoRoomInBag:
+    SetFlag FLAG_COULD_NOT_RECEIVE_ROUTE_221_HOUSE_REWARD
+    Message Route221House_Text_NoRoomInBag
+    WaitButton
     CloseMessage
     ReleaseAll
     End
 
-_0114:
-    CallIfEq 0x4108, 0, _00ED
-    CallIfEq 0x4108, 1, _00F5
-    CallIfEq 0x4108, 2, _00FD
-    ScrCmd_0D1 2, 0x8004
-    Message 3
-    SetVar 0x8005, 1
-    ScrCmd_07D 0x8004, 0x8005, 0x800C
-    GoToIfEq 0x800C, 0, _0105
-    GoTo _00C2
+Route221House_TryGiveReward:
+    CallIfEq VAR_ROUTE_221_HOUSE_REWARD_INDEX, 0, Route221House_SetRewardBlackBelt
+    CallIfEq VAR_ROUTE_221_HOUSE_REWARD_INDEX, 1, Route221House_SetRewardExpertBelt
+    CallIfEq VAR_ROUTE_221_HOUSE_REWARD_INDEX, 2, Route221House_SetRewardFocusSash
+    BufferItemName 2, VAR_0x8004
+    Message Route221House_Text_ThankWithItem
+    SetVar VAR_0x8005, 1
+    GoToIfCannotFitItem VAR_0x8004, VAR_0x8005, VAR_RESULT, Route221House_NoRoomInBag
+    GoTo Route221House_GiveReward
 
-_0164:
-    Message 0
-    WaitABXPadPress
+Route221House_ShowThisLevelPokemon:
+    Message Route221House_Text_ShowThisLevelPokemon
+    WaitButton
     CloseMessage
     ReleaseAll
     End
 
-_016F:
-    Message 4
-    WaitABXPadPress
+Route221House_ComeAgainTomorrow:
+    Message Route221House_Text_ComeAgainTomorrow
+    WaitButton
     CloseMessage
     ReleaseAll
     End
 
-_017A:
-    PlayFanfare SEQ_SE_CONFIRM
-    LockAll
-    Message 5
-    WaitABXPadPress
-    CloseMessage
-    ReleaseAll
+Route221House_BgSign:
+    EventMessage Route221House_Text_WinItemsFromMe
     End
 
-    .byte 0
+    .balign 4, 0

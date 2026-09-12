@@ -3,7 +3,6 @@
 #include <nitro.h>
 #include <string.h>
 
-#include "struct_defs/archived_sprite.h"
 #include "struct_defs/struct_020298D8.h"
 
 #include "overlay022/ov22_02254DE0.h"
@@ -20,9 +19,9 @@
 #include "overlay022/struct_ov22_0225B388.h"
 
 #include "pokemon.h"
+#include "pokemon_sprite.h"
+#include "software_sprite.h"
 #include "touch_screen.h"
-#include "unk_0200762C.h"
-#include "unk_02015064.h"
 
 static void ov22_02257DEC(UnkStruct_ov22_02257964 *param0, UnkStruct_ov22_02259560 *param1, BOOL param2, NNSG2dCharacterData **param3);
 static void ov22_02257EC8(UnkStruct_ov22_02259560 *param0, int *param1, int *param2);
@@ -60,19 +59,19 @@ void ov22_02257948(UnkStruct_ov22_02257964 *param0)
     memset(param0, 0, sizeof(UnkStruct_ov22_02257964));
 }
 
-void ov22_02257964(UnkStruct_ov22_02257964 *param0, Pokemon *param1, ArchivedSprite *param2, int param3, int param4, int param5, int param6)
+void ov22_02257964(UnkStruct_ov22_02257964 *param0, Pokemon *param1, PokemonSpriteTemplate *param2, int param3, int param4, int param5, int param6)
 {
     ov22_022590C0(&param0->unk_2C.unk_4C, param0->unk_2C.unk_10, param1, param2, param6);
     ov22_022591D0(&param0->unk_2C.unk_4C, param5);
     ov22_022591EC(&param0->unk_2C.unk_4C, param3, param4);
 }
 
-void ov22_02257998(UnkStruct_ov22_02257964 *param0, Pokemon *param1, ArchivedSprite *param2, int param3)
+void ov22_02257998(UnkStruct_ov22_02257964 *param0, Pokemon *param1, PokemonSpriteTemplate *param2, int param3)
 {
     ov22_022590C0(&param0->unk_2C.unk_4C, param0->unk_2C.unk_10, param1, param2, param3);
 }
 
-void ov22_022579B4(UnkStruct_ov22_02257964 *param0, Pokemon *param1, ArchivedSprite *param2, int param3)
+void ov22_022579B4(UnkStruct_ov22_02257964 *param0, Pokemon *param1, PokemonSpriteTemplate *param2, int param3)
 {
     ov22_022590D4(&param0->unk_2C.unk_4C, param0->unk_2C.unk_10, param1, param2, param3, 1);
 }
@@ -180,9 +179,7 @@ void ov22_02257B10(UnkStruct_ov22_02257964 *param0)
 
 void ov22_02257B1C(UnkStruct_ov22_02257964 *param0, int param1)
 {
-    UnkStruct_ov22_02259560 *v0;
-
-    v0 = param0->unk_00.unk_14.unk_08;
+    UnkStruct_ov22_02259560 *v0 = param0->unk_00.unk_14.unk_08;
 
     while (v0 != &param0->unk_00.unk_14) {
         if (v0->unk_04 == 0) {
@@ -267,7 +264,7 @@ BOOL ov22_02257C04(UnkStruct_ov22_02257964 *param0, int param1, int param2)
     v0.rect.left = (136 + 2);
     v0.rect.right = (136 + 2) + (112 - (2 * 2));
 
-    return sub_02022830(&v0, param1, param2);
+    return TouchScreen_IsTouchInHitTable(&v0, param1, param2);
 }
 
 UnkStruct_ov22_02259560 *ov22_02257C20(UnkStruct_ov22_02257964 *param0, int *param1, int *param2, NNSG2dCharacterData **param3)
@@ -302,12 +299,12 @@ UnkStruct_ov22_02259560 *ov22_02257C20(UnkStruct_ov22_02257964 *param0, int *par
     return NULL;
 }
 
-void ov22_02257C88(UnkStruct_ov22_02257964 *param0, int param1, int param2)
+void ov22_02257C88(UnkStruct_ov22_02257964 *param0, int param1, enum HeapID heapID)
 {
     UnkStruct_ov22_022599A0 v0;
 
     v0.unk_00 = param0->unk_2C.unk_14;
-    v0.unk_04 = 25;
+    v0.narcID = NARC_INDEX_GRAPHIC__IMAGECLIP;
     v0.unk_08 = (param1) * 4 + 134;
     v0.unk_0C = (param1) * 4 + 134 + 1;
     v0.unk_10 = (param1) * 4 + 134 + 2;
@@ -317,7 +314,7 @@ void ov22_02257C88(UnkStruct_ov22_02257964 *param0, int param1, int param2)
     v0.unk_20 = 1;
     v0.unk_24 = 13;
     v0.unk_28 = 0;
-    v0.unk_2C = param2;
+    v0.heapID = heapID;
 
     ov22_022597BC(&param0->unk_2C.unk_1C, &v0);
 
@@ -331,8 +328,8 @@ void ov22_02257CD4(UnkStruct_ov22_02257964 *param0)
 
 void ov22_02257CE0(UnkStruct_ov22_02257964 *param0, int *param1, int *param2)
 {
-    *param1 = sub_020080C0(param0->unk_2C.unk_4C.unk_00, 0);
-    *param2 = sub_020080C0(param0->unk_2C.unk_4C.unk_00, 1);
+    *param1 = PokemonSprite_GetAttribute(param0->unk_2C.unk_4C.unk_00, MON_SPRITE_X_CENTER);
+    *param2 = PokemonSprite_GetAttribute(param0->unk_2C.unk_4C.unk_00, MON_SPRITE_Y_CENTER);
 }
 
 int ov22_02257D00(UnkStruct_ov22_02257964 *param0)
@@ -346,9 +343,7 @@ void ov22_02257D04(UnkStruct_ov22_02257964 *param0, int *param1, int *param2)
     int v1;
     int v2;
     int v3;
-    UnkStruct_ov22_02259560 *v4;
-
-    v4 = param0->unk_00.unk_14.unk_08;
+    UnkStruct_ov22_02259560 *v4 = param0->unk_00.unk_14.unk_08;
     v0 = 0;
     v1 = 0;
 
@@ -372,21 +367,19 @@ void ov22_02257D04(UnkStruct_ov22_02257964 *param0, int *param1, int *param2)
 
 void ov22_02257D70(UnkStruct_ov22_02257964 *param0, GXRgb param1)
 {
-    UnkStruct_ov22_02259560 *v0;
-
-    v0 = param0->unk_00.unk_14.unk_08;
+    UnkStruct_ov22_02259560 *v0 = param0->unk_00.unk_14.unk_08;
 
     while (v0 != &param0->unk_00.unk_14) {
         if (v0->unk_04 == 0) {
             UnkStruct_ov22_02255040 *v1 = v0->unk_00;
 
-            sub_0201529C(v1->unk_04, param1);
+            SoftwareSprite_SetDiffuse(v1->unk_04, param1);
         } else {
             UnkStruct_020298D8 *v2 = v0->unk_00;
 
-            sub_02007DEC(v2->unk_00, 24, (param1 >> 10) & 0x1f);
-            sub_02007DEC(v2->unk_00, 25, (param1 >> 5) & 0x1f);
-            sub_02007DEC(v2->unk_00, 26, (param1 >> 0) & 0x1f);
+            PokemonSprite_SetAttribute(v2->unk_00, MON_SPRITE_DIFFUSE_R, (param1 >> 10) & 0x1f);
+            PokemonSprite_SetAttribute(v2->unk_00, MON_SPRITE_DIFFUSE_G, (param1 >> 5) & 0x1f);
+            PokemonSprite_SetAttribute(v2->unk_00, MON_SPRITE_DIFFUSE_B, (param1 >> 0) & 0x1f);
         }
 
         v0 = v0->unk_08;
@@ -397,7 +390,7 @@ void ov22_02257D70(UnkStruct_ov22_02257964 *param0, GXRgb param1)
     while (v0 != &param0->unk_00.unk_04) {
         UnkStruct_ov22_02255040 *v3 = v0->unk_00;
 
-        sub_0201529C(v3->unk_04, param1);
+        SoftwareSprite_SetDiffuse(v3->unk_04, param1);
         v0 = v0->unk_08;
     }
 }

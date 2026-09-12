@@ -1,18 +1,20 @@
 #include <nitro.h>
 #include <string.h>
 
+#include "constants/graphics.h"
+
 #include "struct_defs/struct_0208C06C.h"
 
 #include "overlay062/ov62_0222F2C0.h"
 #include "overlay062/ov62_022300D8.h"
 #include "overlay062/ov62_02231690.h"
 
-#include "core_sys.h"
 #include "game_overlay.h"
 #include "gx_layers.h"
 #include "heap.h"
 #include "savedata_misc.h"
-#include "unk_020041CC.h"
+#include "sound.h"
+#include "system.h"
 #include "unk_0208B284.h"
 #include "unk_0208BA78.h"
 
@@ -21,42 +23,42 @@
 
 FS_EXTERN_OVERLAY(overlay62);
 
-static int sub_0208BF38(OverlayManager *param0, int *param1);
-static int sub_0208BF44(OverlayManager *param0, int *param1);
-static int sub_0208BEBC(OverlayManager *param0, int *param1, int param2);
-static int sub_0208BF50(OverlayManager *param0, int *param1);
-static int sub_0208BF6C(OverlayManager *param0, int *param1);
+static int sub_0208BF38(ApplicationManager *appMan, int *param1);
+static int sub_0208BF44(ApplicationManager *appMan, int *param1);
+static int sub_0208BEBC(ApplicationManager *appMan, int *param1, int param2);
+static int sub_0208BF50(ApplicationManager *appMan, int *param1);
+static int sub_0208BF6C(ApplicationManager *appMan, int *param1);
 
-const OverlayManagerTemplate Unk_020F3050 = {
+const ApplicationManagerTemplate Unk_020F3050 = {
     sub_0208BF38,
     sub_0208BF50,
     sub_0208BF6C,
     FS_OVERLAY_ID(overlay62)
 };
 
-const OverlayManagerTemplate Unk_020F3060 = {
+const ApplicationManagerTemplate Unk_020F3060 = {
     sub_0208BF44,
     sub_0208BF50,
     sub_0208BF6C,
     FS_OVERLAY_ID(overlay62)
 };
 
-static int sub_0208BEBC(OverlayManager *param0, int *param1, int param2)
+static int sub_0208BEBC(ApplicationManager *appMan, int *param1, int param2)
 {
     UnkStruct_0208C06C *v0;
 
-    Heap_Create(3, 102, 0x55000);
-    v0 = sub_0208BA78(param0);
+    Heap_Create(HEAP_ID_APPLICATION, HEAP_ID_102, 0x55000);
+    v0 = sub_0208BA78(appMan);
     ov62_02230060(v0);
-    sub_0200544C(1, (127 / 3));
+    Sound_SetPlayerVolume(1, (127 / 3));
 
     if (param2 != 0) {
-        sub_02004550(4, 1196, 1);
+        Sound_SetSceneAndPlayBGM(SOUND_SCENE_FIELD, SEQ_PL_WIFITOWER_sseq, 1);
     }
 
     if (param2 == 0) {
         {
-            MiscSaveBlock *v1 = SaveData_MiscSaveBlock(v0->unk_830);
+            MiscSaveBlock *v1 = SaveData_MiscSaveBlock(v0->saveData);
 
             MiscSaveBlock_VsRecorderColor(v1, &v0->unk_14.unk_48);
 
@@ -75,20 +77,20 @@ static int sub_0208BEBC(OverlayManager *param0, int *param1, int param2)
     return 1;
 }
 
-static int sub_0208BF38(OverlayManager *param0, int *param1)
+static int sub_0208BF38(ApplicationManager *appMan, int *param1)
 {
-    return sub_0208BEBC(param0, param1, 0);
+    return sub_0208BEBC(appMan, param1, 0);
 }
 
-static int sub_0208BF44(OverlayManager *param0, int *param1)
+static int sub_0208BF44(ApplicationManager *appMan, int *param1)
 {
-    return sub_0208BEBC(param0, param1, 1);
+    return sub_0208BEBC(appMan, param1, 1);
 }
 
-static int sub_0208BF50(OverlayManager *param0, int *param1)
+static int sub_0208BF50(ApplicationManager *appMan, int *param1)
 {
     BOOL v0 = 0;
-    UnkStruct_0208C06C *v1 = sub_0208BA78(param0);
+    UnkStruct_0208C06C *v1 = sub_0208BA78(appMan);
 
     v1->unk_10 = param1;
     v0 = ov62_0222F910(v1, param1);
@@ -96,9 +98,9 @@ static int sub_0208BF50(OverlayManager *param0, int *param1)
     return (v0) ? 1 : 0;
 }
 
-static int sub_0208BF6C(OverlayManager *param0, int *param1)
+static int sub_0208BF6C(ApplicationManager *appMan, int *param1)
 {
-    UnkStruct_0208C06C *v0 = sub_0208BA78(param0);
+    UnkStruct_0208C06C *v0 = sub_0208BA78(appMan);
 
     switch (*param1) {
     case 0:
@@ -123,9 +125,9 @@ static int sub_0208BF6C(OverlayManager *param0, int *param1)
     } break;
     default:
         ov62_0222F514(v0);
-        Heap_Destroy(102);
+        Heap_Destroy(HEAP_ID_102);
         Overlay_UnloadByID(FS_OVERLAY_ID(overlay62));
-        gCoreSys.unk_65 = 0;
+        gSystem.whichScreenIs3D = DS_SCREEN_MAIN;
         GXLayers_SwapDisplay();
 
         return 1;

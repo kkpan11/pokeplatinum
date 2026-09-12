@@ -1,752 +1,707 @@
-    .include "macros/scrcmd.inc"
+#include "macros/scrcmd.inc"
+#include "res/text/bank/sandgem_town_pokemon_research_lab.h"
+#include "res/field/events/events_sandgem_town_pokemon_research_lab.h"
 
-    .data
 
-    ScriptEntry _003E
-    ScriptEntry _01AE
-    ScriptEntry _008C
-    ScriptEntry _01AC
-    ScriptEntry _04F0
-    ScriptEntry _0544
-    ScriptEntry _0592
-    ScriptEntry _0594
-    ScriptEntry _05A5
-    ScriptEntry _05B6
-    ScriptEntry _05C7
-    ScriptEntry _05D8
-    ScriptEntry _05EC
-    ScriptEntry _05FD
-    ScriptEntry _0114
-    .short 0xFD13
+    ScriptEntry SandgemTownLab_OnTransition
+    ScriptEntry SandgemTownLab_OnFrame_GetPokedex
+    ScriptEntry SandgemTownLab_ProfRowan
+    ScriptEntry SandgemTownLab_Dummy4
+    ScriptEntry SandgemTownLab_ScientistM
+    ScriptEntry SandgemTownLab_ScientistF
+    ScriptEntry SandgemTownLab_Dummy7
+    ScriptEntry SandgemTownLab_BookshelfAdventureRuleNo1
+    ScriptEntry SandgemTownLab_BookshelfAdventureRuleNo2
+    ScriptEntry SandgemTownLab_BookshelfBooks
+    ScriptEntry SandgemTownLab_BookshelfReferenceMaterial
+    ScriptEntry SandgemTownLab_PC
+    ScriptEntry SandgemTownLab_ResearchMaterials_Unused
+    ScriptEntry SandgemTownLab_Refrigerator
+    ScriptEntry SandgemTownLab_OnFrame_ReturnedFromDistortionWorld
+    ScriptEntryEnd
 
-_003E:
-    CallIfEq 0x40A6, 2, _005A
-    CallIfEq 0x40A6, 3, _005A
+SandgemTownLab_OnTransition:
+    CallIfEq VAR_SANDGEM_TOWN_LAB_STATE, 2, SandgemTownLab_SetProfRowanAndCounterpartPositions
+    CallIfEq VAR_SANDGEM_TOWN_LAB_STATE, 3, SandgemTownLab_SetProfRowanAndCounterpartPositions
     End
 
-_005A:
-    ClearFlag 0x198
-    ScrCmd_186 0, 7, 14
-    ScrCmd_189 0, 1
-    ScrCmd_188 0, 15
-    ClearFlag 0x199
-    ScrCmd_186 3, 6, 14
-    ScrCmd_189 3, 1
-    ScrCmd_188 3, 15
+SandgemTownLab_SetProfRowanAndCounterpartPositions:
+    ClearFlag FLAG_HIDE_SANDGEM_TOWN_LAB_PROF_ROWAN
+    SetObjectEventPos LOCALID_PROF_ROWAN, 7, 14
+    SetObjectEventDir LOCALID_PROF_ROWAN, DIR_SOUTH
+    SetObjectEventMovementType LOCALID_PROF_ROWAN, MOVEMENT_TYPE_LOOK_SOUTH
+    ClearFlag FLAG_HIDE_SANDGEM_TOWN_LAB_COUNTERPART
+    SetObjectEventPos LOCALID_COUNTERPART, 6, 14
+    SetObjectEventDir LOCALID_COUNTERPART, DIR_SOUTH
+    SetObjectEventMovementType LOCALID_COUNTERPART, MOVEMENT_TYPE_LOOK_SOUTH
     Return
 
-_008C:
-    PlayFanfare SEQ_SE_CONFIRM
+SandgemTownLab_ProfRowan:
+    PlaySE SE_CONFIRM_sseq_3
     LockAll
     FacePlayer
-    Call _08A0
-    GoToIfEq 0x8006, 1, _0106
-    GoTo _00B7
+    Call SandgemTownLab_SetVarIfArrivedInSunyshoreCity
+    GoToIfEq VAR_0x8006, TRUE, SandgemTownLab_GiveCynthiaMyBestRegards
+    GoTo SandgemTownLab_ProfRowanReactToPokedex
     End
 
-_00AF:
-    SetVar 0x40AA, 3
+SandgemTownLab_IncreaseExitedDistortionWorldState:
+    SetVar VAR_EXITED_DISTORTION_WORLD_STATE, 3
     Return
 
-_00B7:
-    ScrCmd_22D 2, 0x800C
-    GoToIfEq 0x800C, 1, _07AE
-    GoToIfUnset 0x9BA, _00E5
-    ScrCmd_1E8 0x800C
-    GoToIfEq 0x800C, 1, _060E
-_00E5:
-    GoToIfGe 0x4071, 2, _0100
-    ScrCmd_0CD 0
-    Message 18
-    WaitABXPadPress
+SandgemTownLab_ProfRowanReactToPokedex:
+    GetNationalDexEnabled VAR_RESULT
+    GoToIfEq VAR_RESULT, TRUE, SandgemTownLab_ManyMorePokemon
+    GoToIfUnset FLAG_FIRST_ARRIVAL_ETERNA_CITY, SandgemTownLab_CheckShouldRatePokedex
+    CheckLocalDexCompleted VAR_RESULT
+    GoToIfEq VAR_RESULT, TRUE, SandgemTownLab_ShowCompleteLocalDex
+SandgemTownLab_CheckShouldRatePokedex:
+    GoToIfGe VAR_SANDGEM_TOWN_STATE, 2, SandgemTownLab_CheckPokedexRatings
+    BufferPlayerName 0
+    Message SandgemTownLab_Text_GrandAdventureAwaitsYou
+    WaitButton
     CloseMessage
     ReleaseAll
     End
 
-_0100:
+SandgemTownLab_CheckPokedexRatings:
     CallCommonScript 0x26DE
     End
 
-_0106:
-    ScrCmd_0CD 0
-    Message 55
-    WaitABXPadPress
+SandgemTownLab_GiveCynthiaMyBestRegards:
+    BufferPlayerName 0
+    Message SandgemTownLab_Text_GiveCynthiaMyBestRegards
+    WaitButton
     CloseMessage
     ReleaseAll
     End
 
-_0114:
+SandgemTownLab_OnFrame_ReturnedFromDistortionWorld:
     LockAll
-    CallIfEq 0x40AA, 2, _00AF
-    ScrCmd_0CD 1
-    Message 51
+    CallIfEq VAR_EXITED_DISTORTION_WORLD_STATE, 2, SandgemTownLab_IncreaseExitedDistortionWorldState
+    BufferPlayerName 1
+    Message SandgemTownLab_Text_YouReallyHaveDoneIt
     CloseMessage
-    ApplyMovement 3, _019C
+    ApplyMovement LOCALID_COUNTERPART, SandgemTownLab_Movement_CounterpartTurnOnSpot
     WaitMovement
-    ScrCmd_14D 0x800C
-    GoToIfEq 0x800C, 0, _014E
-    GoTo _015C
+    GetPlayerGender VAR_RESULT
+    GoToIfEq VAR_RESULT, GENDER_MALE, SandgemTownLab_DawnGladToSeeYouSafe
+    GoTo SandgemTownLab_LucasGladToSeeYouSafe
     End
 
-_014E:
-    ScrCmd_0CD 1
-    Message 52
-    GoTo _016A
+SandgemTownLab_DawnGladToSeeYouSafe:
+    BufferPlayerName 1
+    Message SandgemTownLab_Text_DawnGladToSeeYouSafe
+    GoTo SandgemTownLab_ObtainSunyshoresBadge
     End
 
-_015C:
-    ScrCmd_0CD 1
-    Message 53
-    GoTo _016A
+SandgemTownLab_LucasGladToSeeYouSafe:
+    BufferPlayerName 1
+    Message SandgemTownLab_Text_LucasGladToSeeYouSafe
+    GoTo SandgemTownLab_ObtainSunyshoresBadge
     End
 
-_016A:
-    ScrCmd_11E 0x800C
-    ScrCmd_0D5 1, 0x800C
-    Message 54
-    WaitABXPadPress
+SandgemTownLab_ObtainSunyshoresBadge:
+    GetLocalDexSeenCount VAR_RESULT
+    BufferNumber 1, VAR_RESULT
+    Message SandgemTownLab_Text_ObtainSunyshoresBadge
+    WaitButton
     CloseMessage
-    SetFlag 0x27D
-    SetVar 0x4112, 1
-    ClearFlag 0x1DF
-    ClearFlag 0x1E0
-    ClearFlag 0x1E1
-    SetVar 0x40A6, 3
+    SetFlag FLAG_HIDE_VALOR_LAKEFRONT_COLLECTOR
+    SetVar VAR_VALOR_LAKEFRONT_BLOCK_SUNYSHORE_STATE, 1
+    ClearFlag FLAG_HIDE_VERITY_CAVERN_MESPRIT
+    ClearFlag FLAG_HIDE_VALOR_CAVERN_AZELF
+    ClearFlag FLAG_HIDE_ACUITY_CAVERN_UXIE
+    SetVar VAR_SANDGEM_TOWN_LAB_STATE, 3
     ReleaseAll
     End
 
     .balign 4, 0
-_019C:
-    MoveAction_023
-    MoveAction_03E
-    MoveAction_021
+SandgemTownLab_Movement_CounterpartTurnOnSpot:
+    WalkOnSpotNormalEast
+    Delay4
+    WalkOnSpotNormalSouth
     EndMovement
 
-_01AC:
+SandgemTownLab_Dummy4:
     End
 
-_01AE:
+SandgemTownLab_OnFrame_GetPokedex:
     LockAll
-    ApplyMovement 3, _0484
-    ApplyMovement 0xFF, _04A8
+    ApplyMovement LOCALID_COUNTERPART, SandgemTownLab_Movement_CounterpartWalkToProfRowan
+    ApplyMovement LOCALID_PLAYER, SandgemTownLab_Movement_PlayerWalkToProfRowan
     WaitMovement
-    ScrCmd_0CD 0
-    Message 0
+    BufferPlayerName 0
+    Message SandgemTownLab_Text_LookAtYourPokemon
     CloseMessage
-    ScrCmd_0CB 0x100
-    ScrCmd_0CC
-    ApplyMovement 0xFF, _04E0
+    SetPlayerState PLAYER_TRANSITION_HEALING
+    ChangePlayerState
+    ApplyMovement LOCALID_PLAYER, SandgemTownLab_Movement_PlayerGive
     WaitMovement
-    SetVar 0x8004, 0
-    ScrCmd_198 0x8004, 0x800C
-    SetVar 0x8008, 0x800C
-    GoToIfEq 0x8008, 0x183, _0219
-    GoToIfEq 0x8008, 0x186, _0219
-    GoToIfEq 0x8008, 0x189, _0219
-    GoTo _0222
+    SetVar VAR_0x8004, 0
+    GetPartyMonSpecies VAR_0x8004, VAR_RESULT
+    SetVar VAR_0x8008, VAR_RESULT
+    GoToIfEq VAR_0x8008, SPECIES_TURTWIG, SandgemTownLab_PokemonSeemsRatherHappy
+    GoToIfEq VAR_0x8008, SPECIES_CHIMCHAR, SandgemTownLab_PokemonSeemsRatherHappy
+    GoToIfEq VAR_0x8008, SPECIES_PIPLUP, SandgemTownLab_PokemonSeemsRatherHappy
+    GoTo SandgemTownLab_PokemonEvolvedAlready
 
-_0219:
-    Message 1
-    GoTo _022B
+SandgemTownLab_PokemonSeemsRatherHappy:
+    Message SandgemTownLab_Text_PokemonSeemsRatherHappy
+    GoTo SandgemTownLab_GiveItANickname
 
-_0222:
-    Message 2
-    GoTo _022B
+SandgemTownLab_PokemonEvolvedAlready:
+    Message SandgemTownLab_Text_PokemonEvolvedAlready
+    GoTo SandgemTownLab_GiveItANickname
 
-_022B:
+SandgemTownLab_GiveItANickname:
     CloseMessage
-    ApplyMovement 0xFF, _04E8
+    ApplyMovement LOCALID_PLAYER, SandgemTownLab_Movement_PlayerReceive
     WaitMovement
-    ScrCmd_0CB 1
-    ScrCmd_0CC
-    ScrCmd_0D0 0, 0
-    Message 3
-    Message 4
-    ScrCmd_03E 0x800C
-    GoToIfEq 0x800C, 1, _02BC
-    GoTo _0261
+    SetPlayerState PLAYER_TRANSITION_WALKING
+    ChangePlayerState
+    BufferPartyMonSpecies 0, 0
+    Message SandgemTownLab_Text_EntrustingWasNoMistake
+    Message SandgemTownLab_Text_GiveItANickname
+    ShowYesNoMenu VAR_RESULT
+    GoToIfEq VAR_RESULT, MENU_NO, SandgemTownLab_CherishThatStarter
+    GoTo SandgemTownLab_NicknameStarter
     End
 
-_0261:
-    SetVar 0x800C, 0
+SandgemTownLab_NicknameStarter:
+    SetVar VAR_RESULT, 0
     CloseMessage
-    FadeScreen 6, 1, 0, 0
+    FadeScreenOut
     WaitFadeScreen
-    ScrCmd_0BB 0, 0x800C
-    SetVar 0x8002, 0x800C
-    FadeScreen 6, 1, 1, 0
+    OpenPokemonNamingScreen 0, VAR_RESULT
+    SetVar VAR_0x8002, VAR_RESULT
+    FadeScreenIn
     WaitFadeScreen
-    Message 5
-    ScrCmd_03E 0x800C
-    GoToIfEq 0x800C, 1, _0261
-    CallIfNe 0x8002, 1, _02B6
-    GoTo _02BC
+    Message SandgemTownLab_Text_YoureHappyWithNickname
+    ShowYesNoMenu VAR_RESULT
+    GoToIfEq VAR_RESULT, MENU_NO, SandgemTownLab_NicknameStarter
+    CallIfNe VAR_0x8002, 1, SandgemTownLab_IncrementRecordPokemonNicknamed
+    GoTo SandgemTownLab_CherishThatStarter
     End
 
-_02B6:
-    ScrCmd_1E5 49
+SandgemTownLab_IncrementRecordPokemonNicknamed:
+    IncrementGameRecord RECORD_POKEMON_NICKNAMED
     Return
 
-_02BC:
-    ScrCmd_0D0 0, 0
-    ScrCmd_0CE 1
-    Message 6
+SandgemTownLab_CherishThatStarter:
+    BufferPartyMonSpecies 0, 0
+    BufferRivalName 1
+    Message SandgemTownLab_Text_CherishThatStarter
     CloseMessage
-    ApplyMovement 3, _0498
+    ApplyMovement LOCALID_COUNTERPART, SandgemTownLab_Movement_CounterpartWalkOnSpotWest
     WaitMovement
-    ApplyMovement 0xFF, _04BC
+    ApplyMovement LOCALID_PLAYER, SandgemTownLab_Movement_PlayerFaceCounterpart
     WaitMovement
-    WaitTime 15, 0x800C
-    ScrCmd_14D 0x800C
-    GoToIfEq 0x800C, 0, _02FC
-    GoTo _0316
+    WaitTime 15, VAR_RESULT
+    GetPlayerGender VAR_RESULT
+    GoToIfEq VAR_RESULT, GENDER_MALE, SandgemTownLab_DawnImGladYourKind
+    GoTo SandgemTownLab_LucasImGladYourKind
     End
 
-_02FC:
-    ScrCmd_0CF 0
-    Message 7
+SandgemTownLab_DawnImGladYourKind:
+    BufferCounterpartName 0
+    Message SandgemTownLab_Text_DawnImGladYourKind
     CloseMessage
-    ApplyMovement 3, _04D0
+    ApplyMovement LOCALID_COUNTERPART, SandgemTownLab_Movement_CounterpartWalkOnSpotWest2
     WaitMovement
-    GoTo _0330
+    GoTo SandgemTownLab_RecordDataOnAllPokemon
     End
 
-_0316:
-    ScrCmd_0CF 0
-    Message 8
+SandgemTownLab_LucasImGladYourKind:
+    BufferCounterpartName 0
+    Message SandgemTownLab_Text_LucasImGladYourKind
     CloseMessage
-    ApplyMovement 3, _04D0
+    ApplyMovement LOCALID_COUNTERPART, SandgemTownLab_Movement_CounterpartWalkOnSpotWest2
     WaitMovement
-    GoTo _0330
+    GoTo SandgemTownLab_RecordDataOnAllPokemon
     End
 
-_0330:
-    ScrCmd_054 0, 40
-    ApplyMovement 0, _047C
-    ApplyMovement 0xFF, _04B4
+SandgemTownLab_RecordDataOnAllPokemon:
+    FadeOutBGM 0, 40
+    ApplyMovement LOCALID_PROF_ROWAN, SandgemTownLab_Movement_ProfRowanWalkOnSpotSouth
+    ApplyMovement LOCALID_PLAYER, SandgemTownLab_Movement_PlayerFaceProfRowan
     WaitMovement
-    WaitTime 35, 0x800C
-    SetFlag 0x993
-    ScrCmd_050 0x44A
-    Message 9
-    Message 10
-    ScrCmd_03E 0x800C
-    GoToIfEq 0x800C, 1, _0375
-    GoTo _0394
+    WaitTime 35, VAR_RESULT
+    SetFlag FLAG_ALT_MUSIC_ROWANS_LAB
+    PlayMusic SEQ_OPENING_sseq_1
+    Message SandgemTownLab_Text_SomethingIWantYouToDo
+    Message SandgemTownLab_Text_RecordDataOnAllPokemon
+    ShowYesNoMenu VAR_RESULT
+    GoToIfEq VAR_RESULT, MENU_NO, SandgemTownLab_LetMeAskYouAgain
+    GoTo SandgemTownLab_ObtainPokedex
     End
 
-_0375:
-    ScrCmd_0CD 0
-    Message 11
-    ScrCmd_03E 0x800C
-    GoToIfEq 0x800C, 1, _0375
-    GoTo _0394
+SandgemTownLab_LetMeAskYouAgain:
+    BufferPlayerName 0
+    Message SandgemTownLab_Text_LetMeAskYouAgain
+    ShowYesNoMenu VAR_RESULT
+    GoToIfEq VAR_RESULT, MENU_NO, SandgemTownLab_LetMeAskYouAgain
+    GoTo SandgemTownLab_ObtainPokedex
     End
 
-_0394:
-    Message 12
-    ScrCmd_158
-    SetFlag 144
-    ScrCmd_0CD 0
-    Message 13
-    ScrCmd_04E 0x486
-    ScrCmd_04F
-    ScrCmd_0CD 0
-    Message 14
+SandgemTownLab_ObtainPokedex:
+    Message SandgemTownLab_Text_GoodAnswer
+    GivePokedex
+    SetFlag FLAG_HAS_POKEDEX
+    BufferPlayerName 0
+    Message SandgemTownLab_Text_PlayerObtainedThePokedex
+    PlayFanfare SEQ_FANFA4_sseq
+    WaitFanfare
+    BufferPlayerName 0
+    Message SandgemTownLab_Text_MeetEveryKindOfPokemon
     CloseMessage
-    ApplyMovement 3, _04A0
+    ApplyMovement LOCALID_COUNTERPART, SandgemTownLab_Movement_CounterpartWalkOnSpotWest3
     WaitMovement
-    WaitTime 15, 0x800C
-    ScrCmd_14D 0x800C
-    GoToIfEq 0x800C, 0, _03DA
-    GoTo _03E8
+    WaitTime 15, VAR_RESULT
+    GetPlayerGender VAR_RESULT
+    GoToIfEq VAR_RESULT, GENDER_MALE, SandgemTownLab_DawnIveGotOneToo
+    GoTo SandgemTownLab_LucasIveGotTheSamePokedex
     End
 
-_03DA:
-    ScrCmd_0CF 0
-    Message 15
-    GoTo _03F6
+SandgemTownLab_DawnIveGotOneToo:
+    BufferCounterpartName 0
+    Message SandgemTownLab_Text_DawnIveGotOneToo
+    GoTo SandgemTownLab_GrandAdventureBeginsNow
     End
 
-_03E8:
-    ScrCmd_0CF 0
-    Message 16
-    GoTo _03F6
+SandgemTownLab_LucasIveGotTheSamePokedex:
+    BufferCounterpartName 0
+    Message SandgemTownLab_Text_LucasIveGotTheSamePokedex
+    GoTo SandgemTownLab_GrandAdventureBeginsNow
     End
 
-_03F6:
-    ScrCmd_0CD 0
-    Message 17
+SandgemTownLab_GrandAdventureBeginsNow:
+    BufferPlayerName 0
+    Message SandgemTownLab_Text_GrandAdventureBeginsNow
     CloseMessage
-    ApplyMovement 3, _04A0
+    ApplyMovement LOCALID_COUNTERPART, SandgemTownLab_Movement_CounterpartWalkOnSpotWest3
     WaitMovement
-    ApplyMovement 0xFF, _04BC
+    ApplyMovement LOCALID_PLAYER, SandgemTownLab_Movement_PlayerFaceCounterpart
     WaitMovement
-    ScrCmd_14D 0x800C
-    GoToIfEq 0x800C, 0, _042B
-    GoTo _043C
+    GetPlayerGender VAR_RESULT
+    GoToIfEq VAR_RESULT, GENDER_MALE, SandgemTownLab_DawnHappyToTeachYou
+    GoTo SandgemTownLab_LucasIllTeachYouStuff
     End
 
-_042B:
-    ScrCmd_0CD 0
-    ScrCmd_342 1
-    Message 19
-    GoTo _044D
+SandgemTownLab_DawnHappyToTeachYou:
+    BufferPlayerName 0
+    BufferPlayerCounterpartStarterSpeciesNameWithArticle 1
+    Message SandgemTownLab_Text_DawnHappyToTeachYou
+    GoTo SandgemTownLab_CounterpartLeave
     End
 
-_043C:
-    ScrCmd_0CD 0
-    ScrCmd_0DC 1
-    Message 20
-    GoTo _044D
+SandgemTownLab_LucasIllTeachYouStuff:
+    BufferPlayerName 0
+    BufferRivalStarterSpeciesName 1
+    Message SandgemTownLab_Text_LucasIllTeachYouStuff
+    GoTo SandgemTownLab_CounterpartLeave
     End
 
-_044D:
+SandgemTownLab_CounterpartLeave:
     CloseMessage
-    ApplyMovement 0xFF, _04C4
-    ApplyMovement 3, _04D8
+    ApplyMovement LOCALID_PLAYER, SandgemTownLab_Movement_PlayerWatchCounterpartLeave
+    ApplyMovement LOCALID_COUNTERPART, SandgemTownLab_Movement_CounterpartLeave
     WaitMovement
-    ScrCmd_065 3
-    ClearFlag 0x177
-    SetVar 0x40A6, 1
+    RemoveObject LOCALID_COUNTERPART
+    ClearFlag FLAG_HIDE_SANDGEM_TOWN_COUNTERPART
+    SetVar VAR_SANDGEM_TOWN_LAB_STATE, 1
     ReleaseAll
     End
 
-    .byte 0
-    .byte 33
-    .byte 0
-    .byte 1
-    .byte 0
-    .byte 254
-    .byte 0
-    .byte 0
-    .byte 0
-
     .balign 4, 0
-_047C:
-    MoveAction_021
+SandgemTownLab_Movement_Unused:
+    WalkOnSpotNormalSouth
     EndMovement
 
     .balign 4, 0
-_0484:
-    MoveAction_041
-    MoveAction_00C 8
-    MoveAction_00F
-    MoveAction_022
+SandgemTownLab_Movement_ProfRowanWalkOnSpotSouth:
+    WalkOnSpotNormalSouth
     EndMovement
 
     .balign 4, 0
-_0498:
-    MoveAction_022
+SandgemTownLab_Movement_CounterpartWalkToProfRowan:
+    Delay16
+    WalkNormalNorth 8
+    WalkNormalEast
+    WalkOnSpotNormalWest
     EndMovement
 
     .balign 4, 0
-_04A0:
-    MoveAction_022
+SandgemTownLab_Movement_CounterpartWalkOnSpotWest:
+    WalkOnSpotNormalWest
     EndMovement
 
     .balign 4, 0
-_04A8:
-    MoveAction_041
-    MoveAction_00C 9
+SandgemTownLab_Movement_CounterpartWalkOnSpotWest3:
+    WalkOnSpotNormalWest
     EndMovement
 
     .balign 4, 0
-_04B4:
-    MoveAction_020
+SandgemTownLab_Movement_PlayerWalkToProfRowan:
+    Delay16
+    WalkNormalNorth 9
     EndMovement
 
     .balign 4, 0
-_04BC:
-    MoveAction_023
+SandgemTownLab_Movement_PlayerFaceProfRowan:
+    WalkOnSpotNormalNorth
     EndMovement
 
     .balign 4, 0
-_04C4:
-    MoveAction_03F
-    MoveAction_021
+SandgemTownLab_Movement_PlayerFaceCounterpart:
+    WalkOnSpotNormalEast
     EndMovement
 
     .balign 4, 0
-_04D0:
-    MoveAction_022
+SandgemTownLab_Movement_PlayerWatchCounterpartLeave:
+    Delay8
+    WalkOnSpotNormalSouth
     EndMovement
 
     .balign 4, 0
-_04D8:
-    MoveAction_00D 10
+SandgemTownLab_Movement_CounterpartWalkOnSpotWest2:
+    WalkOnSpotNormalWest
     EndMovement
 
     .balign 4, 0
-_04E0:
-    MoveAction_066
+SandgemTownLab_Movement_CounterpartLeave:
+    WalkNormalSouth 10
     EndMovement
 
     .balign 4, 0
-_04E8:
-    MoveAction_068
+SandgemTownLab_Movement_PlayerGive:
+    PlayerGive
     EndMovement
 
-_04F0:
-    PlayFanfare SEQ_SE_CONFIRM
+    .balign 4, 0
+SandgemTownLab_Movement_PlayerReceive:
+    PlayerReceive
+    EndMovement
+
+SandgemTownLab_ScientistM:
+    PlaySE SE_CONFIRM_sseq_3
     LockAll
     FacePlayer
-    Call _08A0
-    GoToIfEq 0x8006, 1, _0539
-    ScrCmd_22D 2, 0x800C
-    GoToIfEq 0x800C, 1, _052B
-    ScrCmd_0CF 0
-    Message 21
-    WaitABXPadPress
+    Call SandgemTownLab_SetVarIfArrivedInSunyshoreCity
+    GoToIfEq VAR_0x8006, TRUE, SandgemTownLab_StunnedByGreatness
+    GetNationalDexEnabled VAR_RESULT
+    GoToIfEq VAR_RESULT, TRUE, SandgemTownLab_YouveBeenGreatForResearch
+    BufferCounterpartName 0
+    Message SandgemTownLab_Text_ImCounterpartsFather
+    WaitButton
     CloseMessage
     ReleaseAll
     End
 
-_052B:
-    ScrCmd_0CF 0
-    Message 49
-    WaitABXPadPress
+SandgemTownLab_YouveBeenGreatForResearch:
+    BufferCounterpartName 0
+    Message SandgemTownLab_Text_YouveBeenGreatForResearch
+    WaitButton
     CloseMessage
     ReleaseAll
     End
 
-_0539:
-    Message 59
-    WaitABXPadPress
+SandgemTownLab_StunnedByGreatness:
+    Message SandgemTownLab_Text_StunnedByGreatness
+    WaitButton
     CloseMessage
     ReleaseAll
     End
 
-_0544:
-    PlayFanfare SEQ_SE_CONFIRM
+SandgemTownLab_ScientistF:
+    PlaySE SE_CONFIRM_sseq_3
     LockAll
     FacePlayer
-    Call _08A0
-    GoToIfEq 0x8006, 1, _0587
-    ScrCmd_22D 2, 0x800C
-    GoToIfEq 0x800C, 1, _057C
-    Message 22
-    WaitABXPadPress
+    Call SandgemTownLab_SetVarIfArrivedInSunyshoreCity
+    GoToIfEq VAR_0x8006, TRUE, SandgemTownLab_GaveMeShivers
+    GetNationalDexEnabled VAR_RESULT
+    GoToIfEq VAR_RESULT, TRUE, SandgemTownLab_StudyingPokedexSystems
+    Message SandgemTownLab_Text_HonorToBeAnAssistant
+    WaitButton
     CloseMessage
     ReleaseAll
     End
 
-_057C:
-    Message 50
-    WaitABXPadPress
+SandgemTownLab_StudyingPokedexSystems:
+    Message SandgemTownLab_Text_StudyingPokedexSystems
+    WaitButton
     CloseMessage
     ReleaseAll
     End
 
-_0587:
-    Message 60
-    WaitABXPadPress
+SandgemTownLab_GaveMeShivers:
+    Message SandgemTownLab_Text_GaveMeShivers
+    WaitButton
     CloseMessage
     ReleaseAll
     End
 
-_0592:
+SandgemTownLab_Dummy7:
     End
 
-_0594:
-    PlayFanfare SEQ_SE_CONFIRM
-    LockAll
-    Message 23
-    WaitABXPadPress
+SandgemTownLab_BookshelfAdventureRuleNo1:
+    EventMessage SandgemTownLab_Text_AdventureRuleNo1
+    End
+
+SandgemTownLab_BookshelfAdventureRuleNo2:
+    EventMessage SandgemTownLab_Text_AdventureRuleNo2
+    End
+
+SandgemTownLab_BookshelfBooks:
+    EventMessage SandgemTownLab_Text_CrammedFullOfBooks
+    End
+
+SandgemTownLab_BookshelfReferenceMaterial:
+    EventMessage SandgemTownLab_Text_ReferenceMaterial
+    End
+
+SandgemTownLab_PC:
+    BufferPlayerName 0
+    EventMessage SandgemTownLab_Text_PlayerCheckedThePC
+    End
+
+SandgemTownLab_ResearchMaterials_Unused:
+    EventMessage SandgemTownLab_Text_ResearchMaterialsTuckedAway
+    End
+
+SandgemTownLab_Refrigerator:
+    EventMessage SandgemTownLab_Text_FilledWithTastySweets
+    End
+
+SandgemTownLab_ShowCompleteLocalDex:
+    GoToIfSet FLAG_SHOWN_COMPLETE_LOCAL_DEX, SandgemTownLab_MetEverySinnohPokemon
+    GoTo SandgemTownLab_YouveComeToShowProgress
+    End
+
+SandgemTownLab_MetEverySinnohPokemon:
+    BufferPlayerName 0
+    Message SandgemTownLab_Text_MetEverySinnohPokemon
+    CloseMessage
+    GoTo SandgemTownLab_EnableNationalDex
+    End
+
+SandgemTownLab_YouveComeToShowProgress:
+    BufferPlayerName 0
+    Message SandgemTownLab_Text_YouveComeToShowProgress
+    ShowYesNoMenu VAR_RESULT
+    GoToIfEq VAR_RESULT, MENU_NO, SandgemTownLab_WhatsWrong
+    GoTo SandgemTownLab_SoYouveSeenAllPokemon
+    End
+
+SandgemTownLab_WhatsWrong:
+    Message SandgemTownLab_Text_WhatsWrong
+    WaitButton
     CloseMessage
     ReleaseAll
     End
 
-_05A5:
-    PlayFanfare SEQ_SE_CONFIRM
-    LockAll
-    Message 24
-    WaitABXPadPress
+SandgemTownLab_SoYouveSeenAllPokemon:
+    GetLocalDexSeenCount VAR_RESULT
+    BufferNumber 0, VAR_RESULT
+    Message SandgemTownLab_Text_SoYouveSeenXPokemon
+    BufferPlayerName 0
+    Message SandgemTownLab_Text_ExcellentWork
     CloseMessage
-    ReleaseAll
+    GoTo SandgemTownLab_EnableNationalDex
     End
 
-_05B6:
-    PlayFanfare SEQ_SE_CONFIRM
-    LockAll
-    Message 25
-    WaitABXPadPress
-    CloseMessage
-    ReleaseAll
-    End
-
-_05C7:
-    PlayFanfare SEQ_SE_CONFIRM
-    LockAll
-    Message 26
-    WaitABXPadPress
-    CloseMessage
-    ReleaseAll
-    End
-
-_05D8:
-    ScrCmd_0CD 0
-    PlayFanfare SEQ_SE_CONFIRM
-    LockAll
-    Message 46
-    WaitABXPadPress
-    CloseMessage
-    ReleaseAll
-    End
-
-_05EC:
-    PlayFanfare SEQ_SE_CONFIRM
-    LockAll
-    Message 47
-    WaitABXPadPress
-    CloseMessage
-    ReleaseAll
-    End
-
-_05FD:
-    PlayFanfare SEQ_SE_CONFIRM
-    LockAll
-    Message 48
-    WaitABXPadPress
-    CloseMessage
-    ReleaseAll
-    End
-
-_060E:
-    GoToIfSet 0x110, _0621
-    GoTo _0631
-    End
-
-_0621:
-    ScrCmd_0CD 0
-    Message 31
-    CloseMessage
-    GoTo _0677
-    End
-
-_0631:
-    ScrCmd_0CD 0
-    Message 27
-    ScrCmd_03E 0x800C
-    GoToIfEq 0x800C, 1, _0650
-    GoTo _065B
-    End
-
-_0650:
-    Message 29
-    WaitABXPadPress
-    CloseMessage
-    ReleaseAll
-    End
-
-_065B:
-    ScrCmd_11E 0x800C
-    ScrCmd_0D5 0, 0x800C
-    Message 28
-    ScrCmd_0CD 0
-    Message 30
-    CloseMessage
-    GoTo _0677
-    End
-
-_0677:
-    ScrCmd_1BD 0x8007
-    CallIfEq 0x8007, 0, _07B9
-    CallIfEq 0x8007, 1, _07BB
-    CallIfEq 0x8007, 2, _07CF
-    CallIfEq 0x8007, 3, _07E3
-    ClearFlag 0x22A
-    ScrCmd_064 4
-    ApplyMovement 0xFF, _0858
-    ApplyMovement 4, _0884
-    ApplyMovement 0, _0804
+SandgemTownLab_EnableNationalDex:
+    GetPlayerDir VAR_0x8007
+    CallIfEq VAR_0x8007, DIR_NORTH, SandgemTownLab_PlayerWalkFromSouthToSouthFromProfRowan
+    CallIfEq VAR_0x8007, DIR_SOUTH, SandgemTownLab_PlayerWalkFromNorthToSouthFromProfRowan
+    CallIfEq VAR_0x8007, DIR_WEST, SandgemTownLab_PlayerWalkFromEastToSouthFromProfRowan
+    CallIfEq VAR_0x8007, DIR_EAST, SandgemTownLab_PlayerWalkFromWestToSouthFromProfRowan
+    ClearFlag FLAG_HIDE_SANDGEM_TOWN_LAB_PROF_OAK
+    AddObject LOCALID_PROF_OAK
+    ApplyMovement LOCALID_PLAYER, SandgemTownLab_Movement_PlayerMoveAwayForProfOak
+    ApplyMovement LOCALID_PROF_OAK, SandgemTownLab_Movement_ProfOakEnter
+    ApplyMovement LOCALID_PROF_ROWAN, SandgemTownLab_Movement_ProfRowanNoticeProfOak
     WaitMovement
-    Message 32
-    Message 33
+    Message SandgemTownLab_Text_GreetingsProfessorRowan
+    Message SandgemTownLab_Text_OldColleagueProfessorOak
     CloseMessage
-    ApplyMovement 0, _080C
+    ApplyMovement LOCALID_PROF_ROWAN, SandgemTownLab_Movement_ProfRowanTurnOnSpot
     WaitMovement
-    WaitTime 15, 0x800C
-    Message 34
+    WaitTime 15, VAR_RESULT
+    Message SandgemTownLab_Text_IntroduceYouToMyAssistant
     CloseMessage
-    ApplyMovement 4, _088C
-    ApplyMovement 0xFF, _086C
+    ApplyMovement LOCALID_PROF_OAK, SandgemTownLab_Movement_ProfOakWalkToPlayer
+    ApplyMovement LOCALID_PLAYER, SandgemTownLab_Movement_PlayerFaceProfOak
     WaitMovement
-    Message 35
-    CallIfSet 0x964, _07A2
-    CallIfGe 0x4081, 2, _079C
-    ScrCmd_22D 1, 0x800C
-    ScrCmd_0CD 0
-    ScrCmd_04E 0x486
-    Message 36
-    ScrCmd_04F
-    Message 37
-    Message 38
-    Message 39
-    ScrCmd_0CD 0
-    ScrCmd_14D 0x8004
-    CallIfEq 0x8004, 0, _07A4
-    CallIfEq 0x8004, 1, _07A9
+    Message SandgemTownLab_Text_LetMeUpgradeYourPokedex
+    CallIfSet FLAG_GAME_COMPLETED, SandgemTownLab_GameCompletedReturn
+    CallIfGe VAR_FIGHT_AREA_STATE, 2, SandgemTownLab_HideFightAreaBlockade
+    SetNationalDexEnabled
+    BufferPlayerName 0
+    PlayFanfare SEQ_FANFA4_sseq
+    Message SandgemTownLab_Text_PokedexUpgradedWithNationalMode
+    WaitFanfare
+    Message SandgemTownLab_Text_WontBeEasyToComplete
+    Message SandgemTownLab_Text_PlayerWillGetTheJobDone
+    Message SandgemTownLab_Text_PalParkIsNowOpen
+    BufferPlayerName 0
+    GetPlayerGender VAR_0x8004
+    CallIfEq VAR_0x8004, GENDER_MALE, SandgemTownLab_VisitThePalParkMale
+    CallIfEq VAR_0x8004, GENDER_FEMALE, SandgemTownLab_VisitThePalParkFemale
     CloseMessage
-    ApplyMovement 4, _0898
+    ApplyMovement LOCALID_PROF_OAK, SandgemTownLab_Movement_ProfOakLeave
     WaitMovement
-    ScrCmd_065 4
-    Message 42
+    RemoveObject LOCALID_PROF_OAK
+    Message SandgemTownLab_Text_OffHeGoes
     CloseMessage
-    WaitTime 15, 0x800C
-    ApplyMovement 0xFF, _0878
+    WaitTime 15, VAR_RESULT
+    ApplyMovement LOCALID_PLAYER, SandgemTownLab_Movement_PlayerWalkBackToProfRowan
     WaitMovement
-    ScrCmd_0CD 0
-    Message 43
-    SetVar 0x8004, 0x1AF
-    SetVar 0x8005, 1
-    CallCommonScript 0x7FC
-    Message 44
-    WaitABXPadPress
+    BufferPlayerName 0
+    Message SandgemTownLab_Text_GiftForCompletingSinnohPokedex
+    SetVar VAR_0x8004, ITEM_POKE_RADAR
+    SetVar VAR_0x8005, 1
+    Common_GiveItemQuantity
+    Message SandgemTownLab_Text_ThatsThePokemonRadar
+    WaitButton
     CloseMessage
     ReleaseAll
     End
 
-_079C:
-    SetFlag 0x294
+SandgemTownLab_HideFightAreaBlockade:
+    SetFlag FLAG_HIDE_FIGHT_AREA_BLOCKADE
     Return
 
-_07A2:
+SandgemTownLab_GameCompletedReturn:
     Return
 
-_07A4:
-    Message 40
+SandgemTownLab_VisitThePalParkMale:
+    Message SandgemTownLab_Text_VisitThePalParkMale
     Return
 
-_07A9:
-    Message 41
+SandgemTownLab_VisitThePalParkFemale:
+    Message SandgemTownLab_Text_VisitThePalParkFemale
     Return
 
-_07AE:
-    Message 45
-    WaitABXPadPress
+SandgemTownLab_ManyMorePokemon:
+    Message SandgemTownLab_Text_ManyMorePokemon
+    WaitButton
     CloseMessage
     ReleaseAll
     End
 
-_07B9:
+SandgemTownLab_PlayerWalkFromSouthToSouthFromProfRowan:
     Return
 
-_07BB:
-    ApplyMovement 0xFF, _0824
-    ApplyMovement 0, _07F8
+SandgemTownLab_PlayerWalkFromNorthToSouthFromProfRowan:
+    ApplyMovement LOCALID_PLAYER, SandgemTownLab_Movement_PlayerWalkFromNorthToSouthFromProfRowan
+    ApplyMovement LOCALID_PROF_ROWAN, SandgemTownLab_Movement_ProfRowanFacePlayerSouth
     WaitMovement
     Return
 
-_07CF:
-    ApplyMovement 0xFF, _0838
-    ApplyMovement 0, _07F8
+SandgemTownLab_PlayerWalkFromEastToSouthFromProfRowan:
+    ApplyMovement LOCALID_PLAYER, SandgemTownLab_Movement_PlayerWalkFromEastToSouthFromProfRowan
+    ApplyMovement LOCALID_PROF_ROWAN, SandgemTownLab_Movement_ProfRowanFacePlayerSouth
     WaitMovement
     Return
 
-_07E3:
-    ApplyMovement 0xFF, _0848
-    ApplyMovement 0, _07F8
+SandgemTownLab_PlayerWalkFromWestToSouthFromProfRowan:
+    ApplyMovement LOCALID_PLAYER, SandgemTownLab_Movement_PlayerWalkFromWestToSouthFromProfRowan
+    ApplyMovement LOCALID_PROF_ROWAN, SandgemTownLab_Movement_ProfRowanFacePlayerSouth
     WaitMovement
     Return
 
     .balign 4, 0
-_07F8:
-    MoveAction_03F
-    MoveAction_021
+SandgemTownLab_Movement_ProfRowanFacePlayerSouth:
+    Delay8
+    WalkOnSpotNormalSouth
     EndMovement
 
     .balign 4, 0
-_0804:
-    MoveAction_04B
+SandgemTownLab_Movement_ProfRowanNoticeProfOak:
+    EmoteExclamationMark
     EndMovement
 
     .balign 4, 0
-_080C:
-    MoveAction_022
-    MoveAction_03F 2
-    MoveAction_021
+SandgemTownLab_Movement_ProfRowanTurnOnSpot:
+    WalkOnSpotNormalWest
+    Delay8 2
+    WalkOnSpotNormalSouth
     EndMovement
 
-    .byte 34
-    .byte 0
-    .byte 1
-    .byte 0
-    .byte 254
-    .byte 0
-    .byte 0
-    .byte 0
-
-    .balign 4, 0
-_0824:
-    MoveAction_00E
-    MoveAction_00D 2
-    MoveAction_00F
-    MoveAction_020
+SandgemTownLab_Movement_Unused2:
+    WalkOnSpotNormalWest
     EndMovement
 
     .balign 4, 0
-_0838:
-    MoveAction_00D
-    MoveAction_00E
-    MoveAction_020
+SandgemTownLab_Movement_PlayerWalkFromNorthToSouthFromProfRowan:
+    WalkNormalWest
+    WalkNormalSouth 2
+    WalkNormalEast
+    WalkOnSpotNormalNorth
     EndMovement
 
     .balign 4, 0
-_0848:
-    MoveAction_00D
-    MoveAction_00F
-    MoveAction_020
+SandgemTownLab_Movement_PlayerWalkFromEastToSouthFromProfRowan:
+    WalkNormalSouth
+    WalkNormalWest
+    WalkOnSpotNormalNorth
     EndMovement
 
     .balign 4, 0
-_0858:
-    MoveAction_021
-    MoveAction_03F 5
-    MoveAction_00E
-    MoveAction_023
+SandgemTownLab_Movement_PlayerWalkFromWestToSouthFromProfRowan:
+    WalkNormalSouth
+    WalkNormalEast
+    WalkOnSpotNormalNorth
     EndMovement
 
     .balign 4, 0
-_086C:
-    MoveAction_03F
-    MoveAction_021
+SandgemTownLab_Movement_PlayerMoveAwayForProfOak:
+    WalkOnSpotNormalSouth
+    Delay8 5
+    WalkNormalWest
+    WalkOnSpotNormalEast
     EndMovement
 
     .balign 4, 0
-_0878:
-    MoveAction_00F
-    MoveAction_020
+SandgemTownLab_Movement_PlayerFaceProfOak:
+    Delay8
+    WalkOnSpotNormalSouth
     EndMovement
 
     .balign 4, 0
-_0884:
-    MoveAction_00C 7
+SandgemTownLab_Movement_PlayerWalkBackToProfRowan:
+    WalkNormalEast
+    WalkOnSpotNormalNorth
     EndMovement
 
     .balign 4, 0
-_088C:
-    MoveAction_00E
-    MoveAction_020
+SandgemTownLab_Movement_ProfOakEnter:
+    WalkNormalNorth 7
     EndMovement
 
     .balign 4, 0
-_0898:
-    MoveAction_00D 9
+SandgemTownLab_Movement_ProfOakWalkToPlayer:
+    WalkNormalWest
+    WalkOnSpotNormalNorth
     EndMovement
 
-_08A0:
-    SetVar 0x8006, 0
-    GoToIfEq 0x40A6, 3, _08B5
+    .balign 4, 0
+SandgemTownLab_Movement_ProfOakLeave:
+    WalkNormalSouth 9
+    EndMovement
+
+SandgemTownLab_SetVarIfArrivedInSunyshoreCity:
+    SetVar VAR_0x8006, FALSE
+    GoToIfEq VAR_SANDGEM_TOWN_LAB_STATE, 3, SandgemTownLab_CheckArrivedInSunyshoreCity
     Return
 
-_08B5:
-    GoToIfUnset 0x9BE, _08C2
+SandgemTownLab_CheckArrivedInSunyshoreCity:
+    GoToIfUnset FLAG_FIRST_ARRIVAL_SUNYSHORE_CITY, SandgemTownLab_SetVarArrivedInSunyshoreCity
     Return
 
-_08C2:
-    SetVar 0x8006, 1
+SandgemTownLab_SetVarArrivedInSunyshoreCity:
+    SetVar VAR_0x8006, TRUE
     Return
 
-    .byte 0
-    .byte 0
+    .balign 4, 0

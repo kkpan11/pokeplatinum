@@ -1,35 +1,22 @@
-    .include "macros/scrcmd.inc"
+#include "macros/scrcmd.inc"
+#include "res/text/bank/route_209_lost_tower_1f.h"
 
-    .data
 
-    ScriptEntry _000E
-    ScriptEntry _0014
-    ScriptEntry _0027
-    .short 0xFD13
+    ScriptEntry Route209LostTower1F_OnTransition
+    ScriptEntry Route209LostTower1F_PokemonBreederF1
+    ScriptEntry Route209LostTower1F_PokemonBreederF2
+    ScriptEntryEnd
 
-_000E:
-    SetFlag 0x9E8
+Route209LostTower1F_OnTransition:
+    SetFlag FLAG_FIRST_ARRIVAL_LOST_TOWER
     End
 
-_0014:
-    PlayFanfare SEQ_SE_CONFIRM
-    LockAll
-    FacePlayer
-    Message 0
-    WaitABXPadPress
-    CloseMessage
-    ReleaseAll
+Route209LostTower1F_PokemonBreederF1:
+    NPCMessage Route209LostTower1F_Text_ThisIsWhereSpiritsRest
     End
 
-_0027:
-    PlayFanfare SEQ_SE_CONFIRM
-    LockAll
-    FacePlayer
-    Message 1
-    WaitABXPadPress
-    CloseMessage
-    ReleaseAll
+Route209LostTower1F_PokemonBreederF2:
+    NPCMessage Route209LostTower1F_Text_ThisIsTheLostTower
     End
 
-    .byte 0
-    .byte 0
+    .balign 4, 0

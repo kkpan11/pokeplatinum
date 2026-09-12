@@ -1,16 +1,13 @@
-    .include "macros/scrcmd.inc"
+#include "macros/scrcmd.inc"
 
-    .data
 
-    .byte 2
-    .short 1, 0
-    .byte 1
-    ScriptEntry _000B
-    .byte 0
+    InitScriptEntry_OnTransition 1
+    InitScriptEntry_OnFrameTable InitScriptFrameTable
+    InitScriptEntryEnd
 
-_000B:
-    .short 0x40F8, 1, 2
-    .short 0x40F8, 2, 3
-    .short 0
+InitScriptFrameTable:
+    InitScriptGoToIfEqual VAR_DARKRAI_EVENT_STATE, 1, 2
+    InitScriptGoToIfEqual VAR_DARKRAI_EVENT_STATE, 2, 3
+    InitScriptFrameTableEnd
 
-    .balign 4, 0
+    InitScriptEnd

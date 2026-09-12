@@ -1,214 +1,165 @@
-    .include "macros/scrcmd.inc"
+#include "macros/scrcmd.inc"
+#include "res/text/bank/team_galactic_eterna_building_4f.h"
+#include "res/field/events/events_team_galactic_eterna_building_4f.h"
 
-    .data
 
-    ScriptEntry _001A
-    ScriptEntry _0022
-    ScriptEntry _0198
-    ScriptEntry _01B7
-    ScriptEntry _01D6
-    ScriptEntry _01FF
-    .short 0xFD13
+    ScriptEntry TeamGalacticEternaBuilding4F_OnLoad
+    ScriptEntry TeamGalacticEternaBuilding4F_Jupiter
+    ScriptEntry TeamGalacticEternaBuilding4F_Clefairy
+    ScriptEntry TeamGalacticEternaBuilding4F_Buneary
+    ScriptEntry TeamGalacticEternaBuilding4F_PokefanM
+    ScriptEntry TeamGalacticEternaBuilding4F_BgSign
+    ScriptEntryEnd
 
-_001A:
+TeamGalacticEternaBuilding4F_OnLoad:
     ScrCmd_2CD
     End
 
-    .byte 205
-    .byte 2
-    .byte 2
-    .byte 0
+TeamGalacticEternaBuilding4F_Unused:
+    ScrCmd_2CD
+    End
 
-_0022:
-    PlayFanfare SEQ_SE_CONFIRM
+TeamGalacticEternaBuilding4F_Jupiter:
+    PlaySE SE_CONFIRM_sseq_3
     LockAll
     FacePlayer
-    ApplyMovement 2, _013C
+    ApplyMovement LOCALID_POKEFAN_M, TeamGalacticEternaBuilding4F_Movement_PokefanMWalkOnSpotNorth
     WaitMovement
-    Message 0
+    Message TeamGalacticEternaBuilding4F_Text_IWillDealWithYou
     CloseMessage
-    ScrCmd_0E5 0x196, 0
-    ScrCmd_0EC 0x800C
-    GoToIfEq 0x800C, 0, _0135
-    Message 1
+    StartTrainerBattle TRAINER_COMMANDER_JUPITER_TEAM_GALACTIC_ETERNA_BUILDING
+    CheckWonBattle VAR_RESULT
+    GoToIfEq VAR_RESULT, FALSE, TeamGalacticEternaBuilding4F_BlackOut
+    Message TeamGalacticEternaBuilding4F_Text_WellArentYouTough
     CloseMessage
-    FadeScreen 6, 1, 0, 0
+    FadeScreenOut
     WaitFadeScreen
-    ScrCmd_065 0
-    FadeScreen 6, 1, 1, 0
+    RemoveObject LOCALID_JUPITER
+    FadeScreenIn
     WaitFadeScreen
-    WaitTime 15, 0x800C
-    ScrCmd_1BD 0x8004
-    GoToIfEq 0x8004, 0, _00A4
-    GoToIfEq 0x8004, 2, _00BE
-    GoToIfEq 0x8004, 3, _00D0
+    WaitTime 15, VAR_RESULT
+    GetPlayerDir VAR_0x8004
+    GoToIfEq VAR_0x8004, DIR_NORTH, TeamGalacticEternaBuilding4F_PokefanMWalkToPlayerNorth
+    GoToIfEq VAR_0x8004, DIR_WEST, TeamGalacticEternaBuilding4F_PokefanMWalkToPlayerWest
+    GoToIfEq VAR_0x8004, DIR_EAST, TeamGalacticEternaBuilding4F_PokefanMWalkToPlayerEast
     End
 
-_00A4:
-    ApplyMovement 2, _0144
-    ApplyMovement 0xFF, _0174
+TeamGalacticEternaBuilding4F_PokefanMWalkToPlayerNorth:
+    ApplyMovement LOCALID_POKEFAN_M, TeamGalacticEternaBuilding4F_Movement_PokefanMWalkToPlayerNorth
+    ApplyMovement LOCALID_PLAYER, TeamGalacticEternaBuilding4F_Movement_PlayerFacePokefanM
     WaitMovement
-    GoTo _00E2
+    GoTo TeamGalacticEternaBuilding4F_HandleTeamGalacticLeftEternaBuilding
     End
 
-_00BE:
-    ApplyMovement 2, _015C
+TeamGalacticEternaBuilding4F_PokefanMWalkToPlayerWest:
+    ApplyMovement LOCALID_POKEFAN_M, TeamGalacticEternaBuilding4F_Movement_PokefanMWalkToPlayerWest
     WaitMovement
-    GoTo _00E2
+    GoTo TeamGalacticEternaBuilding4F_HandleTeamGalacticLeftEternaBuilding
     End
 
-_00D0:
-    ApplyMovement 2, _0168
+TeamGalacticEternaBuilding4F_PokefanMWalkToPlayerEast:
+    ApplyMovement LOCALID_POKEFAN_M, TeamGalacticEternaBuilding4F_Movement_PokefanMWalkToPlayerEast
     WaitMovement
-    GoTo _00E2
+    GoTo TeamGalacticEternaBuilding4F_HandleTeamGalacticLeftEternaBuilding
     End
 
-_00E2:
-    Message 4
+TeamGalacticEternaBuilding4F_HandleTeamGalacticLeftEternaBuilding:
+    Message TeamGalacticEternaBuilding4F_Text_ThankYouCruiseByCycleShop
     CloseMessage
-    FadeScreen 6, 1, 0, 0
+    FadeScreenOut
     WaitFadeScreen
-    SetFlag 0x1FD
-    SetFlag 0x1BB
-    SetFlag 0x1C2
-    SetFlag 129
-    ClearFlag 0x192
-    ClearFlag 0x200
-    ClearFlag 0x1FE
-    ScrCmd_065 2
-    ScrCmd_065 1
-    ScrCmd_065 3
-    SetVar 0x407A, 3
-    FadeScreen 6, 1, 1, 0
+    SetFlag FLAG_HIDE_ETERNA_CITY_GALACTIC_GRUNTS
+    SetFlag FLAG_HIDE_TEAM_GALACTIC_ETERNA_BUILDING_1F_LOOKER
+    SetFlag FLAG_HIDE_TEAM_GALACTIC_ETERNA_BUILDING_1F_GRUNT_M_LOOKER
+    SetFlag FLAG_TEAM_GALACTIC_LEFT_ETERNA_BUILDING
+    ClearFlag FLAG_HIDE_CYCLE_SHOP_POKEFAN_M
+    ClearFlag FLAG_HIDE_CYCLE_SHOP_CLEFAIRY
+    ClearFlag FLAG_HIDE_ETERNA_CITY_POKECENTER_1F_BUNEARY
+    RemoveObject LOCALID_POKEFAN_M
+    RemoveObject LOCALID_CLEFAIRY
+    RemoveObject LOCALID_BUNEARY
+    SetVar VAR_ETERNA_CITY_STATE, 3
+    FadeScreenIn
     WaitFadeScreen
-    SetFlag 0x987
+    SetFlag FLAG_ALT_MUSIC_GALACTIC_ETERNA_BUILDING
     ReleaseAll
     End
 
-_0135:
-    ScrCmd_0EB
+TeamGalacticEternaBuilding4F_BlackOut:
+    BlackOutFromBattle
     ReleaseAll
     End
 
     .balign 4, 0
-_013C:
-    MoveAction_020
+TeamGalacticEternaBuilding4F_Movement_PokefanMWalkOnSpotNorth:
+    WalkOnSpotNormalNorth
     EndMovement
 
     .balign 4, 0
-_0144:
-    MoveAction_00C
+TeamGalacticEternaBuilding4F_Movement_PokefanMWalkToPlayerNorth:
+    WalkNormalNorth
     EndMovement
 
-    .byte 63
-    .byte 0
-    .byte 1
-    .byte 0
-    .byte 15
-    .byte 0
-    .byte 2
-    .byte 0
-    .byte 32
-    .byte 0
-    .byte 1
-    .byte 0
-    .byte 254
-    .byte 0
-    .byte 0
-    .byte 0
-
-    .balign 4, 0
-_015C:
-    MoveAction_00C 3
-    MoveAction_023
+TeamGalacticEternaBuilding4F_Movement_Unused:
+    Delay8
+    WalkNormalEast 2
+    WalkOnSpotNormalNorth
     EndMovement
 
     .balign 4, 0
-_0168:
-    MoveAction_00C 3
-    MoveAction_022
+TeamGalacticEternaBuilding4F_Movement_PokefanMWalkToPlayerWest:
+    WalkNormalNorth 3
+    WalkOnSpotNormalEast
     EndMovement
 
     .balign 4, 0
-_0174:
-    MoveAction_03F
-    MoveAction_021
+TeamGalacticEternaBuilding4F_Movement_PokefanMWalkToPlayerEast:
+    WalkNormalNorth 3
+    WalkOnSpotNormalWest
     EndMovement
 
-    .byte 34
-    .byte 0
-    .byte 1
-    .byte 0
-    .byte 62
-    .byte 0
-    .byte 1
-    .byte 0
-    .byte 33
-    .byte 0
-    .byte 1
-    .byte 0
-    .byte 254
-    .byte 0
-    .byte 0
-    .byte 0
-    .byte 34
-    .byte 0
-    .byte 1
-    .byte 0
-    .byte 254
-    .byte 0
-    .byte 0
-    .byte 0
+    .balign 4, 0
+TeamGalacticEternaBuilding4F_Movement_PlayerFacePokefanM:
+    Delay8
+    WalkOnSpotNormalSouth
+    EndMovement
 
-_0198:
-    PlayFanfare SEQ_SE_CONFIRM
+TeamGalacticEternaBuilding4F_Movement_Unused2:
+    WalkOnSpotNormalWest
+    Delay4
+    WalkOnSpotNormalSouth
+    EndMovement
+
+TeamGalacticEternaBuilding4F_Movement_Unused3:
+    WalkOnSpotNormalWest
+    EndMovement
+
+TeamGalacticEternaBuilding4F_Clefairy:
+    PokemonCryAndMessage SPECIES_CLEFAIRY, TeamGalacticEternaBuilding4F_Text_ClefairyCry
+    End
+
+TeamGalacticEternaBuilding4F_Buneary:
+    PokemonCryAndMessage SPECIES_BUNEARY, TeamGalacticEternaBuilding4F_Text_BunearyCry
+    End
+
+TeamGalacticEternaBuilding4F_PokefanM:
+    PlaySE SE_CONFIRM_sseq_3
     LockAll
     FacePlayer
-    ScrCmd_04B 0x5DC
-    ScrCmd_04C 35, 0
-    Message 2
-    ScrCmd_04D
-    WaitABXPadPress
+    GoToIfSet FLAG_TEAM_GALACTIC_LEFT_ETERNA_BUILDING, TeamGalacticEternaBuilding4F_ThankYouCruiseByCycleShop
+    Message TeamGalacticEternaBuilding4F_Text_WhatsWithTeamGalactic
+    WaitButton
     CloseMessage
     ReleaseAll
     End
 
-_01B7:
-    PlayFanfare SEQ_SE_CONFIRM
-    LockAll
-    FacePlayer
-    ScrCmd_04B 0x5DC
-    ScrCmd_04C 0x1AB, 0
-    Message 5
-    ScrCmd_04D
-    WaitABXPadPress
+TeamGalacticEternaBuilding4F_ThankYouCruiseByCycleShop:
+    Message TeamGalacticEternaBuilding4F_Text_ThankYouCruiseByCycleShop
+    WaitButton
     CloseMessage
     ReleaseAll
     End
 
-_01D6:
-    PlayFanfare SEQ_SE_CONFIRM
-    LockAll
-    FacePlayer
-    GoToIfSet 129, _01F4
-    Message 3
-    WaitABXPadPress
-    CloseMessage
-    ReleaseAll
-    End
-
-_01F4:
-    Message 4
-    WaitABXPadPress
-    CloseMessage
-    ReleaseAll
-    End
-
-_01FF:
-    PlayFanfare SEQ_SE_CONFIRM
-    LockAll
-    Message 6
-    WaitABXPadPress
-    CloseMessage
-    ReleaseAll
+TeamGalacticEternaBuilding4F_BgSign:
+    EventMessage TeamGalacticEternaBuilding4F_Text_WorkingForWorldPeace
     End

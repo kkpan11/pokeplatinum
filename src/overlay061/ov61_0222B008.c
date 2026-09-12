@@ -4,11 +4,10 @@
 #include <nitro.h>
 #include <string.h>
 
-#include "struct_decls/struct_02029C68_decl.h"
-#include "struct_decls/struct_020797DC_decl.h"
+#include "struct_defs/dress_up_photo.h"
 #include "struct_defs/struct_02030A80.h"
 
-#include "overlay004/ov4_021D0D80.h"
+#include "nintendo_wfc/main.h"
 #include "overlay061/ov61_0222AE60.h"
 #include "overlay061/ov61_0222BC4C.h"
 #include "overlay061/struct_ov61_0222AFC0.h"
@@ -18,7 +17,6 @@
 #include "overlay061/struct_ov61_0222B960.h"
 #include "overlay061/struct_ov61_0222BDC8.h"
 #include "overlay062/ov62_02248408.h"
-#include "overlay062/struct_ov62_022349A8.h"
 #include "overlay062/struct_ov62_022349A8_sub3_sub3.h"
 #include "overlay062/struct_ov62_022349A8_sub3_sub4.h"
 #include "overlay062/struct_ov62_022349A8_sub3_sub5.h"
@@ -26,16 +24,17 @@
 #include "overlay062/struct_ov62_0223D518_sub1_sub1.h"
 #include "overlay062/struct_ov62_02241130.h"
 
-#include "core_sys.h"
+#include "comm_manager.h"
 #include "gds.h"
 #include "heap.h"
 #include "message.h"
+#include "pc_boxes.h"
 #include "play_time.h"
 #include "save_player.h"
-#include "strbuf.h"
+#include "string_gf.h"
 #include "string_template.h"
+#include "system.h"
 #include "unk_0202F1D4.h"
-#include "unk_020366A0.h"
 
 typedef int (*UnkFuncPtr_ov61_0222E48C)(UnkStruct_ov62_022349A8 *, UnkStruct_ov61_0222B138 *);
 
@@ -46,10 +45,10 @@ static int ov61_0222B190(UnkStruct_ov62_022349A8 *param0, UnkStruct_ov61_0222B13
 static int ov61_0222B6D8(UnkStruct_ov62_022349A8 *param0);
 static int ov61_0222B860(UnkStruct_ov62_022349A8 *param0);
 static int ov61_0222BBE8(UnkStruct_ov62_022349A8 *param0);
-static void ov61_0222BB54(UnkStruct_ov62_022349A8 *param0, Strbuf *param1);
+static void ov61_0222BB54(UnkStruct_ov62_022349A8 *param0, String *param1);
 static void ov61_0222BB60(UnkStruct_ov62_022349A8 *param0, int param1, int param2);
 static int ov61_0222B960(UnkStruct_ov62_022349A8 *param0);
-static void *ov61_0222BBF0(int param0);
+static void *ov61_0222BBF0(enum HeapID heapID);
 static void ov61_0222BC40(void);
 static BOOL ov61_0222B920(void *param0, void *param1);
 static BOOL ov61_0222B924(void *param0, void *param1);
@@ -82,25 +81,25 @@ int ov61_0222B008(UnkStruct_ov62_022349A8 *param0, const UnkStruct_ov62_02241130
 
     MI_CpuClear8(param0, sizeof(UnkStruct_ov62_022349A8));
 
-    param0->unk_144 = param1->unk_04;
-    param0->unk_00 = param1->unk_08;
+    param0->heapID = param1->heapID;
+    param0->saveData = param1->saveData;
     param0->unk_150 = param1->unk_0C;
     param0->unk_08 = param1->unk_3C;
     param0->unk_04 = param1->unk_38;
     param0->unk_14C = -1;
     param0->unk_3E8 = 23004;
     param0->unk_3EC = 23004;
-    param0->unk_3B4 = Heap_AllocFromHeap(param1->unk_04, ov61_0222DE8C(-1));
+    param0->unk_3B4 = Heap_Alloc(param1->heapID, ov61_0222DE8C(-1));
 
     MI_CpuClear8(param0->unk_3B4, ov61_0222DE8C(-1));
 
-    param0->unk_3F4 = MessageLoader_Init(0, 26, 695, param1->unk_04);
-    param0->unk_3F8 = StringTemplate_Default(param1->unk_04);
-    param0->unk_3FC = Strbuf_Init((16 * 8 * 2), param1->unk_04);
-    param0->unk_18C = ov61_0222BBF0(param1->unk_04);
+    param0->unk_3F4 = MessageLoader_Init(MSG_LOADER_PRELOAD_ENTIRE_BANK, NARC_INDEX_MSGDATA__PL_MSG, TEXT_BANK_UNK_0695, param1->heapID);
+    param0->unk_3F8 = StringTemplate_Default(param1->heapID);
+    param0->unk_3FC = String_Init((16 * 8 * 2), param1->heapID);
+    param0->unk_18C = ov61_0222BBF0(param1->heapID);
     param0->unk_0C.unk_00 = param1->unk_00;
     param0->unk_0C.unk_04 = GAME_VERSION;
-    param0->unk_0C.unk_05 = GAME_LANGUAGE;
+    param0->unk_0C.language = GAME_LANGUAGE;
 
     v0 = ov61_0222DCDC(&param0->unk_0C);
     GF_ASSERT(v0 == 1);
@@ -117,12 +116,12 @@ void ov61_0222B0F0(UnkStruct_ov62_022349A8 *param0)
 
     param0->unk_3C4 = 0;
 
-    Strbuf_Free(param0->unk_3FC);
+    String_Free(param0->unk_3FC);
     StringTemplate_Free(param0->unk_3F8);
     MessageLoader_Free(param0->unk_3F4);
-    Heap_FreeToHeap(param0->unk_3B4);
+    Heap_Free(param0->unk_3B4);
     ov61_0222BC40();
-    Heap_FreeToHeap(param0->unk_18C);
+    Heap_Free(param0->unk_18C);
 }
 
 static int ov61_0222B138(UnkStruct_ov62_022349A8 *param0, UnkStruct_ov61_0222B138 *param1)
@@ -137,7 +136,7 @@ static int ov61_0222B14C(UnkStruct_ov62_022349A8 *param0, UnkStruct_ov61_0222B13
     DWC_ClearError();
     DWC_CleanupInet();
 
-    sub_0203848C();
+    CommManager_EndGlobalWifi();
     param0->unk_3C8 = 0;
 
     return 1;
@@ -147,7 +146,7 @@ static int ov61_0222B168(UnkStruct_ov62_022349A8 *param0, UnkStruct_ov61_0222B13
 {
     int v0, v1;
 
-    v0 = ov4_021D1F3C(-param0->unk_3E0, param0->unk_3E4);
+    v0 = NintendoWFC_GetErrorCode(-param0->unk_3E0, param0->unk_3E4);
     ov61_0222BB60(param0, v0, -param0->unk_3E0);
 
     return 1;
@@ -155,7 +154,7 @@ static int ov61_0222B168(UnkStruct_ov62_022349A8 *param0, UnkStruct_ov61_0222B13
 
 static int ov61_0222B190(UnkStruct_ov62_022349A8 *param0, UnkStruct_ov61_0222B138 *param1)
 {
-    if ((gCoreSys.pressedKeys & PAD_BUTTON_A) || (gCoreSys.pressedKeys & PAD_BUTTON_B)) {
+    if ((gSystem.pressedKeys & PAD_BUTTON_A) || (gSystem.pressedKeys & PAD_BUTTON_B)) {
         ov61_0222BB54(param0, NULL);
         return 1;
     }
@@ -163,14 +162,14 @@ static int ov61_0222B190(UnkStruct_ov62_022349A8 *param0, UnkStruct_ov61_0222B13
     return 0;
 }
 
-int ov61_0222B1B4(UnkStruct_ov62_022349A8 *param0, UnkStruct_02030A80 *param1, UnkStruct_02029C68 *param2)
+int ov61_0222B1B4(UnkStruct_ov62_022349A8 *param0, UnkStruct_02030A80 *param1, DressUpPhoto *photo)
 {
     if (ov61_0222BBBC(param0) == 0) {
         return 0;
     }
 
-    ov61_0222AFA4(param0->unk_00, param1, &param0->unk_190.unk_00_val1.unk_00);
-    ov61_0222AE60(param0->unk_00, param2, &param0->unk_190.unk_00_val1.unk_80);
+    ov61_0222AFA4(param0->saveData, param1, &param0->unk_190.unk_00_val1.unk_00);
+    ov61_0222AE60(param0->saveData, photo, &param0->unk_190.unk_00_val1.unk_80);
 
     param0->unk_40E = 60;
     param0->unk_3E8 = 20000;
@@ -190,7 +189,7 @@ int ov61_0222B1FC(UnkStruct_ov62_022349A8 *param0, int param1)
     return 1;
 }
 
-int ov61_0222B224(UnkStruct_ov62_022349A8 *param0, int param1, UnkStruct_02030A80 *param2, const PCBoxes *param3, int param4)
+int ov61_0222B224(UnkStruct_ov62_022349A8 *param0, int param1, UnkStruct_02030A80 *param2, const PCBoxes *pcBoxes, int param4)
 {
     if (ov61_0222BBBC(param0) == 0) {
         return 0;
@@ -199,9 +198,9 @@ int ov61_0222B224(UnkStruct_ov62_022349A8 *param0, int param1, UnkStruct_02030A8
     param0->unk_190.unk_21C.val1.unk_00 = param1;
     param0->unk_190.unk_21C.val1.unk_01 = param4;
 
-    ov61_0222AFA4(param0->unk_00, param2, &param0->unk_190.unk_00_val2.unk_00);
-    ov61_0222AE88(param0->unk_00, param3, param4, &param0->unk_190.unk_00_val2.unk_80, param0->unk_144);
-    ov61_0222AF88(param0->unk_00, &param0->unk_190.unk_00_val2.unk_80, param1);
+    ov61_0222AFA4(param0->saveData, param2, &param0->unk_190.unk_00_val2.unk_00);
+    ov61_0222AE88(param0->saveData, pcBoxes, param4, &param0->unk_190.unk_00_val2.unk_80, param0->heapID);
+    ov61_0222AF88(param0->saveData, &param0->unk_190.unk_00_val2.unk_80, param1);
 
     param0->unk_40E = 60;
     param0->unk_3E8 = 21000;
@@ -240,9 +239,9 @@ int ov61_0222B2D8(UnkStruct_ov62_022349A8 *param0, UnkStruct_02030A80 *param1, U
         return 0;
     }
 
-    playTime = SaveData_GetPlayTime(param0->unk_00);
+    playTime = SaveData_GetPlayTime(param0->saveData);
     MI_CpuCopy8(playTime, &param0->unk_190.unk_00_val3.unk_08, sizeof(UnkStruct_ov62_0223D518_sub1_sub1));
-    ov61_0222AFCC(param0->unk_00, param1, &param0->unk_190.unk_00_val3.unk_00);
+    ov61_0222AFCC(param0->saveData, param1, &param0->unk_190.unk_00_val3.unk_00);
 
     for (v1 = 0; v1 < 3; v1++) {
         param0->unk_190.unk_00_val3.unk_0C[v1] = param2[v1];
@@ -265,7 +264,7 @@ int ov61_0222B338(UnkStruct_ov62_022349A8 *param0, UnkStruct_02030A80 *param1)
 
     param0->unk_190.unk_00_val4 = (UnkStruct_ov62_022349A8_sub3_sub3 *)sub_0202F27C();
 
-    ov62_02248624(param0->unk_00);
+    ov62_02248624(param0->saveData);
 
     v0 = sub_0202FDE8();
     MI_CpuCopy8(param1, v0, sizeof(UnkStruct_ov61_0222AFC0));
@@ -536,7 +535,7 @@ static int ov61_0222B6D8(UnkStruct_ov62_022349A8 *param0)
         }
         break;
     default:
-        GF_ASSERT(0);
+        GF_ASSERT(FALSE);
         break;
     }
 
@@ -621,7 +620,7 @@ static BOOL ov61_0222B928(void *param0, void *param1)
 
     v2 = ov61_0222DE80();
     v3 = (UnkStruct_ov61_0222BDC8 *)(v2->unk_04);
-    v4 = ov62_02248658(v0->unk_00, v3->unk_00, &v1->unk_04, &v1->unk_06);
+    v4 = ov62_02248658(v0->saveData, v3->unk_00, &v1->unk_04, &v1->unk_06);
 
     if ((v4 == 2) || (v4 == 3)) {
         return 1;
@@ -739,7 +738,7 @@ BOOL ov61_0222BB48(UnkStruct_ov62_022349A8 *param0, UnkStruct_ov62_0223CAA4 **pa
     return param0->unk_17C.unk_00;
 }
 
-static void ov61_0222BB54(UnkStruct_ov62_022349A8 *param0, Strbuf *param1)
+static void ov61_0222BB54(UnkStruct_ov62_022349A8 *param0, String *param1)
 {
     param0->unk_04(param0->unk_08, param1);
 }
@@ -747,7 +746,7 @@ static void ov61_0222BB54(UnkStruct_ov62_022349A8 *param0, Strbuf *param1)
 static void ov61_0222BB60(UnkStruct_ov62_022349A8 *param0, int param1, int param2)
 {
     int v0;
-    Strbuf *v1;
+    String *v1;
 
     if (param1 != -1) {
         v0 = 0 + param1;
@@ -756,9 +755,9 @@ static void ov61_0222BB60(UnkStruct_ov62_022349A8 *param0, int param1, int param
     }
 
     StringTemplate_SetNumber(param0->unk_3F8, 0, param2, 5, 2, 1);
-    v1 = MessageLoader_GetNewStrbuf(param0->unk_3F4, v0);
+    v1 = MessageLoader_GetNewString(param0->unk_3F4, v0);
     StringTemplate_Format(param0->unk_3F8, param0->unk_3FC, v1);
-    Strbuf_Free(v1);
+    String_Free(v1);
     ov61_0222BB54(param0, param0->unk_3FC);
 }
 
@@ -778,14 +777,14 @@ static int ov61_0222BBE8(UnkStruct_ov62_022349A8 *param0)
 
 static OSHeapHandle Unk_ov61_0222E760;
 
-static void *ov61_0222BBF0(int param0)
+static void *ov61_0222BBF0(enum HeapID heapID)
 {
     void *v0;
     void *v1;
     void *v2;
     int v3 = 0x2000;
 
-    v0 = Heap_AllocFromHeap(param0, v3);
+    v0 = Heap_Alloc(heapID, v3);
     v2 = v0;
     v1 = (void *)((u32)v0 + v3);
     v0 = OS_InitAlloc(OS_ARENA_MAIN, v0, v1, 1);

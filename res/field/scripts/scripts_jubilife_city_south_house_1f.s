@@ -1,43 +1,22 @@
-    .include "macros/scrcmd.inc"
+#include "macros/scrcmd.inc"
+#include "res/text/bank/jubilife_city_south_house_1f.h"
 
-    .data
 
-    ScriptEntry _000E
-    ScriptEntry _0021
-    ScriptEntry _0034
-    .short 0xFD13
+    ScriptEntry JubilifeCitySouthHouse1F_AceTrainerM
+    ScriptEntry JubilifeCitySouthHouse1F_Lass
+    ScriptEntry JubilifeCitySouthHouse1F_Pachirisu
+    ScriptEntryEnd
 
-_000E:
-    PlayFanfare SEQ_SE_CONFIRM
-    LockAll
-    FacePlayer
-    Message 0
-    WaitABXPadPress
-    CloseMessage
-    ReleaseAll
+JubilifeCitySouthHouse1F_AceTrainerM:
+    NPCMessage JubilifeCitySouthHouse1F_DeeplyMysteriousCreatures
     End
 
-_0021:
-    PlayFanfare SEQ_SE_CONFIRM
-    LockAll
-    FacePlayer
-    Message 1
-    WaitABXPadPress
-    CloseMessage
-    ReleaseAll
+JubilifeCitySouthHouse1F_Lass:
+    NPCMessage JubilifeCitySouthHouse1F_TalkToEveryoneYouSee
     End
 
-_0034:
-    PlayFanfare SEQ_SE_CONFIRM
-    LockAll
-    FacePlayer
-    ScrCmd_04B 0x5DC
-    ScrCmd_04C 0x1A1, 0
-    Message 2
-    ScrCmd_04D
-    WaitABXPadPress
-    CloseMessage
-    ReleaseAll
+JubilifeCitySouthHouse1F_Pachirisu:
+    PokemonCryAndMessage SPECIES_PACHIRISU, JubilifeCitySouthHouse1F_PachirisuCry
     End
 
-    .byte 0
+    .balign 4, 0

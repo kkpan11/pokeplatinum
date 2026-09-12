@@ -1,66 +1,53 @@
-    .include "macros/scrcmd.inc"
+#include "macros/scrcmd.inc"
+#include "res/text/bank/oreburgh_city_north_house_2f.h"
 
-    .data
 
-    ScriptEntry _000E
-    ScriptEntry _0021
-    ScriptEntry _0034
-    .short 0xFD13
+    ScriptEntry OreburghCityNorthHouse2F_Guitarist
+    ScriptEntry OreburghCityNorthHouse2F_PokemonBreederF
+    ScriptEntry OreburghCityNorthHouse2F_Collector
+    ScriptEntryEnd
 
-_000E:
-    PlayFanfare SEQ_SE_CONFIRM
+OreburghCityNorthHouse2F_Guitarist:
+    NPCMessage OreburghCityNorthHouse2F_Text_SpecialPowerCalledAbility
+    End
+
+OreburghCityNorthHouse2F_PokemonBreederF:
+    NPCMessage OreburghCityNorthHouse2F_Text_FavoriteAbilityIsPickup
+    End
+
+OreburghCityNorthHouse2F_Collector:
+    PlaySE SE_CONFIRM_sseq_3
     LockAll
     FacePlayer
-    Message 0
-    WaitABXPadPress
+    GoToIfSet FLAG_RECEIVED_OREBURGH_CITY_NORTH_HOUSE_2F_HEAL_BALL, OreburghCityNorthHouse2F_SoManyKindsOfPokemon
+    CheckPartyHasSpecies VAR_RESULT, SPECIES_GEODUDE
+    GoToIfEq VAR_RESULT, FALSE, OreburghCityNorthHouse2F_ShowMeGeodude
+    Message OreburghCityNorthHouse2F_Text_TokenOfMyThanks
+    SetVar VAR_0x8004, ITEM_HEAL_BALL
+    SetVar VAR_0x8005, 1
+    GoToIfCannotFitItem VAR_0x8004, VAR_0x8005, VAR_RESULT, OreburghCityNorthHouse2F_BagIsFull
+    SetFlag FLAG_RECEIVED_OREBURGH_CITY_NORTH_HOUSE_2F_HEAL_BALL
+    Common_GiveItemQuantityNoLineFeed
     CloseMessage
     ReleaseAll
     End
 
-_0021:
-    PlayFanfare SEQ_SE_CONFIRM
-    LockAll
-    FacePlayer
-    Message 1
-    WaitABXPadPress
+OreburghCityNorthHouse2F_BagIsFull:
+    Common_MessageBagIsFull
     CloseMessage
     ReleaseAll
     End
 
-_0034:
-    PlayFanfare SEQ_SE_CONFIRM
-    LockAll
-    FacePlayer
-    GoToIfSet 193, _00A1
-    ScrCmd_1C0 0x800C, 74
-    GoToIfEq 0x800C, 0, _0096
-    Message 3
-    SetVar 0x8004, 14
-    SetVar 0x8005, 1
-    ScrCmd_07D 0x8004, 0x8005, 0x800C
-    GoToIfEq 0x800C, 0, _008C
-    SetFlag 193
-    CallCommonScript 0x7E0
+OreburghCityNorthHouse2F_ShowMeGeodude:
+    Message OreburghCityNorthHouse2F_Text_ShowMeGeodude
+    WaitButton
     CloseMessage
     ReleaseAll
     End
 
-_008C:
-    CallCommonScript 0x7E1
-    CloseMessage
-    ReleaseAll
-    End
-
-_0096:
-    Message 2
-    WaitABXPadPress
-    CloseMessage
-    ReleaseAll
-    End
-
-_00A1:
-    Message 4
-    WaitABXPadPress
+OreburghCityNorthHouse2F_SoManyKindsOfPokemon:
+    Message OreburghCityNorthHouse2F_Text_SoManyKindsOfPokemon
+    WaitButton
     CloseMessage
     ReleaseAll
     End

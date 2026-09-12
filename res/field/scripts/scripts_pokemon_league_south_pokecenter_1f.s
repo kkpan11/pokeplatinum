@@ -1,63 +1,38 @@
-    .include "macros/scrcmd.inc"
+#include "macros/scrcmd.inc"
+#include "res/text/bank/pokemon_league_south_pokecenter_1f.h"
+#include "res/field/events/events_pokemon_league_south_pokecenter_1f.h"
 
-    .data
 
-    ScriptEntry _0020
-    ScriptEntry _002C
-    ScriptEntry _0042
-    ScriptEntry _001A
-    ScriptEntry _0058
-    ScriptEntry _006B
-    .short 0xFD13
+    ScriptEntry PokemonLeagueSouthPokecenter1F_Nurse
+    ScriptEntry PokemonLeagueSouthPokecenter1F_VendorCommon_Unused
+    ScriptEntry PokemonLeagueSouthPokecenter1F_VendorSpecial_Unused
+    ScriptEntry PokemonLeagueSouthPokecenter1F_OnTransition
+    ScriptEntry PokemonLeagueSouthPokecenter1F_Pokefan
+    ScriptEntry PokemonLeagueSouthPokecenter1F_AceTrainer
+    ScriptEntryEnd
 
-_001A:
-    SetFlag 0x9C0
+PokemonLeagueSouthPokecenter1F_OnTransition:
+    SetFlag FLAG_FIRST_ARRIVAL_OUTSIDE_VICTORY_ROAD
     End
 
-_0020:
-    SetVar 0x8007, 0
-    CallCommonScript 0x7D2
+PokemonLeagueSouthPokecenter1F_Nurse:
+    Common_CallPokecenterNurse LOCALID_LEAGUE_SOUTH_NURSE
     End
 
-_002C:
-    PlayFanfare SEQ_SE_CONFIRM
-    LockAll
-    FacePlayer
-    CallCommonScript 0x7E3
-    ScrCmd_035
-    ScrCmd_147 1
-    ReleaseAll
+PokemonLeagueSouthPokecenter1F_VendorCommon_Unused:
+    PokeMartCommonWithGreeting
     End
 
-_0042:
-    PlayFanfare SEQ_SE_CONFIRM
-    LockAll
-    FacePlayer
-    CallCommonScript 0x7E3
-    ScrCmd_035
-    ScrCmd_148 18
-    ReleaseAll
+PokemonLeagueSouthPokecenter1F_VendorSpecial_Unused:
+    PokeMartSpecialtiesWithGreeting MART_SPECIALTIES_ID_POKEMON_LEAGUE
     End
 
-_0058:
-    PlayFanfare SEQ_SE_CONFIRM
-    LockAll
-    FacePlayer
-    Message 0
-    WaitABXPadPress
-    CloseMessage
-    ReleaseAll
+PokemonLeagueSouthPokecenter1F_Pokefan:
+    NPCMessage PokemonLeagueSouthPokecenter1F_Text_ReachThePokemonLeague
     End
 
-_006B:
-    PlayFanfare SEQ_SE_CONFIRM
-    LockAll
-    FacePlayer
-    Message 1
-    WaitABXPadPress
-    CloseMessage
-    ReleaseAll
+PokemonLeagueSouthPokecenter1F_AceTrainer:
+    NPCMessage PokemonLeagueSouthPokecenter1F_Text_VictoryRoadConfusesMe
     End
 
-    .byte 0
-    .byte 0
+    .balign 4, 0

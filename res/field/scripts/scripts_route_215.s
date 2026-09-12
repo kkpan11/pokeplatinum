@@ -1,119 +1,85 @@
-    .include "macros/scrcmd.inc"
+#include "macros/scrcmd.inc"
+#include "res/text/bank/route_215.h"
 
-    .data
 
-    ScriptEntry _008D
-    ScriptEntry _00A0
-    ScriptEntry _00FA
-    ScriptEntry _0111
-    ScriptEntry _013D
-    ScriptEntry _0150
-    ScriptEntry _0022
-    ScriptEntry _0128
-    .short 0xFD13
+    ScriptEntry Route215_Dummy1
+    ScriptEntry Route215_BlackBelt
+    ScriptEntry Route215_ArrowSignpostWest
+    ScriptEntry Route215_ArrowSignpostVeilstoneCity
+    ScriptEntry Route215_JoggerScott
+    ScriptEntry Route215_JoggerCraig
+    ScriptEntry Route215_OnTransition
+    ScriptEntry Route215_TrainerTipsSignpost
+    ScriptEntryEnd
 
-_0022:
-    GetTimeOfDay 0x4000
-    GoToIfEq 0x4000, 0, _0069
-    GoToIfEq 0x4000, 1, _007B
-    GoToIfEq 0x4000, 2, _007B
-    GoToIfEq 0x4000, 3, _007B
-    GoToIfEq 0x4000, 4, _007B
+Route215_OnTransition:
+    GetTimeOfDay VAR_MAP_LOCAL_0x00
+    GoToIfEq VAR_MAP_LOCAL_0x00, TIMEOFDAY_MORNING, Route215_SetJoggersBattle
+    GoToIfInRange VAR_MAP_LOCAL_0x00, TIMEOFDAY_DAY, TIMEOFDAY_LATE_NIGHT, Route215_SetJoggersNoBattle
     End
 
-_0069:
-    ClearFlag 0x273
-    ClearFlag 0x275
-    SetFlag 0x272
-    SetFlag 0x274
+Route215_SetJoggersBattle:
+    ClearFlag FLAG_HIDE_ROUTE_215_JOGGER_SCOTT
+    ClearFlag FLAG_HIDE_ROUTE_215_JOGGER_CRAIG
+    SetFlag FLAG_HIDE_ROUTE_215_JOGGER_SCOTT_NO_BATTLE
+    SetFlag FLAG_HIDE_ROUTE_215_JOGGER_CRAIG_NO_BATTLE
     End
 
-_007B:
-    ClearFlag 0x272
-    ClearFlag 0x274
-    SetFlag 0x273
-    SetFlag 0x275
+Route215_SetJoggersNoBattle:
+    ClearFlag FLAG_HIDE_ROUTE_215_JOGGER_SCOTT_NO_BATTLE
+    ClearFlag FLAG_HIDE_ROUTE_215_JOGGER_CRAIG_NO_BATTLE
+    SetFlag FLAG_HIDE_ROUTE_215_JOGGER_SCOTT
+    SetFlag FLAG_HIDE_ROUTE_215_JOGGER_CRAIG
     End
 
-_008D:
-    PlayFanfare SEQ_SE_CONFIRM
+Route215_Dummy1:
+    NPCMessage Route215_Text_Dummy0
+    End
+
+Route215_BlackBelt:
+    PlaySE SE_CONFIRM_sseq_3
     LockAll
     FacePlayer
-    Message 0
-    WaitABXPadPress
+    GoToIfSet FLAG_RECEIVED_ROUTE_215_TM66, Route215_PaybackIsHarsh
+    Message Route215_Text_YupItsPayback
+    SetVar VAR_0x8004, ITEM_TM66
+    SetVar VAR_0x8005, 1
+    GoToIfCannotFitItem VAR_0x8004, VAR_0x8005, VAR_RESULT, Route215_BagIsFull
+    Common_GiveItemQuantity
+    SetFlag FLAG_RECEIVED_ROUTE_215_TM66
+    GoTo Route215_PaybackIsHarsh
+
+Route215_PaybackIsHarsh:
+    Message Route215_Text_PaybackIsHarsh
+    WaitButton
     CloseMessage
     ReleaseAll
     End
 
-_00A0:
-    PlayFanfare SEQ_SE_CONFIRM
-    LockAll
-    FacePlayer
-    GoToIfSet 205, _00E5
-    Message 1
-    SetVar 0x8004, 0x189
-    SetVar 0x8005, 1
-    ScrCmd_07D 0x8004, 0x8005, 0x800C
-    GoToIfEq 0x800C, 0, _00F0
-    CallCommonScript 0x7FC
-    SetFlag 205
-    GoTo _00E5
-
-_00E5:
-    Message 2
-    WaitABXPadPress
+Route215_BagIsFull:
+    Common_MessageBagIsFull
     CloseMessage
     ReleaseAll
     End
 
-_00F0:
-    CallCommonScript 0x7E1
-    CloseMessage
-    ReleaseAll
+Route215_ArrowSignpostWest:
+    ShowArrowSign Route215_Text_SignCelesticTownSolaceonTown
     End
 
-_00FA:
-    ScrCmd_036 5, 1, 0, 0x800C
-    ScrCmd_038 3
-    ScrCmd_039
-    ScrCmd_03B 0x800C
-    CallCommonScript 0x7D0
+Route215_ArrowSignpostVeilstoneCity:
+    ShowArrowSign Route215_Text_SignVeilstoneCity
     End
 
-_0111:
-    ScrCmd_036 6, 1, 0, 0x800C
-    ScrCmd_038 3
-    ScrCmd_039
-    ScrCmd_03B 0x800C
-    CallCommonScript 0x7D0
+Route215_TrainerTipsSignpost:
+    ShowScrollingSign Route215_Text_TrainerTipsPhysicalSpecial
     End
 
-_0128:
-    ScrCmd_037 3, 0
-    ScrCmd_038 3
-    ScrCmd_039
-    ScrCmd_03A 7, 0x800C
-    CallCommonScript 0x7D0
+Route215_JoggerScott:
+    NPCMessage Route215_Text_DontOverdoIt
     End
 
-_013D:
-    PlayFanfare SEQ_SE_CONFIRM
-    LockAll
-    FacePlayer
-    Message 3
-    WaitABXPadPress
-    CloseMessage
-    ReleaseAll
+Route215_JoggerCraig:
+    NPCMessage Route215_Text_ImOnlyHuman
     End
 
-_0150:
-    PlayFanfare SEQ_SE_CONFIRM
-    LockAll
-    FacePlayer
-    Message 4
-    WaitABXPadPress
-    CloseMessage
-    ReleaseAll
-    End
-
-    .byte 0
+    .balign 4, 0

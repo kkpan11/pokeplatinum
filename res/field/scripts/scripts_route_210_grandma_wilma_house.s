@@ -1,141 +1,140 @@
-    .include "macros/scrcmd.inc"
+#include "macros/scrcmd.inc"
+#include "res/text/bank/route_210_grandma_wilma_house.h"
+#include "generated/pokemon_types.h"
 
-    .data
 
-    ScriptEntry _000A
-    ScriptEntry _0010
-    .short 0xFD13
+    ScriptEntry Route210GrandmaWilmaHouse_OnTransition
+    ScriptEntry Route210GrandmaWilmaHouse_Wilma
+    ScriptEntryEnd
 
-_000A:
-    SetFlag 0x9EA
+Route210GrandmaWilmaHouse_OnTransition:
+    SetFlag FLAG_FIRST_ARRIVAL_DRAGON_MASTERS_HOUSE
     End
 
-_0010:
-    PlayFanfare SEQ_SE_CONFIRM
+Route210GrandmaWilmaHouse_Wilma:
+    PlaySE SE_CONFIRM_sseq_3
     LockAll
     FacePlayer
-    GoToIfSet 0x100, _0041
-    SetFlag 0x100
-    Message 0
-    ScrCmd_03E 0x800C
-    GoToIfEq 0x800C, 1, _005B
-    GoTo _00A2
+    GoToIfSet FLAG_TALKED_TO_ROUTE_210_GRANDMA_WILMA, Route210GrandmaWilmaHouse_AskTeachDracoMeteor
+    SetFlag FLAG_TALKED_TO_ROUTE_210_GRANDMA_WILMA
+    Message Route210GrandmaWilmaHouse_Text_ImWilmaTeachDracoMeteor
+    ShowYesNoMenu VAR_RESULT
+    GoToIfEq VAR_RESULT, MENU_NO, Route210GrandmaWilmaHouse_DoComeBack
+    GoTo Route210GrandmaWilmaHouse_CheckCanAnyMonLearn
 
-_0041:
-    Message 1
-    ScrCmd_03E 0x800C
-    GoToIfEq 0x800C, 1, _005B
-    GoTo _00A2
+Route210GrandmaWilmaHouse_AskTeachDracoMeteor:
+    Message Route210GrandmaWilmaHouse_Text_TeachDracoMeteor
+    ShowYesNoMenu VAR_RESULT
+    GoToIfEq VAR_RESULT, MENU_NO, Route210GrandmaWilmaHouse_DoComeBack
+    GoTo Route210GrandmaWilmaHouse_CheckCanAnyMonLearn
 
-_005B:
-    Message 2
-    WaitABXPadPress
+Route210GrandmaWilmaHouse_DoComeBack:
+    Message Route210GrandmaWilmaHouse_Text_DoComeBack
+    WaitButton
     CloseMessage
     ReleaseAll
     End
 
-_0066:
-    Message 3
-    WaitABXPadPress
+Route210GrandmaWilmaHouse_NoPokemonCanLearn:
+    Message Route210GrandmaWilmaHouse_Text_NoPokemonCanLearn
+    WaitButton
     CloseMessage
     ReleaseAll
     End
 
-_0071:
-    Message 6
-    WaitABXPadPress
+Route210GrandmaWilmaHouse_CantLearnDracoMeteor:
+    Message Route210GrandmaWilmaHouse_Text_CantLearnDracoMeteor
+    WaitButton
     CloseMessage
     ReleaseAll
     End
 
-_007C:
-    Message 7
-    WaitABXPadPress
+Route210GrandmaWilmaHouse_CantTeachEgg:
+    Message Route210GrandmaWilmaHouse_Text_CantTeachEgg
+    WaitButton
     CloseMessage
     ReleaseAll
     End
 
-_0087:
-    ScrCmd_0D4 0, 0x1B2
-    Message 8
-    WaitABXPadPress
+Route210GrandmaWilmaHouse_AlreadyKnowsDracoMeteor:
+    BufferMoveName 0, MOVE_DRACO_METEOR
+    Message Route210GrandmaWilmaHouse_Text_AlreadyKnowsDracoMeteor
+    WaitButton
     CloseMessage
     ReleaseAll
     End
 
-_0097:
-    Message 5
-    WaitABXPadPress
+Route210GrandmaWilmaHouse_DoesntFullyTrustYou:
+    Message Route210GrandmaWilmaHouse_Text_DoesntFullyTrustYou
+    WaitButton
     CloseMessage
     ReleaseAll
     End
 
-_00A2:
-    ScrCmd_177 0x4000
-_00A6:
-    SubVar 0x4000, 1
-    ScrCmd_198 0x4000, 0x800C
-    GoToIfEq 0x800C, 0, _00FC
-    ScrCmd_248 0x8004, 0x8005, 0x4000
-    GoToIfEq 0x8004, 16, _00E7
-    GoToIfEq 0x8005, 16, _00E7
-    GoTo _00FC
+Route210GrandmaWilmaHouse_CheckCanAnyMonLearn:
+    GetPartyCount VAR_MAP_LOCAL_0x00
+Route210GrandmaWilmaHouse_CheckMonDragonType:
+    SubVar VAR_MAP_LOCAL_0x00, 1
+    GetPartyMonSpecies VAR_MAP_LOCAL_0x00, VAR_RESULT
+    GoToIfEq VAR_RESULT, SPECIES_NONE, Route210GrandmaWilmaHouse_TryCheckNextMon
+    GetPartyMonType VAR_0x8004, VAR_0x8005, VAR_MAP_LOCAL_0x00
+    GoToIfEq VAR_0x8004, TYPE_DRAGON, Route210GrandmaWilmaHouse_CheckHasDracoMeteor
+    GoToIfEq VAR_0x8005, TYPE_DRAGON, Route210GrandmaWilmaHouse_CheckHasDracoMeteor
+    GoTo Route210GrandmaWilmaHouse_TryCheckNextMon
 
-_00E7:
-    ScrCmd_099 0x800C, 0x1B2, 0x4000
-    GoToIfEq 0x800C, 0, _010F
-_00FC:
-    GoToIfNe 0x4000, 0, _00A6
-    GoTo _0066
+Route210GrandmaWilmaHouse_CheckHasDracoMeteor:
+    CheckPartyMonHasMove VAR_RESULT, MOVE_DRACO_METEOR, VAR_MAP_LOCAL_0x00
+    GoToIfEq VAR_RESULT, FALSE, Route210GrandmaWilmaHouse_PickPokemonToTeach
+Route210GrandmaWilmaHouse_TryCheckNextMon:
+    GoToIfNe VAR_MAP_LOCAL_0x00, 0, Route210GrandmaWilmaHouse_CheckMonDragonType
+    GoTo Route210GrandmaWilmaHouse_NoPokemonCanLearn
 
-_010F:
-    Message 4
+Route210GrandmaWilmaHouse_PickPokemonToTeach:
+    Message Route210GrandmaWilmaHouse_Text_PickPokemonToTeach
     CloseMessage
-    FadeScreen 6, 1, 0, 0
+    FadeScreenOut
     WaitFadeScreen
-    ScrCmd_191
-    ScrCmd_193 0x8000
-    ScrCmd_0A1
-    FadeScreen 6, 1, 1, 0
+    SelectMoveTutorPokemon
+    GetSelectedPartySlot VAR_0x8000
+    ReturnToField
+    FadeScreenIn
     WaitFadeScreen
-    GoToIfEq 0x8000, 0xFF, _005B
-    ScrCmd_198 0x8000, 0x8001
-    GoToIfEq 0x8001, 0, _007C
-    Call _01D7
-    GoToIfEq 0x800C, 0, _0071
-    ScrCmd_099 0x800C, 0x1B2, 0x8000
-    GoToIfEq 0x800C, 1, _0087
-    ScrCmd_1B9 0x800C, 0x8000
-    GoToIfLt 0x800C, 0xFF, _0097
-    SetVar 0x8003, 0x1B2
-    GoTo _019B
+    GoToIfEq VAR_0x8000, PARTY_SLOT_NONE, Route210GrandmaWilmaHouse_DoComeBack
+    GetPartyMonSpecies VAR_0x8000, VAR_0x8001
+    GoToIfEq VAR_0x8001, SPECIES_NONE, Route210GrandmaWilmaHouse_CantTeachEgg
+    Call Route210GrandmaWilmaHouse_CheckSelectedDragonType
+    GoToIfEq VAR_RESULT, FALSE, Route210GrandmaWilmaHouse_CantLearnDracoMeteor
+    CheckPartyMonHasMove VAR_RESULT, MOVE_DRACO_METEOR, VAR_0x8000
+    GoToIfEq VAR_RESULT, TRUE, Route210GrandmaWilmaHouse_AlreadyKnowsDracoMeteor
+    GetPartyMonFriendship VAR_RESULT, VAR_0x8000
+    GoToIfLt VAR_RESULT, MAX_FRIENDSHIP_VALUE, Route210GrandmaWilmaHouse_DoesntFullyTrustYou
+    SetVar VAR_0x8003, MOVE_DRACO_METEOR
+    GoTo Route210GrandmaWilmaHouse_TryTeachDracoMeteor
 
-_019B:
-    FadeScreen 6, 1, 0, 0
+Route210GrandmaWilmaHouse_TryTeachDracoMeteor:
+    FadeScreenOut
     WaitFadeScreen
-    ScrCmd_224 0x8000, 0x1B2
-    ScrCmd_225 0x800C
-    ScrCmd_0A1
-    FadeScreen 6, 1, 1, 0
+    OpenMoveTutorMenu VAR_0x8000, MOVE_DRACO_METEOR
+    CheckLearnedTutorMove VAR_RESULT
+    ReturnToField
+    FadeScreenIn
     WaitFadeScreen
-    GoToIfEq 0x800C, 0xFF, _005B
-    Message 16
-    WaitABXPadPress
+    GoToIfEq VAR_RESULT, 0xFF, Route210GrandmaWilmaHouse_DoComeBack
+    Message Route210GrandmaWilmaHouse_Text_ExplainDracoMeteor
+    WaitButton
     CloseMessage
     ReleaseAll
     End
 
-_01D7:
-    ScrCmd_248 0x8004, 0x8005, 0x8000
-    GoToIfEq 0x8004, 16, _0201
-    GoToIfEq 0x8005, 16, _0201
-    SetVar 0x800C, 0
+Route210GrandmaWilmaHouse_CheckSelectedDragonType:
+    GetPartyMonType VAR_0x8004, VAR_0x8005, VAR_0x8000
+    GoToIfEq VAR_0x8004, TYPE_DRAGON, Route210GrandmaWilmaHouse_SelectedDragonType
+    GoToIfEq VAR_0x8005, TYPE_DRAGON, Route210GrandmaWilmaHouse_SelectedDragonType
+    SetVar VAR_RESULT, FALSE
     Return
 
-_0201:
-    SetVar 0x800C, 1
+Route210GrandmaWilmaHouse_SelectedDragonType:
+    SetVar VAR_RESULT, TRUE
     Return
 
-    .byte 0
-    .byte 0
-    .byte 0
+    .balign 4, 0

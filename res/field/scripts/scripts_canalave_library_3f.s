@@ -1,582 +1,579 @@
-    .include "macros/scrcmd.inc"
+#include "macros/scrcmd.inc"
+#include "res/text/bank/canalave_library_3f.h"
+#include "res/text/bank/menu_entries.h"
+#include "res/field/events/events_canalave_library_3f.h"
 
-    .data
 
-    ScriptEntry _0032
-    ScriptEntry _0062
-    ScriptEntry _03E8
-    ScriptEntry _0411
-    ScriptEntry _043A
-    ScriptEntry _047C
-    ScriptEntry _04BE
-    ScriptEntry _0500
-    ScriptEntry _056A
-    ScriptEntry _05D4
-    ScriptEntry _0616
-    ScriptEntry _06A2
-    .short 0xFD13
+    ScriptEntry CanalaveLibrary3F_OnTransition
+    ScriptEntry CanalaveLibrary3F_OnFrame_Explosion
+    ScriptEntry CanalaveLibrary3F_ScientistF
+    ScriptEntry CanalaveLibrary3F_Youngster
+    ScriptEntry CanalaveLibrary3F_SinnohMyth
+    ScriptEntry CanalaveLibrary3F_SinnohRegionsMythology
+    ScriptEntry CanalaveLibrary3F_SinnohsMyth
+    ScriptEntry CanalaveLibrary3F_VeilstonesMyth
+    ScriptEntry CanalaveLibrary3F_TheOriginalStory
+    ScriptEntry CanalaveLibrary3F_HorrificMyth
+    ScriptEntry CanalaveLibrary3F_SinnohFolkStories
+    ScriptEntry CanalaveLibrary3F_BgSign
+    ScriptEntryEnd
 
-_0032:
-    ScrCmd_14D 0x4000
-    GoToIfEq 0x4000, 0, _0052
-    GoToIfEq 0x4000, 1, _005A
+CanalaveLibrary3F_OnTransition:
+    GetPlayerGender VAR_MAP_LOCAL_0x00
+    GoToIfEq VAR_MAP_LOCAL_0x00, GENDER_MALE, CanalaveLibrary3F_SetCounterpartGraphicsDawn
+    GoToIfEq VAR_MAP_LOCAL_0x00, GENDER_FEMALE, CanalaveLibrary3F_SetCounterpartGraphicsLucas
     End
 
-_0052:
-    SetVar 0x4020, 97
+CanalaveLibrary3F_SetCounterpartGraphicsDawn:
+    SetVar VAR_OBJ_GFX_ID_0, OBJ_EVENT_GFX_PLAYER_F
     End
 
-_005A:
-    SetVar 0x4020, 0
+CanalaveLibrary3F_SetCounterpartGraphicsLucas:
+    SetVar VAR_OBJ_GFX_ID_0, OBJ_EVENT_GFX_PLAYER_M
     End
 
-_0062:
+CanalaveLibrary3F_OnFrame_Explosion:
     LockAll
-    ScrCmd_0CE 0
-    ScrCmd_0CD 1
-    Message 0
+    BufferRivalName 0
+    BufferPlayerName 1
+    Message CanalaveLibrary3F_Text_OverHere
     CloseMessage
-    ApplyMovement 4, _0364
-    ApplyMovement 0xFF, _0310
+    ApplyMovement LOCALID_RIVAL, CanalaveLibrary3F_Movement_RivalTakePlayerToTable
+    ApplyMovement LOCALID_PLAYER, CanalaveLibrary3F_Movement_PlayerFollowRivalToTable
     WaitMovement
-    ScrCmd_069 0x8004, 0x8005
-    ScrCmd_066 0x8004, 0x8005
-    ApplyMovement 241, _0340
+    GetPlayerMapPos VAR_0x8004, VAR_0x8005
+    AddFreeCamera VAR_0x8004, VAR_0x8005
+    ApplyFreeCameraMovement CanalaveLibrary3F_Movement_CameraMoveEast
     WaitMovement
-    WaitTime 30, 0x800C
-    ScrCmd_0CE 0
-    ScrCmd_0CD 1
-    Message 1
+    WaitTime 30, VAR_RESULT
+    BufferRivalName 0
+    BufferPlayerName 1
+    Message CanalaveLibrary3F_Text_IllBeOuttahere
     CloseMessage
-    ApplyMovement 4, _0350
+    ApplyMovement LOCALID_RIVAL, CanalaveLibrary3F_Movement_RivalWalkNorthOnSpotSouth
     WaitMovement
-    ScrCmd_0CD 0
-    Message 2
-    ScrCmd_0CE 0
-    Message 3
+    BufferPlayerName 0
+    Message CanalaveLibrary3F_Text_Ellipses
+    BufferRivalName 0
+    Message CanalaveLibrary3F_Text_OKIGetIt
     CloseMessage
-    ApplyMovement 4, _035C
+    ApplyMovement LOCALID_RIVAL, CanalaveLibrary3F_Movement_RivalWalkSouth
     WaitMovement
-    WaitTime 10, 0x800C
-    ScrCmd_0CD 0
-    Message 4
+    WaitTime 10, VAR_RESULT
+    BufferPlayerName 0
+    Message CanalaveLibrary3F_Text_EveryonesHereFinally
     CloseMessage
-    ApplyMovement 2, _02C8
+    ApplyMovement LOCALID_PROF_ROWAN, CanalaveLibrary3F_Movement_ProfRowanWalkEastOnSpotSouth
     WaitMovement
-    Message 5
+    Message CanalaveLibrary3F_Text_MoreIStudyMoreMysteries
     CloseMessage
-    ApplyMovement 2, _02D4
+    ApplyMovement LOCALID_PROF_ROWAN, CanalaveLibrary3F_Movement_ProfRowanWalkWestOnSpotNorth
     WaitMovement
-    Message 6
-    ScrCmd_0CE 0
-    Message 7
-    Message 8
-    ScrCmd_14D 0x800C
-    GoToIfEq 0x800C, 0, _0116
-    GoTo _0124
+    Message CanalaveLibrary3F_Text_HelpMeFindLakePokemon
+    BufferRivalName 0
+    Message CanalaveLibrary3F_Text_IDidntGetPokedex
+    Message CanalaveLibrary3F_Text_BoltedFromLab
+    GetPlayerGender VAR_RESULT
+    GoToIfEq VAR_RESULT, GENDER_MALE, CanalaveLibrary3F_DawnCountOnMe
+    GoTo CanalaveLibrary3F_LucasYouBet
     End
 
-_0116:
-    ScrCmd_0CD 0
-    Message 9
-    GoTo _0132
+CanalaveLibrary3F_DawnCountOnMe:
+    BufferPlayerName 0
+    Message CanalaveLibrary3F_Text_DawnCountOnMe
+    GoTo CanalaveLibrary3F_InvestigateLakesIndividually
     End
 
-_0124:
-    ScrCmd_0CD 0
-    Message 10
-    GoTo _0132
+CanalaveLibrary3F_LucasYouBet:
+    BufferPlayerName 0
+    Message CanalaveLibrary3F_Text_LucasYouBet
+    GoTo CanalaveLibrary3F_InvestigateLakesIndividually
     End
 
-_0132:
-    Message 11
+CanalaveLibrary3F_InvestigateLakesIndividually:
+    Message CanalaveLibrary3F_Text_InvestigateLakesIndividually
     CloseMessage
-    ApplyMovement 2, _02E0
-    ApplyMovement 3, _03D8
+    ApplyMovement LOCALID_PROF_ROWAN, CanalaveLibrary3F_Movement_ProfRowanWalkOnSpotWest
+    ApplyMovement LOCALID_COUNTERPART, CanalaveLibrary3F_Movement_CounterpartWalkOnSpotEast
     WaitMovement
-    ScrCmd_14D 0x800C
-    GoToIfEq 0x800C, 0, _0162
-    GoTo _0173
+    GetPlayerGender VAR_RESULT
+    GoToIfEq VAR_RESULT, GENDER_MALE, CanalaveLibrary3F_DawnToLakeVerity
+    GoTo CanalaveLibrary3F_LucasToLakeVerity
     End
 
-_0162:
-    Message 12
-    ScrCmd_0CF 0
-    Message 13
-    GoTo _0184
+CanalaveLibrary3F_DawnToLakeVerity:
+    Message CanalaveLibrary3F_Text_DawnToLakeVerity
+    BufferCounterpartName 0
+    Message CanalaveLibrary3F_Text_DawnWillDo
+    GoTo CanalaveLibrary3F_Explosion
     End
 
-_0173:
-    Message 14
-    ScrCmd_0CF 0
-    Message 15
-    GoTo _0184
+CanalaveLibrary3F_LucasToLakeVerity:
+    Message CanalaveLibrary3F_Text_LucasToLakeVerity
+    BufferCounterpartName 0
+    Message CanalaveLibrary3F_Text_LucasYesSir
+    GoTo CanalaveLibrary3F_Explosion
     End
 
-_0184:
+CanalaveLibrary3F_Explosion:
     CloseMessage
-    ApplyMovement 2, _02E8
-    ApplyMovement 3, _03E0
+    ApplyMovement LOCALID_PROF_ROWAN, CanalaveLibrary3F_Movement_ProfRowanWalkOnSpotNorth
+    ApplyMovement LOCALID_COUNTERPART, CanalaveLibrary3F_Movement_CounterpartWalkOnSpotNorth
     WaitMovement
-    ScrCmd_0CE 0
-    Message 16
+    BufferRivalName 0
+    Message CanalaveLibrary3F_Text_RivalToLakeAcuity
     CloseMessage
-    ApplyMovement 4, _039C
+    ApplyMovement LOCALID_RIVAL, CanalaveLibrary3F_Movement_RivalWalkOnSpotEast
     WaitMovement
-    Message 17
+    Message CanalaveLibrary3F_Text_YeahOfCourse
     CloseMessage
-    ApplyMovement 4, _03A4
+    ApplyMovement LOCALID_RIVAL, CanalaveLibrary3F_Movement_RivalWalkOnSpotSouth
     WaitMovement
-    ScrCmd_0CD 0
-    Message 18
-    ScrCmd_04B 0x5DC
-    MessageInstant 19
+    BufferPlayerName 0
+    Message CanalaveLibrary3F_Text_ThatLeavesLakeValor
+    WaitSE SE_CONFIRM_sseq_3
+    MessageInstant CanalaveLibrary3F_Text_BigExplosion
     ScrCmd_29F 1
-    Message 20
-    ScrCmd_0CE 0
-    Message 21
+    Message CanalaveLibrary3F_Text_AreYouUnharmed
+    BufferRivalName 0
+    Message CanalaveLibrary3F_Text_WhatWasThatAbout
     CloseMessage
-    ApplyMovement 4, _03AC
-    ApplyMovement 0xFF, _0330
+    ApplyMovement LOCALID_RIVAL, CanalaveLibrary3F_Movement_RivalWalkToTV
+    ApplyMovement LOCALID_PLAYER, CanalaveLibrary3F_Movement_PlayerFaceTV
     WaitMovement
-    FadeScreen 6, 1, 0, 0
+    FadeScreenOut
     WaitFadeScreen
-    ScrCmd_067
-    ScrCmd_310
-    ScrCmd_0A1
-    ScrCmd_069 0x8004, 0x8005
-    ScrCmd_066 0x8004, 0x8005
-    ApplyMovement 241, _0340
+    RestoreCamera
+    StartLibraryTV
+    ReturnToField
+    GetPlayerMapPos VAR_0x8004, VAR_0x8005
+    AddFreeCamera VAR_0x8004, VAR_0x8005
+    ApplyFreeCameraMovement CanalaveLibrary3F_Movement_CameraMoveEast
     WaitMovement
-    FadeScreen 6, 1, 1, 0
+    FadeScreenIn
     WaitFadeScreen
-    Message 22
+    Message CanalaveLibrary3F_Text_NewsExplosion
     CloseMessage
-    WaitTime 15, 0x800C
-    ApplyMovement 4, _03B4
+    WaitTime 15, VAR_RESULT
+    ApplyMovement LOCALID_RIVAL, CanalaveLibrary3F_Movement_RivalWalkOnSpotSouth2
     WaitMovement
-    ScrCmd_0CE 0
-    Message 23
-    ApplyMovement 0xFF, _0338
+    BufferRivalName 0
+    Message CanalaveLibrary3F_Text_TheySaidExplosion
+    ApplyMovement LOCALID_PLAYER, CanalaveLibrary3F_Movement_PlayerWalkOnSpotSouth
     WaitMovement
-    Message 24
+    Message CanalaveLibrary3F_Text_LetsGetOutside
     CloseMessage
-    ApplyMovement 3, _03BC
-    ApplyMovement 4, _0388
-    ApplyMovement 2, _02F0
-    ApplyMovement 241, _0348
+    ApplyMovement LOCALID_COUNTERPART, CanalaveLibrary3F_Movement_CounterpartLeave
+    ApplyMovement LOCALID_RIVAL, CanalaveLibrary3F_Movement_RivalLeave
+    ApplyMovement LOCALID_PROF_ROWAN, CanalaveLibrary3F_Movement_ProfRowanWalkToStairs
+    ApplyFreeCameraMovement CanalaveLibrary3F_Movement_CameraMoveWest
     WaitMovement
-    ScrCmd_065 4
-    ScrCmd_065 3
-    ScrCmd_067
-    ApplyMovement 0xFF, _02C0
+    RemoveObject LOCALID_RIVAL
+    RemoveObject LOCALID_COUNTERPART
+    RestoreCamera
+    ApplyMovement LOCALID_PLAYER, CanalaveLibrary3F_Movement_PlayerWalkOnSpotNorth
     WaitMovement
-    Message 25
+    Message CanalaveLibrary3F_Text_LeaveNowToo
     CloseMessage
-    ScrCmd_04A 0x5DC
-    ApplyMovement 2, _0308
+    StopSE SE_CONFIRM_sseq_3
+    ApplyMovement LOCALID_PROF_ROWAN, CanalaveLibrary3F_Movement_ProfRowanLeave
     WaitMovement
-    PlayFanfare SEQ_SE_DP_KAIDAN2
-    ScrCmd_065 2
-    ScrCmd_04A 0x603
-    SetVar 0x4078, 4
-    SetVar 0x40B2, 2
-    SetFlag 168
-    SetFlag 0x1AE
-    ClearFlag 0x1B3
-    ClearFlag 0x1B5
-    ClearFlag 0x1B2
+    PlaySE SEQ_SE_DP_KAIDAN2_sseq
+    RemoveObject LOCALID_PROF_ROWAN
+    StopSE SEQ_SE_DP_KAIDAN2_sseq
+    SetVar VAR_CANALAVE_CITY_STATE, 4
+    SetVar VAR_CANALAVE_LIBRARY_STATE, 2
+    SetFlag FLAG_LAKE_VALOR_EXPLODED
+    SetFlag FLAG_HIDE_VALOR_LAKEFRONT_CAMERAMEN
+    ClearFlag FLAG_HIDE_CANALAVE_CITY_PROF_ROWAN
+    ClearFlag FLAG_HIDE_CANALAVE_CITY_COUNTERPART
+    ClearFlag FLAG_HIDE_CANALAVE_CITY_RIVAL_BRIDGE
     ReleaseAll
     End
 
     .balign 4, 0
-_02C0:
-    MoveAction_020
+CanalaveLibrary3F_Movement_PlayerWalkOnSpotNorth:
+    WalkOnSpotNormalNorth
     EndMovement
 
     .balign 4, 0
-_02C8:
-    MoveAction_00B
-    MoveAction_021
+CanalaveLibrary3F_Movement_ProfRowanWalkEastOnSpotSouth:
+    WalkSlowEast
+    WalkOnSpotNormalSouth
     EndMovement
 
     .balign 4, 0
-_02D4:
-    MoveAction_00E
-    MoveAction_020
+CanalaveLibrary3F_Movement_ProfRowanWalkWestOnSpotNorth:
+    WalkNormalWest
+    WalkOnSpotNormalNorth
     EndMovement
 
     .balign 4, 0
-_02E0:
-    MoveAction_022
+CanalaveLibrary3F_Movement_ProfRowanWalkOnSpotWest:
+    WalkOnSpotNormalWest
     EndMovement
 
     .balign 4, 0
-_02E8:
-    MoveAction_020
+CanalaveLibrary3F_Movement_ProfRowanWalkOnSpotNorth:
+    WalkOnSpotNormalNorth
     EndMovement
 
     .balign 4, 0
-_02F0:
-    MoveAction_00F
-    MoveAction_00C 4
-    MoveAction_00E 5
-    MoveAction_00C 3
-    MoveAction_021
+CanalaveLibrary3F_Movement_ProfRowanWalkToStairs:
+    WalkNormalEast
+    WalkNormalNorth 4
+    WalkNormalWest 5
+    WalkNormalNorth 3
+    WalkOnSpotNormalSouth
     EndMovement
 
     .balign 4, 0
-_0308:
-    MoveAction_00F
+CanalaveLibrary3F_Movement_ProfRowanLeave:
+    WalkNormalEast
     EndMovement
 
     .balign 4, 0
-_0310:
-    MoveAction_03F 3
-    MoveAction_021
-    MoveAction_00D 2
-    MoveAction_00F
-    MoveAction_00D
-    MoveAction_00F 2
-    MoveAction_00D
+CanalaveLibrary3F_Movement_PlayerFollowRivalToTable:
+    Delay8 3
+    WalkOnSpotNormalSouth
+    WalkNormalSouth 2
+    WalkNormalEast
+    WalkNormalSouth
+    WalkNormalEast 2
+    WalkNormalSouth
     EndMovement
 
     .balign 4, 0
-_0330:
-    MoveAction_020
+CanalaveLibrary3F_Movement_PlayerFaceTV:
+    WalkOnSpotNormalNorth
     EndMovement
 
     .balign 4, 0
-_0338:
-    MoveAction_021
+CanalaveLibrary3F_Movement_PlayerWalkOnSpotSouth:
+    WalkOnSpotNormalSouth
     EndMovement
 
     .balign 4, 0
-_0340:
-    MoveAction_00B 3
+CanalaveLibrary3F_Movement_CameraMoveEast:
+    WalkSlowEast 3
     EndMovement
 
     .balign 4, 0
-_0348:
-    MoveAction_00A 3
+CanalaveLibrary3F_Movement_CameraMoveWest:
+    WalkSlowWest 3
     EndMovement
 
     .balign 4, 0
-_0350:
-    MoveAction_010
-    MoveAction_021
+CanalaveLibrary3F_Movement_RivalWalkNorthOnSpotSouth:
+    WalkFastNorth
+    WalkOnSpotNormalSouth
     EndMovement
 
     .balign 4, 0
-_035C:
-    MoveAction_00D
+CanalaveLibrary3F_Movement_RivalWalkSouth:
+    WalkNormalSouth
     EndMovement
 
     .balign 4, 0
-_0364:
-    MoveAction_00D
-    MoveAction_00F 2
-    MoveAction_020
-    MoveAction_00D
-    MoveAction_00F
-    MoveAction_00D
-    MoveAction_00F 3
-    MoveAction_00D
+CanalaveLibrary3F_Movement_RivalTakePlayerToTable:
+    WalkNormalSouth
+    WalkNormalEast 2
+    WalkOnSpotNormalNorth
+    WalkNormalSouth
+    WalkNormalEast
+    WalkNormalSouth
+    WalkNormalEast 3
+    WalkNormalSouth
     EndMovement
 
     .balign 4, 0
-_0388:
-    MoveAction_012 4
-    MoveAction_010 3
-    MoveAction_013
-    MoveAction_045
+CanalaveLibrary3F_Movement_RivalLeave:
+    WalkFastWest 4
+    WalkFastNorth 3
+    WalkFastEast
+    SetInvisible
     EndMovement
 
     .balign 4, 0
-_039C:
-    MoveAction_027
+CanalaveLibrary3F_Movement_RivalWalkOnSpotEast:
+    WalkOnSpotFastEast
     EndMovement
 
     .balign 4, 0
-_03A4:
-    MoveAction_021
+CanalaveLibrary3F_Movement_RivalWalkOnSpotSouth:
+    WalkOnSpotNormalSouth
     EndMovement
 
     .balign 4, 0
-_03AC:
-    MoveAction_010
+CanalaveLibrary3F_Movement_RivalWalkToTV:
+    WalkFastNorth
     EndMovement
 
     .balign 4, 0
-_03B4:
-    MoveAction_021
+CanalaveLibrary3F_Movement_RivalWalkOnSpotSouth2:
+    WalkOnSpotNormalSouth
     EndMovement
 
     .balign 4, 0
-_03BC:
-    MoveAction_00E
-    MoveAction_00C 5
-    MoveAction_00E 2
-    MoveAction_00C 2
-    MoveAction_00F
-    MoveAction_045
+CanalaveLibrary3F_Movement_CounterpartLeave:
+    WalkNormalWest
+    WalkNormalNorth 5
+    WalkNormalWest 2
+    WalkNormalNorth 2
+    WalkNormalEast
+    SetInvisible
     EndMovement
 
     .balign 4, 0
-_03D8:
-    MoveAction_023
+CanalaveLibrary3F_Movement_CounterpartWalkOnSpotEast:
+    WalkOnSpotNormalEast
     EndMovement
 
     .balign 4, 0
-_03E0:
-    MoveAction_020
+CanalaveLibrary3F_Movement_CounterpartWalkOnSpotNorth:
+    WalkOnSpotNormalNorth
     EndMovement
 
-_03E8:
-    PlayFanfare SEQ_SE_CONFIRM
+CanalaveLibrary3F_ScientistF:
+    PlaySE SE_CONFIRM_sseq_3
     LockAll
     FacePlayer
-    GoToIfSet 168, _0406
-    Message 26
-    WaitABXPadPress
+    GoToIfSet FLAG_LAKE_VALOR_EXPLODED, CanalaveLibrary3F_WasThatAnEarthquake
+    Message CanalaveLibrary3F_Text_BooksContainMemories
+    WaitButton
     CloseMessage
     ReleaseAll
     End
 
-_0406:
-    Message 27
-    WaitABXPadPress
+CanalaveLibrary3F_WasThatAnEarthquake:
+    Message CanalaveLibrary3F_Text_WasThatAnEarthquake
+    WaitButton
     CloseMessage
     ReleaseAll
     End
 
-_0411:
-    PlayFanfare SEQ_SE_CONFIRM
+CanalaveLibrary3F_Youngster:
+    PlaySE SE_CONFIRM_sseq_3
     LockAll
     FacePlayer
-    GoToIfSet 168, _042F
-    Message 28
-    WaitABXPadPress
+    GoToIfSet FLAG_LAKE_VALOR_EXPLODED, CanalaveLibrary3F_ImFeelingWobbly
+    Message CanalaveLibrary3F_Text_BookAlwaysCheckedOut
+    WaitButton
     CloseMessage
     ReleaseAll
     End
 
-_042F:
-    Message 29
-    WaitABXPadPress
+CanalaveLibrary3F_ImFeelingWobbly:
+    Message CanalaveLibrary3F_Text_ImFeelingWobbly
+    WaitButton
     CloseMessage
     ReleaseAll
     End
 
-_043A:
-    PlayFanfare SEQ_SE_CONFIRM
+CanalaveLibrary3F_SinnohMyth:
+    PlaySE SE_CONFIRM_sseq_3
     LockAll
-    Message 30
-    ScrCmd_03E 0x800C
-    GoToIfEq 0x800C, 0, _0471
-    GoToIfEq 0x800C, 1, _0463
+    Message CanalaveLibrary3F_Text_AskReadSinnohMyth
+    ShowYesNoMenu VAR_RESULT
+    GoToIfEq VAR_RESULT, MENU_YES, CanalaveLibrary3F_ReadSinnohMyth
+    GoToIfEq VAR_RESULT, MENU_NO, CanalaveLibrary3F_PutSinnohMythBack
     End
 
-_0463:
-    ScrCmd_0CD 0
-    Message 31
-    WaitABXPadPress
+CanalaveLibrary3F_PutSinnohMythBack:
+    BufferPlayerName 0
+    Message CanalaveLibrary3F_Text_PutSinnohMythBack
+    WaitButton
     CloseMessage
     ReleaseAll
     End
 
-_0471:
-    Message 32
-    WaitABXPadPress
+CanalaveLibrary3F_ReadSinnohMyth:
+    Message CanalaveLibrary3F_Text_SinnohMyth
+    WaitButton
     CloseMessage
     ReleaseAll
     End
 
-_047C:
-    PlayFanfare SEQ_SE_CONFIRM
+CanalaveLibrary3F_SinnohRegionsMythology:
+    PlaySE SE_CONFIRM_sseq_3
     LockAll
-    Message 33
-    ScrCmd_03E 0x800C
-    GoToIfEq 0x800C, 0, _04B3
-    GoToIfEq 0x800C, 1, _04A5
+    Message CanalaveLibrary3F_Text_AskReadSinnohRegionsMythology
+    ShowYesNoMenu VAR_RESULT
+    GoToIfEq VAR_RESULT, MENU_YES, CanalaveLibrary3F_ReadSinnohRegionsMythology
+    GoToIfEq VAR_RESULT, MENU_NO, CanalaveLibrary3F_PutSinnohRegionsMythologyBack
     End
 
-_04A5:
-    ScrCmd_0CD 0
-    Message 34
-    WaitABXPadPress
+CanalaveLibrary3F_PutSinnohRegionsMythologyBack:
+    BufferPlayerName 0
+    Message CanalaveLibrary3F_Text_PutSinnohRegionsMythologyBack
+    WaitButton
     CloseMessage
     ReleaseAll
     End
 
-_04B3:
-    Message 35
-    WaitABXPadPress
+CanalaveLibrary3F_ReadSinnohRegionsMythology:
+    Message CanalaveLibrary3F_Text_SinnohRegionsMythology
+    WaitButton
     CloseMessage
     ReleaseAll
     End
 
-_04BE:
-    PlayFanfare SEQ_SE_CONFIRM
+CanalaveLibrary3F_SinnohsMyth:
+    PlaySE SE_CONFIRM_sseq_3
     LockAll
-    Message 36
-    ScrCmd_03E 0x800C
-    GoToIfEq 0x800C, 0, _04F5
-    GoToIfEq 0x800C, 1, _04E7
+    Message CanalaveLibrary3F_Text_AskReadSinnohsMyth
+    ShowYesNoMenu VAR_RESULT
+    GoToIfEq VAR_RESULT, MENU_YES, CanalaveLibrary3F_ReadSinnohsMyth
+    GoToIfEq VAR_RESULT, MENU_NO, CanalaveLibrary3F_PutSinnohsMythBack
     End
 
-_04E7:
-    ScrCmd_0CD 0
-    Message 37
-    WaitABXPadPress
+CanalaveLibrary3F_PutSinnohsMythBack:
+    BufferPlayerName 0
+    Message CanalaveLibrary3F_Text_PutSinnohsMythBack
+    WaitButton
     CloseMessage
     ReleaseAll
     End
 
-_04F5:
-    Message 38
-    WaitABXPadPress
+CanalaveLibrary3F_ReadSinnohsMyth:
+    Message CanalaveLibrary3F_Text_SinnohsMyth
+    WaitButton
     CloseMessage
     ReleaseAll
     End
 
-_0500:
-    PlayFanfare SEQ_SE_CONFIRM
+CanalaveLibrary3F_VeilstonesMyth:
+    PlaySE SE_CONFIRM_sseq_3
     LockAll
-    Message 39
-    ScrCmd_03E 0x800C
-    GoToIfEq 0x800C, 0, _0537
-    GoToIfEq 0x800C, 1, _0529
+    Message CanalaveLibrary3F_Text_AskReadVeilstonesMyth
+    ShowYesNoMenu VAR_RESULT
+    GoToIfEq VAR_RESULT, MENU_YES, CanalaveLibrary3F_ReadVeilstonesMyth
+    GoToIfEq VAR_RESULT, MENU_NO, CanalaveLibrary3F_PutVeilstonesMythBack
     End
 
-_0529:
-    ScrCmd_0CD 0
-    Message 40
-    WaitABXPadPress
+CanalaveLibrary3F_PutVeilstonesMythBack:
+    BufferPlayerName 0
+    Message CanalaveLibrary3F_Text_PutVeilstonesMythBack
+    WaitButton
     CloseMessage
     ReleaseAll
     End
 
-_0537:
-    Message 41
-    ScrCmd_03E 0x800C
-    GoToIfEq 0x800C, 1, _0529
-    Message 42
-    ScrCmd_03E 0x800C
-    GoToIfEq 0x800C, 1, _0529
-    Message 43
-    WaitABXPadPress
+CanalaveLibrary3F_ReadVeilstonesMyth:
+    Message CanalaveLibrary3F_Text_VeilstonesMyth1
+    ShowYesNoMenu VAR_RESULT
+    GoToIfEq VAR_RESULT, MENU_NO, CanalaveLibrary3F_PutVeilstonesMythBack
+    Message CanalaveLibrary3F_Text_VeilstonesMyth2
+    ShowYesNoMenu VAR_RESULT
+    GoToIfEq VAR_RESULT, MENU_NO, CanalaveLibrary3F_PutVeilstonesMythBack
+    Message CanalaveLibrary3F_Text_VeilstonesMyth3
+    WaitButton
     CloseMessage
     ReleaseAll
     End
 
-_056A:
-    PlayFanfare SEQ_SE_CONFIRM
+CanalaveLibrary3F_TheOriginalStory:
+    PlaySE SE_CONFIRM_sseq_3
     LockAll
-    Message 44
-    ScrCmd_03E 0x800C
-    GoToIfEq 0x800C, 0, _05A1
-    GoToIfEq 0x800C, 1, _0593
+    Message CanalaveLibrary3F_Text_AskReadTheOriginalStory
+    ShowYesNoMenu VAR_RESULT
+    GoToIfEq VAR_RESULT, MENU_YES, CanalaveLibrary3F_ReadTheOriginalStory
+    GoToIfEq VAR_RESULT, MENU_NO, CanalaveLibrary3F_PutTheOriginalStoryBack
     End
 
-_0593:
-    ScrCmd_0CD 0
-    Message 45
-    WaitABXPadPress
+CanalaveLibrary3F_PutTheOriginalStoryBack:
+    BufferPlayerName 0
+    Message CanalaveLibrary3F_Text_PutTheOriginalStoryBack
+    WaitButton
     CloseMessage
     ReleaseAll
     End
 
-_05A1:
-    Message 46
-    ScrCmd_03E 0x800C
-    GoToIfEq 0x800C, 1, _0593
-    Message 47
-    ScrCmd_03E 0x800C
-    GoToIfEq 0x800C, 1, _0593
-    Message 48
-    WaitABXPadPress
+CanalaveLibrary3F_ReadTheOriginalStory:
+    Message CanalaveLibrary3F_Text_TheOriginalStory1
+    ShowYesNoMenu VAR_RESULT
+    GoToIfEq VAR_RESULT, MENU_NO, CanalaveLibrary3F_PutTheOriginalStoryBack
+    Message CanalaveLibrary3F_Text_TheOriginalStory2
+    ShowYesNoMenu VAR_RESULT
+    GoToIfEq VAR_RESULT, MENU_NO, CanalaveLibrary3F_PutTheOriginalStoryBack
+    Message CanalaveLibrary3F_Text_TheOriginalStory3
+    WaitButton
     CloseMessage
     ReleaseAll
     End
 
-_05D4:
-    PlayFanfare SEQ_SE_CONFIRM
+CanalaveLibrary3F_HorrificMyth:
+    PlaySE SE_CONFIRM_sseq_3
     LockAll
-    Message 49
-    ScrCmd_03E 0x800C
-    GoToIfEq 0x800C, 0, _060B
-    GoToIfEq 0x800C, 1, _05FD
+    Message CanalaveLibrary3F_Text_AskReadHorrificMyth
+    ShowYesNoMenu VAR_RESULT
+    GoToIfEq VAR_RESULT, MENU_YES, CanalaveLibrary3F_ReadHorrificMyth
+    GoToIfEq VAR_RESULT, MENU_NO, CanalaveLibrary3F_PutHorrificMythBack
     End
 
-_05FD:
-    ScrCmd_0CD 0
-    Message 50
-    WaitABXPadPress
+CanalaveLibrary3F_PutHorrificMythBack:
+    BufferPlayerName 0
+    Message CanalaveLibrary3F_Text_PutHorrificMythBack
+    WaitButton
     CloseMessage
     ReleaseAll
     End
 
-_060B:
-    Message 51
-    WaitABXPadPress
+CanalaveLibrary3F_ReadHorrificMyth:
+    Message CanalaveLibrary3F_Text_HorrificMyth
+    WaitButton
     CloseMessage
     ReleaseAll
     End
 
-_0616:
-    PlayFanfare SEQ_SE_CONFIRM
+CanalaveLibrary3F_SinnohFolkStories:
+    PlaySE SE_CONFIRM_sseq_3
     LockAll
-    Message 52
-    Message 53
-    ScrCmd_040 1, 1, 0, 1, 0x800C
-    ScrCmd_29D 0x103, 0
-    ScrCmd_29D 0x104, 1
-    ScrCmd_29D 0x105, 2
-    ScrCmd_29D 0x106, 3
-    ScrCmd_043
-    GoToIfEq 0x800C, 0, _0673
-    GoToIfEq 0x800C, 1, _067E
-    GoToIfEq 0x800C, 2, _0689
-    GoTo _0694
+    Message CanalaveLibrary3F_Text_SinnohFolkStories
+    Message CanalaveLibrary3F_Text_ReadWhichStory
+    InitGlobalTextMenu 1, 1, 0, VAR_RESULT
+    AddMenuEntry MenuEntries_Text_SinnohFolkStory_Part1, 0
+    AddMenuEntry MenuEntries_Text_SinnohFolkStory_Part2, 1
+    AddMenuEntry MenuEntries_Text_SinnohFolkStory_Part3, 2
+    AddMenuEntry MenuEntries_Text_SinnohFolkStory_Exit, 3
+    ShowMenu
+    GoToIfEq VAR_RESULT, 0, CanalaveLibrary3F_SinnohFolkStory1
+    GoToIfEq VAR_RESULT, 1, CanalaveLibrary3F_SinnohFolkStory2
+    GoToIfEq VAR_RESULT, 2, CanalaveLibrary3F_SinnohFolkStory3
+    GoTo CanalaveLibrary3F_PutSinnohFolkStoriesBack
     End
 
-_0673:
-    Message 55
-    WaitABXPadPress
+CanalaveLibrary3F_SinnohFolkStory1:
+    Message CanalaveLibrary3F_Text_SinnohFolkStory1
+    WaitButton
     CloseMessage
     ReleaseAll
     End
 
-_067E:
-    Message 56
-    WaitABXPadPress
+CanalaveLibrary3F_SinnohFolkStory2:
+    Message CanalaveLibrary3F_Text_SinnohFolkStory2
+    WaitButton
     CloseMessage
     ReleaseAll
     End
 
-_0689:
-    Message 57
-    WaitABXPadPress
+CanalaveLibrary3F_SinnohFolkStory3:
+    Message CanalaveLibrary3F_Text_SinnohFolkStory3
+    WaitButton
     CloseMessage
     ReleaseAll
     End
 
-_0694:
-    ScrCmd_0CD 0
-    Message 54
-    WaitABXPadPress
+CanalaveLibrary3F_PutSinnohFolkStoriesBack:
+    BufferPlayerName 0
+    Message CanalaveLibrary3F_Text_PutSinnohFolkStoriesBack
+    WaitButton
     CloseMessage
     ReleaseAll
     End
 
-_06A2:
-    PlayFanfare SEQ_SE_CONFIRM
-    LockAll
-    Message 58
-    WaitABXPadPress
-    CloseMessage
-    ReleaseAll
+CanalaveLibrary3F_BgSign:
+    EventMessage CanalaveLibrary3F_Text_ManyMythsAndLegends
     End
 
-    .byte 0
+    .balign 4, 0

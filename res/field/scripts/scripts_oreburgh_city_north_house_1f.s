@@ -1,84 +1,71 @@
-    .include "macros/scrcmd.inc"
+#include "macros/scrcmd.inc"
+#include "constants/npc_trades.h"
+#include "res/text/bank/oreburgh_city_north_house_1f.h"
 
-    .data
 
-    ScriptEntry _000E
-    ScriptEntry _00C2
-    ScriptEntry _00D5
-    .short 0xFD13
+    ScriptEntry OreburghCityNorthHouse1F_SchoolKidF
+    ScriptEntry OreburghCityNorthHouse1F_ExpertF
+    ScriptEntry OreburghCityNorthHouse1F_PokemonBreederM
+    ScriptEntryEnd
 
-_000E:
-    PlayFanfare SEQ_SE_CONFIRM
+OreburghCityNorthHouse1F_SchoolKidF:
+    PlaySE SE_CONFIRM_sseq_3
     LockAll
     FacePlayer
-    GoToIfSet 133, _00B7
-    Message 0
-    ScrCmd_03E 0x800C
-    GoToIfEq 0x800C, 0, _003B
-    GoTo _00AC
+    GoToIfSet FLAG_TRADED_FOR_KAZZA_ABRA, OreburghCityNorthHouse1F_ThanksToPokemonWereFriends
+    Message OreburghCityNorthHouse1F_Text_AskTradeMachopForAbra
+    ShowYesNoMenu VAR_RESULT
+    GoToIfEq VAR_RESULT, MENU_YES, OreburghCityNorthHouse1F_TryTrade
+    GoTo OreburghCityNorthHouse1F_IllBeWaiting
 
-_003B:
+OreburghCityNorthHouse1F_TryTrade:
     CloseMessage
-    FadeScreen 6, 1, 0, 0
+    FadeScreenOut
     WaitFadeScreen
-    ScrCmd_2A5
-    ScrCmd_193 0x800C
-    ScrCmd_0A1
-    FadeScreen 6, 1, 1, 0
+    SelectPokemonToTrade
+    FadeScreenIn
     WaitFadeScreen
-    GoToIfEq 0x800C, 0xFF, _00AC
-    ScrCmd_226 0
-    SetVar 0x8004, 0x800C
-    ScrCmd_198 0x8004, 0x8005
-    ScrCmd_228 0x800C
-    GoToIfNe 0x8005, 0x800C, _009F
-    ScrCmd_229 0x8004
-    ScrCmd_22A
-    SetFlag 133
-    Message 1
-    WaitABXPadPress
+    GoToIfEq VAR_RESULT, 0xFF, OreburghCityNorthHouse1F_IllBeWaiting
+    InitNPCTrade NPC_TRADE_KAZZA_ABRA
+    SetVar VAR_0x8004, VAR_RESULT
+    GetPartyMonSpecies VAR_0x8004, VAR_0x8005
+    GetNPCTradeRequestedSpecies VAR_RESULT
+    GoToIfNe VAR_0x8005, VAR_RESULT, OreburghCityNorthHouse1F_AskedForMachop
+    StartNPCTrade VAR_0x8004
+    FinishNPCTrade
+    SetFlag FLAG_TRADED_FOR_KAZZA_ABRA
+    Message OreburghCityNorthHouse1F_Text_BeNiceToMyAbra
+    WaitButton
     CloseMessage
     ReleaseAll
     End
 
-_009F:
-    ScrCmd_22A
-    Message 2
-    WaitABXPadPress
+OreburghCityNorthHouse1F_AskedForMachop:
+    FinishNPCTrade
+    Message OreburghCityNorthHouse1F_Text_AskedForMachop
+    WaitButton
     CloseMessage
     ReleaseAll
     End
 
-_00AC:
-    Message 3
-    WaitABXPadPress
+OreburghCityNorthHouse1F_IllBeWaiting:
+    Message OreburghCityNorthHouse1F_Text_IllBeWaiting
+    WaitButton
     CloseMessage
     ReleaseAll
     End
 
-_00B7:
-    Message 4
-    WaitABXPadPress
+OreburghCityNorthHouse1F_ThanksToPokemonWereFriends:
+    Message OreburghCityNorthHouse1F_Text_ThanksToPokemonWereFriends
+    WaitButton
     CloseMessage
     ReleaseAll
     End
 
-_00C2:
-    PlayFanfare SEQ_SE_CONFIRM
-    LockAll
-    FacePlayer
-    Message 5
-    WaitABXPadPress
-    CloseMessage
-    ReleaseAll
+OreburghCityNorthHouse1F_ExpertF:
+    NPCMessage OreburghCityNorthHouse1F_Text_PokemonFromTradeGrowsQuickly
     End
 
-_00D5:
-    PlayFanfare SEQ_SE_CONFIRM
-    LockAll
-    FacePlayer
-    Message 6
-    WaitABXPadPress
-    CloseMessage
-    ReleaseAll
+OreburghCityNorthHouse1F_PokemonBreederM:
+    NPCMessage OreburghCityNorthHouse1F_Text_ItemIsTradedAsWell
     End

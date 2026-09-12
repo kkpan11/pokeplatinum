@@ -1,15 +1,12 @@
-    .include "macros/scrcmd.inc"
+#include "macros/scrcmd.inc"
 
-    .data
 
-    .byte 2
-    .short 1, 0
-    .byte 1
-    ScriptEntry _000B
-    .byte 0
+    InitScriptEntry_OnTransition 1
+    InitScriptEntry_OnFrameTable InitScriptFrameTable
+    InitScriptEntryEnd
 
-_000B:
-    .short 0x4110, 1, 2
-    .short 0
+InitScriptFrameTable:
+    InitScriptGoToIfEqual VAR_OLD_CHATEAU_DINING_AREA_OLD_MAN_STATE, 1, 2
+    InitScriptFrameTableEnd
 
-    .balign 4, 0
+    InitScriptEnd

@@ -23,16 +23,16 @@
 #include "overlay017/struct_ov17_022529C8.h"
 #include "overlay017/struct_ov17_022539E4.h"
 
+#include "bg_window.h"
+#include "brightness_controller.h"
 #include "heap.h"
 #include "pokemon.h"
+#include "pokemon_sprite.h"
+#include "render_window.h"
+#include "screen_fade.h"
+#include "sound_playback.h"
 #include "sys_task.h"
 #include "sys_task_manager.h"
-#include "unk_02005474.h"
-#include "unk_0200762C.h"
-#include "unk_0200A9DC.h"
-#include "unk_0200DA60.h"
-#include "unk_0200F174.h"
-#include "unk_02018340.h"
 
 static int ov17_02251DAC(UnkStruct_ov17_0224F30C *param0, void *param1, int param2, void *param3);
 static void ov17_02251DC0(UnkStruct_ov17_0224F30C *param0, void *param1, const UnkStruct_ov17_02243C80 *param2, void *param3);
@@ -109,9 +109,9 @@ void ov17_02251D6C(UnkStruct_ov17_0224FCA0 *param0)
 
     v0.unk_00 = Unk_ov17_02254D18;
     v0.unk_04 = NELEMS(Unk_ov17_02254D18);
-    v0.unk_06 = param0->unk_00->unk_00.unk_113;
+    v0.playerContestantID = param0->unk_00->unk_00.playerContestantID;
     v0.unk_08 = param0->unk_00->unk_00.unk_10C;
-    v0.unk_07 = param0->unk_00->unk_155;
+    v0.isLinkContest = param0->unk_00->isLinkContest;
 
     ov17_0224F18C(&param0->unk_85C, &v0);
 }
@@ -119,9 +119,7 @@ void ov17_02251D6C(UnkStruct_ov17_0224FCA0 *param0)
 static int ov17_02251DAC(UnkStruct_ov17_0224F30C *param0, void *param1, int param2, void *param3)
 {
     UnkStruct_ov17_0224FCA0 *v0 = param1;
-    int v1;
-
-    v1 = ov17_0224F1F8(param0, 0xff, param2, NULL, 0);
+    int v1 = ov17_0224F1F8(param0, 0xff, param2, NULL, 0);
     return v1;
 }
 
@@ -140,9 +138,7 @@ static void ov17_02251DD0(UnkStruct_ov17_0224F30C *param0, void *param1, const U
 static int ov17_02251DD4(UnkStruct_ov17_0224F30C *param0, void *param1, int param2, void *param3)
 {
     UnkStruct_ov17_0224FCA0 *v0 = param1;
-    int v1;
-
-    v1 = ov17_0224F1F8(param0, 0xff, param2, param3, sizeof(UnkStruct_ov17_0224FCA0_sub1));
+    int v1 = ov17_0224F1F8(param0, 0xff, param2, param3, sizeof(UnkStruct_ov17_0224FCA0_sub1));
     return v1;
 }
 
@@ -164,18 +160,14 @@ static void ov17_02251DE8(UnkStruct_ov17_0224F30C *param0, void *param1, const U
 static int ov17_02251E54(UnkStruct_ov17_0224F30C *param0, void *param1, int param2, void *param3)
 {
     UnkStruct_ov17_0224FCA0 *v0 = param1;
-    int v1;
-
-    v1 = ov17_0224F1F8(param0, 0xff, param2, NULL, 0);
+    int v1 = ov17_0224F1F8(param0, 0xff, param2, NULL, 0);
     return v1;
 }
 
 static void ov17_02251E68(UnkStruct_ov17_0224F30C *param0, void *param1, const UnkStruct_ov17_02243C80 *param2, void *param3)
 {
     UnkStruct_ov17_0224FCA0 *v0 = param1;
-    UnkStruct_ov17_02251EAC *v1;
-
-    v1 = Heap_AllocFromHeap(24, sizeof(UnkStruct_ov17_02251EAC));
+    UnkStruct_ov17_02251EAC *v1 = Heap_Alloc(HEAP_ID_24, sizeof(UnkStruct_ov17_02251EAC));
     MI_CpuClear8(v1, sizeof(UnkStruct_ov17_02251EAC));
 
     v1->unk_00 = v0;
@@ -208,7 +200,7 @@ static void ov17_02251EAC(SysTask *param0, void *param1)
             u16 *v1, *v2;
             int v3, v4, v5, v6, v7;
 
-            v1 = sub_02019FE4(v0->unk_00->unk_10.unk_20, 2);
+            v1 = Bg_GetTilemapBuffer(v0->unk_00->unk_10.unk_20, 2);
 
             for (v4 = 0; v4 < 4; v4++) {
                 if (Unk_ov17_02254CF8[v0->unk_11] + v4 < 0) {
@@ -239,7 +231,7 @@ static void ov17_02251EAC(SysTask *param0, void *param1)
                 }
             }
 
-            sub_0201C3C0(v0->unk_00->unk_10.unk_20, 2);
+            Bg_ScheduleTilemapTransfer(v0->unk_00->unk_10.unk_20, 2);
         }
 
         v0->unk_12++;
@@ -256,7 +248,7 @@ static void ov17_02251EAC(SysTask *param0, void *param1)
         break;
     default:
         ov17_0224F26C(v0->unk_0C, &v0->unk_04, NULL, 0);
-        Heap_FreeToHeap(v0);
+        Heap_Free(v0);
         SysTask_Done(param0);
         return;
     }
@@ -265,18 +257,14 @@ static void ov17_02251EAC(SysTask *param0, void *param1)
 static int ov17_02252008(UnkStruct_ov17_0224F30C *param0, void *param1, int param2, void *param3)
 {
     UnkStruct_ov17_0224FCA0 *v0 = param1;
-    int v1;
-
-    v1 = ov17_0224F1F8(param0, 0xff, param2, NULL, 0);
+    int v1 = ov17_0224F1F8(param0, 0xff, param2, NULL, 0);
     return v1;
 }
 
 static void ov17_0225201C(UnkStruct_ov17_0224F30C *param0, void *param1, const UnkStruct_ov17_02243C80 *param2, void *param3)
 {
     UnkStruct_ov17_0224FCA0 *v0 = param1;
-    UnkStruct_ov17_0225201C *v1;
-
-    v1 = Heap_AllocFromHeap(24, sizeof(UnkStruct_ov17_0225201C));
+    UnkStruct_ov17_0225201C *v1 = Heap_Alloc(HEAP_ID_24, sizeof(UnkStruct_ov17_0225201C));
     MI_CpuClear8(v1, sizeof(UnkStruct_ov17_0225201C));
 
     v1->unk_00 = v0;
@@ -309,7 +297,7 @@ static void ov17_02252060(SysTask *param0, void *param1)
             int v3, v4, v5, v6, v7;
             int v8;
 
-            v1 = sub_02019FE4(v0->unk_00->unk_10.unk_20, 2);
+            v1 = Bg_GetTilemapBuffer(v0->unk_00->unk_10.unk_20, 2);
 
             for (v4 = 0; v4 < 4; v4++) {
                 v8 = Unk_ov17_02254CF8[NELEMS(Unk_ov17_02254CF8) - 1 - v0->unk_11];
@@ -345,7 +333,7 @@ static void ov17_02252060(SysTask *param0, void *param1)
                 }
             }
 
-            sub_0201C3C0(v0->unk_00->unk_10.unk_20, 2);
+            Bg_ScheduleTilemapTransfer(v0->unk_00->unk_10.unk_20, 2);
         }
 
         v0->unk_12++;
@@ -363,7 +351,7 @@ static void ov17_02252060(SysTask *param0, void *param1)
         break;
     default:
         ov17_0224F26C(v0->unk_0C, &v0->unk_04, NULL, 0);
-        Heap_FreeToHeap(v0);
+        Heap_Free(v0);
         SysTask_Done(param0);
         return;
     }
@@ -372,9 +360,7 @@ static void ov17_02252060(SysTask *param0, void *param1)
 static int ov17_022521E4(UnkStruct_ov17_0224F30C *param0, void *param1, int param2, void *param3)
 {
     UnkStruct_ov17_0224FCA0 *v0 = param1;
-    int v1;
-
-    v1 = ov17_0224F1F8(param0, 0xff, param2, NULL, 0);
+    int v1 = ov17_0224F1F8(param0, 0xff, param2, NULL, 0);
     return v1;
 }
 
@@ -389,9 +375,7 @@ static void ov17_022521F8(UnkStruct_ov17_0224F30C *param0, void *param1, const U
 static int ov17_02252210(UnkStruct_ov17_0224F30C *param0, void *param1, int param2, void *param3)
 {
     UnkStruct_ov17_0224FCA0 *v0 = param1;
-    int v1;
-
-    v1 = ov17_0224F1F8(param0, 0xff, param2, param3, sizeof(UnkStruct_ov17_0224FCA0_sub2));
+    int v1 = ov17_0224F1F8(param0, 0xff, param2, param3, sizeof(UnkStruct_ov17_0224FCA0_sub2));
     return v1;
 }
 
@@ -399,9 +383,7 @@ static void ov17_02252224(UnkStruct_ov17_0224F30C *param0, void *param1, const U
 {
     UnkStruct_ov17_0224FCA0 *v0 = param1;
     UnkStruct_ov17_0224FCA0_sub2 *v1 = param3;
-    UnkStruct_ov17_0225228C *v2;
-
-    v2 = Heap_AllocFromHeap(24, sizeof(UnkStruct_ov17_0225228C));
+    UnkStruct_ov17_0225228C *v2 = Heap_Alloc(HEAP_ID_24, sizeof(UnkStruct_ov17_0225228C));
     MI_CpuClear8(v2, sizeof(UnkStruct_ov17_0225228C));
 
     v2->unk_00 = v0;
@@ -409,7 +391,7 @@ static void ov17_02252224(UnkStruct_ov17_0224F30C *param0, void *param1, const U
     v2->unk_0C = param0;
     v2->unk_11 = v1->unk_00;
     v2->unk_14 = v1->unk_08;
-    v2->unk_1A = v1->unk_0E;
+    v2->announcerMessagesID = v1->announcerMessagesID;
     v2->unk_1D = v1->unk_11;
     v2->unk_1C = v1->unk_10;
     v2->unk_1B = v1->unk_0F;
@@ -423,13 +405,13 @@ static void ov17_0225228C(SysTask *param0, void *param1)
 
     switch (v0->unk_10) {
     case 0:
-        if (v0->unk_1A != 0) {
+        if (v0->announcerMessagesID != 0) {
             if (v0->unk_1D == 0) {
-                sub_0200E060(&v0->unk_00->unk_10.unk_24[0], 1, 1, 14);
-                sub_0201C3C0(v0->unk_00->unk_10.unk_20, 1);
+                Window_DrawMessageBoxWithScrollCursor(&v0->unk_00->unk_10.unk_24[0], 1, 1, 14);
+                Bg_ScheduleTilemapTransfer(v0->unk_00->unk_10.unk_20, 1);
             }
 
-            ov17_02250968(v0->unk_00, v0->unk_1A, &v0->unk_14);
+            ov17_02250968(v0->unk_00, v0->announcerMessagesID, &v0->unk_14);
             v0->unk_10++;
         } else {
             v0->unk_10 = 100;
@@ -446,14 +428,14 @@ static void ov17_0225228C(SysTask *param0, void *param1)
         if (v0->unk_1C == 1) {
             v0->unk_10++;
         } else if (v0->unk_12 >= v0->unk_1B) {
-            sub_0200E084(&v0->unk_00->unk_10.unk_24[0], 1);
-            sub_0201C3C0(v0->unk_00->unk_10.unk_20, 1);
+            Window_EraseMessageBox(&v0->unk_00->unk_10.unk_24[0], 1);
+            Bg_ScheduleTilemapTransfer(v0->unk_00->unk_10.unk_20, 1);
             v0->unk_10++;
         }
         break;
     default:
         ov17_0224F26C(v0->unk_0C, &v0->unk_04, NULL, 0);
-        Heap_FreeToHeap(v0);
+        Heap_Free(v0);
         SysTask_Done(param0);
         return;
     }
@@ -462,9 +444,7 @@ static void ov17_0225228C(SysTask *param0, void *param1)
 static int ov17_02252344(UnkStruct_ov17_0224F30C *param0, void *param1, int param2, void *param3)
 {
     UnkStruct_ov17_0224FCA0 *v0 = param1;
-    int v1;
-
-    v1 = ov17_0224F1F8(param0, 0xff, param2, param3, sizeof(UnkStruct_ov17_0224FCA0_sub1));
+    int v1 = ov17_0224F1F8(param0, 0xff, param2, param3, sizeof(UnkStruct_ov17_0224FCA0_sub1));
     return v1;
 }
 
@@ -475,7 +455,7 @@ static void ov17_02252358(UnkStruct_ov17_0224F30C *param0, void *param1, const U
 
     v0->unk_39A = *((UnkStruct_ov17_0224FCA0_sub1 *)param3);
 
-    v1 = Heap_AllocFromHeap(24, sizeof(UnkStruct_ov17_022523AC));
+    v1 = Heap_Alloc(HEAP_ID_24, sizeof(UnkStruct_ov17_022523AC));
     MI_CpuClear8(v1, sizeof(UnkStruct_ov17_022523AC));
 
     v1->unk_00 = v0;
@@ -500,12 +480,12 @@ static void ov17_022523AC(SysTask *param0, void *param1)
         }
         break;
     case 2:
-        sub_0200F174(0, 0, 0, 0x0, 6, 1, 24);
-        sub_020055D0(1135, 30);
+        StartScreenFade(FADE_BOTH_SCREENS, FADE_TYPE_BRIGHTNESS_OUT, FADE_TYPE_BRIGHTNESS_OUT, COLOR_BLACK, 6, 1, HEAP_ID_24);
+        Sound_StopBGM(CONTEST_DRESSING_ROOM_sseq, 30);
         v0->unk_10++;
         break;
     case 3:
-        if (ScreenWipe_Done() == 1) {
+        if (IsScreenFadeDone() == TRUE) {
             v0->unk_10++;
         }
         break;
@@ -518,16 +498,16 @@ static void ov17_022523AC(SysTask *param0, void *param1)
 
         ov17_02250CEC(v0->unk_00);
 
-        sub_0200E060(&v0->unk_00->unk_10.unk_24[0], 0, 1, 14);
+        Window_DrawMessageBoxWithScrollCursor(&v0->unk_00->unk_10.unk_24[0], 0, 1, 14);
 
-        BGL_FillWindow(&v0->unk_00->unk_10.unk_24[0], 0xff);
-        sub_0201A954(&v0->unk_00->unk_10.unk_24[0]);
+        Window_FillTilemap(&v0->unk_00->unk_10.unk_24[0], 0xff);
+        Window_CopyToVRAM(&v0->unk_00->unk_10.unk_24[0]);
 
         {
             int v1;
 
             for (v1 = 0; v1 < 4; v1++) {
-                sub_02007DEC(v0->unk_00->unk_10.unk_08[v1], 6, 1);
+                PokemonSprite_SetAttribute(v0->unk_00->unk_10.unk_08[v1], MON_SPRITE_HIDE, 1);
             }
         }
 
@@ -535,20 +515,20 @@ static void ov17_022523AC(SysTask *param0, void *param1)
         v0->unk_10++;
         break;
     case 5:
-        if (Sound_CheckFade() == 0) {
-            sub_0200F174(0, 1, 1, 0x0, 6, 1, 24);
+        if (Sound_IsFadeActive() == FALSE) {
+            StartScreenFade(FADE_BOTH_SCREENS, FADE_TYPE_BRIGHTNESS_IN, FADE_TYPE_BRIGHTNESS_IN, COLOR_BLACK, 6, 1, HEAP_ID_24);
             v0->unk_10++;
         }
         break;
     case 6:
-        if (ScreenWipe_Done() == 1) {
-            Sound_PlayBGM(1181);
+        if (IsScreenFadeDone() == TRUE) {
+            Sound_PlayBGM(SEQ_CO_KEKKA_sseq);
             v0->unk_10++;
         }
         break;
     default:
         ov17_0224F26C(v0->unk_0C, &v0->unk_04, NULL, 0);
-        Heap_FreeToHeap(v0);
+        Heap_Free(v0);
         SysTask_Done(param0);
         return;
     }
@@ -557,9 +537,7 @@ static void ov17_022523AC(SysTask *param0, void *param1)
 static int ov17_02252514(UnkStruct_ov17_0224F30C *param0, void *param1, int param2, void *param3)
 {
     UnkStruct_ov17_0224FCA0 *v0 = param1;
-    int v1;
-
-    v1 = ov17_0224F1F8(param0, 0xff, param2, param3, sizeof(UnkStruct_ov17_0224FCA0_sub2));
+    int v1 = ov17_0224F1F8(param0, 0xff, param2, param3, sizeof(UnkStruct_ov17_0224FCA0_sub2));
     return v1;
 }
 
@@ -570,7 +548,7 @@ static void ov17_02252528(UnkStruct_ov17_0224F30C *param0, void *param1, const U
     UnkStruct_ov17_02252580 *v2;
     int v3;
 
-    v2 = Heap_AllocFromHeap(24, sizeof(UnkStruct_ov17_02252580));
+    v2 = Heap_Alloc(HEAP_ID_24, sizeof(UnkStruct_ov17_02252580));
     MI_CpuClear8(v2, sizeof(UnkStruct_ov17_02252580));
 
     v2->unk_00 = v0;
@@ -615,7 +593,7 @@ static void ov17_02252580(SysTask *param0, void *param1)
     case 4:
     default:
         ov17_0224F26C(v0->unk_0C, &v0->unk_04, NULL, 0);
-        Heap_FreeToHeap(v0);
+        Heap_Free(v0);
         SysTask_Done(param0);
         return;
     }
@@ -624,9 +602,7 @@ static void ov17_02252580(SysTask *param0, void *param1)
 static int ov17_0225260C(UnkStruct_ov17_0224F30C *param0, void *param1, int param2, void *param3)
 {
     UnkStruct_ov17_0224FCA0 *v0 = param1;
-    int v1;
-
-    v1 = ov17_0224F1F8(param0, 0xff, param2, param3, sizeof(UnkStruct_ov17_0224FCA0_sub2));
+    int v1 = ov17_0224F1F8(param0, 0xff, param2, param3, sizeof(UnkStruct_ov17_0224FCA0_sub2));
     return v1;
 }
 
@@ -634,15 +610,13 @@ static void ov17_02252620(UnkStruct_ov17_0224F30C *param0, void *param1, const U
 {
     UnkStruct_ov17_0224FCA0 *v0 = param1;
     UnkStruct_ov17_0224FCA0_sub2 *v1 = param3;
-    UnkStruct_ov17_0225266C *v2;
-
-    v2 = Heap_AllocFromHeap(24, sizeof(UnkStruct_ov17_0225266C));
+    UnkStruct_ov17_0225266C *v2 = Heap_Alloc(HEAP_ID_24, sizeof(UnkStruct_ov17_0225266C));
     MI_CpuClear8(v2, sizeof(UnkStruct_ov17_0225266C));
 
     v2->unk_00 = v0;
     v2->unk_04 = *param2;
     v2->unk_0C = param0;
-    v2->unk_11 = v1->unk_02;
+    v2->winningContestantID = v1->winningContestantID;
 
     SysTask_Start(ov17_0225266C, v2, 30000);
 }
@@ -655,8 +629,8 @@ static void ov17_0225266C(SysTask *param0, void *param1)
     case 0:
         ov17_02250FE4(v0->unk_00);
         ov17_02251598(v0->unk_00, 0, &v0->unk_12);
-        Sound_PlayBGM(1182);
-        Sound_PlayEffect(1765);
+        Sound_PlayBGM(SEQ_CO_FANFA_sseq);
+        Sound_PlayEffect(SEQ_SE_DP_CON_007_sseq);
         v0->unk_10++;
         break;
     case 1:
@@ -665,7 +639,7 @@ static void ov17_0225266C(SysTask *param0, void *param1)
         }
         break;
     case 2:
-        ov17_02251718(v0->unk_00, v0->unk_11, 0, &v0->unk_13);
+        ov17_02251718(v0->unk_00, v0->winningContestantID, 0, &v0->unk_13);
         v0->unk_10++;
         break;
     case 3:
@@ -674,16 +648,14 @@ static void ov17_0225266C(SysTask *param0, void *param1)
         }
         break;
     case 4: {
-        int v1, v2;
-
-        v1 = Pokemon_GetValue(v0->unk_00->unk_10.unk_00->unk_00[v0->unk_11], MON_DATA_SPECIES, NULL);
-        v2 = Pokemon_GetValue(v0->unk_00->unk_10.unk_00->unk_00[v0->unk_11], MON_DATA_FORM, NULL);
-        Pokemon_PlayCry(v0->unk_00->unk_00->unk_14C[v0->unk_11], 0, v1, v2, 0, 127, NULL, 24);
+        int species = Pokemon_GetValue(v0->unk_00->unk_10.unk_00->contestMons[v0->winningContestantID], MON_DATA_SPECIES, NULL);
+        int form = Pokemon_GetValue(v0->unk_00->unk_10.unk_00->contestMons[v0->winningContestantID], MON_DATA_FORM, NULL);
+        PlayCryWithParams(v0->unk_00->unk_00->chatotCry[v0->winningContestantID], POKECRY_NORMAL, species, form, 0, 127, NULL, HEAP_ID_24);
     }
         v0->unk_10++;
         break;
     case 5:
-        if (sub_0200598C() == 0) {
+        if (Sound_IsPokemonCryPlaying() == FALSE) {
             v0->unk_10++;
         }
         break;
@@ -697,7 +669,7 @@ static void ov17_0225266C(SysTask *param0, void *param1)
         break;
     default:
         ov17_0224F26C(v0->unk_0C, &v0->unk_04, NULL, 0);
-        Heap_FreeToHeap(v0);
+        Heap_Free(v0);
         SysTask_Done(param0);
         return;
     }
@@ -706,9 +678,7 @@ static void ov17_0225266C(SysTask *param0, void *param1)
 static int ov17_02252798(UnkStruct_ov17_0224F30C *param0, void *param1, int param2, void *param3)
 {
     UnkStruct_ov17_0224FCA0 *v0 = param1;
-    int v1;
-
-    v1 = ov17_0224F1F8(param0, 0xff, param2, param3, sizeof(UnkStruct_ov17_0224FCA0_sub2));
+    int v1 = ov17_0224F1F8(param0, 0xff, param2, param3, sizeof(UnkStruct_ov17_0224FCA0_sub2));
     return v1;
 }
 
@@ -719,7 +689,7 @@ static void ov17_022527AC(UnkStruct_ov17_0224F30C *param0, void *param1, const U
     UnkStruct_ov17_02252858 *v2;
     int v3;
 
-    v2 = Heap_AllocFromHeap(24, sizeof(UnkStruct_ov17_02252858));
+    v2 = Heap_Alloc(HEAP_ID_24, sizeof(UnkStruct_ov17_02252858));
     MI_CpuClear8(v2, sizeof(UnkStruct_ov17_02252858));
 
     v2->unk_00 = v0;
@@ -744,7 +714,7 @@ static void ov17_022527AC(UnkStruct_ov17_0224F30C *param0, void *param1, const U
         }
         break;
     default:
-        GF_ASSERT(0);
+        GF_ASSERT(FALSE);
         break;
     }
 
@@ -758,7 +728,7 @@ static void ov17_02252858(SysTask *param0, void *param1)
 
     switch (v0->unk_10) {
     case 0:
-        Sound_PlayEffect(1786);
+        Sound_PlayEffect(SEQ_SE_DP_CON_033_sseq);
         v0->unk_10++;
         break;
     case 1:
@@ -772,7 +742,7 @@ static void ov17_02252858(SysTask *param0, void *param1)
     case 2:
         for (v1 = 0; v1 < 4; v1++) {
             if (v0->unk_14[v1] > 0) {
-                Sound_PlayEffect(1787);
+                Sound_PlayEffect(SEQ_SE_PL_CON_034_sseq_1);
                 break;
             }
         }
@@ -806,18 +776,18 @@ static void ov17_02252858(SysTask *param0, void *param1)
     case 4:
         for (v1 = 0; v1 < 4; v1++) {
             if (v0->unk_14[v1] > 0) {
-                Sound_PlayEffect(1785);
+                Sound_PlayEffect(SEQ_SE_DP_CON_032_sseq);
                 break;
             }
         }
 
-        sub_020057A4(1786, 0);
+        Sound_StopEffect(1786, 0);
         v0->unk_10++;
         break;
     case 5:
     default:
         ov17_0224F26C(v0->unk_0C, &v0->unk_04, NULL, 0);
-        Heap_FreeToHeap(v0);
+        Heap_Free(v0);
         SysTask_Done(param0);
         return;
     }
@@ -826,18 +796,14 @@ static void ov17_02252858(SysTask *param0, void *param1)
 static int ov17_02252970(UnkStruct_ov17_0224F30C *param0, void *param1, int param2, void *param3)
 {
     UnkStruct_ov17_0224FCA0 *v0 = param1;
-    int v1;
-
-    v1 = ov17_0224F1F8(param0, 0xff, param2, NULL, 0);
+    int v1 = ov17_0224F1F8(param0, 0xff, param2, NULL, 0);
     return v1;
 }
 
 static void ov17_02252984(UnkStruct_ov17_0224F30C *param0, void *param1, const UnkStruct_ov17_02243C80 *param2, void *param3)
 {
     UnkStruct_ov17_0224FCA0 *v0 = param1;
-    UnkStruct_ov17_022529C8 *v1;
-
-    v1 = Heap_AllocFromHeap(24, sizeof(UnkStruct_ov17_022529C8));
+    UnkStruct_ov17_022529C8 *v1 = Heap_Alloc(HEAP_ID_24, sizeof(UnkStruct_ov17_022529C8));
     MI_CpuClear8(v1, sizeof(UnkStruct_ov17_022529C8));
 
     v1->unk_00 = v0;
@@ -853,12 +819,12 @@ static void ov17_022529C8(SysTask *param0, void *param1)
 
     switch (v0->unk_10) {
     case 0:
-        sub_0200AAE0(90, 16, 0, (GX_BLEND_PLANEMASK_BG0 | GX_BLEND_PLANEMASK_BG1 | GX_BLEND_PLANEMASK_BG2 | GX_BLEND_PLANEMASK_BG3 | GX_BLEND_PLANEMASK_OBJ | GX_BLEND_PLANEMASK_BD), 3);
-        sub_020055D0(1182, 90);
+        BrightnessController_StartTransition(90, 16, 0, (GX_BLEND_PLANEMASK_BG0 | GX_BLEND_PLANEMASK_BG1 | GX_BLEND_PLANEMASK_BG2 | GX_BLEND_PLANEMASK_BG3 | GX_BLEND_PLANEMASK_OBJ | GX_BLEND_PLANEMASK_BD), BRIGHTNESS_BOTH_SCREENS);
+        Sound_StopBGM(SEQ_CO_FANFA_sseq, 90);
         v0->unk_10++;
         break;
     case 1:
-        if ((sub_0200AC1C(3) == 1) && (Sound_CheckFade() == 0)) {
+        if ((BrightnessController_IsTransitionComplete(BRIGHTNESS_BOTH_SCREENS) == TRUE) && (Sound_IsFadeActive() == FALSE)) {
             ov17_02251020(v0->unk_00);
             GX_SetMasterBrightness(16);
             GXS_SetMasterBrightness(16);
@@ -875,7 +841,7 @@ static void ov17_022529C8(SysTask *param0, void *param1)
         break;
     default:
         ov17_0224F26C(v0->unk_0C, &v0->unk_04, NULL, 0);
-        Heap_FreeToHeap(v0);
+        Heap_Free(v0);
         SysTask_Done(param0);
         return;
     }

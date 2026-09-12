@@ -6,16 +6,16 @@
 #include "constants/battle.h"
 #include "constants/pokemon.h"
 #include "constants/species.h"
-#include "constants/trainer.h"
-#include "consts/sdat.h"
-
-#include "struct_decls/struct_party_decl.h"
+#include "generated/trainer_classes.h"
 
 #include "overlay005/encounter_effect.h"
-#include "overlay006/battle_params.h"
 
+#include "field_battle_data_transfer.h"
+#include "party.h"
 #include "pokemon.h"
 #include "unk_02054884.h"
+
+#include "res/sound/pl_sound_data.naix"
 
 // This needs to be moved to a constants file somewhere
 #define ZONE_ID_PAL_PARK 251
@@ -72,46 +72,46 @@ enum EncEffectsPairID {
 };
 
 static const EncEffectsPair sEncEffectsTable[35] = {
-    [ENCEFF_LEADER_ROARK] = { ENCEFF_CUTIN_LEADER_ROARK, SEQ_BATTLE_GYM_LEADER },
-    [ENCEFF_LEADER_GARDENIA] = { ENCEFF_CUTIN_LEADER_GARDENIA, SEQ_BATTLE_GYM_LEADER },
-    [ENCEFF_LEADER_WAKE] = { ENCEFF_CUTIN_LEADER_WAKE, SEQ_BATTLE_GYM_LEADER },
-    [ENCEFF_LEADER_MAYLENE] = { ENCEFF_CUTIN_LEADER_MAYLENE, SEQ_BATTLE_GYM_LEADER },
-    [ENCEFF_LEADER_FANTINA] = { ENCEFF_CUTIN_LEADER_FANTINA, SEQ_BATTLE_GYM_LEADER },
-    [ENCEFF_LEADER_CANDICE] = { ENCEFF_CUTIN_LEADER_CANDICE, SEQ_BATTLE_GYM_LEADER },
-    [ENCEFF_LEADER_BYRON] = { ENCEFF_CUTIN_LEADER_BYRON, SEQ_BATTLE_GYM_LEADER },
-    [ENCEFF_LEADER_VOLKNER] = { ENCEFF_CUTIN_LEADER_VOLKNER, SEQ_BATTLE_GYM_LEADER },
-    [ENCEFF_ELITE_FOUR_AARON] = { ENCEFF_CUTIN_ELITE_FOUR_AARON, SEQ_BATTLE_ELITE_FOUR },
-    [ENCEFF_ELITE_FOUR_BERTHA] = { ENCEFF_CUTIN_ELITE_FOUR_BERTHA, SEQ_BATTLE_ELITE_FOUR },
-    [ENCEFF_ELITE_FOUR_FLINT] = { ENCEFF_CUTIN_ELITE_FOUR_FLINT, SEQ_BATTLE_ELITE_FOUR },
-    [ENCEFF_ELITE_FOUR_LUCIAN] = { ENCEFF_CUTIN_ELITE_FOUR_LUCIAN, SEQ_BATTLE_ELITE_FOUR },
-    [ENCEFF_CHAMPION_CYNTHIA] = { ENCEFF_CUTIN_CHAMPION_CYNTHIA, SEQ_BATTLE_CHAMPION },
-    [ENCEFF_RIVAL] = { ENCEFF_CUTIN_USE_LOCAL, SEQ_BATTLE_RIVAL },
-    [ENCEFF_SHAYMIN] = { ENCEFF_CUTIN_MYTHICAL, SEQ_BATTLE_WILD_POKEMON },
-    [ENCEFF_DIALGA_PALKIA] = { ENCEFF_CUTIN_LEGENDARY, SEQ_BATTLE_DIALGA_PALKIA },
-    [ENCEFF_UXIE_AZELF] = { ENCEFF_CUTIN_LEGENDARY, SEQ_BATTLE_LAKE_GUARDIAN },
-    [ENCEFF_MESPRIT] = { ENCEFF_CUTIN_USE_LOCAL, SEQ_BATTLE_LAKE_GUARDIAN },
-    [ENCEFF_ARCEUS] = { ENCEFF_CUTIN_LEGENDARY, SEQ_BATTLE_ARCEUS },
-    [ENCEFF_MINOR_LEGENDARIES] = { ENCEFF_CUTIN_MYTHICAL, SEQ_BATTLE_LEGENDARY },
-    [ENCEFF_CRESSELIA] = { ENCEFF_CUTIN_USE_LOCAL, SEQ_BATTLE_WILD_POKEMON },
-    [ENCEFF_KANTO_BIRDS] = { ENCEFF_CUTIN_USE_LOCAL, SEQ_BATTLE_LEGENDARY },
-    [ENCEFF_GIRATINA] = { ENCEFF_CUTIN_MYTHICAL, SEQ_BATTLE_GIRATINA },
-    [ENCEFF_REGI_TRIO] = { ENCEFF_CUTIN_MYTHICAL, SEQ_BATTLE_REGI_TRIO },
-    [ENCEFF_GALACTIC_GRUNT] = { ENCEFF_CUTIN_GALACTIC_GRUNT, SEQ_BATTLE_GALACTIC_GRUNT },
-    [ENCEFF_GALACTIC_CMDR] = { ENCEFF_CUTIN_GALACTIC_BOSS, SEQ_BATTLE_GALACTIC_CMDR },
-    [ENCEFF_GALACTIC_CYRUS] = { ENCEFF_CUTIN_GALACTIC_BOSS, SEQ_BATTLE_CYRUS },
-    [ENCEFF_FRONTIER] = { ENCEFF_CUTIN_FRONTIER, SEQ_BATTLE_TRAINER },
-    [ENCEFF_LINK_BATTLE] = { ENCEFF_CUTIN_FRONTIER, SEQ_BATTLE_TRAINER },
-    [ENCEFF_DOUBLE_BATTLE] = { ENCEFF_CUTIN_DOUBLE, SEQ_BATTLE_TRAINER },
-    [ENCEFF_DOUBLE_WILD] = { ENCEFF_CUTIN_DOUBLE, SEQ_BATTLE_WILD_POKEMON },
-    [ENCEFF_FRONTIER_BRAIN] = { ENCEFF_CUTIN_FRONTIER, SEQ_BATTLE_FRONTIER_BRAIN },
-    [ENCEFF_DOUBLE_LEADER] = { ENCEFF_CUTIN_DOUBLE, SEQ_BATTLE_GYM_LEADER },
-    [ENCEFF_NORMAL_TRAINER] = { ENCEFF_CUTIN_USE_LOCAL, SEQ_BATTLE_TRAINER },
-    [ENCEFF_NORMAL_WILD] = { ENCEFF_CUTIN_USE_LOCAL, SEQ_BATTLE_WILD_POKEMON }
+    [ENCEFF_LEADER_ROARK] = { ENCEFF_CUTIN_LEADER_ROARK, BATTLE_GYM_LEADER_sseq },
+    [ENCEFF_LEADER_GARDENIA] = { ENCEFF_CUTIN_LEADER_GARDENIA, BATTLE_GYM_LEADER_sseq },
+    [ENCEFF_LEADER_WAKE] = { ENCEFF_CUTIN_LEADER_WAKE, BATTLE_GYM_LEADER_sseq },
+    [ENCEFF_LEADER_MAYLENE] = { ENCEFF_CUTIN_LEADER_MAYLENE, BATTLE_GYM_LEADER_sseq },
+    [ENCEFF_LEADER_FANTINA] = { ENCEFF_CUTIN_LEADER_FANTINA, BATTLE_GYM_LEADER_sseq },
+    [ENCEFF_LEADER_CANDICE] = { ENCEFF_CUTIN_LEADER_CANDICE, BATTLE_GYM_LEADER_sseq },
+    [ENCEFF_LEADER_BYRON] = { ENCEFF_CUTIN_LEADER_BYRON, BATTLE_GYM_LEADER_sseq },
+    [ENCEFF_LEADER_VOLKNER] = { ENCEFF_CUTIN_LEADER_VOLKNER, BATTLE_GYM_LEADER_sseq },
+    [ENCEFF_ELITE_FOUR_AARON] = { ENCEFF_CUTIN_ELITE_FOUR_AARON, BATTLE_ELITE_FOUR_sseq },
+    [ENCEFF_ELITE_FOUR_BERTHA] = { ENCEFF_CUTIN_ELITE_FOUR_BERTHA, BATTLE_ELITE_FOUR_sseq },
+    [ENCEFF_ELITE_FOUR_FLINT] = { ENCEFF_CUTIN_ELITE_FOUR_FLINT, BATTLE_ELITE_FOUR_sseq },
+    [ENCEFF_ELITE_FOUR_LUCIAN] = { ENCEFF_CUTIN_ELITE_FOUR_LUCIAN, BATTLE_ELITE_FOUR_sseq },
+    [ENCEFF_CHAMPION_CYNTHIA] = { ENCEFF_CUTIN_CHAMPION_CYNTHIA, BATTLE_CHAMPION_sseq },
+    [ENCEFF_RIVAL] = { ENCEFF_CUTIN_USE_LOCAL, BATTLE_RIVAL_sseq },
+    [ENCEFF_SHAYMIN] = { ENCEFF_CUTIN_MYTHICAL, BATTLE_WILD_POKEMON_sseq },
+    [ENCEFF_DIALGA_PALKIA] = { ENCEFF_CUTIN_LEGENDARY, BATTLE_DIALGA_PALKIA_sseq },
+    [ENCEFF_UXIE_AZELF] = { ENCEFF_CUTIN_LEGENDARY, BATTLE_LAKE_GUARDIAN_sseq },
+    [ENCEFF_MESPRIT] = { ENCEFF_CUTIN_USE_LOCAL, BATTLE_LAKE_GUARDIAN_sseq },
+    [ENCEFF_ARCEUS] = { ENCEFF_CUTIN_LEGENDARY, BATTLE_ARCEUS_sseq },
+    [ENCEFF_MINOR_LEGENDARIES] = { ENCEFF_CUTIN_MYTHICAL, BATTLE_LEGENDARY_sseq },
+    [ENCEFF_CRESSELIA] = { ENCEFF_CUTIN_USE_LOCAL, BATTLE_WILD_POKEMON_sseq },
+    [ENCEFF_KANTO_BIRDS] = { ENCEFF_CUTIN_USE_LOCAL, BATTLE_LEGENDARY_sseq },
+    [ENCEFF_GIRATINA] = { ENCEFF_CUTIN_MYTHICAL, BATTLE_GIRATINA_sseq },
+    [ENCEFF_REGI_TRIO] = { ENCEFF_CUTIN_MYTHICAL, BATTLE_REGI_TRIO_sseq },
+    [ENCEFF_GALACTIC_GRUNT] = { ENCEFF_CUTIN_GALACTIC_GRUNT, BATTLE_GALACTIC_GRUNT_sseq },
+    [ENCEFF_GALACTIC_CMDR] = { ENCEFF_CUTIN_GALACTIC_BOSS, BATTLE_GALACTIC_CMDR_sseq },
+    [ENCEFF_GALACTIC_CYRUS] = { ENCEFF_CUTIN_GALACTIC_BOSS, BATTLE_CYRUS_sseq },
+    [ENCEFF_FRONTIER] = { ENCEFF_CUTIN_FRONTIER, BATTLE_TRAINER_sseq },
+    [ENCEFF_LINK_BATTLE] = { ENCEFF_CUTIN_FRONTIER, BATTLE_TRAINER_sseq },
+    [ENCEFF_DOUBLE_BATTLE] = { ENCEFF_CUTIN_DOUBLE, BATTLE_TRAINER_sseq },
+    [ENCEFF_DOUBLE_WILD] = { ENCEFF_CUTIN_DOUBLE, BATTLE_WILD_POKEMON_sseq },
+    [ENCEFF_FRONTIER_BRAIN] = { ENCEFF_CUTIN_FRONTIER, BATTLE_FRONTIER_BRAIN_sseq },
+    [ENCEFF_DOUBLE_LEADER] = { ENCEFF_CUTIN_DOUBLE, BATTLE_GYM_LEADER_sseq },
+    [ENCEFF_NORMAL_TRAINER] = { ENCEFF_CUTIN_USE_LOCAL, BATTLE_TRAINER_sseq },
+    [ENCEFF_NORMAL_WILD] = { ENCEFF_CUTIN_USE_LOCAL, BATTLE_WILD_POKEMON_sseq }
 };
 
-static u32 EncEffects_GetEffectPair(const BattleParams *battleParams);
-static u32 EncEffects_CutInEffectForPair(u32 effectPairID, const BattleParams *battleParams);
-static u32 EncEffects_BGMForPair(u32 effectPairID, const BattleParams *battleParams);
+static u32 EncEffects_GetEffectPair(const FieldBattleDTO *dto);
+static u32 EncEffects_CutInEffectForPair(u32 effectPairID, const FieldBattleDTO *dto);
+static u32 EncEffects_BGMForPair(u32 effectPairID, const FieldBattleDTO *dto);
 static u32 EncEffects_TrainerClassEffect(u32 trainerClass);
 static u32 EncEffects_WildPokemonEffect(Party *wildParty, int mapHeaderID);
 
@@ -122,12 +122,12 @@ inline BOOL EncEffects_Galactic(u32 effect)
         || (effect == ENCEFF_GALACTIC_CYRUS);
 }
 
-static u32 EncEffects_GetEffectPair(const BattleParams *battleParams)
+static u32 EncEffects_GetEffectPair(const FieldBattleDTO *dto)
 {
-    u32 battleType = battleParams->battleType;
+    u32 battleType = dto->battleType;
 
     if (battleType & BATTLE_TYPE_TRAINER) {
-        u32 trainerEffect = EncEffects_TrainerClassEffect(battleParams->trainerData[1].class);
+        u32 trainerEffect = EncEffects_TrainerClassEffect(dto->trainer[1].header.trainerType);
 
         if (battleType & BATTLE_TYPE_FRONTIER) {
             if (trainerEffect == ENCEFF_FRONTIER_BRAIN) {
@@ -164,7 +164,7 @@ static u32 EncEffects_GetEffectPair(const BattleParams *battleParams)
         return trainerEffect;
     }
 
-    u32 pokemonEffect = EncEffects_WildPokemonEffect(battleParams->parties[1], battleParams->mapHeaderID);
+    u32 pokemonEffect = EncEffects_WildPokemonEffect(dto->parties[1], dto->mapHeaderID);
 
     if (pokemonEffect < ENCEFF_NORMAL_WILD) {
         return pokemonEffect;
@@ -177,34 +177,34 @@ static u32 EncEffects_GetEffectPair(const BattleParams *battleParams)
     return pokemonEffect;
 }
 
-static u32 EncEffects_CutInEffectForPair(u32 effectPairID, const BattleParams *battleParams)
+static u32 EncEffects_CutInEffectForPair(u32 effectPairID, const FieldBattleDTO *dto)
 {
     GF_ASSERT(effectPairID < ENCEFF_MAX);
 
     // If the cut-in effect specifies, determine what effect to use
     // based on the encounter locale.
     if (sEncEffectsTable[effectPairID].cutInEffect == ENCEFF_CUTIN_USE_LOCAL) {
-        return CutInEffects_ForBattle(battleParams);
+        return CutInEffects_ForBattle(dto);
     }
 
     return sEncEffectsTable[effectPairID].cutInEffect;
 }
 
-static u32 EncEffects_BGMForPair(u32 effectPairID, const BattleParams *battleParams)
+static u32 EncEffects_BGMForPair(u32 effectPairID, const FieldBattleDTO *dto)
 {
     GF_ASSERT(effectPairID < ENCEFF_MAX);
 
     return sEncEffectsTable[effectPairID].sdatBGMusic;
 }
 
-u32 EncEffects_CutInEffect(const BattleParams *battleParams)
+u32 EncEffects_CutInEffect(const FieldBattleDTO *dto)
 {
-    return EncEffects_CutInEffectForPair(EncEffects_GetEffectPair(battleParams), battleParams);
+    return EncEffects_CutInEffectForPair(EncEffects_GetEffectPair(dto), dto);
 }
 
-u32 EncEffects_BGM(const BattleParams *battleParams)
+u32 EncEffects_BGM(const FieldBattleDTO *dto)
 {
-    return EncEffects_BGMForPair(EncEffects_GetEffectPair(battleParams), battleParams);
+    return EncEffects_BGMForPair(EncEffects_GetEffectPair(dto), dto);
 }
 
 static u32 EncEffects_TrainerClassEffect(u32 trainerClass)

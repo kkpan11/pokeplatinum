@@ -1,6 +1,5 @@
-    .include "macros/btlcmd.inc"
+#include "macros/btlcmd.inc"
 
-    .data
 
 _000:
     CheckAbility CHECK_HAVE, BTLSCR_SWITCHED_MON, ABILITY_MAGIC_GUARD, _105
@@ -16,7 +15,7 @@ _037:
     CompareVarToValue OPCODE_EQU, BTLVAR_CALC_TEMP, 0x00000002, _063
     CompareVarToValue OPCODE_EQU, BTLVAR_CALC_TEMP, 0x00000001, _059
     // The poison spikes disappeared from around your team’s feet!
-    PrintMessage pl_msg_00000368_01065, TAG_NONE_SIDE_CONSCIOUS, BTLSCR_SWITCHED_MON
+    PrintMessage BattleStrings_Text_ThePoisonSpikesDisappearedFromAroundYourTeamsFeet, TAG_NONE_SIDE_CONSCIOUS, BTLSCR_SWITCHED_MON
     Wait 
     WaitButtonABTime 30
     GoTo _065
@@ -34,7 +33,7 @@ _065:
     UpdateVar OPCODE_FLAG_ON, BTLVAR_BATTLE_CTX_STATUS, SYSCTL_SKIP_SPRITE_BLINK
     Call BATTLE_SUBSCRIPT_UPDATE_HP
     // {0} is hurt by the spikes!
-    PrintMessage pl_msg_00000368_00429, TAG_NICKNAME, BTLSCR_SWITCHED_MON
+    PrintMessage BattleStrings_Text_PokemonIsHurtByTheSpikes_Ally, TAG_NICKNAME, BTLSCR_SWITCHED_MON
     Wait 
     WaitButtonABTime 30
 
@@ -44,7 +43,7 @@ _085:
     UpdateVar OPCODE_FLAG_ON, BTLVAR_BATTLE_CTX_STATUS, SYSCTL_SKIP_SPRITE_BLINK
     Call BATTLE_SUBSCRIPT_UPDATE_HP
     // Pointed stones dug into {0}!
-    PrintMessage pl_msg_00000368_01079, TAG_NICKNAME, BTLSCR_SWITCHED_MON
+    PrintMessage BattleStrings_Text_PointedStonesDugIntoPokemon_Ally, TAG_NICKNAME, BTLSCR_SWITCHED_MON
     Wait 
     WaitButtonABTime 30
 

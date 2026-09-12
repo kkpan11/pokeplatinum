@@ -1,27 +1,15 @@
-    .include "macros/scrcmd.inc"
+#include "macros/scrcmd.inc"
+#include "res/text/bank/solaceon_town_north_house.h"
 
-    .data
 
-    ScriptEntry _000A
-    ScriptEntry _001D
-    .short 0xFD13
+    ScriptEntry SolaceonTownNorthHouse_OldWoman
+    ScriptEntry SolaceonTownNorthHouse_Lass
+    ScriptEntryEnd
 
-_000A:
-    PlayFanfare SEQ_SE_CONFIRM
-    LockAll
-    FacePlayer
-    Message 0
-    WaitABXPadPress
-    CloseMessage
-    ReleaseAll
+SolaceonTownNorthHouse_OldWoman:
+    NPCMessage SolaceonTownNorthHouse_Text_EggsFoundAtDayCare
     End
 
-_001D:
-    PlayFanfare SEQ_SE_CONFIRM
-    LockAll
-    FacePlayer
-    Message 1
-    WaitABXPadPress
-    CloseMessage
-    ReleaseAll
+SolaceonTownNorthHouse_Lass:
+    NPCMessage SolaceonTownNorthHouse_Text_NotProvenPokemonLayEggs
     End

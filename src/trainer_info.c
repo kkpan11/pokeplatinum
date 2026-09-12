@@ -5,9 +5,9 @@
 
 #include "constants/charcode.h"
 
+#include "charcode_util.h"
 #include "heap.h"
-#include "strbuf.h"
-#include "unk_020021B0.h"
+#include "string_gf.h"
 
 #define MONEY_MAX 999999
 
@@ -16,9 +16,9 @@ int TrainerInfo_Size(void)
     return sizeof(TrainerInfo);
 }
 
-TrainerInfo *TrainerInfo_New(u32 heapID)
+TrainerInfo *TrainerInfo_New(enum HeapID heapID)
 {
-    TrainerInfo *info = Heap_AllocFromHeap(heapID, sizeof(TrainerInfo));
+    TrainerInfo *info = Heap_Alloc(heapID, sizeof(TrainerInfo));
     TrainerInfo_Init(info);
 
     return info;
@@ -32,7 +32,7 @@ void TrainerInfo_Copy(const TrainerInfo *src, TrainerInfo *dst)
 void TrainerInfo_Init(TrainerInfo *info)
 {
     memset(info, 0, sizeof(TrainerInfo));
-    info->regionCode = GAME_LANGUAGE;
+    info->language = GAME_LANGUAGE;
 
     TrainerInfo_SetGameCode(info, GAME_VERSION);
 }
@@ -40,7 +40,7 @@ void TrainerInfo_Init(TrainerInfo *info)
 BOOL TrainerInfo_HasNoName(const TrainerInfo *info)
 {
     for (int i = 0; i < TRAINER_NAME_LEN + 1; i++) {
-        if (info->name[i] != CHAR_EMPTY) {
+        if (info->name[i] != CHAR_NONE) {
             return FALSE;
         }
     }
@@ -50,15 +50,15 @@ BOOL TrainerInfo_HasNoName(const TrainerInfo *info)
 
 void TrainerInfo_SetName(TrainerInfo *info, const charcode_t *name)
 {
-    int len = GF_strlen(name);
+    int len = CharCode_Length(name);
     GF_ASSERT(len < TRAINER_NAME_LEN + 1);
 
-    GF_strcpy(info->name, name);
+    CharCode_Copy(info->name, name);
 }
 
-void TrainerInfo_SetNameFromStrbuf(TrainerInfo *info, const Strbuf *name)
+void TrainerInfo_SetNameFromString(TrainerInfo *info, const String *name)
 {
-    Strbuf_ToChars(name, info->name, TRAINER_NAME_LEN + 1);
+    String_ToChars(name, info->name, TRAINER_NAME_LEN + 1);
 }
 
 const charcode_t *TrainerInfo_Name(const TrainerInfo *info)
@@ -66,16 +66,16 @@ const charcode_t *TrainerInfo_Name(const TrainerInfo *info)
     return info->name;
 }
 
-void TrainerInfo_NameStrbuf(const TrainerInfo *info, Strbuf *name)
+void TrainerInfo_NameString(const TrainerInfo *info, String *name)
 {
-    Strbuf_CopyChars(name, info->name);
+    String_CopyChars(name, info->name);
 }
 
-Strbuf *TrainerInfo_NameNewStrbuf(const TrainerInfo *info, int heapID)
+String *TrainerInfo_NameNewString(const TrainerInfo *info, enum HeapID heapID)
 {
-    Strbuf *name = Strbuf_Init(TRAINER_NAME_LEN + 1, heapID);
+    String *name = String_Init(TRAINER_NAME_LEN + 1, heapID);
 
-    TrainerInfo_NameStrbuf(info, name);
+    TrainerInfo_NameString(info, name);
     return name;
 }
 
@@ -196,14 +196,14 @@ u8 TrainerInfo_DPGameCode(void)
     return 0;
 }
 
-u8 TrainerInfo_RegionCode(const TrainerInfo *info)
+u8 TrainerInfo_Language(const TrainerInfo *info)
 {
-    return info->regionCode;
+    return info->language;
 }
 
-void TrainerInfo_SetRegionCode(TrainerInfo *info, u8 regionCode)
+void TrainerInfo_SetLanguage(TrainerInfo *info, u8 language)
 {
-    info->regionCode = regionCode;
+    info->language = language;
 }
 
 void TrainerInfo_SetMainStoryCleared(TrainerInfo *info)
@@ -228,6 +228,6 @@ BOOL TrainerInfo_HasNationalDex(TrainerInfo *info)
 
 BOOL TrainerInfo_Equals(const TrainerInfo *info1, const TrainerInfo *info2)
 {
-    return GF_strncmp(info1->name, info2->name, TRAINER_NAME_LEN) == 0
+    return CharCode_CompareNumChars(info1->name, info2->name, TRAINER_NAME_LEN) == 0
         && info1->id == info2->id;
 }

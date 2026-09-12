@@ -1,26 +1,26 @@
-    .include "macros/scrcmd.inc"
+#include "macros/scrcmd.inc"
+#include "res/text/bank/route_215_gate_to_veilstone_city.h"
 
-    .data
 
-    ScriptEntry _0006
-    .short 0xFD13
+    ScriptEntry Route215GateToVeilstoneCity_RuinManiac
+    ScriptEntryEnd
 
-_0006:
-    PlayFanfare SEQ_SE_CONFIRM
+Route215GateToVeilstoneCity_RuinManiac:
+    PlaySE SE_CONFIRM_sseq_3
     LockAll
     FacePlayer
-    GoToIfSet 0x107, _0024
-    Message 0
-    WaitABXPadPress
+    GoToIfSet FLAG_USED_SECRETPOTION, Route215GateToVeilstoneCity_BlockingPokemonAreGone
+    Message Route215GateToVeilstoneCity_Text_PokemonAreBlockingCelestic
+    WaitButton
     CloseMessage
     ReleaseAll
     End
 
-_0024:
-    Message 1
-    WaitABXPadPress
+Route215GateToVeilstoneCity_BlockingPokemonAreGone:
+    Message Route215GateToVeilstoneCity_Text_BlockingPokemonAreGone
+    WaitButton
     CloseMessage
     ReleaseAll
     End
 
-    .byte 0
+    .balign 4, 0

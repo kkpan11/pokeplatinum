@@ -1,45 +1,59 @@
-nuts_data_format_txt     = files('nuts_data_format.txt')
-nuts_data_csv            = files('nuts_data.csv')
+subdir('icons')
 
-nuts_data_narc = custom_target('nuts_data.narc',
-    output: 'nuts_data.narc',
+item_icon_narc = custom_target('item_icon.narc',
+    output: [
+        'item_icon.narc',
+        'item_icon.naix',
+    ],
     input: [
-        nuts_data_format_txt,
-        nuts_data_csv
-    ], 
+        item_icon_ncgrs,
+        item_icon_nclrs,
+        copy_gen.process(item_icon_unused_ncgrs),
+        copy_gen.process(item_icon_unused_nclrs),
+        item_icon_nanrs,
+        item_icon_ncers,
+    ],
     command: [
-        csv2bin_exe,
-        'compile',
-        '@INPUT1@',
-        '@OUTPUT0@',
-        '@INPUT0@',
-        '--narc',
-        '-i', '@SOURCE_ROOT@/include',
-        '-i', '@SOURCE_ROOT@/build',
-    ]
+        nitroarc_exe,
+        '--create',
+        '--index',
+        '--files-from', files('item_icon.order'),
+        '--file', '@OUTPUT0@',
+        '@PRIVATE_DIR@',
+    ],
 )
 
-pl_item_data_format_txt     = files('pl_item_data_format.txt')
-pl_item_data_csv            = files('pl_item_data.csv')
+nitrofs_files += item_icon_narc
+naix_headers += item_icon_narc[1]
 
-pl_item_data_narc = custom_target('pl_item_data.narc',
-    output: 'pl_item_data.narc',
-    input: [
-        pl_item_data_format_txt,
-        pl_item_data_csv
-    ], 
+item_data = custom_target('item_data',
+    output: [
+        'pl_item_data.narc',
+        'nuts_data.narc',
+        'item_id_map.h',
+        'item_tm_move_map.h',
+        'item_berry_list.h',
+        'item_mail_list.h',
+        'hidden_item_scripts.h',
+        'item_names.json',
+        'item_names_plural.json',
+        'item_names_with_articles.json',
+        'item_descriptions.json',
+    ],
+
     command: [
-        csv2bin_exe,
-        'compile',
-        '@INPUT1@',
-        '@OUTPUT0@',
-        '@INPUT0@',
-        '--narc',
-        '--pad', '0xFF',
-        '-i', '@SOURCE_ROOT@/include',
-        '-i', '@SOURCE_ROOT@/build',
-    ]
+        itemproc_exe,
+        '-M', '@DEPFILE@',
+        '-o', meson.current_build_dir(),
+        meson.global_build_root() / 'generated' / 'items.h', # TODO: replace with proper file() reference
+        meson.current_source_dir() / 'data',
+    ],
+
+    depends: item_icon_narc[1],
+    depfile: 'item_data.d',
 )
 
-nitrofs_files += nuts_data_narc
-nitrofs_files += pl_item_data_narc
+item_data_outputs = item_data.to_list()
+h_headers += item_data_outputs.slice(2, 7)
+item_text_banks = item_data_outputs.slice(7, item_data_outputs.length())
+nitrofs_files += item_data

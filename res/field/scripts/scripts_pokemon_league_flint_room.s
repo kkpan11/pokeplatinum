@@ -1,114 +1,115 @@
-    .include "macros/scrcmd.inc"
+#include "macros/scrcmd.inc"
+#include "res/text/bank/pokemon_league_flint_room.h"
+#include "res/field/events/events_pokemon_league_flint_room.h"
 
-    .data
 
-    ScriptEntry _000A
-    ScriptEntry _0138
-    .short 0xFD13
+    ScriptEntry PokemonLeagueFlintRoom_Flint
+    ScriptEntry PokemonLeagueFlintRoom_OnFrame_EnterRoom
+    ScriptEntryEnd
 
-_000A:
-    PlayFanfare SEQ_SE_CONFIRM
+PokemonLeagueFlintRoom_Flint:
+    PlaySE SE_CONFIRM_sseq_3
     LockAll
     FacePlayer
-    GoToIfSet 178, _00D2
-    ScrCmd_0EA 0x107
-    CallIfUnset 0x964, _00F0
-    CallIfSet 0x964, _0104
+    GoToIfSet FLAG_DEFEATED_FLINT, PokemonLeagueFlintRoom_PostBattle
+    PlayTrainerEncounterBGM TRAINER_ELITE_FOUR_FLINT
+    CallIfUnset FLAG_GAME_COMPLETED, PokemonLeagueFlintRoom_FlintIntro
+    CallIfSet FLAG_GAME_COMPLETED, PokemonLeagueFlintRoom_FlintGameCompletedIntro
     CloseMessage
-    CallIfUnset 214, _00A0
-    CallIfSet 214, _00A8
-    ScrCmd_0EC 0x800C
-    GoToIfEq 0x800C, 0, _00CC
-    SetFlag 178
-    PlayFanfare SEQ_SE_DP_KI_GASYAN
-    ScrCmd_065 1
-    CallIfUnset 214, _00B0
-    CallIfSet 214, _00BE
-    CallIfUnset 0x964, _0109
-    CallIfSet 0x964, _010E
-    WaitABXPadPress
-    CloseMessage
-    ReleaseAll
-    End
-
-_00A0:
-    ScrCmd_0E5 0x107, 0
-    Return
-
-_00A8:
-    ScrCmd_0E5 0x364, 0
-    Return
-
-_00B0:
-    ScrCmd_1CD 11, 0x107, 0, 0, 0
-    Return
-
-_00BE:
-    ScrCmd_1CD 11, 0x364, 0, 0, 0
-    Return
-
-_00CC:
-    ScrCmd_0EB
-    ReleaseAll
-    End
-
-_00D2:
-    CallIfUnset 0x964, _0113
-    CallIfSet 0x964, _0118
-    WaitABXPadPress
+    CallIfUnset FLAG_ARRESTED_CHARON_STARK_MOUNTAIN, PokemonLeagueFlintRoom_StartFlintBattle
+    CallIfSet FLAG_ARRESTED_CHARON_STARK_MOUNTAIN, PokemonLeagueFlintRoom_StartFlintRematchBattle
+    CheckWonBattle VAR_RESULT
+    GoToIfEq VAR_RESULT, FALSE, PokemonLeagueFlintRoom_BlackOut
+    SetFlag FLAG_DEFEATED_FLINT
+    PlaySE SEQ_SE_DP_KI_GASYAN_sseq
+    RemoveObject LOCALID_EXIT_DOOR
+    CallIfUnset FLAG_ARRESTED_CHARON_STARK_MOUNTAIN, PokemonLeagueFlintRoom_CreateJournalEventDefeatedFlint
+    CallIfSet FLAG_ARRESTED_CHARON_STARK_MOUNTAIN, PokemonLeagueFlintRoom_CreateJournalEventDefeatedRematchFlint
+    CallIfUnset FLAG_GAME_COMPLETED, PokemonLeagueFlintRoom_FlintDefeat
+    CallIfSet FLAG_GAME_COMPLETED, PokemonLeagueFlintRoom_FlintGameCompletedDefeat
+    WaitButton
     CloseMessage
     ReleaseAll
     End
 
-_00F0:
-    Message 0
+PokemonLeagueFlintRoom_StartFlintBattle:
+    StartTrainerBattle TRAINER_ELITE_FOUR_FLINT
+    Return
+
+PokemonLeagueFlintRoom_StartFlintRematchBattle:
+    StartTrainerBattle TRAINER_ELITE_FOUR_FLINT_REMATCH
+    Return
+
+PokemonLeagueFlintRoom_CreateJournalEventDefeatedFlint:
+    CreateJournalEvent LOCATION_EVENT_BEAT_ELITE_FOUR_MEMBER, TRAINER_ELITE_FOUR_FLINT
+    Return
+
+PokemonLeagueFlintRoom_CreateJournalEventDefeatedRematchFlint:
+    CreateJournalEvent LOCATION_EVENT_BEAT_ELITE_FOUR_MEMBER, TRAINER_ELITE_FOUR_FLINT_REMATCH
+    Return
+
+PokemonLeagueFlintRoom_BlackOut:
+    BlackOutFromBattle
+    ReleaseAll
+    End
+
+PokemonLeagueFlintRoom_PostBattle:
+    CallIfUnset FLAG_GAME_COMPLETED, PokemonLeagueFlintRoom_FlintPostBattle
+    CallIfSet FLAG_GAME_COMPLETED, PokemonLeagueFlintRoom_FlintGameCompletedPostBattle
+    WaitButton
     CloseMessage
-    ApplyMovement 0, _0120
+    ReleaseAll
+    End
+
+PokemonLeagueFlintRoom_FlintIntro:
+    Message PokemonLeagueFlintRoom_Text_FlintIntroPart1
+    CloseMessage
+    ApplyMovement LOCALID_FLINT, PokemonLeagueFlintRoom_Movement_WalkFastInPlace
     WaitMovement
-    Message 1
+    Message PokemonLeagueFlintRoom_Text_FlintIntroPart2
     Return
 
-_0104:
-    Message 4
+PokemonLeagueFlintRoom_FlintGameCompletedIntro:
+    Message PokemonLeagueFlintRoom_Text_FlintGameCompletedIntro
     Return
 
-_0109:
-    Message 2
+PokemonLeagueFlintRoom_FlintDefeat:
+    Message PokemonLeagueFlintRoom_Text_FlintDefeat
     Return
 
-_010E:
-    Message 5
+PokemonLeagueFlintRoom_FlintGameCompletedDefeat:
+    Message PokemonLeagueFlintRoom_Text_FlintGameCompletedDefeat
     Return
 
-_0113:
-    Message 3
+PokemonLeagueFlintRoom_FlintPostBattle:
+    Message PokemonLeagueFlintRoom_Text_FlintPostBattle
     Return
 
-_0118:
-    Message 6
+PokemonLeagueFlintRoom_FlintGameCompletedPostBattle:
+    Message PokemonLeagueFlintRoom_Text_FlintGameCompletedPostBattle
     Return
 
     .balign 4, 0
-_0120:
-    MoveAction_047
-    MoveAction_021 3
-    MoveAction_025 4
-    MoveAction_029 2
-    MoveAction_048
+PokemonLeagueFlintRoom_Movement_WalkFastInPlace:
+    LockDir
+    WalkOnSpotNormalSouth 3
+    WalkOnSpotFastSouth 4
+    WalkOnSpotFasterSouth 2
+    UnlockDir
     EndMovement
 
-_0138:
+PokemonLeagueFlintRoom_OnFrame_EnterRoom:
     LockAll
-    ApplyMovement 0xFF, _015C
+    ApplyMovement LOCALID_PLAYER, PokemonLeagueFlintRoom_Movement_PlayerEnterRoom
     WaitMovement
-    PlayFanfare SEQ_SE_DP_KI_GASYAN
-    ClearFlag 0x284
-    ScrCmd_064 2
-    SetVar 0x4001, 1
+    PlaySE SEQ_SE_DP_KI_GASYAN_sseq
+    ClearFlag FLAG_HIDE_POKEMON_LEAGUE_FLINT_ROOM_ENTRANCE_DOOR
+    AddObject LOCALID_ENTRANCE_DOOR
+    SetVar VAR_MAP_LOCAL_0x01, 1
     ReleaseAll
     End
 
     .balign 4, 0
-_015C:
-    MoveAction_00C 2
+PokemonLeagueFlintRoom_Movement_PlayerEnterRoom:
+    WalkNormalNorth 2
     EndMovement

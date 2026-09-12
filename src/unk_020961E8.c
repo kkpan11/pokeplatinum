@@ -3,20 +3,20 @@
 #include <nitro.h>
 #include <string.h>
 
-#include "struct_defs/struct_02039A58.h"
+#include "struct_defs/comm_cmd_table.h"
 #include "struct_defs/struct_020961E8_t.h"
 #include "struct_defs/struct_02096274.h"
 
 #include "overlay059/ov59_021D0D80.h"
 #include "overlay059/struct_ov59_021D30E0.h"
 
+#include "comm_manager.h"
 #include "communication_system.h"
-#include "unk_02005474.h"
-#include "unk_0201D15C.h"
-#include "unk_02030EE0.h"
+#include "math_util.h"
+#include "sound_playback.h"
 #include "unk_02032798.h"
-#include "unk_020366A0.h"
 #include "unk_02099500.h"
+#include "wireless_manager.h"
 
 typedef struct UnkStruct_020961E8_t UnkStruct_020961E8;
 
@@ -186,8 +186,8 @@ void sub_0209621C(int param0, int param1, void *param2, void *param3)
     ov59_021D1D40(v0);
     ov59_021D2204(v0, 25, param0);
 
-    CommMan_SetErrorHandling(1, 1);
-    Sound_PlayEffect(1624);
+    CommManager_SetErrorHandling(1, 1);
+    Sound_PlayEffect(SEQ_SE_DP_F209_sseq);
 }
 
 void sub_02096264(int param0, int param1, void *param2, void *param3)
@@ -200,9 +200,7 @@ void sub_02096274(int param0, int param1, void *param2, void *param3)
 {
     UnkStruct_020961E8 *v0 = (UnkStruct_020961E8 *)param3;
     UnkStruct_02096274 v1;
-    UnkStruct_02096274 *v2;
-
-    v2 = param2;
+    UnkStruct_02096274 *v2 = param2;
 
     if (param0 != 0) {
         if (CommSys_CurNetId() == 0) {
@@ -212,13 +210,13 @@ void sub_02096274(int param0, int param1, void *param2, void *param3)
 
             switch (v2->unk_02) {
             case 0:
-                if ((v0->unk_4AAC != CommSys_ConnectedCount()) || (v0->unk_4AAC != ov59_021D2544()) || (v0->unk_4AAC != MATH_CountPopulation(sub_020318EC()))) {
+                if ((v0->unk_4AAC != CommSys_ConnectedCount()) || (v0->unk_4AAC != ov59_021D2544()) || (v0->unk_4AAC != MATH_CountPopulation(WirelessManager_GetConnectedBitmap()))) {
                     v1.unk_03 = 0;
                 } else {
                     v0->unk_4AB4 |= 1 << param0;
                     v1.unk_03 = 1;
 
-                    sub_02037B58(CommSys_ConnectedCount());
+                    CommManager_SetMaxNumConnections(CommSys_ConnectedCount());
                 }
                 break;
             case 1:
@@ -249,9 +247,7 @@ void sub_02096274(int param0, int param1, void *param2, void *param3)
 void sub_02096360(int param0, int param1, void *param2, void *param3)
 {
     UnkStruct_020961E8 *v0 = (UnkStruct_020961E8 *)param3;
-    u8 v1;
-
-    v1 = *(u8 *)param2;
+    u8 v1 = *(u8 *)param2;
 
     ov59_021D22EC(v0, 1, v1);
 

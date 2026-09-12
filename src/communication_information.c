@@ -6,23 +6,21 @@
 
 #include "constants/heap.h"
 
-#include "struct_decls/struct_0202B370_decl.h"
-#include "struct_decls/struct_0202B4A0_decl.h"
-#include "struct_decls/struct_0202C878_decl.h"
-#include "struct_defs/struct_0202610C.h"
+#include "struct_decls/wi_fi_list.h"
+#include "struct_defs/wi_fi_history.h"
 
+#include "battle_regulation.h"
 #include "communication_system.h"
 #include "heap.h"
+#include "record_mixed_rng.h"
 #include "save_player.h"
 #include "savedata.h"
 #include "trainer_info.h"
-#include "unk_0202602C.h"
-#include "unk_0202854C.h"
-#include "unk_0202ACE0.h"
-#include "unk_0202B37C.h"
-#include "unk_0202C858.h"
+#include "underground.h"
 #include "unk_02033200.h"
 #include "unk_0203909C.h"
+#include "wifi_history_save_data.h"
+#include "wifi_list.h"
 
 typedef struct CommPlayerInfo {
     u8 regulationBuffer[32];
@@ -33,7 +31,7 @@ typedef struct CommPlayerInfo {
     u8 netId;
     u8 country;
     u8 region;
-    u8 unk_65;
+    u8 hasGiftPenalty;
 } CommPlayerInfo;
 
 typedef struct CommPlayerRecord {
@@ -74,7 +72,7 @@ void CommInfo_Init(SaveData *saveData, const BattleRegulation *regulation)
         return;
     }
 
-    sCommInfo = Heap_AllocFromHeap(HEAP_ID_COMMUNICATION, sizeof(CommunicationInformation));
+    sCommInfo = Heap_Alloc(HEAP_ID_COMMUNICATION, sizeof(CommunicationInformation));
     MI_CpuClear8(sCommInfo, sizeof(CommunicationInformation));
 
     for (netId = 0; netId < MAX_CONNECTED_PLAYERS; netId++) {
@@ -101,7 +99,7 @@ void CommInfo_Delete(void)
         }
 
         if (sCommInfo) {
-            Heap_FreeToHeap(sCommInfo);
+            Heap_Free(sCommInfo);
         }
 
         sCommInfo = NULL;
@@ -113,14 +111,14 @@ BOOL CommInfo_IsInitialized(void)
     return sCommInfo != NULL;
 }
 
-void CommInfo_SendBattleRegulation(void)
+void CommInfo_SendPlayerInfo(void)
 {
     u16 netId = CommSys_CurNetId();
     TrainerInfo *trainerInfo;
     const u16 *v2;
-    UnkStruct_0202B4A0 *v3 = sub_0202B4A0(sCommInfo->saveData);
-    UnkStruct_0202B370 *v4 = sub_0202B370(sCommInfo->saveData);
-    UnkStruct_0202C878 *v5 = sub_0202C878(sCommInfo->saveData);
+    RecordMixedRNG *v3 = SaveData_GetRecordMixedRNG(sCommInfo->saveData);
+    WiFiList *v4 = SaveData_GetWiFiList(sCommInfo->saveData);
+    WiFiHistory *wiFiHistory = SaveData_WiFiHistory(sCommInfo->saveData);
 
     if (sCommInfo->personalTrainerInfo) {
         trainerInfo = sCommInfo->personalTrainerInfo;
@@ -131,16 +129,16 @@ void CommInfo_SendBattleRegulation(void)
     TrainerInfo_Copy(trainerInfo, sCommInfo->trainerInfo[netId]);
     OS_GetMacAddress(&sCommInfo->playerInfo[netId].macAddress[0]);
 
-    v2 = sub_0202B42C(v3, 1, 0);
+    v2 = RecordMixedRNG_GetEntryName(v3, 1, 0);
 
     MI_CpuCopy8(v2, sCommInfo->playerInfo[netId].unk_4C, sizeof(sCommInfo->playerInfo[netId].unk_4C));
 
-    sCommInfo->playerInfo[netId].country = sub_0202C8C0(v5);
-    sCommInfo->playerInfo[netId].region = sub_0202C8C4(v5);
-    sCommInfo->playerInfo[netId].unk_65 = sub_02028810(sCommInfo->saveData);
-    sCommInfo->playerInfo[netId].unk_65 = 1 - sCommInfo->playerInfo[netId].unk_65;
+    sCommInfo->playerInfo[netId].country = WiFiHistory_GetCountry(wiFiHistory);
+    sCommInfo->playerInfo[netId].region = WiFiHistory_GetRegion(wiFiHistory);
+    sCommInfo->playerInfo[netId].hasGiftPenalty = Underground_CanExchangeGifts(sCommInfo->saveData);
+    sCommInfo->playerInfo[netId].hasGiftPenalty = 1 - sCommInfo->playerInfo[netId].hasGiftPenalty; // did they not know about the ! operator?
 
-    DWC_CreateExchangeToken(sub_0202AD28(v4), &sCommInfo->playerInfo[netId].friendData);
+    DWC_CreateExchangeToken(WiFiList_GetUserData(v4), &sCommInfo->playerInfo[netId].friendData);
     MI_CpuClear8(sCommInfo->playerInfo[netId].regulationBuffer, 32);
 
     if (sCommInfo->regulation) {
@@ -155,7 +153,7 @@ int CommPlayerInfo_Size(void)
     return sizeof(CommPlayerInfo);
 }
 
-void CommunicatitonInformaion_FinishReading(int param0, int param1, void *param2, void *param3)
+void CommInfo_FinishReading(int unused0, int unused1, void *unused2, void *unused3)
 {
     if (sCommInfo) {
         sCommInfo->dataFinishedReading = TRUE;
@@ -227,7 +225,7 @@ BOOL CommInfo_ServerSendArray(void)
         return FALSE;
     }
 
-    if (!sub_02036254(5)) {
+    if (!CommSys_IsCmdQueuedServer(5)) {
         for (netId = 0; netId < MAX_CONNECTED_PLAYERS; netId++) {
             if (sCommInfo->infoState[netId] != INFO_STATE_EMPTY) {
                 sCommInfo->playerInfo[netId].netId = netId;
@@ -390,13 +388,13 @@ int CommInfo_PlayerRegion(int netId)
     return 0;
 }
 
-int sub_02032FC0(int param0)
+BOOL CommInfo_PlayerHasGiftPenalty(int netID)
 {
-    if (sCommInfo->infoState[param0] != 0) {
-        return sCommInfo->playerInfo[param0].unk_65;
+    if (sCommInfo->infoState[netID] != INFO_STATE_EMPTY) {
+        return sCommInfo->playerInfo[netID].hasGiftPenalty;
     }
 
-    return 0;
+    return FALSE;
 }
 
 BOOL CommInfo_CheckBattleRegulation(void)
@@ -454,7 +452,7 @@ static void CommInfo_UpdatePlayerRecord(int param0, int val)
 
 void CommInfo_SavePlayerRecord(SaveData *saveData)
 {
-    UnkStruct_0202B370 *v0 = sub_0202B370(saveData);
+    WiFiList *v0 = SaveData_GetWiFiList(saveData);
     int netId, v2, v3;
 
     for (netId = 0; netId < CommSys_ConnectedCount(); netId++) {

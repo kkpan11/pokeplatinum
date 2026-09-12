@@ -1,510 +1,447 @@
-    .include "macros/scrcmd.inc"
+#include "macros/scrcmd.inc"
+#include "res/text/bank/iron_island_b2f_left_room.h"
+#include "res/text/bank/special_met_location_names.h"
+#include "res/field/events/events_iron_island_b2f_left_room.h"
 
-    .data
 
-    ScriptEntry _0026
-    ScriptEntry _0060
-    ScriptEntry _0064
-    ScriptEntry _00F3
-    ScriptEntry _01A8
-    ScriptEntry _0464
-    ScriptEntry _0466
-    ScriptEntry _0468
-    ScriptEntry _01AA
-    .short 0xFD13
+    ScriptEntry IronIslandB2FLeftRoom_OnTransition
+    ScriptEntry IronIslandB2FLeftRoom_CoordEvent_PlatformLift
+    ScriptEntry IronIslandB2FLeftRoom_CoordEvent_RileyStartFollowing
+    ScriptEntry IronIslandB2FLeftRoom_CoordEvent_PlayerLeaveRiley
+    ScriptEntry IronIslandB2FLeftRoom_Dummy5
+    ScriptEntry IronIslandB2FLeftRoom_Dummy6
+    ScriptEntry IronIslandB2FLeftRoom_Dummy7
+    ScriptEntry IronIslandB2FLeftRoom_Riley
+    ScriptEntry IronIslandB2FLeftRoom_CoordEvent_Grunts
+    ScriptEntryEnd
 
-_0026:
-    ScrCmd_25B
-    GoToIfUnset 229, _0035
+IronIslandB2FLeftRoom_OnTransition:
+    InitPersistedMapFeaturesForPlatformLift
+    GoToIfUnset FLAG_RECEIVED_RIOLU_EGG_FROM_RILEY, IronIslandB2FLeftRoom_TrySetRileyPositionAtExit
     End
 
-_0035:
-    GoToIfEq 0x4092, 2, _004A
-    SetVar 0x4092, 0
+IronIslandB2FLeftRoom_TrySetRileyPositionAtExit:
+    GoToIfEq VAR_IRON_ISLAND_B2F_LEFT_ROOM_FOLLOWER_RILEY_STATE, 2, IronIslandB2FLeftRoom_SetRileyPositionAtExit
+    SetVar VAR_IRON_ISLAND_B2F_LEFT_ROOM_FOLLOWER_RILEY_STATE, 0
     End
 
-_004A:
-    ScrCmd_186 4, 19, 41
-    ScrCmd_188 4, 17
-    ScrCmd_189 4, 3
+IronIslandB2FLeftRoom_SetRileyPositionAtExit:
+    SetObjectEventPos LOCALID_RILEY, 19, 41
+    SetObjectEventMovementType LOCALID_RILEY, MOVEMENT_TYPE_LOOK_EAST
+    SetObjectEventDir LOCALID_RILEY, DIR_EAST
     End
 
-_0060:
-    ScrCmd_25C
+IronIslandB2FLeftRoom_CoordEvent_PlatformLift:
+    TriggerPlatformLift
     End
 
-_0064:
+IronIslandB2FLeftRoom_CoordEvent_RileyStartFollowing:
     LockAll
-    ScrCmd_0C8 0
-    ScrCmd_069 0x8004, 0x8005
-    CallIfEq 0x8005, 2, _00D1
-    CallIfEq 0x8005, 3, _00DD
-    ScrCmd_0CD 0
-    CallIfUnset 225, _00E9
-    CallIfSet 225, _00EE
-    ScrCmd_0CD 0
-    ScrCmd_04E 0x481
-    Message 1
-    ScrCmd_04F
-    SetFlag 225
-    SetVar 0x4092, 1
-    Message 2
-    WaitABXPadPress
+    SetPlayerBike FALSE
+    GetPlayerMapPos VAR_0x8004, VAR_0x8005
+    CallIfEq VAR_0x8005, 2, IronIslandB2FLeftRoom_RileyNoticeWalkToPlayer
+    CallIfEq VAR_0x8005, 3, IronIslandB2FLeftRoom_RileyNoticeFacePlayer
+    BufferPlayerName 0
+    CallIfUnset FLAG_TALKED_TO_IRON_ISLAND_B2F_LEFT_ROOM_RILEY, IronIslandB2FLeftRoom_LetsTeamUp
+    CallIfSet FLAG_TALKED_TO_IRON_ISLAND_B2F_LEFT_ROOM_RILEY, IronIslandB2FLeftRoom_HiLetsTeamUp
+    BufferPlayerName 0
+    PlayFanfare SEQ_GONIN_sseq
+    Message IronIslandB2FLeftRoom_Text_DecidedToGoWithRiley
+    WaitFanfare
+    SetFlag FLAG_TALKED_TO_IRON_ISLAND_B2F_LEFT_ROOM_RILEY
+    SetVar VAR_IRON_ISLAND_B2F_LEFT_ROOM_FOLLOWER_RILEY_STATE, 1
+    Message IronIslandB2FLeftRoom_Text_IllHealYourPokemon
+    WaitButton
     CloseMessage
-    SetVar 0x403F, 0x261
-    ScrCmd_161
-    ScrCmd_06D 4, 48
+    SetVar VAR_PARTNER_TRAINER_ID, TRAINER_RILEY_IRON_ISLAND
+    SetHasPartner
+    SetMovementType LOCALID_RILEY, MOVEMENT_TYPE_FOLLOW_PLAYER
     ReleaseAll
     End
 
-_00D1:
-    ApplyMovement 4, _0170
+IronIslandB2FLeftRoom_RileyNoticeWalkToPlayer:
+    ApplyMovement LOCALID_RILEY, IronIslandB2FLeftRoom_Movement_RileyNoticeWalkToPlayer
     WaitMovement
     Return
 
-_00DD:
-    ApplyMovement 4, _0184
+IronIslandB2FLeftRoom_RileyNoticeFacePlayer:
+    ApplyMovement LOCALID_RILEY, IronIslandB2FLeftRoom_Movement_RileyNoticeFacePlayer
     WaitMovement
     Return
 
-_00E9:
-    Message 0
+IronIslandB2FLeftRoom_LetsTeamUp:
+    Message IronIslandB2FLeftRoom_Text_LetsTeamUp
     Return
 
-_00EE:
-    Message 3
+IronIslandB2FLeftRoom_HiLetsTeamUp:
+    Message IronIslandB2FLeftRoom_Text_HiLetsTeamUp
     Return
 
-_00F3:
+IronIslandB2FLeftRoom_CoordEvent_PlayerLeaveRiley:
     LockAll
-    ApplyMovement 0xFF, _0158
-    ApplyMovement 4, _0160
+    ApplyMovement LOCALID_PLAYER, IronIslandB2FLeftRoom_Movement_PlayerWalkOnSpotWest
+    ApplyMovement LOCALID_RILEY, IronIslandB2FLeftRoom_Movement_RileyFaceEast
     WaitMovement
-    Message 4
+    Message IronIslandB2FLeftRoom_Text_GoodIfYouCameBack
     CloseMessage
-    SetVar 0x4092, 0
-    ScrCmd_162
-    ScrCmd_06D 4, 16
-    ScrCmd_069 0x8004, 0x8005
-    CallIfEq 0x8005, 2, _013E
-    CallIfEq 0x8005, 3, _014A
+    SetVar VAR_IRON_ISLAND_B2F_LEFT_ROOM_FOLLOWER_RILEY_STATE, 0
+    ClearHasPartner
+    SetMovementType LOCALID_RILEY, MOVEMENT_TYPE_LOOK_WEST
+    GetPlayerMapPos VAR_0x8004, VAR_0x8005
+    CallIfEq VAR_0x8005, 2, IronIslandB2FLeftRoom_RileyWalkBackZ2
+    CallIfEq VAR_0x8005, 3, IronIslandB2FLeftRoom_RileyWalkBackZ3
     ReleaseAll
     End
 
-_013E:
-    ApplyMovement 4, _0190
+IronIslandB2FLeftRoom_RileyWalkBackZ2:
+    ApplyMovement LOCALID_RILEY, IronIslandB2FLeftRoom_Movement_RileyWalkBackZ2
     WaitMovement
     Return
 
-_014A:
-    ApplyMovement 4, _01A0
+IronIslandB2FLeftRoom_RileyWalkBackZ3:
+    ApplyMovement LOCALID_RILEY, IronIslandB2FLeftRoom_Movement_RileyWalkBackZ3
     WaitMovement
     Return
 
     .balign 4, 0
-_0158:
-    MoveAction_022
+IronIslandB2FLeftRoom_Movement_PlayerWalkOnSpotWest:
+    WalkOnSpotNormalWest
     EndMovement
 
     .balign 4, 0
-_0160:
-    MoveAction_003
+IronIslandB2FLeftRoom_Movement_RileyFaceEast:
+    FaceEast
     EndMovement
 
-    .byte 14
-    .byte 0
-    .byte 1
-    .byte 0
-    .byte 254
-    .byte 0
-    .byte 0
-    .byte 0
-
-    .balign 4, 0
-_0170:
-    MoveAction_023
-    MoveAction_04B
-    MoveAction_00C
-    MoveAction_023
+IronIslandB2FLeftRoom_Movement_Unused:
+    WalkNormalWest
     EndMovement
 
     .balign 4, 0
-_0184:
-    MoveAction_023
-    MoveAction_04B
+IronIslandB2FLeftRoom_Movement_RileyNoticeWalkToPlayer:
+    WalkOnSpotNormalEast
+    EmoteExclamationMark
+    WalkNormalNorth
+    WalkOnSpotNormalEast
     EndMovement
 
     .balign 4, 0
-_0190:
-    MoveAction_00E
-    MoveAction_00D
-    MoveAction_022
+IronIslandB2FLeftRoom_Movement_RileyNoticeFacePlayer:
+    WalkOnSpotNormalEast
+    EmoteExclamationMark
     EndMovement
 
     .balign 4, 0
-_01A0:
-    MoveAction_00E
+IronIslandB2FLeftRoom_Movement_RileyWalkBackZ2:
+    WalkNormalWest
+    WalkNormalSouth
+    WalkOnSpotNormalWest
     EndMovement
 
-_01A8:
+    .balign 4, 0
+IronIslandB2FLeftRoom_Movement_RileyWalkBackZ3:
+    WalkNormalWest
+    EndMovement
+
+IronIslandB2FLeftRoom_Dummy5:
     End
 
-_01AA:
+IronIslandB2FLeftRoom_CoordEvent_Grunts:
     LockAll
-    ScrCmd_162
-    ScrCmd_06D 4, 16
-    ScrCmd_069 0x8004, 0x8005
-    CallIfEq 0x8005, 40, _0291
-    CallIfEq 0x8005, 41, _02A5
-    Message 5
+    ClearHasPartner
+    SetMovementType LOCALID_RILEY, MOVEMENT_TYPE_LOOK_WEST
+    GetPlayerMapPos VAR_0x8004, VAR_0x8005
+    CallIfEq VAR_0x8005, 40, IronIslandB2FLeftRoom_PlayerRileyWalkToGruntsZ40
+    CallIfEq VAR_0x8005, 41, IronIslandB2FLeftRoom_PlayerRileyWalkToGruntsZ41
+    Message IronIslandB2FLeftRoom_Text_YoureResponsible
     CloseMessage
-    ApplyMovement 5, _0384
+    ApplyMovement LOCALID_GRUNT_M_WEST, IronIslandB2FLeftRoom_Movement_GruntMWestWalkOnSpotEast
     WaitMovement
-    Message 6
+    Message IronIslandB2FLeftRoom_Text_WellTakeAllPokemon
     CloseMessage
-    ApplyMovement 6, _038C
+    ApplyMovement LOCALID_GRUNT_M_EAST, IronIslandB2FLeftRoom_Movement_GruntMEastWalkOnSpotEast
     WaitMovement
-    Message 7
+    Message IronIslandB2FLeftRoom_Text_WereAbductingPokemon
     CloseMessage
-    ApplyMovement 4, _040C
+    ApplyMovement LOCALID_RILEY, IronIslandB2FLeftRoom_Movement_RileyWalkOnSpotWest
     WaitMovement
-    ScrCmd_0CD 0
-    Message 8
+    BufferPlayerName 0
+    Message IronIslandB2FLeftRoom_Text_WeCantLose
     CloseMessage
-    ScrCmd_161
-    ScrCmd_0E5 0x343, 0x344
-    ScrCmd_162
-    ScrCmd_0EC 0x800C
-    GoToIfEq 0x800C, 0, _037D
-    ApplyMovement 5, _0394
+    SetHasPartner
+    StartTrainerBattle TRAINER_GALACTIC_GRUNT_IRON_ISLAND_1, TRAINER_GALACTIC_GRUNT_IRON_ISLAND_2
+    ClearHasPartner
+    CheckWonBattle VAR_RESULT
+    GoToIfEq VAR_RESULT, FALSE, IronIslandB2FLeftRoom_BlackOut
+    ApplyMovement LOCALID_GRUNT_M_WEST, IronIslandB2FLeftRoom_Movement_GruntMEastWalkOnSpotSouth
     WaitMovement
-    Message 9
+    Message IronIslandB2FLeftRoom_Text_LetsBeatItPartner
     CloseMessage
-    ApplyMovement 6, _039C
+    ApplyMovement LOCALID_GRUNT_M_EAST, IronIslandB2FLeftRoom_Movement_GruntMEastWalkOnSpotNorth
     WaitMovement
-    Message 10
+    Message IronIslandB2FLeftRoom_Text_WeDontKnowBigPlan
     CloseMessage
-    FadeScreen 6, 1, 0, 0
+    FadeScreenOut
     WaitFadeScreen
-    ScrCmd_065 5
-    ScrCmd_065 6
-    FadeScreen 6, 1, 1, 0
+    RemoveObject LOCALID_GRUNT_M_WEST
+    RemoveObject LOCALID_GRUNT_M_EAST
+    FadeScreenIn
     WaitFadeScreen
-    ScrCmd_069 0x8004, 0x8005
-    CallIfEq 0x8005, 40, _02D1
-    CallIfEq 0x8005, 41, _02E5
-    Call _02F9
-    ScrCmd_2B6 4, 1
+    GetPlayerMapPos VAR_0x8004, VAR_0x8005
+    CallIfEq VAR_0x8005, 40, IronIslandB2FLeftRoom_PlayerRileyFaceEachOtherZ40
+    CallIfEq VAR_0x8005, 41, IronIslandB2FLeftRoom_PlayerRileyFaceEachOtherZ41
+    Call IronIslandB2FLeftRoom_WouldYouTakeEgg
+    ScrCmd_2B6 LOCALID_RILEY, 1
     ReleaseAll
     End
 
-_0291:
-    ApplyMovement 4, _03D4
-    ApplyMovement 0xFF, _0434
+IronIslandB2FLeftRoom_PlayerRileyWalkToGruntsZ40:
+    ApplyMovement LOCALID_RILEY, IronIslandB2FLeftRoom_Movement_RileyWalkToGruntMSouth
+    ApplyMovement LOCALID_PLAYER, IronIslandB2FLeftRoom_Movement_PlayerWalkToGruntMNorth
     WaitMovement
     Return
 
-_02A5:
-    ApplyMovement 4, _03E4
-    ApplyMovement 0xFF, _044C
+IronIslandB2FLeftRoom_PlayerRileyWalkToGruntsZ41:
+    ApplyMovement LOCALID_RILEY, IronIslandB2FLeftRoom_Movement_RileyWalkToGruntMNorth
+    ApplyMovement LOCALID_PLAYER, IronIslandB2FLeftRoom_Movement_PlayerWalkToGruntMSouth
     WaitMovement
     Return
 
-    .byte 94
-    .byte 0
-    .byte 4
-    .byte 0
-    .byte 51
-    .byte 1
-    .byte 0
-    .byte 0
-    .byte 95
-    .byte 0
-    .byte 27
-    .byte 0
-    .byte 94
-    .byte 0
-    .byte 4
-    .byte 0
-    .byte 51
-    .byte 1
-    .byte 0
-    .byte 0
-    .byte 95
-    .byte 0
-    .byte 27
-    .byte 0
-
-_02D1:
-    ApplyMovement 4, _0414
-    ApplyMovement 0xFF, _0424
+IronIslandB2FLeftRoom_Unused:
+    ApplyMovement LOCALID_RILEY, IronIslandB2FLeftRoom_Movement_Unused6
     WaitMovement
     Return
 
-_02E5:
-    ApplyMovement 4, _041C
-    ApplyMovement 0xFF, _042C
+IronIslandB2FLeftRoom_Unused2:
+    ApplyMovement LOCALID_RILEY, IronIslandB2FLeftRoom_Movement_Unused7
     WaitMovement
     Return
 
-_02F9:
-    Message 11
-    ScrCmd_03E 0x800C
-    GoToIfEq 0x800C, 0, _031C
-    GoToIfEq 0x800C, 1, _0366
+IronIslandB2FLeftRoom_PlayerRileyFaceEachOtherZ40:
+    ApplyMovement LOCALID_RILEY, IronIslandB2FLeftRoom_Movement_RileyWalkOnSpotNorth
+    ApplyMovement LOCALID_PLAYER, IronIslandB2FLeftRoom_Movement_PlayerWalkOnSpotSouth
+    WaitMovement
+    Return
+
+IronIslandB2FLeftRoom_PlayerRileyFaceEachOtherZ41:
+    ApplyMovement LOCALID_RILEY, IronIslandB2FLeftRoom_Movement_RileyWalkOnSpotSouth
+    ApplyMovement LOCALID_PLAYER, IronIslandB2FLeftRoom_Movement_PlayerWalkOnSpotNorth
+    WaitMovement
+    Return
+
+IronIslandB2FLeftRoom_WouldYouTakeEgg:
+    Message IronIslandB2FLeftRoom_Text_WouldYouTakeEgg
+    ShowYesNoMenu VAR_RESULT
+    GoToIfEq VAR_RESULT, MENU_YES, IronIslandB2FLeftRoom_AcceptedEgg
+    GoToIfEq VAR_RESULT, MENU_NO, IronIslandB2FLeftRoom_RefusedEgg
     End
 
-_031C:
-    ScrCmd_177 0x800C
-    GoToIfEq 0x800C, 6, _0353
-    ScrCmd_04E 0x486
-    ScrCmd_04F
-    Message 12
-    ScrCmd_097 0x1BF, 10
-    SetFlag 0x1E5
-    ClearFlag 226
-    Call _0371
-    Message 15
-    WaitABXPadPress
+IronIslandB2FLeftRoom_AcceptedEgg:
+    GetPartyCount VAR_RESULT
+    GoToIfEq VAR_RESULT, MAX_PARTY_SIZE, IronIslandB2FLeftRoom_NoRoomToTakeEgg
+    PlayFanfare SEQ_FANFA4_sseq
+    WaitFanfare
+    Message IronIslandB2FLeftRoom_Text_ShowEggPokemonPlaces
+    GiveEgg SPECIES_RIOLU, SPECIAL_METLOC_NAME_RILEY
+    SetFlag FLAG_HIDE_IRON_ISLAND_B2F_LEFT_ROOM_RILEY
+    ClearFlag FLAG_COULD_NOT_RECEIVE_RIOLU_EGG
+    Call IronIslandB2FLeftRoom_SetFlagReceivedEgg
+    Message IronIslandB2FLeftRoom_Text_LetsMeetAgain
+    WaitButton
     CloseMessage
     Return
 
-_0353:
-    SetFlag 226
-    SetVar 0x4092, 2
-    Message 13
-    WaitABXPadPress
+IronIslandB2FLeftRoom_NoRoomToTakeEgg:
+    SetFlag FLAG_COULD_NOT_RECEIVE_RIOLU_EGG
+    SetVar VAR_IRON_ISLAND_B2F_LEFT_ROOM_FOLLOWER_RILEY_STATE, 2
+    Message IronIslandB2FLeftRoom_Text_NoRoomToTakeEgg
+    WaitButton
     CloseMessage
     Return
 
-_0366:
-    Message 14
-    GoTo _02F9
+IronIslandB2FLeftRoom_RefusedEgg:
+    Message IronIslandB2FLeftRoom_Text_AcceptItAsToken
+    GoTo IronIslandB2FLeftRoom_WouldYouTakeEgg
     End
 
-_0371:
-    SetFlag 229
-    SetVar 0x4092, 2
+IronIslandB2FLeftRoom_SetFlagReceivedEgg:
+    SetFlag FLAG_RECEIVED_RIOLU_EGG_FROM_RILEY
+    SetVar VAR_IRON_ISLAND_B2F_LEFT_ROOM_FOLLOWER_RILEY_STATE, 2
     Return
 
-_037D:
-    ScrCmd_0EB
+IronIslandB2FLeftRoom_BlackOut:
+    BlackOutFromBattle
     ReleaseAll
     End
 
     .balign 4, 0
-_0384:
-    MoveAction_023
+IronIslandB2FLeftRoom_Movement_GruntMWestWalkOnSpotEast:
+    WalkOnSpotNormalEast
     EndMovement
 
     .balign 4, 0
-_038C:
-    MoveAction_023
+IronIslandB2FLeftRoom_Movement_GruntMEastWalkOnSpotEast:
+    WalkOnSpotNormalEast
     EndMovement
 
     .balign 4, 0
-_0394:
-    MoveAction_021
+IronIslandB2FLeftRoom_Movement_GruntMEastWalkOnSpotSouth:
+    WalkOnSpotNormalSouth
     EndMovement
 
     .balign 4, 0
-_039C:
-    MoveAction_020
+IronIslandB2FLeftRoom_Movement_GruntMEastWalkOnSpotNorth:
+    WalkOnSpotNormalNorth
     EndMovement
 
-    .byte 14
-    .byte 0
-    .byte 1
-    .byte 0
-    .byte 35
-    .byte 0
-    .byte 1
-    .byte 0
-    .byte 254
-    .byte 0
-    .byte 0
-    .byte 0
-    .byte 12
-    .byte 0
-    .byte 1
-    .byte 0
-    .byte 34
-    .byte 0
-    .byte 1
-    .byte 0
-    .byte 254
-    .byte 0
-    .byte 0
-    .byte 0
-    .byte 32
-    .byte 0
-    .byte 1
-    .byte 0
-    .byte 63
-    .byte 0
-    .byte 2
-    .byte 0
-    .byte 34
-    .byte 0
-    .byte 1
-    .byte 0
-    .byte 254
-    .byte 0
-    .byte 0
-    .byte 0
-    .byte 12
-    .byte 0
-    .byte 1
-    .byte 0
-    .byte 254
-    .byte 0
-    .byte 0
-    .byte 0
+IronIslandB2FLeftRoom_Movement_Unused2:
+    WalkNormalWest
+    WalkOnSpotNormalEast
+    EndMovement
 
-    .balign 4, 0
-_03D4:
-    MoveAction_022
-    MoveAction_00D
-    MoveAction_00E 2
+IronIslandB2FLeftRoom_Movement_Unused3:
+    WalkNormalNorth
+    WalkOnSpotNormalWest
+    EndMovement
+
+IronIslandB2FLeftRoom_Movement_Unused4:
+    WalkOnSpotNormalNorth
+    Delay8 2
+    WalkOnSpotNormalWest
+    EndMovement
+
+IronIslandB2FLeftRoom_Movement_Unused5:
+    WalkNormalNorth
     EndMovement
 
     .balign 4, 0
-_03E4:
-    MoveAction_022
-    MoveAction_00C
-    MoveAction_00E 2
-    EndMovement
-
-    .byte 13
-    .byte 0
-    .byte 1
-    .byte 0
-    .byte 14
-    .byte 0
-    .byte 1
-    .byte 0
-    .byte 254
-    .byte 0
-    .byte 0
-    .byte 0
-    .byte 12
-    .byte 0
-    .byte 1
-    .byte 0
-    .byte 14
-    .byte 0
-    .byte 1
-    .byte 0
-    .byte 254
-    .byte 0
-    .byte 0
-    .byte 0
-
-    .balign 4, 0
-_040C:
-    MoveAction_022
+IronIslandB2FLeftRoom_Movement_RileyWalkToGruntMSouth:
+    WalkOnSpotNormalWest
+    WalkNormalSouth
+    WalkNormalWest 2
     EndMovement
 
     .balign 4, 0
-_0414:
-    MoveAction_020
+IronIslandB2FLeftRoom_Movement_RileyWalkToGruntMNorth:
+    WalkOnSpotNormalWest
+    WalkNormalNorth
+    WalkNormalWest 2
+    EndMovement
+
+IronIslandB2FLeftRoom_Movement_Unused6:
+    WalkNormalSouth
+    WalkNormalWest
+    EndMovement
+
+IronIslandB2FLeftRoom_Movement_Unused7:
+    WalkNormalNorth
+    WalkNormalWest
     EndMovement
 
     .balign 4, 0
-_041C:
-    MoveAction_021
+IronIslandB2FLeftRoom_Movement_RileyWalkOnSpotWest:
+    WalkOnSpotNormalWest
     EndMovement
 
     .balign 4, 0
-_0424:
-    MoveAction_021
+IronIslandB2FLeftRoom_Movement_RileyWalkOnSpotNorth:
+    WalkOnSpotNormalNorth
     EndMovement
 
     .balign 4, 0
-_042C:
-    MoveAction_020
+IronIslandB2FLeftRoom_Movement_RileyWalkOnSpotSouth:
+    WalkOnSpotNormalSouth
     EndMovement
 
     .balign 4, 0
-_0434:
-    MoveAction_03F 2
-    MoveAction_021
-    MoveAction_03F
-    MoveAction_03D
-    MoveAction_00E
+IronIslandB2FLeftRoom_Movement_PlayerWalkOnSpotSouth:
+    WalkOnSpotNormalSouth
     EndMovement
 
     .balign 4, 0
-_044C:
-    MoveAction_03F 2
-    MoveAction_020
-    MoveAction_03F
-    MoveAction_03D
-    MoveAction_00E
+IronIslandB2FLeftRoom_Movement_PlayerWalkOnSpotNorth:
+    WalkOnSpotNormalNorth
     EndMovement
 
-_0464:
+    .balign 4, 0
+IronIslandB2FLeftRoom_Movement_PlayerWalkToGruntMNorth:
+    Delay8 2
+    WalkOnSpotNormalSouth
+    Delay8
+    Delay2
+    WalkNormalWest
+    EndMovement
+
+    .balign 4, 0
+IronIslandB2FLeftRoom_Movement_PlayerWalkToGruntMSouth:
+    Delay8 2
+    WalkOnSpotNormalNorth
+    Delay8
+    Delay2
+    WalkNormalWest
+    EndMovement
+
+IronIslandB2FLeftRoom_Dummy6:
     End
 
-_0466:
+IronIslandB2FLeftRoom_Dummy7:
     End
 
-_0468:
-    PlayFanfare SEQ_SE_CONFIRM
+IronIslandB2FLeftRoom_Riley:
+    PlaySE SE_CONFIRM_sseq_3
     LockAll
     FacePlayer
-    GoToIfSet 226, _0504
-    GoToIfEq 0x4092, 2, _0513
-    GoToIfGe 0x40E3, 4, _04EB
-    GoToIfEq 0x40E3, 3, _04E0
-    GoToIfEq 0x40E3, 2, _04D5
-    GoToIfEq 0x40E3, 1, _04CA
-    ScrCmd_0CD 0
-    Message 18
-    GoTo _04F6
+    GoToIfSet FLAG_COULD_NOT_RECEIVE_RIOLU_EGG, IronIslandB2FLeftRoom_TryGiveEgg
+    GoToIfEq VAR_IRON_ISLAND_B2F_LEFT_ROOM_FOLLOWER_RILEY_STATE, 2, IronIslandB2FLeftRoom_LetsMeetAgain
+    GoToIfGe VAR_FOLLOWER_RILEY_TIMES_TALKED, 4, IronIslandB2FLeftRoom_WhatsGoingOnHere
+    GoToIfEq VAR_FOLLOWER_RILEY_TIMES_TALKED, 3, IronIslandB2FLeftRoom_ImagineSteelVsSteel
+    GoToIfEq VAR_FOLLOWER_RILEY_TIMES_TALKED, 2, IronIslandB2FLeftRoom_HaveYouMetByron
+    GoToIfEq VAR_FOLLOWER_RILEY_TIMES_TALKED, 1, IronIslandB2FLeftRoom_SteelOresPlayedOut
+    BufferPlayerName 0
+    Message IronIslandB2FLeftRoom_Text_IdAgree
+    GoTo IronIslandB2FLeftRoom_RileyEnd
     End
 
-_04CA:
-    Message 19
-    GoTo _04F6
+IronIslandB2FLeftRoom_SteelOresPlayedOut:
+    Message IronIslandB2FLeftRoom_Text_SteelOresPlayedOut
+    GoTo IronIslandB2FLeftRoom_RileyEnd
     End
 
-_04D5:
-    Message 20
-    GoTo _04F6
+IronIslandB2FLeftRoom_HaveYouMetByron:
+    Message IronIslandB2FLeftRoom_Text_HaveYouMetByron
+    GoTo IronIslandB2FLeftRoom_RileyEnd
     End
 
-_04E0:
-    Message 21
-    GoTo _04F6
+IronIslandB2FLeftRoom_ImagineSteelVsSteel:
+    Message IronIslandB2FLeftRoom_Text_ImagineSteelVsSteel
+    GoTo IronIslandB2FLeftRoom_RileyEnd
     End
 
-_04EB:
-    Message 22
-    WaitABXPadPress
+IronIslandB2FLeftRoom_WhatsGoingOnHere:
+    Message IronIslandB2FLeftRoom_Text_WhatsGoingOnHere
+    WaitButton
     CloseMessage
     ReleaseAll
     End
 
-_04F6:
-    AddVar 0x40E3, 1
-    WaitABXPadPress
+IronIslandB2FLeftRoom_RileyEnd:
+    AddVar VAR_FOLLOWER_RILEY_TIMES_TALKED, 1
+    WaitButton
     CloseMessage
     ReleaseAll
     End
 
-_0504:
-    Call _02F9
-    ScrCmd_2B6 4, 1
+IronIslandB2FLeftRoom_TryGiveEgg:
+    Call IronIslandB2FLeftRoom_WouldYouTakeEgg
+    ScrCmd_2B6 LOCALID_RILEY, 1
     ReleaseAll
     End
 
-_0513:
-    Message 15
-    WaitABXPadPress
+IronIslandB2FLeftRoom_LetsMeetAgain:
+    Message IronIslandB2FLeftRoom_Text_LetsMeetAgain
+    WaitButton
     CloseMessage
     ReleaseAll
     End
 
-    .byte 0
-    .byte 0
+    .balign 4, 0

@@ -11,7 +11,7 @@
 #include "sys_task_manager.h"
 
 typedef struct {
-    u32 unk_00;
+    enum HeapID heapID;
     int unk_04;
     int unk_08;
     int unk_0C;
@@ -34,22 +34,22 @@ static int ov5_021F0FF8(UnkStruct_ov5_021F0FB8 *param0);
 
 static void (*const Unk_ov5_0220020C[4])(UnkStruct_ov5_021F0FB8 *);
 
-SysTask *ov5_021F0EB0(FieldSystem *fieldSystem, u32 param1)
+SysTask *ov5_021F0EB0(FieldSystem *fieldSystem, enum HeapID heapID)
 {
-    SysTask *v0;
-    UnkStruct_ov5_021F0FB8 *v1 = Heap_AllocFromHeapAtEnd(param1, (sizeof(UnkStruct_ov5_021F0FB8)));
+    SysTask *task;
+    UnkStruct_ov5_021F0FB8 *v1 = Heap_AllocAtEnd(heapID, (sizeof(UnkStruct_ov5_021F0FB8)));
 
     memset(v1, 0, (sizeof(UnkStruct_ov5_021F0FB8)));
 
-    v1->unk_00 = param1;
+    v1->heapID = heapID;
     v1->unk_0C = 0;
     v1->fieldSystem = fieldSystem;
     v1->camera = fieldSystem->camera;
     v1->unk_10 = Camera_GetDistance(v1->camera);
     v1->unk_20 = v1->unk_10;
 
-    v0 = SysTask_Start(ov5_021F0F2C, v1, 0xffff);
-    return v0;
+    task = SysTask_Start(ov5_021F0F2C, v1, 0xffff);
+    return task;
 }
 
 BOOL ov5_021F0EF0(SysTask *param0)
@@ -62,7 +62,7 @@ void ov5_021F0EFC(SysTask *param0)
 {
     UnkStruct_ov5_021F0FB8 *v0 = SysTask_GetParam(param0);
 
-    Heap_FreeToHeap(v0);
+    Heap_Free(v0);
     SysTask_Done(param0);
 }
 

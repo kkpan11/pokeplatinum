@@ -1,134 +1,100 @@
-    .include "macros/scrcmd.inc"
+#include "macros/scrcmd.inc"
+#include "res/text/bank/veilstone_store_3f.h"
+#include "res/text/bank/menu_entries.h"
 
-    .data
 
-    ScriptEntry _001E
-    ScriptEntry _00EE
-    ScriptEntry _0101
-    ScriptEntry _0114
-    ScriptEntry _0127
-    ScriptEntry _013D
-    ScriptEntry _0153
-    .short 0xFD13
+    ScriptEntry VeilstoneStore3F_Attendant
+    ScriptEntry VeilstoneStore3F_Twin
+    ScriptEntry VeilstoneStore3F_Guitarist
+    ScriptEntry VeilstoneStore3F_Breeder
+    ScriptEntry VeilstoneStore3F_TopVendor
+    ScriptEntry VeilstoneStore3F_BottomVendor
+    ScriptEntry VeilstoneStore3F_Directory
+    ScriptEntryEnd
 
-_001E:
-    PlayFanfare SEQ_SE_CONFIRM
+VeilstoneStore3F_Attendant:
+    PlaySE SE_CONFIRM_sseq_3
     LockAll
     FacePlayer
-    ScrCmd_27E 0x800C
-    GoToIfEq 0x800C, 1, _005F
-    Message 0
-    ScrCmd_040 1, 1, 0, 1, 0x800C
-    ScrCmd_042 229, 1
-    ScrCmd_042 228, 0
-    ScrCmd_043
-    GoToIfEq 0x800C, 1, _00C2
-    GoTo _00B7
+    CheckIsDepartmentStoreRegular VAR_RESULT
+    GoToIfEq VAR_RESULT, TRUE, VeilstoneStore3F_AttendantPersonalized
+    Message VeilstoneStore3F_Text_MayIHelpYou
+    InitGlobalTextMenu 1, 1, 0, VAR_RESULT
+    AddMenuEntryImm MenuEntries_Text_WhatIsRecommended, 1
+    AddMenuEntryImm MenuEntries_Text_NothingThanks, 0
+    ShowMenu
+    GoToIfEq VAR_RESULT, 1, VeilstoneStore3F_AttendantFalseSwipe
+    GoTo VeilstoneStore3F_AttendantPleaseEnjoyYourself
 
-_005F:
-    ScrCmd_0CD 0
-    Message 1
-    ScrCmd_040 1, 1, 0, 1, 0x800C
-    ScrCmd_042 229, 0
-    ScrCmd_042 228, 1
-    ScrCmd_043
-    GoToIfNe 0x800C, 0, _00B7
-    ScrCmd_1B8 0x800C, 4
-    GoToIfEq 0x800C, 0, _00C2
-    GoToIfEq 0x800C, 1, _00CD
-    GoToIfEq 0x800C, 2, _00D8
-    GoTo _00E3
+VeilstoneStore3F_AttendantPersonalized:
+    BufferPlayerName 0
+    Message VeilstoneStore3F_Text_PlayerMayIHelpYou
+    InitGlobalTextMenu 1, 1, 0, VAR_RESULT
+    AddMenuEntryImm MenuEntries_Text_WhatIsRecommended, 0
+    AddMenuEntryImm MenuEntries_Text_NothingThanks, 1
+    ShowMenu
+    GoToIfNe VAR_RESULT, 0, VeilstoneStore3F_AttendantPleaseEnjoyYourself
+    GetRandom2 VAR_RESULT, 4
+    GoToIfEq VAR_RESULT, 0, VeilstoneStore3F_AttendantFalseSwipe
+    GoToIfEq VAR_RESULT, 1, VeilstoneStore3F_AttendantFireBlast
+    GoToIfEq VAR_RESULT, 2, VeilstoneStore3F_AttendantProtect
+    GoTo VeilstoneStore3F_AttendantThunder
 
-_00B7:
-    Message 2
-    WaitABXPadPress
+VeilstoneStore3F_AttendantPleaseEnjoyYourself:
+    Message VeilstoneStore3F_Text_PleaseEnjoyYourself
+    WaitButton
     CloseMessage
     ReleaseAll
     End
 
-_00C2:
-    Message 3
-    WaitABXPadPress
+VeilstoneStore3F_AttendantFalseSwipe:
+    Message VeilstoneStore3F_Text_FalseSwipeMakesCatchingEasier
+    WaitButton
     CloseMessage
     ReleaseAll
     End
 
-_00CD:
-    Message 4
-    WaitABXPadPress
+VeilstoneStore3F_AttendantFireBlast:
+    Message VeilstoneStore3F_Text_FireBlastForFireTypes
+    WaitButton
     CloseMessage
     ReleaseAll
     End
 
-_00D8:
-    Message 5
-    WaitABXPadPress
+VeilstoneStore3F_AttendantProtect:
+    Message VeilstoneStore3F_Text_ProtectForDodgingAttacks
+    WaitButton
     CloseMessage
     ReleaseAll
     End
 
-_00E3:
-    Message 6
-    WaitABXPadPress
+VeilstoneStore3F_AttendantThunder:
+    Message VeilstoneStore3F_Text_ThunderIsPreciseInRain
+    WaitButton
     CloseMessage
     ReleaseAll
     End
 
-_00EE:
-    PlayFanfare SEQ_SE_CONFIRM
-    LockAll
-    FacePlayer
-    Message 7
-    WaitABXPadPress
-    CloseMessage
-    ReleaseAll
+VeilstoneStore3F_Twin:
+    NPCMessage VeilstoneStore3F_Text_FriendTradedMeMachoke
     End
 
-_0101:
-    PlayFanfare SEQ_SE_CONFIRM
-    LockAll
-    FacePlayer
-    Message 8
-    WaitABXPadPress
-    CloseMessage
-    ReleaseAll
+VeilstoneStore3F_Guitarist:
+    NPCMessage VeilstoneStore3F_Text_WroteSecretsInMyMail
     End
 
-_0114:
-    PlayFanfare SEQ_SE_CONFIRM
-    LockAll
-    FacePlayer
-    Message 9
-    WaitABXPadPress
-    CloseMessage
-    ReleaseAll
+VeilstoneStore3F_Breeder:
+    NPCMessage VeilstoneStore3F_Text_WantToBuyAllMerchandise
     End
 
-_0127:
-    PlayFanfare SEQ_SE_CONFIRM
-    LockAll
-    FacePlayer
-    CallCommonScript 0x7E3
-    ScrCmd_035
-    ScrCmd_148 12
-    ReleaseAll
+VeilstoneStore3F_TopVendor:
+    PokeMartSpecialtiesWithGreeting MART_SPECIALTIES_ID_VEILSTONE_3F_UP
     End
 
-_013D:
-    PlayFanfare SEQ_SE_CONFIRM
-    LockAll
-    FacePlayer
-    CallCommonScript 0x7E3
-    ScrCmd_035
-    ScrCmd_148 13
-    ReleaseAll
+VeilstoneStore3F_BottomVendor:
+    PokeMartSpecialtiesWithGreeting MART_SPECIALTIES_ID_VEILSTONE_3F_DOWN
     End
 
-_0153:
-    PlayFanfare SEQ_SE_CONFIRM
-    LockAll
-    Message 10
-    WaitABXPadPress
-    CloseMessage
-    ReleaseAll
+VeilstoneStore3F_Directory:
+    EventMessage VeilstoneStore3F_Text_Directory
     End

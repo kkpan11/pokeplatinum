@@ -3,12 +3,10 @@
 #include <nitro.h>
 #include <string.h>
 
-#include "struct_decls/struct_02018340_decl.h"
-#include "struct_decls/struct_02029C68_decl.h"
-#include "struct_decls/struct_02029C88_decl.h"
-#include "struct_decls/struct_0202A138_decl.h"
-#include "struct_decls/struct_0202A150_decl.h"
-#include "struct_defs/archived_sprite.h"
+#include "struct_defs/dress_up_photo.h"
+#include "struct_defs/photo_accessory.h"
+#include "struct_defs/photo_pokemon.h"
+#include "struct_defs/struct_02029C88.h"
 
 #include "overlay022/ov22_02254DE0.h"
 #include "overlay022/ov22_02255094.h"
@@ -17,7 +15,6 @@
 #include "overlay022/ov22_02259484.h"
 #include "overlay022/ov22_0225AF44.h"
 #include "overlay022/struct_ov22_02254DE0.h"
-#include "overlay022/struct_ov22_022550D4.h"
 #include "overlay022/struct_ov22_02255CB8.h"
 #include "overlay022/struct_ov22_02257964.h"
 #include "overlay022/struct_ov22_02259484.h"
@@ -26,12 +23,13 @@
 #include "overlay022/struct_ov22_0225AF8C.h"
 #include "overlay022/struct_ov22_0225B388.h"
 
+#include "bg_window.h"
+#include "graphics.h"
 #include "heap.h"
 #include "narc.h"
 #include "pokemon.h"
 #include "resource_collection.h"
-#include "unk_02006E3C.h"
-#include "unk_02018340.h"
+#include "software_sprite.h"
 #include "unk_020298BC.h"
 
 typedef struct UnkStruct_ov22_0225B1BC_t {
@@ -54,14 +52,14 @@ typedef struct UnkStruct_ov22_0225B1BC_t {
 } UnkStruct_ov22_0225B1BC;
 
 typedef struct {
-    const UnkStruct_0202A138 *unk_00;
-    const UnkStruct_0202A150 *unk_04[20];
+    const PhotoPokemon *photoMon;
+    const PhotoAccessory *unk_04[20];
     int unk_54;
-    BGL *unk_58;
+    BgConfig *unk_58;
     int unk_5C;
     int unk_60;
     int unk_64;
-    int unk_68;
+    enum HeapID heapID;
 } UnkStruct_ov22_0225B4E4;
 
 static UnkStruct_ov22_0225B1BC *ov22_0225B1BC(const UnkStruct_ov22_0225B4E4 *param0);
@@ -75,17 +73,17 @@ static void ov22_0225B464(UnkStruct_ov22_0225B1BC *param0);
 static void ov22_0225B480(UnkStruct_ov22_0225B1BC *param0);
 static void ov22_0225B490(UnkStruct_ov22_0225B1BC *param0, const UnkStruct_ov22_0225B4E4 *param1);
 static void ov22_0225B4E4(UnkStruct_ov22_0225B4E4 *param0, const UnkStruct_ov22_0225AF8C *param1);
-static void ov22_0225B4F8(UnkStruct_ov22_0225B4E4 *param0, const UnkStruct_02029C68 *param1);
+static void ov22_0225B4F8(UnkStruct_ov22_0225B4E4 *param0, const DressUpPhoto *photo);
 static void ov22_0225B540(UnkStruct_ov22_0225B4E4 *param0, const UnkStruct_02029C88 *param1);
-static void ov22_0225B588(UnkStruct_ov22_0225A0E4 *param0, UnkStruct_ov22_02255CB8 *param1, const UnkStruct_ov22_0225B4E4 *param2, int param3);
-static void ov22_0225B5A8(UnkStruct_ov22_0225A0E4 *param0, UnkStruct_ov22_02255CB8 *param1, const UnkStruct_ov22_0225B4E4 *param2, int param3);
+static void ov22_0225B588(UnkStruct_ov22_0225A0E4 *param0, UnkStruct_ov22_02255CB8 *param1, const UnkStruct_ov22_0225B4E4 *param2, enum HeapID heapID);
+static void ov22_0225B5A8(UnkStruct_ov22_0225A0E4 *param0, UnkStruct_ov22_02255CB8 *param1, const UnkStruct_ov22_0225B4E4 *param2, enum HeapID heapID);
 
-UnkStruct_ov22_0225B1BC *ov22_0225AF8C(const UnkStruct_ov22_0225AF8C *param0, const UnkStruct_02029C68 *param1)
+UnkStruct_ov22_0225B1BC *ov22_0225AF8C(const UnkStruct_ov22_0225AF8C *param0, const DressUpPhoto *photo)
 {
     UnkStruct_ov22_0225B4E4 v0;
 
     ov22_0225B4E4(&v0, param0);
-    ov22_0225B4F8(&v0, param1);
+    ov22_0225B4F8(&v0, photo);
 
     return ov22_0225B1BC(&v0);
 }
@@ -135,8 +133,8 @@ void ov22_0225B020(UnkStruct_ov22_0225B1BC *param0)
     ov22_022594AC(&param0->unk_1E8);
     ov22_0225B35C(param0);
 
-    Heap_FreeToHeap(param0->unk_298);
-    Heap_FreeToHeap(param0);
+    Heap_Free(param0->unk_298);
+    Heap_Free(param0);
 }
 
 void ov22_0225B06C(UnkStruct_ov22_0225B1BC *param0)
@@ -159,8 +157,8 @@ void ov22_0225B080(UnkStruct_ov22_0225B1BC *param0, int param1, int param2)
     ov22_02257AD8(&param0->unk_1F4, param0->unk_2A0, param0->unk_2A4, param1, param2);
 
     if (param0->unk_2C4) {
-        sub_02019184(param0->unk_00.unk_40, 2, 0, 136 - param1);
-        sub_02019184(param0->unk_00.unk_40, 2, 3, 16 - param2);
+        Bg_SetOffset(param0->unk_00.unk_40, 2, 0, 136 - param1);
+        Bg_SetOffset(param0->unk_00.unk_40, 2, 3, 16 - param2);
     }
 
     param0->unk_2A0 = param1;
@@ -239,22 +237,22 @@ static UnkStruct_ov22_0225B1BC *ov22_0225B1BC(const UnkStruct_ov22_0225B4E4 *par
     UnkStruct_ov22_0225B1BC *v0;
     BOOL v1;
 
-    v0 = Heap_AllocFromHeap(param0->unk_68, sizeof(UnkStruct_ov22_0225B1BC));
+    v0 = Heap_Alloc(param0->heapID, sizeof(UnkStruct_ov22_0225B1BC));
     memset(v0, 0, sizeof(UnkStruct_ov22_0225B1BC));
 
-    v0->unk_29C = param0->unk_68;
-    v0->unk_298 = Pokemon_New(param0->unk_68);
-    sub_0202A61C(param0->unk_00, v0->unk_298);
+    v0->unk_29C = param0->heapID;
+    v0->unk_298 = Pokemon_New(param0->heapID);
+    PhotoPokemon_CopyToPokemon(param0->photoMon, v0->unk_298);
 
     ov22_0225B2D4(v0, param0);
-    ov22_022554A8(&v0->unk_00, param0->unk_58, param0->unk_68);
-    ov22_02259484(&v0->unk_1E8, 21, param0->unk_68);
+    ov22_022554A8(&v0->unk_00, param0->unk_58, param0->heapID);
+    ov22_02259484(&v0->unk_1E8, 21, param0->heapID);
 
-    v0->unk_1F0 = ov22_02254DE0(20, param0->unk_68);
+    v0->unk_1F0 = ov22_02254DE0(20, param0->heapID);
 
     ov22_0225B388(v0, param0);
     ov22_0225B450(v0, param0);
-    ov22_0225AF44(&v0->unk_27C, &v0->unk_1F4, param0->unk_68);
+    ov22_0225AF44(&v0->unk_27C, &v0->unk_1F4, param0->heapID);
 
     v0->unk_2C4 = 1;
     v0->unk_2C8 = 1;
@@ -269,18 +267,18 @@ static UnkStruct_ov22_0225B1BC *ov22_0225B258(const UnkStruct_ov22_0225B4E4 *par
     UnkStruct_ov22_0225B1BC *v0;
     BOOL v1;
 
-    v0 = Heap_AllocFromHeap(param0->unk_68, sizeof(UnkStruct_ov22_0225B1BC));
+    v0 = Heap_Alloc(param0->heapID, sizeof(UnkStruct_ov22_0225B1BC));
     memset(v0, 0, sizeof(UnkStruct_ov22_0225B1BC));
 
-    v0->unk_29C = param0->unk_68;
-    v0->unk_298 = Pokemon_New(param0->unk_68);
+    v0->unk_29C = param0->heapID;
+    v0->unk_298 = Pokemon_New(param0->heapID);
 
-    sub_0202A61C(param0->unk_00, v0->unk_298);
+    PhotoPokemon_CopyToPokemon(param0->photoMon, v0->unk_298);
 
     ov22_0225B2D4(v0, param0);
-    ov22_02259484(&v0->unk_1E8, 21, param0->unk_68);
+    ov22_02259484(&v0->unk_1E8, 21, param0->heapID);
 
-    v0->unk_1F0 = ov22_02254DE0(20, param0->unk_68);
+    v0->unk_1F0 = ov22_02254DE0(20, param0->heapID);
 
     ov22_0225B388(v0, param0);
 
@@ -295,17 +293,17 @@ static UnkStruct_ov22_0225B1BC *ov22_0225B258(const UnkStruct_ov22_0225B4E4 *par
 static void ov22_0225B2D4(UnkStruct_ov22_0225B1BC *param0, const UnkStruct_ov22_0225B4E4 *param1)
 {
     UnkStruct_ov22_02255CB8 v0;
-    UnkStruct_ov22_022550D4 v1;
+    SoftwareSpriteManagerTemplate v1;
 
-    param0->unk_00.unk_5C = NARC_ctor(NARC_INDEX_GRAPHIC__IMAGECLIP, param1->unk_68);
+    param0->unk_00.unk_5C = NARC_ctor(NARC_INDEX_GRAPHIC__IMAGECLIP, param1->heapID);
 
-    v1.unk_00 = (700 + 18);
-    v1.unk_04 = (100 + 18);
-    v1.unk_08 = (1 + 18);
-    v1.unk_0C = param1->unk_68;
+    v1.numSprites = (700 + 18);
+    v1.numChars = (100 + 18);
+    v1.numPalettes = (1 + 18);
+    v1.heapID = param1->heapID;
 
-    ov22_0225547C(&param0->unk_00, &v1, param1->unk_68);
-    ov22_0225B588(&param0->unk_00, &v0, param1, param1->unk_68);
+    ov22_0225547C(&param0->unk_00, &v1, param1->heapID);
+    ov22_0225B588(&param0->unk_00, &v0, param1, param1->heapID);
     ov22_022551B4(&param0->unk_00, &v0);
     ov22_02255338(&v0);
 }
@@ -330,7 +328,7 @@ static void ov22_0225B35C(UnkStruct_ov22_0225B1BC *param0)
 static void ov22_0225B388(UnkStruct_ov22_0225B1BC *param0, const UnkStruct_ov22_0225B4E4 *param1)
 {
     UnkStruct_ov22_0225B388 v0;
-    int v1, v2, v3;
+    int xPos, yPos, priority;
 
     memset(&v0, 0, sizeof(UnkStruct_ov22_0225B388));
 
@@ -346,15 +344,13 @@ static void ov22_0225B388(UnkStruct_ov22_0225B1BC *param0, const UnkStruct_ov22_
 
     ov22_022578F4(&param0->unk_1F4, &v0);
 
-    {
-        ArchivedSprite v4;
+    PokemonSpriteTemplate v4;
 
-        v1 = sub_0202A60C(param1->unk_00);
-        v2 = sub_0202A614(param1->unk_00);
-        v3 = sub_0202A604(param1->unk_00);
+    xPos = PhotoPokemon_GetXPos(param1->photoMon);
+    yPos = PhotoPokemon_GetYPos(param1->photoMon);
+    priority = PhotoPokemon_GetPriority(param1->photoMon);
 
-        ov22_02257964(&param0->unk_1F4, param0->unk_298, &v4, v1, v2, v3, param1->unk_68);
-    }
+    ov22_02257964(&param0->unk_1F4, param0->unk_298, &v4, xPos, yPos, priority, param1->heapID);
 
     {
         int v5;
@@ -364,9 +360,9 @@ static void ov22_0225B388(UnkStruct_ov22_0225B1BC *param0, const UnkStruct_ov22_
 
         for (v5 = 0; v5 < param1->unk_54; v5++) {
             v8 = sub_0202A624(param1->unk_04[v5]);
-            v6 = sub_0202A628(param1->unk_04[v5]);
-            v7 = sub_0202A62C(param1->unk_04[v5]);
-            v9 = sub_0202A630(param1->unk_04[v5]);
+            v6 = PhotoAccessory_GetXPos(param1->unk_04[v5]);
+            v7 = PhotoAccessory_GetYPos(param1->unk_04[v5]);
+            v9 = PhotoAccessory_GetPriority(param1->unk_04[v5]);
 
             ov22_022579FC(&param0->unk_1F4, v8, v6, v7, v9);
         }
@@ -375,7 +371,7 @@ static void ov22_0225B388(UnkStruct_ov22_0225B1BC *param0, const UnkStruct_ov22_
 
 static void ov22_0225B450(UnkStruct_ov22_0225B1BC *param0, const UnkStruct_ov22_0225B4E4 *param1)
 {
-    ov22_02257C88(&param0->unk_1F4, param1->unk_5C, param1->unk_68);
+    ov22_02257C88(&param0->unk_1F4, param1->unk_5C, param1->heapID);
 }
 
 static void ov22_0225B464(UnkStruct_ov22_0225B1BC *param0)
@@ -410,31 +406,31 @@ static void ov22_0225B4E4(UnkStruct_ov22_0225B4E4 *param0, const UnkStruct_ov22_
     param0->unk_58 = param1->unk_00;
     param0->unk_60 = param1->unk_04;
     param0->unk_64 = param1->unk_08;
-    param0->unk_68 = param1->unk_0C;
+    param0->heapID = param1->heapID;
 }
 
-static void ov22_0225B4F8(UnkStruct_ov22_0225B4E4 *param0, const UnkStruct_02029C68 *param1)
+static void ov22_0225B4F8(UnkStruct_ov22_0225B4E4 *param0, const DressUpPhoto *photo)
 {
-    int v0;
+    int i;
 
-    param0->unk_00 = sub_0202A138(param1);
+    param0->photoMon = DressUpPhoto_GetPhotoMon(photo);
     param0->unk_54 = 0;
 
-    for (v0 = 0; v0 < (11 - 1); v0++) {
-        if (sub_0202A110(param1, v0)) {
-            param0->unk_04[param0->unk_54] = sub_0202A150(param1, v0);
+    for (i = 0; i < (11 - 1); i++) {
+        if (sub_0202A110(photo, i)) {
+            param0->unk_04[param0->unk_54] = sub_0202A150(photo, i);
             param0->unk_54++;
         }
     }
 
-    param0->unk_5C = sub_0202A1DC(param1);
+    param0->unk_5C = sub_0202A1DC(photo);
 }
 
 static void ov22_0225B540(UnkStruct_ov22_0225B4E4 *param0, const UnkStruct_02029C88 *param1)
 {
     int v0;
 
-    param0->unk_00 = sub_0202A4D8(param1);
+    param0->photoMon = sub_0202A4D8(param1);
     param0->unk_54 = 0;
 
     for (v0 = 0; v0 < (21 - 1); v0++) {
@@ -447,13 +443,13 @@ static void ov22_0225B540(UnkStruct_ov22_0225B4E4 *param0, const UnkStruct_02029
     param0->unk_5C = sub_0202A5B8(param1);
 }
 
-static void ov22_0225B588(UnkStruct_ov22_0225A0E4 *param0, UnkStruct_ov22_02255CB8 *param1, const UnkStruct_ov22_0225B4E4 *param2, int param3)
+static void ov22_0225B588(UnkStruct_ov22_0225A0E4 *param0, UnkStruct_ov22_02255CB8 *param1, const UnkStruct_ov22_0225B4E4 *param2, enum HeapID heapID)
 {
-    ov22_02255410(param1, param3);
-    ov22_0225B5A8(param0, param1, param2, param3);
+    ov22_02255410(param1, heapID);
+    ov22_0225B5A8(param0, param1, param2, heapID);
 }
 
-static void ov22_0225B5A8(UnkStruct_ov22_0225A0E4 *param0, UnkStruct_ov22_02255CB8 *param1, const UnkStruct_ov22_0225B4E4 *param2, int param3)
+static void ov22_0225B5A8(UnkStruct_ov22_0225A0E4 *param0, UnkStruct_ov22_02255CB8 *param1, const UnkStruct_ov22_0225B4E4 *param2, enum HeapID heapID)
 {
     int v0;
     int v1;
@@ -465,20 +461,20 @@ static void ov22_0225B5A8(UnkStruct_ov22_0225A0E4 *param0, UnkStruct_ov22_02255C
         v1 = v3;
 
         if (ResourceCollection_IsIDUnused(param1->unk_10, v1) == 1) {
-            v2 = sub_0200723C(param0->unk_5C, v3 + 1, 0, param3, 1);
+            v2 = LoadMemberFromOpenNARC(param0->unk_5C, v3 + 1, 0, heapID, 1);
 
             ResourceCollection_Add(param1->unk_10, v2, v1);
-            NNS_G2dGetUnpackedCharacterData(v2, &param1->unk_00[v1].unk_04);
+            NNS_G2dGetUnpackedCharacterData(v2, &param1->unk_00[v1].charsData);
 
-            param1->unk_00[v1].unk_00 = param0->unk_00;
+            param1->unk_00[v1].softSpriteMan = param0->unk_00;
         }
     }
 
-    v2 = sub_0200723C(param0->unk_5C, 0, 0, param3, 1);
+    v2 = LoadMemberFromOpenNARC(param0->unk_5C, 0, 0, heapID, 1);
 
     ResourceCollection_Add(param1->unk_14, v2, 0);
-    NNS_G2dGetUnpackedPaletteData(v2, &param1->unk_08[0].unk_04);
+    NNS_G2dGetUnpackedPaletteData(v2, &param1->unk_08[0].paletteData);
 
-    param1->unk_08[0].unk_00 = param0->unk_00;
-    param1->unk_08[0].unk_08 = 3;
+    param1->unk_08[0].softSpriteMan = param0->unk_00;
+    param1->unk_08[0].paletteSlot = 3;
 }

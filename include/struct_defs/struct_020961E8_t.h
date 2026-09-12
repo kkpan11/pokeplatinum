@@ -3,54 +3,52 @@
 
 #include <nnsys.h>
 
-#include "struct_decls/struct_02001AF4_decl.h"
-#include "struct_decls/struct_02009714_decl.h"
-#include "struct_decls/struct_02009DC8_decl.h"
-#include "struct_decls/struct_02018340_decl.h"
-#include "struct_defs/struct_0200C738.h"
 #include "struct_defs/struct_0203DE34.h"
-#include "struct_defs/struct_0205AA50.h"
 #include "struct_defs/struct_020961E8_sub1.h"
 
 #include "overlay059/struct_ov59_021D109C.h"
 #include "overlay059/struct_ov59_021D30E0.h"
 
-#include "cell_actor.h"
+#include "bg_window.h"
+#include "menu.h"
 #include "message.h"
 #include "savedata.h"
-#include "strbuf.h"
+#include "sprite.h"
+#include "sprite_resource.h"
+#include "sprite_util.h"
+#include "string_gf.h"
 #include "string_template.h"
 #include "sys_task_manager.h"
 #include "trainer_info.h"
 
 struct UnkStruct_020961E8_t {
-    BGL *unk_00;
+    BgConfig *unk_00;
     BOOL unk_04;
     UnkStruct_0203DE34 *unk_08;
     UnkStruct_ov59_021D109C unk_0C;
     SysTask *unk_20;
     StringTemplate *unk_24;
     MessageLoader *unk_28;
-    Strbuf *unk_2C[5];
-    Strbuf *unk_40;
-    Strbuf *unk_44;
-    Strbuf *unk_48;
+    String *unk_2C[5];
+    String *unk_40;
+    String *unk_44;
+    String *unk_48;
     int unk_4C;
-    CellActorCollection *unk_50;
-    UnkStruct_0200C738 unk_54;
-    UnkStruct_02009714 *unk_1E0[4];
-    UnkStruct_02009DC8 *unk_1F0[3][4];
-    CellActorResourceData unk_220;
-    CellActorResourceData unk_244;
-    CellActorResourceData unk_268;
-    CellActor *unk_28C[14];
-    CellActor *unk_2C4[14];
+    SpriteList *unk_50;
+    G2dRenderer unk_54;
+    SpriteResourceCollection *unk_1E0[4];
+    SpriteResource *unk_1F0[3][4];
+    SpriteResourcesHeader unk_220;
+    SpriteResourcesHeader unk_244;
+    SpriteResourcesHeader unk_268;
+    Sprite *unk_28C[14];
+    Sprite *unk_2C4[14];
     Window unk_2FC[5];
     Window unk_34C;
     Window unk_35C;
     Window unk_36C;
     Window *unk_37C[2];
-    UIControlData *unk_384;
+    Menu *unk_384;
     void *unk_388[2];
     NNSG2dCharacterData *unk_390[2];
     void *unk_398[2];
@@ -71,7 +69,7 @@ struct UnkStruct_020961E8_t {
     UnkStruct_ov59_021D30E0 unk_418;
     UnkStruct_ov59_021D30E0 unk_FD8[5];
     int unk_4A98;
-    SaveData *unk_4A9C;
+    SaveData *saveData;
     int unk_4AA0;
     u8 unk_4AA4;
     volatile int unk_4AA8;

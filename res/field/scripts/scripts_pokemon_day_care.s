@@ -1,50 +1,43 @@
-    .include "macros/scrcmd.inc"
+#include "macros/scrcmd.inc"
+#include "res/text/bank/pokemon_day_care.h"
 
-    .data
 
-    ScriptEntry _000E
-    ScriptEntry _0021
-    ScriptEntry _005C
-    .short 0xFD13
+    ScriptEntry PokemonDayCare_OnTransition
+    ScriptEntry PokemonDayCare_GymGuide
+    ScriptEntry PokemonDayCare_BgSign
+    ScriptEntryEnd
 
-_000E:
-    CallIfSet 254, _001B
+PokemonDayCare_OnTransition:
+    CallIfSet FLAG_STORED_POKEMON_AT_DAY_CARE, PokemonDayCare_ShowGymGuide
     End
 
-_001B:
-    ClearFlag 0x1D1
+PokemonDayCare_ShowGymGuide:
+    ClearFlag FLAG_HIDE_DAY_CARE_GYM_GUIDE
     Return
 
-_0021:
-    PlayFanfare SEQ_SE_CONFIRM
+PokemonDayCare_GymGuide:
+    PlaySE SE_CONFIRM_sseq_3
     LockAll
     FacePlayer
-    ScrCmd_134 8, 0x800C
-    GoToIfEq 0x800C, 1, _0051
-    Message 0
-    SetVar 0x8004, 8
-    CallCommonScript 0x7D9
-    WaitABXPadPress
+    CheckPoketchAppRegistered POKETCH_APPID_DAYCARECHECKER, VAR_RESULT
+    GoToIfEq VAR_RESULT, TRUE, PokemonDayCare_CheckOnDayCarePokemon
+    Message PokemonDayCare_Text_SharePoketchApp
+    SetVar VAR_0x8004, POKETCH_APPID_DAYCARECHECKER
+    Common_GivePoketchApp
+    WaitButton
     CloseMessage
     ReleaseAll
     End
 
-_0051:
-    Message 1
-    WaitABXPadPress
+PokemonDayCare_CheckOnDayCarePokemon:
+    Message PokemonDayCare_Text_CheckOnDayCarePokemon
+    WaitButton
     CloseMessage
     ReleaseAll
     End
 
-_005C:
-    PlayFanfare SEQ_SE_CONFIRM
-    LockAll
-    Message 2
-    WaitABXPadPress
-    CloseMessage
-    ReleaseAll
+PokemonDayCare_BgSign:
+    EventMessage PokemonDayCare_Text_PokemonGrowsWithYou
     End
 
-    .byte 0
-    .byte 0
-    .byte 0
+    .balign 4, 0

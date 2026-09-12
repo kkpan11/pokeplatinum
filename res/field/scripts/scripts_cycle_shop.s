@@ -1,83 +1,64 @@
-    .include "macros/scrcmd.inc"
+#include "macros/scrcmd.inc"
+#include "res/text/bank/cycle_shop.h"
 
-    .data
 
-    ScriptEntry _0016
-    ScriptEntry _005D
-    ScriptEntry _007C
-    ScriptEntry _00A5
-    ScriptEntry _00B6
-    .short 0xFD13
+    ScriptEntry CycleShop_PokefanM
+    ScriptEntry CycleShop_Clefairy
+    ScriptEntry CycleShop_Youngster
+    ScriptEntry CycleShop_Manual
+    ScriptEntry CycleShop_Catalog
+    ScriptEntryEnd
 
-_0016:
-    PlayFanfare SEQ_SE_CONFIRM
+CycleShop_PokefanM:
+    PlaySE SE_CONFIRM_sseq_3
     LockAll
     FacePlayer
-    GoToIfSet 130, _0052
-    Message 0
-    SetVar 0x8004, 0x1C2
-    SetVar 0x8005, 1
-    CallCommonScript 0x7FC
-    SetFlag 130
-    SetVar 0x4114, 1
-    ScrCmd_14C 9
-    GoTo _0052
+    GoToIfSet FLAG_RECEIVED_BICYCLE, CycleShop_IllReadOperatingManual
+    Message CycleShop_Text_ThanksForRescuingMe
+    SetVar VAR_0x8004, ITEM_BICYCLE
+    SetVar VAR_0x8005, 1
+    Common_GiveItemQuantity
+    SetFlag FLAG_RECEIVED_BICYCLE
+    SetVar VAR_ETERNA_CITY_BLOCK_EXITS_STATE, 1
+    SetBlackOutWarpId 9
+    GoTo CycleShop_IllReadOperatingManual
     End
 
-_0052:
-    Message 1
-    WaitABXPadPress
+CycleShop_IllReadOperatingManual:
+    Message CycleShop_Text_IllReadOperatingManual
+    WaitButton
     CloseMessage
     ReleaseAll
     End
 
-_005D:
-    PlayFanfare SEQ_SE_CONFIRM
+CycleShop_Clefairy:
+    PokemonCryAndMessage SPECIES_CLEFAIRY, CycleShop_Text_ClefairyPipPiih
+    End
+
+CycleShop_Youngster:
+    PlaySE SE_CONFIRM_sseq_3
     LockAll
     FacePlayer
-    ScrCmd_04B 0x5DC
-    ScrCmd_04C 35, 0
-    Message 2
-    ScrCmd_04D
-    WaitABXPadPress
+    GoToIfSet FLAG_TEAM_GALACTIC_LEFT_ETERNA_BUILDING, CycleShop_WhatWasTeamGalacticTrying
+    Message CycleShop_Text_ManagersGoneOff
+    WaitButton
     CloseMessage
     ReleaseAll
     End
 
-_007C:
-    PlayFanfare SEQ_SE_CONFIRM
-    LockAll
-    FacePlayer
-    GoToIfSet 129, _009A
-    Message 3
-    WaitABXPadPress
+CycleShop_WhatWasTeamGalacticTrying:
+    Message CycleShop_Text_WhatWasTeamGalacticTrying
+    WaitButton
     CloseMessage
     ReleaseAll
     End
 
-_009A:
-    Message 4
-    WaitABXPadPress
-    CloseMessage
-    ReleaseAll
+CycleShop_Manual:
+    EventMessage CycleShop_Text_ManualOnLatestBicycle
     End
 
-_00A5:
-    PlayFanfare SEQ_SE_CONFIRM
-    LockAll
-    Message 5
-    WaitABXPadPress
-    CloseMessage
-    ReleaseAll
+CycleShop_Catalog:
+    EventMessage CycleShop_Text_CatalogFromHoenn
     End
 
-_00B6:
-    PlayFanfare SEQ_SE_CONFIRM
-    LockAll
-    Message 6
-    WaitABXPadPress
-    CloseMessage
-    ReleaseAll
-    End
-
-    .byte 0
+    .balign 4, 0

@@ -1,24 +1,17 @@
-    .include "macros/scrcmd.inc"
+#include "macros/scrcmd.inc"
+#include "res/text/bank/old_chateau.h"
 
-    .data
 
-    ScriptEntry _000A
-    ScriptEntry _0010
-    .short 0xFD13
+    ScriptEntry OldChateau_OnTransition
+    ScriptEntry OldChateau_Statue
+    ScriptEntryEnd
 
-_000A:
-    SetFlag 0x9DC
+OldChateau_OnTransition:
+    SetFlag FLAG_FIRST_ARRIVAL_OLD_CHATEAU
     End
 
-_0010:
-    PlayFanfare SEQ_SE_CONFIRM
-    LockAll
-    Message 0
-    WaitABXPadPress
-    CloseMessage
-    ReleaseAll
+OldChateau_Statue:
+    EventMessage OldChateau_Text_ItAppearsGlaring
     End
 
-    .byte 0
-    .byte 0
-    .byte 0
+    .balign 4, 0

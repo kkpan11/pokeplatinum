@@ -1,74 +1,75 @@
-    .include "macros/scrcmd.inc"
+#include "macros/scrcmd.inc"
+#include "res/text/bank/oreburgh_gate_1f.h"
+#include "res/field/events/events_oreburgh_gate_1f.h"
 
-    .data
 
-    ScriptEntry _000E
-    ScriptEntry _0014
-    ScriptEntry _007B
-    .short 0xFD13
+    ScriptEntry OreburghGate1F_OnTransition
+    ScriptEntry OreburghGate1F_Hiker
+    ScriptEntry OreburghGate1F_CoordEvent_Hiker
+    ScriptEntryEnd
 
-_000E:
-    SetFlag 0x9CF
+OreburghGate1F_OnTransition:
+    SetFlag FLAG_FIRST_ARRIVAL_OREBURGH_GATE
     End
 
-_0014:
-    PlayFanfare SEQ_SE_CONFIRM
+OreburghGate1F_Hiker:
+    PlaySE SE_CONFIRM_sseq_3
     LockAll
     FacePlayer
-    ScrCmd_15B 0, 0x800C
-    GoToIfEq 0x800C, 0, _003A
-    Message 2
-    WaitABXPadPress
+    CheckBadgeAcquired BADGE_ID_COAL, VAR_RESULT
+    GoToIfEq VAR_RESULT, FALSE, OreburghGate1F_HikerGiveHM
+    Message OreburghGate1F_Text_NowYouCanUseRockSmash
+    WaitButton
     CloseMessage
     ReleaseAll
     End
 
-_003A:
-    GoToIfSet 147, _0064
-    Message 0
-    SetVar 0x8004, 0x1A9
-    SetVar 0x8005, 1
-    CallCommonScript 0x7FC
-    Call _006F
-    GoTo _0064
+OreburghGate1F_HikerGiveHM:
+    GoToIfSet FLAG_RECEIVED_HM06, OreburghGate1F_ThatHMContainsRockSmash
+    Message OreburghGate1F_Text_MakeAGiftOfThisHM
+    SetVar VAR_0x8004, ITEM_HM06
+    SetVar VAR_0x8005, 1
+    Common_GiveItemQuantity
+    Call OreburghGate1F_SetFlagReceivedHM06
+    GoTo OreburghGate1F_ThatHMContainsRockSmash
 
-_0064:
-    Message 1
-    WaitABXPadPress
+OreburghGate1F_ThatHMContainsRockSmash:
+    Message OreburghGate1F_Text_ThatHMContainsRockSmash
+    WaitButton
     CloseMessage
     ReleaseAll
     End
 
-_006F:
-    SetFlag 147
-    SetVar 0x4093, 2
+OreburghGate1F_SetFlagReceivedHM06:
+    SetFlag FLAG_RECEIVED_HM06
+    SetVar VAR_OREBURGH_GATE_1F_HIKER_STATE, 2
     Return
 
-_007B:
+OreburghGate1F_CoordEvent_Hiker:
     LockAll
-    ApplyMovement 10, _00C0
-    ApplyMovement 0xFF, _00B4
+    ApplyMovement LOCALID_HIKER, OreburghGate1F_Movement_HikerWalkToPlayer
+    ApplyMovement LOCALID_PLAYER, OreburghGate1F_Movement_PlayerFaceHiker
     WaitMovement
-    Message 0
-    SetVar 0x8004, 0x1A9
-    SetVar 0x8005, 1
-    CallCommonScript 0x7FC
-    Call _006F
-    Message 1
-    WaitABXPadPress
+    Message OreburghGate1F_Text_MakeAGiftOfThisHM
+    SetVar VAR_0x8004, ITEM_HM06
+    SetVar VAR_0x8005, 1
+    Common_GiveItemQuantity
+    Call OreburghGate1F_SetFlagReceivedHM06
+    Message OreburghGate1F_Text_ThatHMContainsRockSmash
+    WaitButton
     CloseMessage
     ReleaseAll
     End
 
     .balign 4, 0
-_00B4:
-    MoveAction_03F
-    MoveAction_020
+OreburghGate1F_Movement_PlayerFaceHiker:
+    Delay8
+    WalkOnSpotNormalNorth
     EndMovement
 
     .balign 4, 0
-_00C0:
-    MoveAction_021
-    MoveAction_04B
-    MoveAction_00D
+OreburghGate1F_Movement_HikerWalkToPlayer:
+    WalkOnSpotNormalSouth
+    EmoteExclamationMark
+    WalkNormalSouth
     EndMovement

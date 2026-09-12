@@ -1,6 +1,5 @@
-    .include "macros/btlcmd.inc"
+#include "macros/btlcmd.inc"
 
-    .data
 
 _000:
     IfMovedThisTurn BTLSCR_SIDE_EFFECT_MON, _025
@@ -21,7 +20,7 @@ _026:
 
 _036:
     // {0} won’t flinch because of its {1}!
-    PrintMessage pl_msg_00000368_00737, TAG_NICKNAME_ABILITY, BTLSCR_SIDE_EFFECT_MON, BTLSCR_SIDE_EFFECT_MON
+    PrintMessage BattleStrings_Text_PokemonWontFlinchBecauseOfItsAbility_Ally, TAG_NICKNAME_ABILITY, BTLSCR_SIDE_EFFECT_MON, BTLSCR_SIDE_EFFECT_MON
     Wait 
     WaitButtonABTime 30
 

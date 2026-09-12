@@ -1,100 +1,94 @@
-    .include "macros/scrcmd.inc"
+#include "macros/scrcmd.inc"
+#include "res/text/bank/veilstone_city_northeast_house.h"
 
-    .data
 
-    ScriptEntry _000A
-    ScriptEntry _011C
-    .short 0xFD13
+    ScriptEntry VeilstoneCityNortheastHouse_PokefanM
+    ScriptEntry VeilstoneCityNortheastHouse_PokefanF
+    ScriptEntryEnd
 
-_000A:
-    PlayFanfare SEQ_SE_CONFIRM
+VeilstoneCityNortheastHouse_PokefanM:
+    PlaySE SE_CONFIRM_sseq_3
     LockAll
     FacePlayer
-    GoToIfSet 151, _0109
-    GoToIfSet 181, _0037
-    SetFlag 181
-    Message 0
-    GoTo _0042
+    GoToIfSet FLAG_RECEIVED_VEILSTONE_CITY_NORTHEAST_HOUSE_PORYGON, VeilstoneCityNortheastHouse_GalacticsBuildingBugsMe
+    GoToIfSet FLAG_TALKED_TO_VEILSTONE_CITY_NORTHEAST_HOUSE_POKEFAN_M, VeilstoneCityNortheastHouse_CanYouTakePoryon
+    SetFlag FLAG_TALKED_TO_VEILSTONE_CITY_NORTHEAST_HOUSE_POKEFAN_M
+    Message VeilstoneCityNortheastHouse_Text_ImNoTrainerTakePorygon
+    GoTo VeilstoneCityNortheastHouse_AcceptPorygonYesNo
     End
 
-_0037:
-    Message 1
-    GoTo _0042
+VeilstoneCityNortheastHouse_CanYouTakePoryon:
+    Message VeilstoneCityNortheastHouse_Text_CanYouTakePorygon
+    GoTo VeilstoneCityNortheastHouse_AcceptPorygonYesNo
     End
 
-_0042:
-    ScrCmd_03E 0x800C
-    GoToIfEq 0x800C, 0, _005B
-    GoTo _00FE
+VeilstoneCityNortheastHouse_AcceptPorygonYesNo:
+    ShowYesNoMenu VAR_RESULT
+    GoToIfEq VAR_RESULT, MENU_YES, VeilstoneCityNortheastHouse_AcceptPorygon
+    GoTo VeilstoneCityNortheastHouse_DontAcceptPorygon
     End
 
-_005B:
-    ScrCmd_177 0x800C
-    GoToIfEq 0x800C, 6, _00F3
-    Message 2
-    ScrCmd_04E 0x486
-    ScrCmd_0CD 0
-    Message 3
-    ScrCmd_04F
-    ScrCmd_096 137, 25, 0, 0x800C
-    SetFlag 151
-    Message 4
-    ScrCmd_03E 0x800C
-    GoToIfEq 0x800C, 0, _00AC
-    GoToIfEq 0x800C, 1, _00ED
+VeilstoneCityNortheastHouse_AcceptPorygon:
+    GetPartyCount VAR_RESULT
+    GoToIfEq VAR_RESULT, 6, VeilstoneCityNortheastHouse_PartyIsFull
+    Message VeilstoneCityNortheastHouse_Text_Excellent
+    PlayFanfare SEQ_FANFA4_sseq
+    BufferPlayerName 0
+    Message VeilstoneCityNortheastHouse_Text_PlayerAcceptedThePorygon
+    WaitFanfare
+    GivePokemon SPECIES_PORYGON, 25, ITEM_NONE, VAR_RESULT
+    SetFlag FLAG_RECEIVED_VEILSTONE_CITY_NORTHEAST_HOUSE_PORYGON
+    Message VeilstoneCityNortheastHouse_Text_AskNicknamePorygon
+    ShowYesNoMenu VAR_RESULT
+    GoToIfEq VAR_RESULT, MENU_YES, VeilstoneCityNortheastHouse_NicknamePorygon
+    GoToIfEq VAR_RESULT, MENU_NO, VeilstoneCityNortheastHouse_DontNicknamePorygon
     End
 
-_00AC:
+VeilstoneCityNortheastHouse_NicknamePorygon:
     CloseMessage
-    ScrCmd_177 0x4000
-    SubVar 0x4000, 1
-    FadeScreen 6, 1, 0, 0
+    GetPartyCount VAR_MAP_LOCAL_0x00
+    SubVar VAR_MAP_LOCAL_0x00, 1
+    FadeScreenOut
     WaitFadeScreen
-    ScrCmd_0BB 0x4000, 0x800C
-    CallIfNe 0x800C, 1, _00E7
-    FadeScreen 6, 1, 1, 0
+    OpenPokemonNamingScreen VAR_MAP_LOCAL_0x00, VAR_RESULT
+    CallIfNe VAR_RESULT, 1, VeilstoneCityNortheastHouse_IncrementRecordPokemonNicknamed
+    FadeScreenIn
     WaitFadeScreen
     ReleaseAll
     End
 
-_00E7:
-    ScrCmd_1E5 49
+VeilstoneCityNortheastHouse_IncrementRecordPokemonNicknamed:
+    IncrementGameRecord RECORD_POKEMON_NICKNAMED
     Return
 
-_00ED:
+VeilstoneCityNortheastHouse_DontNicknamePorygon:
     CloseMessage
     ReleaseAll
     End
 
-_00F3:
-    Message 5
-    GoTo _0114
+VeilstoneCityNortheastHouse_PartyIsFull:
+    Message VeilstoneCityNortheastHouse_Text_AlreadyWholeTeam
+    GoTo VeilstoneCityNortheastHouse_PokefanMEnd
     End
 
-_00FE:
-    Message 6
-    GoTo _0114
+VeilstoneCityNortheastHouse_DontAcceptPorygon:
+    Message VeilstoneCityNortheastHouse_Text_IsThatSo
+    GoTo VeilstoneCityNortheastHouse_PokefanMEnd
     End
 
-_0109:
-    Message 7
-    GoTo _0114
+VeilstoneCityNortheastHouse_GalacticsBuildingBugsMe:
+    Message VeilstoneCityNortheastHouse_Text_GalacticsBuildingBugsMe
+    GoTo VeilstoneCityNortheastHouse_PokefanMEnd
     End
 
-_0114:
-    WaitABXPadPress
+VeilstoneCityNortheastHouse_PokefanMEnd:
+    WaitButton
     CloseMessage
     ReleaseAll
     End
 
-_011C:
-    PlayFanfare SEQ_SE_CONFIRM
-    LockAll
-    FacePlayer
-    Message 8
-    WaitABXPadPress
-    CloseMessage
-    ReleaseAll
+VeilstoneCityNortheastHouse_PokefanF:
+    NPCMessage VeilstoneCityNortheastHouse_Text_IDontUnderstandTheirIdea
     End
 
-    .byte 0
+    .balign 4, 0

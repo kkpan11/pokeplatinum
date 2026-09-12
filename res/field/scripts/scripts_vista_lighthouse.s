@@ -1,122 +1,111 @@
-    .include "macros/scrcmd.inc"
+#include "macros/scrcmd.inc"
+#include "res/text/bank/vista_lighthouse.h"
+#include "res/field/events/events_vista_lighthouse.h"
 
-    .data
 
-    ScriptEntry _0012
-    ScriptEntry _0025
-    ScriptEntry _0038
-    ScriptEntry _004C
-    .short 0xFD13
+    ScriptEntry VistaLighthouse_Sailor
+    ScriptEntry VistaLighthouse_Youngster
+    ScriptEntry VistaLighthouse_Binoculars
+    ScriptEntry VistaLighthouse_Volkner
+    ScriptEntryEnd
 
-_0012:
-    PlayFanfare SEQ_SE_CONFIRM
+VistaLighthouse_Sailor:
+    NPCMessage VistaLighthouse_Text_LighthouseRepresentsSafety
+    End
+
+VistaLighthouse_Youngster:
+    NPCMessage VistaLighthouse_Text_GoingFarAwayOneDay
+    End
+
+VistaLighthouse_Binoculars:
+    PlaySE SE_CONFIRM_sseq_3
+    LockAll
+    BufferPlayerName 0
+    Message VistaLighthouse_Text_PlayerLookedThroughBinoculars
+    CloseMessage
+    UseVistaLighthouseBinoculars
+    ReleaseAll
+    End
+
+VistaLighthouse_Volkner:
+    PlaySE SE_CONFIRM_sseq_3
     LockAll
     FacePlayer
-    Message 4
-    WaitABXPadPress
+    Message VistaLighthouse_Text_YoureTheLatestChallenger
+    Message VistaLighthouse_Text_IWantThrillAgain
+    Message VistaLighthouse_Text_UnleashArsenalAtYou
     CloseMessage
-    ReleaseAll
+    WaitTime 15, VAR_RESULT
+    GetPlayerDir VAR_RESULT
+    GoToIfEq VAR_RESULT, DIR_NORTH, VistaLighthouse_VolknerWalkToDoorNorth
+    GoToIfEq VAR_RESULT, DIR_WEST, VistaLighthouse_VolknerWalkToDoorWest
+    GoToIfEq VAR_RESULT, DIR_EAST, VistaLighthouse_VolknerWalkToDoorEast
     End
 
-_0025:
-    PlayFanfare SEQ_SE_CONFIRM
-    LockAll
-    FacePlayer
-    Message 5
-    WaitABXPadPress
-    CloseMessage
-    ReleaseAll
-    End
-
-_0038:
-    PlayFanfare SEQ_SE_CONFIRM
-    LockAll
-    ScrCmd_0CD 0
-    Message 3
-    CloseMessage
-    ScrCmd_27A
-    ReleaseAll
-    End
-
-_004C:
-    PlayFanfare SEQ_SE_CONFIRM
-    LockAll
-    FacePlayer
-    Message 0
-    Message 1
-    Message 2
-    CloseMessage
-    WaitTime 15, 0x800C
-    ScrCmd_1BD 0x800C
-    GoToIfEq 0x800C, 0, _0092
-    GoToIfEq 0x800C, 2, _00AA
-    GoToIfEq 0x800C, 3, _00C2
-    End
-
-_0092:
-    ApplyMovement 2, _0104
-    ApplyMovement 0xFF, _013C
+VistaLighthouse_VolknerWalkToDoorNorth:
+    ApplyMovement LOCALID_VOLKNER, VistaLighthouse_Movement_VolknerWalkToDoorNorth
+    ApplyMovement LOCALID_PLAYER, VistaLighthouse_Movement_PlayerWatchVolknerWalkToDoorNorth
     WaitMovement
-    GoTo _00D2
+    GoTo VistaLighthouse_VolknerLeave
 
-_00AA:
-    ApplyMovement 2, _0118
-    ApplyMovement 0xFF, _0148
+VistaLighthouse_VolknerWalkToDoorWest:
+    ApplyMovement LOCALID_VOLKNER, VistaLighthouse_Movement_VolknerWalkToDoorWestEast
+    ApplyMovement LOCALID_PLAYER, VistaLighthouse_Movement_PlayerWatchVolknerWalkToDoorWest
     WaitMovement
-    GoTo _00D2
+    GoTo VistaLighthouse_VolknerLeave
 
-_00C2:
-    ApplyMovement 2, _0118
+VistaLighthouse_VolknerWalkToDoorEast:
+    ApplyMovement LOCALID_VOLKNER, VistaLighthouse_Movement_VolknerWalkToDoorWestEast
     WaitMovement
-    GoTo _00D2
+    GoTo VistaLighthouse_VolknerLeave
 
-_00D2:
-    ScrCmd_168 0, 0, 6, 9, 77
-    ScrCmd_16B 77
-    ScrCmd_169 77
-    ApplyMovement 2, _0130
+VistaLighthouse_VolknerLeave:
+    LoadDoorAnimation 0, 0, 6, 9, ANIMATION_TAG_DOOR_1
+    PlayDoorOpenAnimation ANIMATION_TAG_DOOR_1
+    WaitForAnimation ANIMATION_TAG_DOOR_1
+    ApplyMovement LOCALID_VOLKNER, VistaLighthouse_Movement_VolknerLeave
     WaitMovement
-    ScrCmd_16C 77
-    ScrCmd_169 77
-    ScrCmd_16A 77
-    ScrCmd_065 2
-    SetFlag 0x162
+    PlayDoorCloseAnimation ANIMATION_TAG_DOOR_1
+    WaitForAnimation ANIMATION_TAG_DOOR_1
+    UnloadAnimation ANIMATION_TAG_DOOR_1
+    RemoveObject LOCALID_VOLKNER
+    SetFlag FLAG_VOLKNER_RETURNED_TO_GYM
     ReleaseAll
     End
 
     .balign 4, 0
-_0104:
-    MoveAction_00F 3
-    MoveAction_00D 6
-    MoveAction_00E 3
-    MoveAction_020
+VistaLighthouse_Movement_VolknerWalkToDoorNorth:
+    WalkNormalEast 3
+    WalkNormalSouth 6
+    WalkNormalWest 3
+    WalkOnSpotNormalNorth
     EndMovement
 
     .balign 4, 0
-_0118:
-    MoveAction_00D
-    MoveAction_00F 3
-    MoveAction_00D 5
-    MoveAction_00E 3
-    MoveAction_020
+VistaLighthouse_Movement_VolknerWalkToDoorWestEast:
+    WalkNormalSouth
+    WalkNormalEast 3
+    WalkNormalSouth 5
+    WalkNormalWest 3
+    WalkOnSpotNormalNorth
     EndMovement
 
     .balign 4, 0
-_0130:
-    MoveAction_00C
-    MoveAction_045
+VistaLighthouse_Movement_VolknerLeave:
+    WalkNormalNorth
+    SetInvisible
     EndMovement
 
     .balign 4, 0
-_013C:
-    MoveAction_03F
-    MoveAction_023
+VistaLighthouse_Movement_PlayerWatchVolknerWalkToDoorNorth:
+    Delay8
+    WalkOnSpotNormalEast
     EndMovement
 
     .balign 4, 0
-_0148:
-    MoveAction_03F
-    MoveAction_021
-    MoveAction_03F
-    MoveAction_023
+VistaLighthouse_Movement_PlayerWatchVolknerWalkToDoorWest:
+    Delay8
+    WalkOnSpotNormalSouth
+    Delay8
+    WalkOnSpotNormalEast
     EndMovement

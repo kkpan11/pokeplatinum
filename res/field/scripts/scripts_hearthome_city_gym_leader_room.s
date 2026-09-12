@@ -1,172 +1,170 @@
-    .include "macros/scrcmd.inc"
+#include "macros/scrcmd.inc"
+#include "res/text/bank/hearthome_city_gym_leader_room.h"
+#include "res/field/events/events_hearthome_city_gym_leader_room.h"
 
-    .data
 
-    ScriptEntry _0039
-    ScriptEntry _0158
-    ScriptEntry _0196
-    ScriptEntry _01A0
-    ScriptEntry _0248
-    ScriptEntry _001A
-    .short 0xFD13
+    ScriptEntry HearthomeGym_Fantina
+    ScriptEntry HearthomeGym_FantinaTryGiveTM65
+    ScriptEntry HearthomeGym_FantinaCannotGiveTM65
+    ScriptEntry HearthomeGym_FantinaAfterBadge
+    ScriptEntry HearthomeGym_LostBattle
+    ScriptEntry HearthomeGym_TryRemoveBollards
+    ScriptEntryEnd
 
-_001A:
-    GoToIfSet 142, _0027
+HearthomeGym_TryRemoveBollards:
+    GoToIfSet FLAG_MAP_LOCAL_REMOVE_OBJECT, HearthomeGym_RemoveBollards
     End
 
-_0027:
-    SetFlag 0x29C
-    ScrCmd_065 2
-    ScrCmd_065 1
-    ClearFlag 142
+HearthomeGym_RemoveBollards:
+    SetFlag FLAG_HIDE_HEARTHOME_CITY_GYM_BOLLARDS
+    RemoveObject LOCALID_BOLLARD_2
+    RemoveObject LOCALID_BOLLARD_1
+    ClearFlag FLAG_MAP_LOCAL_REMOVE_OBJECT
     End
 
-_0039:
-    PlayFanfare SEQ_SE_CONFIRM
+HearthomeGym_Fantina:
+    PlaySE SE_CONFIRM_sseq_3
     LockAll
     FacePlayer
-    ScrCmd_1BD 0x800C
-    GoToIfEq 0x800C, 0, _007B
-    GoToIfEq 0x800C, 1, _008B
-    GoToIfEq 0x800C, 2, _009B
-    GoToIfEq 0x800C, 3, _00AB
+    GetPlayerDir VAR_RESULT
+    GoToIfEq VAR_RESULT, DIR_NORTH, HearthomeGym_FantinaPrepareSpinFaceSouth
+    GoToIfEq VAR_RESULT, DIR_SOUTH, HearthomeGym_FantinaPrepareSpinFaceNorth
+    GoToIfEq VAR_RESULT, DIR_WEST, HearthomeGym_FantinaPrepareSpinFaceEast
+    GoToIfEq VAR_RESULT, DIR_EAST, HearthomeGym_FantinaPrepareSpinFaceWest
     End
 
-_007B:
-    ApplyMovement 0, _01B8
+HearthomeGym_FantinaPrepareSpinFaceSouth:
+    ApplyMovement LOCALID_FANTINA, HearthomeGym_Movement_FantinaSpinFaceSouth
     WaitMovement
-    GoTo _00BB
+    GoTo HearthomeGym_FantinaMain
 
-_008B:
-    ApplyMovement 0, _01DC
+HearthomeGym_FantinaPrepareSpinFaceNorth:
+    ApplyMovement LOCALID_FANTINA, HearthomeGym_Movement_FantinaSpinFaceNorth
     WaitMovement
-    GoTo _00BB
+    GoTo HearthomeGym_FantinaMain
 
-_009B:
-    ApplyMovement 0, _0200
+HearthomeGym_FantinaPrepareSpinFaceEast:
+    ApplyMovement LOCALID_FANTINA, HearthomeGym_Movement_FantinaSpinFaceEast
     WaitMovement
-    GoTo _00BB
+    GoTo HearthomeGym_FantinaMain
 
-_00AB:
-    ApplyMovement 0, _0224
+HearthomeGym_FantinaPrepareSpinFaceWest:
+    ApplyMovement LOCALID_FANTINA, HearthomeGym_Movement_FantinaSpinFaceWest
     WaitMovement
-    GoTo _00BB
+    GoTo HearthomeGym_FantinaMain
 
-_00BB:
-    ScrCmd_15B 4, 0x800C
-    GoToIfEq 0x800C, 1, _01A0
-    ScrCmd_1CD 9, 91, 0, 0, 0
-    Message 0
+HearthomeGym_FantinaMain:
+    GoToIfBadgeAcquired BADGE_ID_RELIC, HearthomeGym_FantinaAfterBadge
+    CreateJournalEvent LOCATION_EVENT_GYM_WAS_TOO_TOUGH, MAP_HEADER_HEARTHOME_CITY_GYM_LEADER_ROOM
+    Message HearthomeGym_Text_FantinaIntro
     CloseMessage
-    SetFlag 142
-    ScrCmd_0E5 0x13E, 0
-    ClearFlag 142
-    ScrCmd_0EC 0x800C
-    GoToIfEq 0x800C, 0, _0248
-    Message 1
-    ScrCmd_0CD 0
-    Message 2
-    ScrCmd_04E 0x489
-    ScrCmd_04F
-    ScrCmd_15C 4
-    ScrCmd_260 23
-    SetTrainerFlag 0x10A
-    SetTrainerFlag 0x118
-    SetTrainerFlag 0x11C
-    SetTrainerFlag 0x145
-    SetTrainerFlag 0x14A
-    SetTrainerFlag 0x154
-    SetTrainerFlag 0x157
-    SetTrainerFlag 0x165
-    ScrCmd_1CD 10, 91, 0x13E, 0, 0
-    SetVar 0x407B, 1
-    SetFlag 0x206
-    ClearFlag 0x207
-    Message 3
-    GoTo _0158
+    SetFlag FLAG_MAP_LOCAL_REMOVE_OBJECT
+    StartTrainerBattle TRAINER_LEADER_FANTINA
+    ClearFlag FLAG_MAP_LOCAL_REMOVE_OBJECT
+    CheckWonBattle VAR_RESULT
+    GoToIfEq VAR_RESULT, FALSE, HearthomeGym_LostBattle
+    Message HearthomeGym_Text_BeatFantina
+    BufferPlayerName 0
+    Message HearthomeGym_Text_FantinaReceiveRelicBadge
+    PlayFanfare SEQ_BADGE_sseq
+    WaitFanfare
+    GiveBadge BADGE_ID_RELIC
+    IncrementTrainerScore2 TRAINER_SCORE_EVENT_BADGE_EARNED
+    SetTrainerFlag TRAINER_CAMPER_DREW
+    SetTrainerFlag TRAINER_ACE_TRAINER_ALLEN
+    SetTrainerFlag TRAINER_ACE_TRAINER_CATHERINE
+    SetTrainerFlag TRAINER_LASS_MOLLY
+    SetTrainerFlag TRAINER_PICNICKER_CHEYENNE
+    SetTrainerFlag TRAINER_SCHOOL_KID_CHANCE
+    SetTrainerFlag TRAINER_SCHOOL_KID_MACKENZIE
+    SetTrainerFlag TRAINER_YOUNGSTER_DONNY
+    CreateJournalEvent LOCATION_EVENT_BEAT_GYM_LEADER, MAP_HEADER_HEARTHOME_CITY_GYM_LEADER_ROOM, TRAINER_LEADER_FANTINA
+    SetVar VAR_ROUTE_209_GATE_TO_HEARTHOME_CITY_STATE, 1
+    SetFlag FLAG_HIDE_HEARTHOME_CITY_ROUTE_209_BLOCKADE
+    ClearFlag FLAG_HIDE_HEARTHOME_CITY_ROUTE_209_GATE_RIVAL
+    Message HearthomeGym_Text_FantinaExplainRelicBadge
+    GoTo HearthomeGym_FantinaTryGiveTM65
 
-_0158:
-    SetVar 0x8004, 0x188
-    SetVar 0x8005, 1
-    ScrCmd_07D 0x8004, 0x8005, 0x800C
-    GoToIfEq 0x800C, 0, _0196
-    CallCommonScript 0x7FC
-    SetFlag 125
-    ScrCmd_0D1 0, 0x8004
-    ScrCmd_0D3 1, 0x8004
-    Message 4
-    WaitABXPadPress
+HearthomeGym_FantinaTryGiveTM65:
+    SetVar VAR_0x8004, ITEM_TM65
+    SetVar VAR_0x8005, 1
+    GoToIfCannotFitItem VAR_0x8004, VAR_0x8005, VAR_RESULT, HearthomeGym_FantinaCannotGiveTM65
+    Common_GiveItemQuantity
+    SetFlag FLAG_RECEIVED_FANTINA_TM65
+    BufferItemName 0, VAR_0x8004
+    BufferTMHMMoveName 1, VAR_0x8004
+    Message HearthomeGym_FantinaExplainTM65
+    WaitButton
     CloseMessage
     ReleaseAll
     End
 
-_0196:
-    CallCommonScript 0x7E1
+HearthomeGym_FantinaCannotGiveTM65:
+    Common_MessageBagIsFull
     CloseMessage
     ReleaseAll
     End
 
-_01A0:
-    GoToIfUnset 125, _0158
-    Message 5
-    WaitABXPadPress
+HearthomeGym_FantinaAfterBadge:
+    GoToIfUnset FLAG_RECEIVED_FANTINA_TM65, HearthomeGym_FantinaTryGiveTM65
+    Message HearthomeGym_Text_FantinaAfterBadge
+    WaitButton
     CloseMessage
     ReleaseAll
     End
 
     .balign 4, 0
-_01B8:
-    MoveAction_002 4
-    MoveAction_000 4
-    MoveAction_003 4
-    MoveAction_001 4
-    MoveAction_002 4
-    MoveAction_000 4
-    MoveAction_003 4
-    MoveAction_001 4
+HearthomeGym_Movement_FantinaSpinFaceSouth:
+    FaceWest 4
+    FaceNorth 4
+    FaceEast 4
+    FaceSouth 4
+    FaceWest 4
+    FaceNorth 4
+    FaceEast 4
+    FaceSouth 4
     EndMovement
 
     .balign 4, 0
-_01DC:
-    MoveAction_003 4
-    MoveAction_001 4
-    MoveAction_002 4
-    MoveAction_000 4
-    MoveAction_003 4
-    MoveAction_001 4
-    MoveAction_002 4
-    MoveAction_000 4
+HearthomeGym_Movement_FantinaSpinFaceNorth:
+    FaceEast 4
+    FaceSouth 4
+    FaceWest 4
+    FaceNorth 4
+    FaceEast 4
+    FaceSouth 4
+    FaceWest 4
+    FaceNorth 4
     EndMovement
 
     .balign 4, 0
-_0200:
-    MoveAction_000 4
-    MoveAction_002 4
-    MoveAction_001 4
-    MoveAction_003 4
-    MoveAction_000 4
-    MoveAction_002 4
-    MoveAction_001 4
-    MoveAction_003 4
+HearthomeGym_Movement_FantinaSpinFaceEast:
+    FaceNorth 4
+    FaceWest 4
+    FaceSouth 4
+    FaceEast 4
+    FaceNorth 4
+    FaceWest 4
+    FaceSouth 4
+    FaceEast 4
     EndMovement
 
     .balign 4, 0
-_0224:
-    MoveAction_000 4
-    MoveAction_003 4
-    MoveAction_001 4
-    MoveAction_002 4
-    MoveAction_000 4
-    MoveAction_003 4
-    MoveAction_001 4
-    MoveAction_002 4
+HearthomeGym_Movement_FantinaSpinFaceWest:
+    FaceNorth 4
+    FaceEast 4
+    FaceSouth 4
+    FaceWest 4
+    FaceNorth 4
+    FaceEast 4
+    FaceSouth 4
+    FaceWest 4
     EndMovement
 
-_0248:
-    ClearFlag 0x29C
-    ScrCmd_0EB
+HearthomeGym_LostBattle:
+    ClearFlag FLAG_HIDE_HEARTHOME_CITY_GYM_BOLLARDS
+    BlackOutFromBattle
     ReleaseAll
     End
 
-    .byte 0
-    .byte 0
+    .balign 4, 0

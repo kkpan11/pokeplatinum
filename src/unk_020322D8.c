@@ -3,12 +3,13 @@
 #include <nitro.h>
 #include <string.h>
 
+#include "struct_defs/comm_queue_man.h"
 #include "struct_defs/struct_020322D8.h"
-#include "struct_defs/struct_020322F8.h"
 #include "struct_defs/struct_02032318.h"
 #include "struct_defs/struct_0203233C.h"
 
 #include "comm_ring.h"
+#include "communication_system.h"
 #include "heap.h"
 #include "unk_02032798.h"
 
@@ -153,7 +154,7 @@ static BOOL sub_020323D0(UnkStruct_020322D8 *param0, UnkStruct_0203233C *param1,
     return 1;
 }
 
-BOOL CommQueue_Write(CommQueueMan *param0, int cmd, u8 *param2, int param3, BOOL param4, BOOL param5)
+BOOL CommQueue_Write(CommQueueMan *param0, int cmd, u8 *data, int size, BOOL param4, BOOL param5)
 {
     UnkStruct_020322D8 *v0;
     UnkStruct_020322D8 *v1 = sub_020322D8(param0);
@@ -166,11 +167,11 @@ BOOL CommQueue_Write(CommQueueMan *param0, int cmd, u8 *param2, int param3, BOOL
         return 0;
     }
 
-    GF_ASSERT(param3 < 65534);
+    GF_ASSERT(size < 65534);
     v3 = CommCmd_PacketSizeOf(cmd);
 
-    if (0xffff == v3) {
-        v3 = param3;
+    if (v3 == PACKET_SIZE_VARIABLE) {
+        v3 = size;
     }
 
     if (param5) {
@@ -180,7 +181,7 @@ BOOL CommQueue_Write(CommQueueMan *param0, int cmd, u8 *param2, int param3, BOOL
             return 0;
         }
 
-        CommRring_Write(param0->unk_14, param2, v3, 265);
+        CommRring_Write(param0->unk_14, data, v3, 265);
         CommRing_UpdateEndPos(param0->unk_14);
 
         v1->unk_0F_1 = 1;
@@ -188,7 +189,7 @@ BOOL CommQueue_Write(CommQueueMan *param0, int cmd, u8 *param2, int param3, BOOL
 
     v1->unk_0C = v3;
     v1->unk_0E = cmd;
-    v1->unk_00 = param2;
+    v1->unk_00 = data;
 
     if (param4 == 1) {
         v2 = &param0->unk_00;
@@ -281,7 +282,7 @@ BOOL sub_02032574(CommQueueMan *param0, UnkStruct_0203233C *param1, BOOL param2)
 void CommQueueMan_Init(CommQueueMan *param0, int param1, CommRing *param2)
 {
     MI_CpuFill8(param0, 0, sizeof(CommQueueMan));
-    param0->unk_18 = Heap_AllocFromHeap(15, sizeof(UnkStruct_020322D8) * param1);
+    param0->unk_18 = Heap_Alloc(HEAP_ID_COMMUNICATION, sizeof(UnkStruct_020322D8) * param1);
 
     MI_CpuFill8(param0->unk_18, 0, sizeof(UnkStruct_020322D8) * param1);
     param0->unk_1C = param1;
@@ -301,10 +302,10 @@ void CommQueueMan_Reset(CommQueueMan *param0)
 
 void CommQueueMan_Delete(CommQueueMan *param0)
 {
-    Heap_FreeToHeap(param0->unk_18);
+    Heap_Free(param0->unk_18);
 }
 
-BOOL CommQueue_CompareCmd(CommQueueMan *param0, int param1)
+BOOL CommQueueMan_IsCmdInQueue(CommQueueMan *param0, int param1)
 {
     int v0;
     UnkStruct_020322D8 *v1 = param0->unk_18;

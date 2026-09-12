@@ -1,18 +1,12 @@
-    .include "macros/scrcmd.inc"
+#include "macros/scrcmd.inc"
+#include "res/text/bank/fuego_ironworks_outside.h"
 
-    .data
 
-    ScriptEntry _0006
-    .short 0xFD13
+    ScriptEntry FuegoIronworksOutside_Signboard
+    ScriptEntryEnd
 
-_0006:
-    ScrCmd_036 0, 2, 0, 0x800C
-    ScrCmd_038 3
-    ScrCmd_039
-    ScrCmd_03B 0x800C
-    CallCommonScript 0x7D0
+FuegoIronworksOutside_Signboard:
+    ShowLandmarkSign FuegoIronworksOutside_Text_SignFuegoIronworks
     End
 
-    .byte 0
-    .byte 0
-    .byte 0
+    .balign 4, 0

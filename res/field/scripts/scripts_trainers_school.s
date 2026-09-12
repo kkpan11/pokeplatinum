@@ -1,395 +1,365 @@
-    .include "macros/scrcmd.inc"
+#include "macros/scrcmd.inc"
+#include "res/text/bank/trainers_school.h"
+#include "res/text/bank/menu_entries.h"
+#include "res/field/events/events_trainers_school.h"
 
-    .data
 
-    ScriptEntry _0032
-    ScriptEntry _0154
-    ScriptEntry _0167
-    ScriptEntry _0169
-    ScriptEntry _017C
-    ScriptEntry _018F
-    ScriptEntry _01A2
-    ScriptEntry _01A4
-    ScriptEntry _01A6
-    ScriptEntry _02E4
-    ScriptEntry _03D9
-    ScriptEntry _049C
-    .short 0xFD13
+    ScriptEntry TrainersSchool_Rival
+    ScriptEntry TrainersSchool_AceTrainerF
+    ScriptEntry TrainersSchool_Dummy3
+    ScriptEntry TrainersSchool_Youngster1
+    ScriptEntry TrainersSchool_Youngster2
+    ScriptEntry TrainersSchool_Lass
+    ScriptEntry TrainersSchool_Dummy7
+    ScriptEntry TrainersSchool_Dummy8
+    ScriptEntry TrainersSchool_SchoolKidHarrison
+    ScriptEntry TrainersSchool_SchoolKidChristine
+    ScriptEntry TrainersSchool_Blackboard
+    ScriptEntry TrainersSchool_Book
+    ScriptEntryEnd
 
-_0032:
-    PlayFanfare SEQ_SE_CONFIRM
+TrainersSchool_Rival:
+    PlaySE SE_CONFIRM_sseq_3
     LockAll
     FacePlayer
-    ScrCmd_0CD 0
-    ScrCmd_0CE 1
-    Message 0
-    ScrCmd_04E 0x486
-    ScrCmd_0CD 0
-    Message 1
-    ScrCmd_04F
-    ScrCmd_07C 0x1CB, 1, 0x800C
-    ScrCmd_0CD 0
-    ScrCmd_0CE 1
-    Message 2
-    SetVar 0x8004, 0x1BA
-    SetVar 0x8005, 1
-    CallCommonScript 0x7FC
-    ScrCmd_0CE 1
-    Message 3
+    BufferPlayerName 0
+    BufferRivalName 1
+    Message TrainersSchool_Text_GotSomethingForMe
+    PlayFanfare SEQ_FANFA4_sseq
+    BufferPlayerName 0
+    Message TrainersSchool_Text_PlayerDeliveredTheParcel
+    WaitFanfare
+    RemoveItem ITEM_PARCEL, 1, VAR_RESULT
+    BufferPlayerName 0
+    BufferRivalName 1
+    Message TrainersSchool_Text_TakeTownMap
+    SetVar VAR_0x8004, ITEM_TOWN_MAP
+    SetVar VAR_0x8005, 1
+    Common_GiveItemQuantity
+    BufferRivalName 1
+    Message TrainersSchool_Text_OreburghCityNext
     CloseMessage
-    ScrCmd_1BD 0x800C
-    SetVar 0x8008, 0x800C
-    GoToIfEq 0x8008, 0, _00A4
-    GoToIfEq 0x8008, 2, _00BE
-    GoTo _00D8
+    GetPlayerDir VAR_RESULT
+    SetVar VAR_0x8008, VAR_RESULT
+    GoToIfEq VAR_0x8008, DIR_NORTH, TrainersSchool_RivalLeaveNorth
+    GoToIfEq VAR_0x8008, DIR_WEST, TrainersSchool_RivalLeaveWest
+    GoTo TrainersSchool_RivalLeaveEast
     End
 
-_00A4:
-    ApplyMovement 1, _0114
-    ApplyMovement 0xFF, _0138
+TrainersSchool_RivalLeaveNorth:
+    ApplyMovement LOCALID_RIVAL, TrainersSchool_Movement_RivalLeaveNorth
+    ApplyMovement LOCALID_PLAYER, TrainersSchool_Movement_PlayerWatchRivalLeaveNorth
     WaitMovement
-    GoTo _00F2
+    GoTo TrainersSchool_RivalEnd
     End
 
-_00BE:
-    ApplyMovement 1, _0124
-    ApplyMovement 0xFF, _0148
+TrainersSchool_RivalLeaveWest:
+    ApplyMovement LOCALID_RIVAL, TrainersSchool_Movement_RivalLeaveWestEast
+    ApplyMovement LOCALID_PLAYER, TrainersSchool_Movement_PlayerWatchRivalLeaveWestEast
     WaitMovement
-    GoTo _00F2
+    GoTo TrainersSchool_RivalEnd
     End
 
-_00D8:
-    ApplyMovement 1, _0124
-    ApplyMovement 0xFF, _0148
+TrainersSchool_RivalLeaveEast:
+    ApplyMovement LOCALID_RIVAL, TrainersSchool_Movement_RivalLeaveWestEast
+    ApplyMovement LOCALID_PLAYER, TrainersSchool_Movement_PlayerWatchRivalLeaveWestEast
     WaitMovement
-    GoTo _00F2
+    GoTo TrainersSchool_RivalEnd
     End
 
-_00F2:
-    PlayFanfare SEQ_SE_DP_KAIDAN2
-    ScrCmd_065 1
-    ScrCmd_04B 0x603
-    SetVar 0x40E7, 1
-    SetFlag 241
-    ClearFlag 0x1F6
-    ClearFlag 0x1F5
+TrainersSchool_RivalEnd:
+    PlaySE SEQ_SE_DP_KAIDAN2_sseq
+    RemoveObject LOCALID_RIVAL
+    WaitSE SEQ_SE_DP_KAIDAN2_sseq
+    SetVar VAR_POKETCH_CAMPAIGN_STATE, 1
+    SetFlag FLAG_TALKED_TO_TRAINERS_SCHOOL_RIVAL
+    ClearFlag FLAG_HIDE_JUBILIFE_CITY_POKETCH_CO_PRESIDENT
+    ClearFlag FLAG_HIDE_JUBILIFE_CITY_CLOWNS_1_AND_2
     ReleaseAll
     End
 
     .balign 4, 0
-_0114:
-    MoveAction_013
-    MoveAction_011 8
-    MoveAction_025
+TrainersSchool_Movement_RivalLeaveNorth:
+    WalkFastEast
+    WalkFastSouth 8
+    WalkOnSpotFastSouth
     EndMovement
 
     .balign 4, 0
-_0124:
-    MoveAction_011 4
-    MoveAction_013
-    MoveAction_011 4
-    MoveAction_025
+TrainersSchool_Movement_RivalLeaveWestEast:
+    WalkFastSouth 4
+    WalkFastEast
+    WalkFastSouth 4
+    WalkOnSpotFastSouth
     EndMovement
 
     .balign 4, 0
-_0138:
-    MoveAction_03F
-    MoveAction_023
-    MoveAction_021
+TrainersSchool_Movement_PlayerWatchRivalLeaveNorth:
+    Delay8
+    WalkOnSpotNormalEast
+    WalkOnSpotNormalSouth
     EndMovement
 
     .balign 4, 0
-_0148:
-    MoveAction_03F
-    MoveAction_021
+TrainersSchool_Movement_PlayerWatchRivalLeaveWestEast:
+    Delay8
+    WalkOnSpotNormalSouth
     EndMovement
 
-_0154:
-    PlayFanfare SEQ_SE_CONFIRM
+TrainersSchool_AceTrainerF:
+    NPCMessage TrainersSchool_Text_DevelopAtOwnPace
+    End
+
+TrainersSchool_Dummy3:
+    End
+
+TrainersSchool_Youngster1:
+    NPCMessage TrainersSchool_Text_LearnedAboutPokemonTypes
+    End
+
+TrainersSchool_Youngster2:
+    NPCMessage TrainersSchool_Text_WroteAnEssay
+    End
+
+TrainersSchool_Lass:
+    NPCMessage TrainersSchool_Text_PokemonUseItems
+    End
+
+TrainersSchool_Dummy7:
+    End
+
+TrainersSchool_Dummy8:
+    End
+
+TrainersSchool_SchoolKidHarrison:
+    PlaySE SE_CONFIRM_sseq_3
     LockAll
     FacePlayer
-    Message 4
-    WaitABXPadPress
+    GoToIfSet FLAG_RECEIVED_TRAINERS_SCHOOL_POTION, TrainersSchool_PotionRestoresHP
+    GoToIfSet FLAG_DEFEATED_TRAINERS_SCHOOL_SCHOOL_KID_HARRISON, TrainersSchool_TryGivePotion
+    Message TrainersSchool_Text_CanWeBattleYou
+    ShowYesNoMenu VAR_RESULT
+    GoToIfEq VAR_RESULT, MENU_YES, TrainersSchool_BattleSchoolKidHarrison
+    GoToIfEq VAR_RESULT, MENU_NO, TrainersSchool_ButBattlingIsTheBest
+    End
+
+TrainersSchool_BattleSchoolKidHarrison:
+    Message TrainersSchool_Text_GoMyPokemonGo
+    CloseMessage
+    GetPlayerStarterSpecies VAR_RESULT
+    GoToIfEq VAR_RESULT, SPECIES_TURTWIG, TrainersSchool_BattleHarrisonTurtwig
+    GoToIfEq VAR_RESULT, SPECIES_CHIMCHAR, TrainersSchool_BattleHarrisonChimchar
+    GoTo TrainersSchool_BattleHarrisonPiplup
+    End
+
+TrainersSchool_BattleHarrisonPiplup:
+    StartTrainerBattle TRAINER_SCHOOL_KID_HARRISON
+    GoTo TrainersSchool_CheckWonBattleHarrison
+    End
+
+TrainersSchool_BattleHarrisonTurtwig:
+    StartTrainerBattle TRAINER_SCHOOL_KID_HARRISON
+    GoTo TrainersSchool_CheckWonBattleHarrison
+    End
+
+TrainersSchool_BattleHarrisonChimchar:
+    StartTrainerBattle TRAINER_SCHOOL_KID_HARRISON
+    GoTo TrainersSchool_CheckWonBattleHarrison
+    End
+
+TrainersSchool_CheckWonBattleHarrison:
+    CheckWonBattle VAR_RESULT
+    GoToIfEq VAR_RESULT, FALSE, TrainersSchool_LostBattleHarrison
+    SetFlag FLAG_DEFEATED_TRAINERS_SCHOOL_SCHOOL_KID_HARRISON
+    GoToIfSet FLAG_DEFEATED_TRAINERS_SCHOOL_SCHOOL_KID_CHRISTINE, TrainersSchool_GivePotion
+    GoToIfUnset FLAG_DEFEATED_TRAINERS_SCHOOL_SCHOOL_KID_CHRISTINE, TrainersSchool_HardToWin
+    End
+
+TrainersSchool_HardToWin:
+    Message TrainersSchool_Text_HardToWin
+    WaitButton
     CloseMessage
     ReleaseAll
     End
 
-_0167:
+TrainersSchool_GivePotion:
+    Message TrainersSchool_Text_UseThisPotion
+    SetVar VAR_0x8004, ITEM_POTION
+    SetVar VAR_0x8005, 1
+    GoToIfCannotFitItem VAR_0x8004, VAR_0x8005, VAR_RESULT, TrainersSchool_BagIsFull
+    Common_GiveItemQuantity
+    SetFlag FLAG_RECEIVED_TRAINERS_SCHOOL_POTION
+    GoTo TrainersSchool_PotionRestoresHP
     End
 
-_0169:
-    PlayFanfare SEQ_SE_CONFIRM
+TrainersSchool_PotionRestoresHP:
+    Message TrainersSchool_Text_PotionRestoresHP
+    WaitButton
+    CloseMessage
+    ReleaseAll
+    End
+
+TrainersSchool_BagIsFull:
+    Common_MessageBagIsFull
+    CloseMessage
+    ReleaseAll
+    End
+
+TrainersSchool_TryGivePotion:
+    GoToIfSet FLAG_DEFEATED_TRAINERS_SCHOOL_SCHOOL_KID_CHRISTINE, TrainersSchool_GivePotion
+    Message TrainersSchool_Text_HardToWin
+    WaitButton
+    CloseMessage
+    ReleaseAll
+    End
+
+TrainersSchool_ButBattlingIsTheBest:
+    Message TrainersSchool_Text_ButBattlingIsTheBest
+    WaitButton
+    CloseMessage
+    ReleaseAll
+    End
+
+TrainersSchool_LostBattleHarrison:
+    BlackOutFromBattle
+    ReleaseAll
+    End
+
+TrainersSchool_SchoolKidChristine:
+    PlaySE SE_CONFIRM_sseq_3
     LockAll
     FacePlayer
-    Message 6
-    WaitABXPadPress
+    GoToIfSet FLAG_DEFEATED_TRAINERS_SCHOOL_SCHOOL_KID_CHRISTINE, TrainersSchool_PostBattleChristine
+    Message TrainersSchool_Text_MayWeBattle
+    ShowYesNoMenu VAR_RESULT
+    GoToIfEq VAR_RESULT, MENU_YES, TrainersSchool_BattleSchoolKidChristine
+    GoToIfEq VAR_RESULT, MENU_NO, TrainersSchool_DontBeShy
+    End
+
+TrainersSchool_BattleSchoolKidChristine:
+    Message TrainersSchool_Text_TryThingsILearned
+    CloseMessage
+    GetPlayerStarterSpecies VAR_RESULT
+    GoToIfEq VAR_RESULT, SPECIES_TURTWIG, TrainersSchool_BattleChristineTurtwig
+    GoToIfEq VAR_RESULT, SPECIES_CHIMCHAR, TrainersSchool_BattleChristineChimchar
+    GoTo TrainersSchool_BattleChristinePiplup
+    End
+
+TrainersSchool_BattleChristinePiplup:
+    StartTrainerBattle TRAINER_SCHOOL_KID_CHRISTINE
+    GoTo TrainersSchool_CheckWonBattleChristine
+    End
+
+TrainersSchool_BattleChristineTurtwig:
+    StartTrainerBattle TRAINER_SCHOOL_KID_CHRISTINE
+    GoTo TrainersSchool_CheckWonBattleChristine
+    End
+
+TrainersSchool_BattleChristineChimchar:
+    StartTrainerBattle TRAINER_SCHOOL_KID_CHRISTINE
+    GoTo TrainersSchool_CheckWonBattleChristine
+    End
+
+TrainersSchool_CheckWonBattleChristine:
+    CheckWonBattle VAR_RESULT
+    GoToIfEq VAR_RESULT, FALSE, TrainersSchool_LostBattleChristine
+    SetFlag FLAG_DEFEATED_TRAINERS_SCHOOL_SCHOOL_KID_CHRISTINE
+    GoToIfSet FLAG_DEFEATED_TRAINERS_SCHOOL_SCHOOL_KID_HARRISON, TrainersSchool_DefeatedChristineAndHarrison
+    GoToIfUnset FLAG_DEFEATED_TRAINERS_SCHOOL_SCHOOL_KID_HARRISON, TrainersSchool_CouldHaveDoneBetter
+    End
+
+TrainersSchool_PostBattleChristine:
+    Message TrainersSchool_Text_CouldHaveDoneBetter
+    WaitButton
     CloseMessage
     ReleaseAll
     End
 
-_017C:
-    PlayFanfare SEQ_SE_CONFIRM
+TrainersSchool_DontBeShy:
+    Message TrainersSchool_Text_DontBeShy
+    WaitButton
+    CloseMessage
+    ReleaseAll
+    End
+
+TrainersSchool_CouldHaveDoneBetter:
+    Message TrainersSchool_Text_CouldHaveDoneBetter
+    WaitButton
+    CloseMessage
+    ReleaseAll
+    End
+
+TrainersSchool_DefeatedChristineAndHarrison:
+    GoToIfSet FLAG_RECEIVED_TRAINERS_SCHOOL_POTION, TrainersSchool_CouldHaveDoneBetter
+    Message TrainersSchool_Text_TalkToMyFriend
+    WaitButton
+    CloseMessage
+    ReleaseAll
+    End
+
+TrainersSchool_LostBattleChristine:
+    BlackOutFromBattle
+    ReleaseAll
+    End
+
+TrainersSchool_Blackboard:
+    PlaySE SE_CONFIRM_sseq_3
     LockAll
-    FacePlayer
-    Message 8
-    WaitABXPadPress
+    Message TrainersSchool_Text_BlackboardListsStatusChanges
+    GoTo TrainersSchool_StatusMenu
+    End
+
+TrainersSchool_StatusMenu:
+    Message TrainersSchool_Text_ReadAboutWhichStatus
+    InitGlobalTextMenu 7, 2, 0, VAR_RESULT
+    AddMenuEntryImm MenuEntries_Text_Status_Poisoned, 0
+    AddMenuEntryImm MenuEntries_Text_Status_Paralyzed, 1
+    AddMenuEntryImm MenuEntries_Text_Status_Asleep, 2
+    AddMenuEntryImm MenuEntries_Text_Status_Burned, 3
+    AddMenuEntryImm MenuEntries_Text_Status_Frozen, 4
+    AddMenuEntryImm MenuEntries_Text_Exit, 5
+    ShowMenuMultiColumn 2
+    SetVar VAR_0x8008, VAR_RESULT
+    GoToIfEq VAR_0x8008, 0, TrainersSchool_StatusPoisoned
+    GoToIfEq VAR_0x8008, 1, TrainersSchool_StatusParalyzed
+    GoToIfEq VAR_0x8008, 2, TrainersSchool_StatusAsleep
+    GoToIfEq VAR_0x8008, 3, TrainersSchool_StatusBurned
+    GoToIfEq VAR_0x8008, 4, TrainersSchool_StatusFrozen
+    GoTo TrainersSchool_BlackboardEnd
+    End
+
+TrainersSchool_StatusPoisoned:
+    Message TrainersSchool_Text_StatusPoisoned
+    GoTo TrainersSchool_StatusMenu
+    End
+
+TrainersSchool_StatusParalyzed:
+    Message TrainersSchool_Text_StatusParalyzed
+    GoTo TrainersSchool_StatusMenu
+    End
+
+TrainersSchool_StatusAsleep:
+    Message TrainersSchool_Text_StatusAsleep
+    GoTo TrainersSchool_StatusMenu
+    End
+
+TrainersSchool_StatusBurned:
+    Message TrainersSchool_Text_StatusBurned
+    GoTo TrainersSchool_StatusMenu
+    End
+
+TrainersSchool_StatusFrozen:
+    Message TrainersSchool_Text_StatusFrozen
+    GoTo TrainersSchool_StatusMenu
+    End
+
+TrainersSchool_BlackboardEnd:
     CloseMessage
     ReleaseAll
     End
 
-_018F:
-    PlayFanfare SEQ_SE_CONFIRM
-    LockAll
-    FacePlayer
-    Message 7
-    WaitABXPadPress
-    CloseMessage
-    ReleaseAll
+TrainersSchool_Book:
+    EventMessage TrainersSchool_Text_NotebookFilledWithWriting
     End
 
-_01A2:
-    End
-
-_01A4:
-    End
-
-_01A6:
-    PlayFanfare SEQ_SE_CONFIRM
-    LockAll
-    FacePlayer
-    GoToIfSet 0x112, _02A8
-    GoToIfSet 0x10C, _02BD
-    Message 9
-    ScrCmd_03E 0x800C
-    GoToIfEq 0x800C, 0, _01E7
-    GoToIfEq 0x800C, 1, _02D3
-    End
-
-_01E7:
-    Message 10
-    CloseMessage
-    ScrCmd_0DE 0x800C
-    GoToIfEq 0x800C, 0x183, _0220
-    GoToIfEq 0x800C, 0x186, _022E
-    GoTo _0212
-    End
-
-_0212:
-    ScrCmd_0E5 0x156, 0
-    GoTo _023C
-    End
-
-_0220:
-    ScrCmd_0E5 0x156, 0
-    GoTo _023C
-    End
-
-_022E:
-    ScrCmd_0E5 0x156, 0
-    GoTo _023C
-    End
-
-_023C:
-    ScrCmd_0EC 0x800C
-    GoToIfEq 0x800C, 0, _02DE
-    SetFlag 0x10C
-    GoToIfSet 0x10D, _0274
-    GoToIfUnset 0x10D, _0269
-    End
-
-_0269:
-    Message 12
-    WaitABXPadPress
-    CloseMessage
-    ReleaseAll
-    End
-
-_0274:
-    Message 13
-    SetVar 0x8004, 17
-    SetVar 0x8005, 1
-    ScrCmd_07D 0x8004, 0x8005, 0x800C
-    GoToIfEq 0x800C, 0, _02B3
-    CallCommonScript 0x7FC
-    SetFlag 0x112
-    GoTo _02A8
-    End
-
-_02A8:
-    Message 14
-    WaitABXPadPress
-    CloseMessage
-    ReleaseAll
-    End
-
-_02B3:
-    CallCommonScript 0x7E1
-    CloseMessage
-    ReleaseAll
-    End
-
-_02BD:
-    GoToIfSet 0x10D, _0274
-    Message 12
-    WaitABXPadPress
-    CloseMessage
-    ReleaseAll
-    End
-
-_02D3:
-    Message 11
-    WaitABXPadPress
-    CloseMessage
-    ReleaseAll
-    End
-
-_02DE:
-    ScrCmd_0EB
-    ReleaseAll
-    End
-
-_02E4:
-    PlayFanfare SEQ_SE_CONFIRM
-    LockAll
-    FacePlayer
-    GoToIfSet 0x10D, _039C
-    Message 15
-    ScrCmd_03E 0x800C
-    GoToIfEq 0x800C, 0, _031A
-    GoToIfEq 0x800C, 1, _03A7
-    End
-
-_031A:
-    Message 16
-    CloseMessage
-    ScrCmd_0DE 0x800C
-    GoToIfEq 0x800C, 0x183, _0353
-    GoToIfEq 0x800C, 0x186, _0361
-    GoTo _0345
-    End
-
-_0345:
-    ScrCmd_0E5 0x159, 0
-    GoTo _036F
-    End
-
-_0353:
-    ScrCmd_0E5 0x159, 0
-    GoTo _036F
-    End
-
-_0361:
-    ScrCmd_0E5 0x159, 0
-    GoTo _036F
-    End
-
-_036F:
-    ScrCmd_0EC 0x800C
-    GoToIfEq 0x800C, 0, _03D3
-    SetFlag 0x10D
-    GoToIfSet 0x10C, _03BD
-    GoToIfUnset 0x10C, _03B2
-    End
-
-_039C:
-    Message 18
-    WaitABXPadPress
-    CloseMessage
-    ReleaseAll
-    End
-
-_03A7:
-    Message 17
-    WaitABXPadPress
-    CloseMessage
-    ReleaseAll
-    End
-
-_03B2:
-    Message 18
-    WaitABXPadPress
-    CloseMessage
-    ReleaseAll
-    End
-
-_03BD:
-    GoToIfSet 0x112, _03B2
-    Message 19
-    WaitABXPadPress
-    CloseMessage
-    ReleaseAll
-    End
-
-_03D3:
-    ScrCmd_0EB
-    ReleaseAll
-    End
-
-_03D9:
-    PlayFanfare SEQ_SE_CONFIRM
-    LockAll
-    Message 20
-    GoTo _03EA
-    End
-
-_03EA:
-    Message 21
-    ScrCmd_040 7, 2, 0, 1, 0x800C
-    ScrCmd_042 0, 0
-    ScrCmd_042 1, 1
-    ScrCmd_042 2, 2
-    ScrCmd_042 3, 3
-    ScrCmd_042 4, 4
-    ScrCmd_042 5, 5
-    ScrCmd_048 2
-    SetVar 0x8008, 0x800C
-    GoToIfEq 0x8008, 0, _045F
-    GoToIfEq 0x8008, 1, _046A
-    GoToIfEq 0x8008, 2, _0475
-    GoToIfEq 0x8008, 3, _0480
-    GoToIfEq 0x8008, 4, _048B
-    GoTo _0496
-    End
-
-_045F:
-    Message 22
-    GoTo _03EA
-    End
-
-_046A:
-    Message 23
-    GoTo _03EA
-    End
-
-_0475:
-    Message 24
-    GoTo _03EA
-    End
-
-_0480:
-    Message 25
-    GoTo _03EA
-    End
-
-_048B:
-    Message 26
-    GoTo _03EA
-    End
-
-_0496:
-    CloseMessage
-    ReleaseAll
-    End
-
-_049C:
-    PlayFanfare SEQ_SE_CONFIRM
-    LockAll
-    Message 27
-    WaitABXPadPress
-    CloseMessage
-    ReleaseAll
-    End
-
-    .byte 0
-    .byte 0
-    .byte 0
+    .balign 4, 0

@@ -1,6 +1,0 @@
-#ifndef POKEPLATINUM_STRUCT_02024440_DECL_H
-#define POKEPLATINUM_STRUCT_02024440_DECL_H
-
-typedef struct PalParkTransfer PalParkTransfer;
-
-#endif // POKEPLATINUM_STRUCT_02024440_DECL_H

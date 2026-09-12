@@ -1,27 +1,15 @@
-    .include "macros/scrcmd.inc"
+#include "macros/scrcmd.inc"
+#include "res/text/bank/floaroma_meadow_house.h"
 
-    .data
 
-    ScriptEntry _000A
-    ScriptEntry _001D
-    .short 0xFD13
+    ScriptEntry FloaromaMeadowHouse_Hiker
+    ScriptEntry FloaromaMeadowHouse_NinjaBoy
+    ScriptEntryEnd
 
-_000A:
-    PlayFanfare SEQ_SE_CONFIRM
-    LockAll
-    FacePlayer
-    Message 0
-    WaitABXPadPress
-    CloseMessage
-    ReleaseAll
+FloaromaMeadowHouse_Hiker:
+    NPCMessage FloaromaMeadowHouse_Text_FlowersInTheFieldsAreSpecial
     End
 
-_001D:
-    PlayFanfare SEQ_SE_CONFIRM
-    LockAll
-    FacePlayer
-    Message 1
-    WaitABXPadPress
-    CloseMessage
-    ReleaseAll
+FloaromaMeadowHouse_NinjaBoy:
+    NPCMessage FloaromaMeadowHouse_Text_RustlingTreeOftenRarePokemon
     End

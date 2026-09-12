@@ -1,40 +1,22 @@
-    .include "macros/scrcmd.inc"
+#include "macros/scrcmd.inc"
+#include "res/text/bank/jubilife_tv_4f.h"
 
-    .data
 
-    ScriptEntry _000E
-    ScriptEntry _0021
-    ScriptEntry _0034
-    .short 0xFD13
+    ScriptEntry JubilifeTV4F_MiddleAgedMan
+    ScriptEntry JubilifeTV4F_Receptionist
+    ScriptEntry JubilifeTV4F_PokemonBreederF
+    ScriptEntryEnd
 
-_000E:
-    PlayFanfare SEQ_SE_CONFIRM
-    LockAll
-    FacePlayer
-    Message 0
-    WaitABXPadPress
-    CloseMessage
-    ReleaseAll
+JubilifeTV4F_MiddleAgedMan:
+    NPCMessage JubilifeTV4F_Text_YourExploitsAreFantastic
     End
 
-_0021:
-    PlayFanfare SEQ_SE_CONFIRM
-    LockAll
-    FacePlayer
-    Message 1
-    WaitABXPadPress
-    CloseMessage
-    ReleaseAll
+JubilifeTV4F_Receptionist:
+    NPCMessage JubilifeTV4F_Text_TVNetworksMotto
     End
 
-_0034:
-    PlayFanfare SEQ_SE_CONFIRM
-    LockAll
-    FacePlayer
-    Message 2
-    WaitABXPadPress
-    CloseMessage
-    ReleaseAll
+JubilifeTV4F_PokemonBreederF:
+    NPCMessage JubilifeTV4F_Text_ThemeSmilesAreDreamy
     End
 
-    .byte 0
+    .balign 4, 0

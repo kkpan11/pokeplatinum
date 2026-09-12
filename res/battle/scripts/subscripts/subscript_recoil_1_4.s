@@ -1,6 +1,5 @@
-    .include "macros/btlcmd.inc"
+#include "macros/btlcmd.inc"
 
-    .data
 
 _000:
     CheckAbility CHECK_HAVE, BTLSCR_ATTACKER, ABILITY_ROCK_HEAD, _038
@@ -14,7 +13,7 @@ _025:
     UpdateVar OPCODE_FLAG_ON, BTLVAR_BATTLE_CTX_STATUS, SYSCTL_SKIP_SPRITE_BLINK
     Call BATTLE_SUBSCRIPT_UPDATE_HP
     // {0} is hit with recoil!
-    PrintMessage pl_msg_00000368_00279, TAG_NICKNAME, BTLSCR_ATTACKER
+    PrintMessage BattleStrings_Text_PokemonIsHitWithRecoil_Ally, TAG_NICKNAME, BTLSCR_ATTACKER
     Wait 
     WaitButtonABTime 30
 

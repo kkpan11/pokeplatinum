@@ -36,13 +36,13 @@ static u32 ov70_0226C848(PPW_LOBBY_TIME_EVENT param0);
 static u32 ov70_0226C87C(PPW_LOBBY_TIME_EVENT param0);
 static void ov70_0226C8A8(UnkStruct_ov70_0226C6F8 *param0);
 
-UnkStruct_ov70_0226C6F8 *ov70_0226C60C(u32 param0, UnkStruct_ov70_0225DEE8 *param1)
+UnkStruct_ov70_0226C6F8 *ov70_0226C60C(u32 heapID, UnkStruct_ov70_0225DEE8 *param1)
 {
     UnkStruct_ov70_0226C6F8 *v0;
     u32 v1, v2, v3;
     u32 v4, v5, v6, v7, v8, v9;
 
-    v0 = Heap_AllocFromHeap(param0, sizeof(UnkStruct_ov70_0226C6F8));
+    v0 = Heap_Alloc(heapID, sizeof(UnkStruct_ov70_0226C6F8));
     memset(v0, 0, sizeof(UnkStruct_ov70_0226C6F8));
 
     v0->unk_00 = param1;
@@ -54,9 +54,9 @@ UnkStruct_ov70_0226C6F8 *ov70_0226C60C(u32 param0, UnkStruct_ov70_0225DEE8 *para
     v2 = ov70_0226C848(ov66_0222E1D0(v0->unk_04));
     v3 = ov70_0226C87C(ov66_0222E1E8(v0->unk_04));
 
-    v0->unk_10 = ov70_0226C338(param0, v1, v2, v3);
-    v0->unk_14 = ov70_0226CE54(param1, param0);
-    v0->unk_18 = ov70_0226C8B4(v0->unk_04, v0->unk_08, param0);
+    v0->unk_10 = ov70_0226C338(heapID, v1, v2, v3);
+    v0->unk_14 = ov70_0226CE54(param1, heapID);
+    v0->unk_18 = ov70_0226C8B4(v0->unk_04, v0->unk_08, heapID);
 
     ov70_0225CAEC(v0->unk_0C, v1);
 
@@ -102,7 +102,7 @@ void ov70_0226C6F8(UnkStruct_ov70_0226C6F8 *param0)
     ov70_0226CF38(param0->unk_14);
     ov70_0226C39C(param0->unk_10);
 
-    Heap_FreeToHeap(param0);
+    Heap_Free(param0);
 }
 
 void ov70_0226C718(UnkStruct_ov70_0226C6F8 *param0)
@@ -178,7 +178,7 @@ static u32 ov70_0226C81C(PPW_LOBBY_TIME_EVENT param0)
     case PPW_LOBBY_TIME_EVENT_NEON_A5:
         return param0 - PPW_LOBBY_TIME_EVENT_NEON_A0;
     default:
-        GF_ASSERT(0);
+        GF_ASSERT(FALSE);
         break;
     }
 
@@ -194,7 +194,7 @@ static u32 ov70_0226C848(PPW_LOBBY_TIME_EVENT param0)
     case PPW_LOBBY_TIME_EVENT_NEON_B3:
         return param0 - PPW_LOBBY_TIME_EVENT_NEON_B0;
     default:
-        GF_ASSERT(0);
+        GF_ASSERT(FALSE);
         break;
     }
 
@@ -210,7 +210,7 @@ static u32 ov70_0226C87C(PPW_LOBBY_TIME_EVENT param0)
     case PPW_LOBBY_TIME_EVENT_NEON_C3:
         return param0 - PPW_LOBBY_TIME_EVENT_NEON_C0;
     default:
-        GF_ASSERT(0);
+        GF_ASSERT(FALSE);
         break;
     }
 

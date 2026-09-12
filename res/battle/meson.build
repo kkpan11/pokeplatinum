@@ -1,2 +1,1 @@
-subdir('moves')
 subdir('scripts')

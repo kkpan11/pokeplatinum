@@ -1,41 +1,32 @@
-    .include "macros/scrcmd.inc"
+#include "macros/scrcmd.inc"
+#include "res/text/bank/celestic_town_southwest_house.h"
 
-    .data
 
-    ScriptEntry _000A
-    ScriptEntry _0045
-    .short 0xFD13
+    ScriptEntry CelesticTownPokecenter1F_BlackBelt
+    ScriptEntry CelesticTownPokecenter1F_Happiny
+    ScriptEntryEnd
 
-_000A:
-    PlayFanfare SEQ_SE_CONFIRM
+CelesticTownPokecenter1F_BlackBelt:
+    PlaySE SE_CONFIRM_sseq_3
     LockAll
     FacePlayer
-    ScrCmd_134 11, 0x800C
-    GoToIfEq 0x800C, 1, _003A
-    Message 0
-    SetVar 0x8004, 11
-    CallCommonScript 0x7D9
-    WaitABXPadPress
+    CheckPoketchAppRegistered POKETCH_APPID_ANALOGWATCH, VAR_RESULT
+    GoToIfEq VAR_RESULT, TRUE, CelesticTownSoutheastHouse_AnalogOrDigital
+    Message CelesticTownSoutheastHouse_Text_TakeThisFromMe
+    SetVar VAR_0x8004, POKETCH_APPID_ANALOGWATCH
+    Common_GivePoketchApp
+    WaitButton
     CloseMessage
     ReleaseAll
     End
 
-_003A:
-    Message 1
-    WaitABXPadPress
+CelesticTownSoutheastHouse_AnalogOrDigital:
+    Message CelesticTownSoutheastHouse_Text_AnalogOrDigital
+    WaitButton
     CloseMessage
     ReleaseAll
     End
 
-_0045:
-    PlayFanfare SEQ_SE_CONFIRM
-    LockAll
-    FacePlayer
-    ScrCmd_04B 0x5DC
-    ScrCmd_04C 0x1B8, 0
-    Message 2
-    ScrCmd_04D
-    WaitABXPadPress
-    CloseMessage
-    ReleaseAll
+CelesticTownPokecenter1F_Happiny:
+    PokemonCryAndMessage SPECIES_HAPPINY, CelesticTownSoutheastHouse_Text_HappinyCry
     End

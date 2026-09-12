@@ -1,371 +1,341 @@
-    .include "macros/scrcmd.inc"
+#include "macros/scrcmd.inc"
+#include "res/text/bank/route_213.h"
+#include "res/field/events/events_route_213.h"
 
-    .data
 
-    ScriptEntry _0022
-    ScriptEntry _0078
-    ScriptEntry _0422
-    ScriptEntry _03FC
-    ScriptEntry _040F
-    ScriptEntry _0435
-    ScriptEntry _044C
-    ScriptEntry _0463
-    .short 0xFD13
+    ScriptEntry Route213_OnTransition
+    ScriptEntry Route213_GruntM
+    ScriptEntry Route213_Fisherman
+    ScriptEntry Route213_Beauty
+    ScriptEntry Route213_Collector
+    ScriptEntry Route213_ArrowSignpostPastoriaCity
+    ScriptEntry Route213_SignboardHotelGrandLake
+    ScriptEntry Route213_SignboardDrFootstepsHouse
+    ScriptEntryEnd
 
-_0022:
-    GoToIfUnset 0x104, _002F
+Route213_OnTransition:
+    GoToIfUnset FLAG_ROUTE_213_GRUNT_M_LEFT, Route213_CheckBadge
     End
 
-_002F:
-    ScrCmd_15B 3, 0x4000
-    GoToIfEq 0x4000, 1, _0044
+Route213_CheckBadge:
+    CheckBadgeAcquired BADGE_ID_FEN, VAR_MAP_LOCAL_0x00
+    GoToIfEq VAR_MAP_LOCAL_0x00, TRUE, Route213_CheckShowGruntM
     End
 
-_0044:
-    GoToIfSet 0x103, _0051
+Route213_CheckShowGruntM:
+    GoToIfSet FLAG_TALKED_TO_PASTORIA_CITY_GRUNT_M, Route213_ShowGruntM
     End
 
-_0051:
-    CallIfUnset 0x118, _0062
-    ClearFlag 0x21A
+Route213_ShowGruntM:
+    CallIfUnset FLAG_TALKED_TO_ROUTE_213_GRUNT_M, Route213_SetGruntMPositionNearPastoria
+    ClearFlag FLAG_HIDE_ROUTE_213_GRUNT_M
     End
 
-_0062:
-    ScrCmd_186 30, 0x28E, 0x32C
-    ScrCmd_189 30, 3
-    ScrCmd_188 30, 17
+Route213_SetGruntMPositionNearPastoria:
+    SetObjectEventPos LOCALID_GRUNT_M, 654, 812
+    SetObjectEventDir LOCALID_GRUNT_M, DIR_EAST
+    SetObjectEventMovementType LOCALID_GRUNT_M, MOVEMENT_TYPE_LOOK_EAST
     Return
 
-_0078:
-    PlayFanfare SEQ_SE_CONFIRM
+Route213_GruntM:
+    PlaySE SE_CONFIRM_sseq_3
     LockAll
-    GoToIfSet 0x118, _0133
-    Message 0
+    GoToIfSet FLAG_TALKED_TO_ROUTE_213_GRUNT_M, Route213_GruntMEast
+    Message Route213_Text_WeNeededEnergy
     CloseMessage
     FacePlayer
-    ApplyMovement 30, _0388
+    ApplyMovement LOCALID_GRUNT_M, Route213_Movement_GruntMExclamationMark
     WaitMovement
-    Message 1
+    Message Route213_Text_YouWereEavesdropping
     CloseMessage
-    ScrCmd_1BD 0x8004
-    GoToIfEq 0x8004, 2, _00F1
-    GoToIfEq 0x8004, 3, _00DF
-    GoTo _00C5
+    GetPlayerDir VAR_0x8004
+    GoToIfEq VAR_0x8004, DIR_WEST, Route213_GruntMLeaveWest
+    GoToIfEq VAR_0x8004, DIR_EAST, Route213_GruntMLeaveEast
+    GoTo Route213_GruntMLeaveNorthSouth
     End
 
-_00C5:
-    ApplyMovement 30, _0390
-    ApplyMovement 0xFF, _03F0
+Route213_GruntMLeaveNorthSouth:
+    ApplyMovement LOCALID_GRUNT_M, Route213_Movement_GruntMLeaveNorthSouthEast
+    ApplyMovement LOCALID_PLAYER, Route213_Movement_WatchGruntMLeave
     WaitMovement
-    GoTo _010B
+    GoTo Route213_MoveGruntMEast
     End
 
-_00DF:
-    ApplyMovement 30, _0390
+Route213_GruntMLeaveEast:
+    ApplyMovement LOCALID_GRUNT_M, Route213_Movement_GruntMLeaveNorthSouthEast
     WaitMovement
-    GoTo _010B
+    GoTo Route213_MoveGruntMEast
     End
 
-_00F1:
-    ApplyMovement 30, _0398
-    ApplyMovement 0xFF, _03F0
+Route213_GruntMLeaveWest:
+    ApplyMovement LOCALID_GRUNT_M, Route213_Movement_GruntMLeaveWest
+    ApplyMovement LOCALID_PLAYER, Route213_Movement_WatchGruntMLeave
     WaitMovement
-    GoTo _010B
+    GoTo Route213_MoveGruntMEast
     End
 
-_010B:
-    SetFlag 0x118
-    ScrCmd_065 30
-    ScrCmd_186 30, 0x2AB, 0x341
-    ScrCmd_189 30, 3
-    ScrCmd_188 30, 17
-    ClearFlag 0x21A
-    ScrCmd_064 30
+Route213_MoveGruntMEast:
+    SetFlag FLAG_TALKED_TO_ROUTE_213_GRUNT_M
+    RemoveObject LOCALID_GRUNT_M
+    SetObjectEventPos LOCALID_GRUNT_M, 683, 833
+    SetObjectEventDir LOCALID_GRUNT_M, DIR_EAST
+    SetObjectEventMovementType LOCALID_GRUNT_M, MOVEMENT_TYPE_LOOK_EAST
+    ClearFlag FLAG_HIDE_ROUTE_213_GRUNT_M
+    AddObject LOCALID_GRUNT_M
     ReleaseAll
     End
 
-_0133:
-    ScrCmd_1BD 0x8004
-    Message 2
+Route213_GruntMEast:
+    GetPlayerDir VAR_0x8004
+    Message Route213_Text_BombPacksAWallop
     CloseMessage
     FacePlayer
-    ApplyMovement 30, _0388
+    ApplyMovement LOCALID_GRUNT_M, Route213_Movement_GruntMExclamationMark
     WaitMovement
-    Message 3
+    Message Route213_Text_YoureAPersistentPest
     CloseMessage
-    ScrCmd_1BD 0x8004
-    GoToIfEq 0x8004, 2, _0180
-    GoTo _0166
+    GetPlayerDir VAR_0x8004
+    GoToIfEq VAR_0x8004, DIR_WEST, Route213_GruntMEastLeaveWest
+    GoTo Route213_GruntMEastLeaveNorthSouthEast
     End
 
-_0166:
-    ApplyMovement 0xFF, _03C0
-    ApplyMovement 30, _03A4
+Route213_GruntMEastLeaveNorthSouthEast:
+    ApplyMovement LOCALID_PLAYER, Route213_Movement_PlayerWatchGruntMEastLeave
+    ApplyMovement LOCALID_GRUNT_M, Route213_Movement_GruntMEastLeaveNorthSouthEast
     WaitMovement
-    GoTo _019A
+    GoTo Route213_Looker
     End
 
-_0180:
-    ApplyMovement 0xFF, _03C0
-    ApplyMovement 30, _03B4
+Route213_GruntMEastLeaveWest:
+    ApplyMovement LOCALID_PLAYER, Route213_Movement_PlayerWatchGruntMEastLeave
+    ApplyMovement LOCALID_GRUNT_M, Route213_Movement_GruntMEastLeaveWest
     WaitMovement
-    GoTo _019A
+    GoTo Route213_Looker
     End
 
-_019A:
-    ScrCmd_065 30
-    SetFlag 0x104
-    ClearFlag 0x1E8
-    ScrCmd_064 33
-    CallCommonScript 0x807
-    ScrCmd_315 0x800C
-    CallIfEq 0x800C, 2, _0261
-    CallIfEq 0x8004, 2, _0267
-    CallIfEq 0x8004, 3, _027B
-    CallIfEq 0x8004, 0, _028F
-    CallIfEq 0x8004, 1, _02A3
-    Message 4
-    ApplyMovement 33, _0348
+Route213_Looker:
+    RemoveObject LOCALID_GRUNT_M
+    SetFlag FLAG_ROUTE_213_GRUNT_M_LEFT
+    ClearFlag FLAG_HIDE_ROUTE_213_LOOKER
+    AddObject LOCALID_LOOKER
+    Common_SetLookerBGM
+    GetOverworldWeather VAR_RESULT
+    CallIfEq VAR_RESULT, OVERWORLD_WEATHER_RAINING, _0261
+    CallIfEq VAR_0x8004, DIR_WEST, Route213_LookerEnterWest
+    CallIfEq VAR_0x8004, DIR_EAST, Route213_LookerEnterEast
+    CallIfEq VAR_0x8004, DIR_NORTH, Route213_LookerEnterNorth
+    CallIfEq VAR_0x8004, DIR_SOUTH, Route213_LookerEnterSouth
+    Message Route213_Text_ThatIsTeamGalactic
+    ApplyMovement LOCALID_LOOKER, Route213_Movement_LookerWalkOnSpotSouth
     WaitMovement
-    Message 5
-    Message 6
+    Message Route213_Text_HowDidIMissIt
+    Message Route213_Text_ThisWillNotDo
     CloseMessage
-    CallIfEq 0x8004, 2, _02B7
-    CallIfEq 0x8004, 3, _02CB
-    CallIfEq 0x8004, 0, _02DF
-    CallIfEq 0x8004, 1, _02F3
-    ScrCmd_065 33
-    CallCommonScript 0x808
-    ScrCmd_315 0x800C
-    CallIfEq 0x800C, 2, _0261
-    ClearFlag 0x211
-    ClearFlag 0x21B
+    CallIfEq VAR_0x8004, DIR_WEST, Route213_LookerLeaveWest
+    CallIfEq VAR_0x8004, DIR_EAST, Route213_LookerLeaveEast
+    CallIfEq VAR_0x8004, DIR_NORTH, Route213_LookerLeaveNorth
+    CallIfEq VAR_0x8004, DIR_SOUTH, Route213_LookerLeaveSouth
+    RemoveObject LOCALID_LOOKER
+    Common_FadeToDefaultMusic4
+    GetOverworldWeather VAR_RESULT
+    CallIfEq VAR_RESULT, OVERWORLD_WEATHER_RAINING, _0261
+    ClearFlag FLAG_HIDE_GRAND_LAKE_ROUTE_213_LOBBY_LOOKER
+    ClearFlag FLAG_HIDE_VALOR_LAKEFRONT_GRUNT_M
     ReleaseAll
     End
 
 _0261:
-    PlayFanfare SEQ_SE_DP_T_AME
+    PlaySE SEQ_SE_DP_T_AME_sseq
     Return
 
-_0267:
-    ApplyMovement 33, _0318
-    ApplyMovement 0xFF, _03CC
+Route213_LookerEnterWest:
+    ApplyMovement LOCALID_LOOKER, Route213_Movement_LookerEnterWest
+    ApplyMovement LOCALID_PLAYER, Route213_Movement_PlayerWatchLookerEnterNorthWestEast
     WaitMovement
     Return
 
-_027B:
-    ApplyMovement 33, _0308
-    ApplyMovement 0xFF, _03CC
+Route213_LookerEnterEast:
+    ApplyMovement LOCALID_LOOKER, Route213_Movement_LookerEnterEast
+    ApplyMovement LOCALID_PLAYER, Route213_Movement_PlayerWatchLookerEnterNorthWestEast
     WaitMovement
     Return
 
-_028F:
-    ApplyMovement 33, _0338
-    ApplyMovement 0xFF, _03CC
+Route213_LookerEnterNorth:
+    ApplyMovement LOCALID_LOOKER, Route213_Movement_LookerEnterNorth
+    ApplyMovement LOCALID_PLAYER, Route213_Movement_PlayerWatchLookerEnterNorthWestEast
     WaitMovement
     Return
 
-_02A3:
-    ApplyMovement 33, _0328
-    ApplyMovement 0xFF, _03D8
+Route213_LookerEnterSouth:
+    ApplyMovement LOCALID_LOOKER, Route213_Movement_LookerEnterSouth
+    ApplyMovement LOCALID_PLAYER, Route213_Movement_PlayerWatchLookerEnterSouth
     WaitMovement
     Return
 
-_02B7:
-    ApplyMovement 33, _035C
-    ApplyMovement 0xFF, _03E4
+Route213_LookerLeaveWest:
+    ApplyMovement LOCALID_LOOKER, Route213_Movement_LookerLeaveWest
+    ApplyMovement LOCALID_PLAYER, Route213_Movement_PlayerWatchLookerLeave
     WaitMovement
     Return
 
-_02CB:
-    ApplyMovement 33, _0350
-    ApplyMovement 0xFF, _03E4
+Route213_LookerLeaveEast:
+    ApplyMovement LOCALID_LOOKER, Route213_Movement_LookerLeaveEast
+    ApplyMovement LOCALID_PLAYER, Route213_Movement_PlayerWatchLookerLeave
     WaitMovement
     Return
 
-_02DF:
-    ApplyMovement 33, _037C
-    ApplyMovement 0xFF, _03E4
+Route213_LookerLeaveNorth:
+    ApplyMovement LOCALID_LOOKER, Route213_Movement_LookerLeaveNorth
+    ApplyMovement LOCALID_PLAYER, Route213_Movement_PlayerWatchLookerLeave
     WaitMovement
     Return
 
-_02F3:
-    ApplyMovement 33, _0368
-    ApplyMovement 0xFF, _03E4
+Route213_LookerLeaveSouth:
+    ApplyMovement LOCALID_LOOKER, Route213_Movement_LookerLeaveSouth
+    ApplyMovement LOCALID_PLAYER, Route213_Movement_PlayerWatchLookerLeave
     WaitMovement
     Return
 
     .balign 4, 0
-_0308:
-    MoveAction_013 10
-    MoveAction_010 2
-    MoveAction_027
+Route213_Movement_LookerEnterEast:
+    WalkFastEast 10
+    WalkFastNorth 2
+    WalkOnSpotFastEast
     EndMovement
 
     .balign 4, 0
-_0318:
-    MoveAction_013 10
-    MoveAction_010 2
-    MoveAction_013 2
+Route213_Movement_LookerEnterWest:
+    WalkFastEast 10
+    WalkFastNorth 2
+    WalkFastEast 2
     EndMovement
 
     .balign 4, 0
-_0328:
-    MoveAction_013 10
-    MoveAction_010 3
-    MoveAction_013
+Route213_Movement_LookerEnterSouth:
+    WalkFastEast 10
+    WalkFastNorth 3
+    WalkFastEast
     EndMovement
 
     .balign 4, 0
-_0338:
-    MoveAction_013 10
-    MoveAction_010
-    MoveAction_013
+Route213_Movement_LookerEnterNorth:
+    WalkFastEast 10
+    WalkFastNorth
+    WalkFastEast
     EndMovement
 
     .balign 4, 0
-_0348:
-    MoveAction_025
+Route213_Movement_LookerWalkOnSpotSouth:
+    WalkOnSpotFastSouth
     EndMovement
 
     .balign 4, 0
-_0350:
-    MoveAction_010
-    MoveAction_013 10
+Route213_Movement_LookerLeaveEast:
+    WalkFastNorth
+    WalkFastEast 10
     EndMovement
 
     .balign 4, 0
-_035C:
-    MoveAction_010
-    MoveAction_013 10
+Route213_Movement_LookerLeaveWest:
+    WalkFastNorth
+    WalkFastEast 10
     EndMovement
 
     .balign 4, 0
-_0368:
-    MoveAction_011
-    MoveAction_013 4
-    MoveAction_010
-    MoveAction_013 6
+Route213_Movement_LookerLeaveSouth:
+    WalkFastSouth
+    WalkFastEast 4
+    WalkFastNorth
+    WalkFastEast 6
     EndMovement
 
     .balign 4, 0
-_037C:
-    MoveAction_010 2
-    MoveAction_013 10
+Route213_Movement_LookerLeaveNorth:
+    WalkFastNorth 2
+    WalkFastEast 10
     EndMovement
 
     .balign 4, 0
-_0388:
-    MoveAction_04B
+Route213_Movement_GruntMExclamationMark:
+    EmoteExclamationMark
     EndMovement
 
     .balign 4, 0
-_0390:
-    MoveAction_013 10
+Route213_Movement_GruntMLeaveNorthSouthEast:
+    WalkFastEast 10
     EndMovement
 
     .balign 4, 0
-_0398:
-    MoveAction_011 2
-    MoveAction_013 9
+Route213_Movement_GruntMLeaveWest:
+    WalkFastSouth 2
+    WalkFastEast 9
     EndMovement
 
     .balign 4, 0
-_03A4:
-    MoveAction_013 4
-    MoveAction_010
-    MoveAction_013 6
+Route213_Movement_GruntMEastLeaveNorthSouthEast:
+    WalkFastEast 4
+    WalkFastNorth
+    WalkFastEast 6
     EndMovement
 
     .balign 4, 0
-_03B4:
-    MoveAction_010
-    MoveAction_013 10
+Route213_Movement_GruntMEastLeaveWest:
+    WalkFastNorth
+    WalkFastEast 10
     EndMovement
 
     .balign 4, 0
-_03C0:
-    MoveAction_03F
-    MoveAction_003
+Route213_Movement_PlayerWatchGruntMEastLeave:
+    Delay8
+    FaceEast
     EndMovement
 
     .balign 4, 0
-_03CC:
-    MoveAction_03E 10
-    MoveAction_022
+Route213_Movement_PlayerWatchLookerEnterNorthWestEast:
+    Delay4 10
+    WalkOnSpotNormalWest
     EndMovement
 
     .balign 4, 0
-_03D8:
-    MoveAction_03E 11
-    MoveAction_022
+Route213_Movement_PlayerWatchLookerEnterSouth:
+    Delay4 11
+    WalkOnSpotNormalWest
     EndMovement
 
     .balign 4, 0
-_03E4:
-    MoveAction_03E 3
-    MoveAction_023
+Route213_Movement_PlayerWatchLookerLeave:
+    Delay4 3
+    WalkOnSpotNormalEast
     EndMovement
 
     .balign 4, 0
-_03F0:
-    MoveAction_03F
-    MoveAction_023
+Route213_Movement_WatchGruntMLeave:
+    Delay8
+    WalkOnSpotNormalEast
     EndMovement
 
-_03FC:
-    PlayFanfare SEQ_SE_CONFIRM
-    LockAll
-    FacePlayer
-    Message 8
-    WaitABXPadPress
-    CloseMessage
-    ReleaseAll
+Route213_Beauty:
+    NPCMessage Route213_Text_RatherPoolThanSea
     End
 
-_040F:
-    PlayFanfare SEQ_SE_CONFIRM
-    LockAll
-    FacePlayer
-    Message 9
-    WaitABXPadPress
-    CloseMessage
-    ReleaseAll
+Route213_Collector:
+    NPCMessage Route213_Text_SomethingOnBigCliff
     End
 
-_0422:
-    PlayFanfare SEQ_SE_CONFIRM
-    LockAll
-    FacePlayer
-    Message 7
-    WaitABXPadPress
-    CloseMessage
-    ReleaseAll
+Route213_Fisherman:
+    NPCMessage Route213_Text_TheresAFancyHotel
     End
 
-_0435:
-    ScrCmd_036 10, 1, 0, 0x800C
-    ScrCmd_038 3
-    ScrCmd_039
-    ScrCmd_03B 0x800C
-    CallCommonScript 0x7D0
+Route213_ArrowSignpostPastoriaCity:
+    ShowArrowSign Route213_Text_SignPastoriaCity
     End
 
-_044C:
-    ScrCmd_036 11, 2, 0, 0x800C
-    ScrCmd_038 3
-    ScrCmd_039
-    ScrCmd_03B 0x800C
-    CallCommonScript 0x7D0
+Route213_SignboardHotelGrandLake:
+    ShowLandmarkSign Route213_Text_SignHotelGrandLake
     End
 
-_0463:
-    ScrCmd_036 12, 2, 0, 0x800C
-    ScrCmd_038 3
-    ScrCmd_039
-    ScrCmd_03B 0x800C
-    CallCommonScript 0x7D0
+Route213_SignboardDrFootstepsHouse:
+    ShowLandmarkSign Route213_Text_SignDrFootstepsHouse
     End
 
-    .byte 0
-    .byte 0
+    .balign 4, 0

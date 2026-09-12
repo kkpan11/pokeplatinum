@@ -1,162 +1,152 @@
-    .include "macros/scrcmd.inc"
+#include "macros/scrcmd.inc"
+#include "generated/tutor_locations.h"
+#include "res/text/bank/survival_area_north_house.h"
 
-    .data
 
-    ScriptEntry _000E
-    ScriptEntry _0021
-    ScriptEntry _0253
-    .short 0xFD13
+    ScriptEntry SurvivalAreaNorthHouse_Psychic
+    ScriptEntry SurvivalAreaNorthHouse_Hiker
+    ScriptEntry SurvivalAreaNorthHouse_Book
+    ScriptEntryEnd
 
-_000E:
-    PlayFanfare SEQ_SE_CONFIRM
+SurvivalAreaNorthHouse_Psychic:
+    NPCMessage SurvivalAreaNorthHouse_Text_LookingForwardToVisitors
+    End
+
+SurvivalAreaNorthHouse_Hiker:
+    PlaySE SE_CONFIRM_sseq_3
     LockAll
     FacePlayer
-    Message 17
-    WaitABXPadPress
+    Message SurvivalAreaNorthHouse_Text_WantToTeachMove
+    ShowYesNoMenu VAR_RESULT
+    GoToIfEq VAR_RESULT, MENU_YES, SurvivalAreaNorthHouse_TryTeachMove
+    GoToIfEq VAR_RESULT, MENU_NO, SurvivalAreaNorthHouse_SeeYouThen
+    End
+
+SurvivalAreaNorthHouse_TryTeachMove:
+    Message SurvivalAreaNorthHouse_Text_TeachWhichPokemon
     CloseMessage
-    ReleaseAll
-    End
-
-_0021:
-    PlayFanfare SEQ_SE_CONFIRM
-    LockAll
-    FacePlayer
-    Message 0
-    ScrCmd_03E 0x800C
-    GoToIfEq 0x800C, 0, _004C
-    GoToIfEq 0x800C, 1, _0232
-    End
-
-_004C:
-    Message 2
-    CloseMessage
-    FadeScreen 6, 1, 0, 0
+    FadeScreenOut
     WaitFadeScreen
-    ScrCmd_191
-    ScrCmd_193 0x8000
-    ScrCmd_0A1
-    FadeScreen 6, 1, 1, 0
+    SelectMoveTutorPokemon
+    GetSelectedPartySlot VAR_0x8000
+    ReturnToField
+    FadeScreenIn
     WaitFadeScreen
-    GoToIfEq 0x8000, 0xFF, _0232
-    ScrCmd_198 0x8000, 0x8001
-    GoToIfEq 0x8001, 0, _0227
-    ScrCmd_2E5 0x8000, 1, 0x800C
-    GoToIfEq 0x800C, 0, _023D
-    ScrCmd_0D6 0, 0x8000
-    Message 5
-    ScrCmd_2E6 0x8000, 1, 0x800C
-    SetVar 0x8003, 0x800C
-    GoToIfEq 0x8003, -2, _0232
-    ScrCmd_2EA 0x8003, 0x800C
-    GoToIfEq 0x800C, 0, _0248
-    ScrCmd_1C8 0x800C, 0x8000
-    SetVar 0x8002, 0x800C
-    GoToIfEq 0x800C, 4, _00FD
-    GoTo _01F2
+    GoToIfEq VAR_0x8000, PARTY_SLOT_NONE, SurvivalAreaNorthHouse_SeeYouThen
+    GetPartyMonSpecies VAR_0x8000, VAR_0x8001
+    GoToIfEq VAR_0x8001, SPECIES_NONE, SurvivalAreaNorthHouse_CantTeachEgg
+    CheckHasLearnableTutorMoves VAR_0x8000, TUTOR_LOCATION_SURVIVAL_AREA, VAR_RESULT
+    GoToIfEq VAR_RESULT, FALSE, SurvivalAreaNorthHouse_NoMovesToTeach
+    BufferPartyMonNickname 0, VAR_0x8000
+    Message SurvivalAreaNorthHouse_Text_TeachWhichMove
+    ShowMoveTutorMoveSelectionMenu VAR_0x8000, TUTOR_LOCATION_SURVIVAL_AREA, VAR_RESULT
+    SetVar VAR_0x8003, VAR_RESULT
+    GoToIfEq VAR_0x8003, MENU_CANCEL, SurvivalAreaNorthHouse_SeeYouThen
+    CheckCanAffordMove VAR_0x8003, VAR_RESULT
+    GoToIfEq VAR_RESULT, FALSE, SurvivalAreaNorthHouse_NotEnoughShards
+    GetPartyMonMoveCount VAR_RESULT, VAR_0x8000
+    SetVar VAR_0x8002, VAR_RESULT
+    GoToIfEq VAR_RESULT, LEARNED_MOVES_MAX, SurvivalAreaNorthHouse_TryReplaceMove
+    GoTo SurvivalAreaNorthHouse_TeachMove
     End
 
-_00FD:
-    ScrCmd_0D6 0, 0x8000
-    ScrCmd_0D4 1, 0x8003
-    Message 9
-    ScrCmd_03E 0x800C
-    GoToIfEq 0x800C, 1, _01B7
-    FadeScreen 6, 1, 0, 0
+SurvivalAreaNorthHouse_TryReplaceMove:
+    BufferPartyMonNickname 0, VAR_0x8000
+    BufferMoveName 1, VAR_0x8003
+    Message SurvivalAreaNorthHouse_Text_DeleteOlderMove
+    ShowYesNoMenu VAR_RESULT
+    GoToIfEq VAR_RESULT, MENU_NO, SurvivalAreaNorthHouse_StopTryingToTeachMove
+    FadeScreenOut
     WaitFadeScreen
     CloseMessage
-    ScrCmd_2E7 0x8000, 0x8003
-    ScrCmd_2E8 0x8002
-    ScrCmd_0A1
-    FadeScreen 6, 1, 1, 0
+    OpenSummaryScreenTeachMove VAR_0x8000, VAR_0x8003
+    GetSummarySelectedMoveSlot VAR_0x8002
+    ReturnToField
+    FadeScreenIn
     WaitFadeScreen
-    GoToIfEq 0x8002, 4, _01B7
-    ScrCmd_1CA 0x800C, 0x8000, 0x8002
-    ScrCmd_0D4 1, 0x800C
-    Message 12
-    ScrCmd_03E 0x800C
-    GoToIfEq 0x800C, 1, _01B7
-    ScrCmd_0D6 0, 0x8000
-    ScrCmd_1CA 0x800C, 0x8000, 0x8002
-    ScrCmd_0D4 1, 0x800C
-    Message 13
-    PlayFanfare SEQ_SE_DP_KON
-    ScrCmd_04B 0x5E6
-    WaitTime 30, 0x800C
-    Message 14
-    WaitTime 32, 0x800C
-    ScrCmd_04E 0x483
-    ScrCmd_0D4 1, 0x8003
-    Message 15
-    ScrCmd_04F
-    WaitTime 16, 0x800C
-    GoTo _0213
+    GoToIfEq VAR_0x8002, LEARNED_MOVES_MAX, SurvivalAreaNorthHouse_StopTryingToTeachMove
+    GetPartyMonMove VAR_RESULT, VAR_0x8000, VAR_0x8002
+    BufferMoveName 1, VAR_RESULT
+    Message SurvivalAreaNorthHouse_Text_OKToForgetMove
+    ShowYesNoMenu VAR_RESULT
+    GoToIfEq VAR_RESULT, MENU_NO, SurvivalAreaNorthHouse_StopTryingToTeachMove
+    BufferPartyMonNickname 0, VAR_0x8000
+    GetPartyMonMove VAR_RESULT, VAR_0x8000, VAR_0x8002
+    BufferMoveName 1, VAR_RESULT
+    Message SurvivalAreaNorthHouse_Text_OneTwoThreePoof
+    PlaySE SEQ_SE_DP_KON_sseq
+    WaitSE SEQ_SE_DP_KON_sseq
+    WaitTime 30, VAR_RESULT
+    Message SurvivalAreaNorthHouse_Text_PokemonForgotMove
+    WaitTime 32, VAR_RESULT
+    PlayFanfare SEQ_FANFA1_sseq
+    BufferMoveName 1, VAR_0x8003
+    Message SurvivalAreaNorthHouse_Text_PokemonLearnedMove2
+    WaitFanfare
+    WaitTime 16, VAR_RESULT
+    GoTo SurvivalAreaNorthHouse_PayShards
     End
 
-_01B7:
-    ScrCmd_0D6 0, 0x8000
-    ScrCmd_0D4 1, 0x8003
-    Message 10
-    ScrCmd_03E 0x800C
-    GoToIfEq 0x800C, 0, _01DD
-    GoTo _00FD
+SurvivalAreaNorthHouse_StopTryingToTeachMove:
+    BufferPartyMonNickname 0, VAR_0x8000
+    BufferMoveName 1, VAR_0x8003
+    Message SurvivalAreaNorthHouse_Text_StopTryingToTeachMove
+    ShowYesNoMenu VAR_RESULT
+    GoToIfEq VAR_RESULT, MENU_YES, SurvivalAreaNorthHouse_DidntLearnMove
+    GoTo SurvivalAreaNorthHouse_TryReplaceMove
     End
 
-_01DD:
-    ScrCmd_0D6 0, 0x8000
-    ScrCmd_0D4 1, 0x8003
-    Message 11
-    GoTo _0232
+SurvivalAreaNorthHouse_DidntLearnMove:
+    BufferPartyMonNickname 0, VAR_0x8000
+    BufferMoveName 1, VAR_0x8003
+    Message SurvivalAreaNorthHouse_Text_PokemonDidntLearnMove
+    GoTo SurvivalAreaNorthHouse_SeeYouThen
     End
 
-_01F2:
-    ScrCmd_0D6 0, 0x8000
-    ScrCmd_0D4 1, 0x8003
-    Message 8
-    ScrCmd_04E 0x483
-    ScrCmd_04F
-    WaitTime 16, 0x800C
-    GoTo _0213
+SurvivalAreaNorthHouse_TeachMove:
+    BufferPartyMonNickname 0, VAR_0x8000
+    BufferMoveName 1, VAR_0x8003
+    Message SurvivalAreaNorthHouse_Text_PokemonLearnedMove
+    PlayFanfare SEQ_FANFA1_sseq
+    WaitFanfare
+    WaitTime 16, VAR_RESULT
+    GoTo SurvivalAreaNorthHouse_PayShards
     End
 
-_0213:
-    ScrCmd_2EB 0x8003
-    ScrCmd_2E9 0x8000, 0x8002, 0x8003
-    GoTo _0232
+SurvivalAreaNorthHouse_PayShards:
+    PayShardCost VAR_0x8003
+    ResetMoveSlot VAR_0x8000, VAR_0x8002, VAR_0x8003
+    GoTo SurvivalAreaNorthHouse_SeeYouThen
     End
 
-_0227:
-    Message 16
-    WaitABXPadPress
+SurvivalAreaNorthHouse_CantTeachEgg:
+    Message SurvivalAreaNorthHouse_Text_CantTeachEgg
+    WaitButton
     CloseMessage
     ReleaseAll
     End
 
-_0232:
-    Message 1
-    WaitABXPadPress
+SurvivalAreaNorthHouse_SeeYouThen:
+    Message SurvivalAreaNorthHouse_Text_SeeYouThen
+    WaitButton
     CloseMessage
     ReleaseAll
     End
 
-_023D:
-    Message 3
-    WaitABXPadPress
+SurvivalAreaNorthHouse_NoMovesToTeach:
+    Message SurvivalAreaNorthHouse_Text_NoMovesToTeach
+    WaitButton
     CloseMessage
     ReleaseAll
     End
 
-_0248:
-    Message 4
-    WaitABXPadPress
+SurvivalAreaNorthHouse_NotEnoughShards:
+    Message SurvivalAreaNorthHouse_Text_NotEnoughShards
+    WaitButton
     CloseMessage
     ReleaseAll
     End
 
-_0253:
-    PlayFanfare SEQ_SE_CONFIRM
-    LockAll
-    Message 18
-    WaitABXPadPress
-    CloseMessage
-    ReleaseAll
+SurvivalAreaNorthHouse_Book:
+    EventMessage SurvivalAreaNorthHouse_Text_ShardColorsEmphasize
     End

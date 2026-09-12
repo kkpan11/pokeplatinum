@@ -1,56 +1,55 @@
-    .include "macros/scrcmd.inc"
+#include "macros/scrcmd.inc"
 
-    .data
 
-    ScriptEntry _0006
-    .short 0xFD13
+    ScriptEntry VistaLighthouseElevator_OnFrame_Init
+    ScriptEntryEnd
 
-_0006:
+VistaLighthouseElevator_OnFrame_Init:
     LockAll
-    ApplyMovement 0xFF, _00B8
+    ApplyMovement LOCALID_PLAYER, VistaLighthouseElevator_Movement_PlayerWalkIn
     WaitMovement
-    ScrCmd_11C 0x40CE
-    SetVar 0x8008, 0x40CE
-    GoToIfEq 0x8008, 1, _0038
-    GoToIfEq 0x8008, 0, _006A
+    GetFloorsAbove VAR_ELEVATOR_FLOORS_ABOVE
+    SetVar VAR_0x8008, VAR_ELEVATOR_FLOORS_ABOVE
+    GoToIfEq VAR_0x8008, 1, VistaLighthouseElevator_ElevatorUp
+    GoToIfEq VAR_0x8008, 0, VistaLighthouseElevator_ElevatorDown
     End
 
-_0038:
-    SetVar 0x8004, 0
-    Call _009C
-    FadeScreen 6, 1, 0, 0
+VistaLighthouseElevator_ElevatorUp:
+    SetVar VAR_0x8004, ELEVATOR_DIR_UP
+    Call VistaLighthouseElevator_ElevatorAnimation
+    FadeScreenOut
     WaitFadeScreen
-    ScrCmd_0BE 164, 0, 6, 10, 1
-    FadeScreen 6, 1, 1, 0
-    WaitFadeScreen
-    End
-
-_006A:
-    SetVar 0x8004, 1
-    Call _009C
-    FadeScreen 6, 1, 0, 0
-    WaitFadeScreen
-    ScrCmd_0BE 150, 0, 0x376, 0x317, 1
-    FadeScreen 6, 1, 1, 0
+    Warp MAP_HEADER_VISTA_LIGHTHOUSE, 6, 10, DIR_SOUTH
+    FadeScreenIn
     WaitFadeScreen
     End
 
-_009C:
-    ScrCmd_04B 0x5DC
-    ScrCmd_23C 0x8004, 4
-    ApplyMovement 0xFF, _00C4
+VistaLighthouseElevator_ElevatorDown:
+    SetVar VAR_0x8004, ELEVATOR_DIR_DOWN
+    Call VistaLighthouseElevator_ElevatorAnimation
+    FadeScreenOut
+    WaitFadeScreen
+    Warp MAP_HEADER_SUNYSHORE_CITY, 886, 791, DIR_SOUTH
+    FadeScreenIn
+    WaitFadeScreen
+    End
+
+VistaLighthouseElevator_ElevatorAnimation:
+    WaitSE SE_CONFIRM_sseq_3
+    PlayElevatorAnimation VAR_0x8004, 4
+    ApplyMovement LOCALID_PLAYER, VistaLighthouseElevator_Movement_PlayerWalkOut
     WaitMovement
-    PlayFanfare SEQ_SE_DP_KAIDAN2
+    PlaySE SEQ_SE_DP_KAIDAN2_sseq
     Return
 
     .balign 4, 0
-_00B8:
-    MoveAction_00C 2
-    MoveAction_021
+VistaLighthouseElevator_Movement_PlayerWalkIn:
+    WalkNormalNorth 2
+    WalkOnSpotNormalSouth
     EndMovement
 
     .balign 4, 0
-_00C4:
-    MoveAction_00D 2
-    MoveAction_021
+VistaLighthouseElevator_Movement_PlayerWalkOut:
+    WalkNormalSouth 2
+    WalkOnSpotNormalSouth
     EndMovement

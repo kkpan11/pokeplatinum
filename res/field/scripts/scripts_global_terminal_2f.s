@@ -1,215 +1,148 @@
-    .include "macros/scrcmd.inc"
+#include "macros/scrcmd.inc"
+#include "res/text/bank/global_terminal_2f.h"
 
-    .data
 
-    ScriptEntry _0107
-    ScriptEntry _003A
-    ScriptEntry _004D
-    ScriptEntry _0060
-    ScriptEntry _0073
-    ScriptEntry _0086
-    ScriptEntry _0099
-    ScriptEntry _00AC
-    ScriptEntry _00BF
-    ScriptEntry _00D2
-    ScriptEntry _00E5
-    ScriptEntry _00F6
-    ScriptEntry _0109
-    ScriptEntry _0193
-    .short 0xFD13
+    ScriptEntry GlobalTerminal2F_Dummy1
+    ScriptEntry GlobalTerminal2F_Artist
+    ScriptEntry GlobalTerminal2F_Hiker
+    ScriptEntry GlobalTerminal2F_BattleGirl
+    ScriptEntry GlobalTerminal2F_Idol
+    ScriptEntry GlobalTerminal2F_ExpertF
+    ScriptEntry GlobalTerminal2F_PokefanF
+    ScriptEntry GlobalTerminal2F_Beauty
+    ScriptEntry GlobalTerminal2F_Lass
+    ScriptEntry GlobalTerminal2F_Twin
+    ScriptEntry GlobalTerminal2F_BgSignWarp1F
+    ScriptEntry GlobalTerminal2F_BgSignWarp3F
+    ScriptEntry GlobalTerminal2F_BoxDataMachine
+    ScriptEntry GlobalTerminal2F_DressUpDataMachine
+    ScriptEntryEnd
 
-_003A:
-    PlayFanfare SEQ_SE_CONFIRM
+GlobalTerminal2F_Artist:
+    NPCMessage GlobalTerminal2F_Text_ThisIsDiscriminatory
+    End
+
+GlobalTerminal2F_Hiker:
+    NPCMessage GlobalTerminal2F_Text_SneakingAPeek
+    End
+
+GlobalTerminal2F_BattleGirl:
+    NPCMessage GlobalTerminal2F_Text_DidYouKnow
+    End
+
+GlobalTerminal2F_Idol:
+    NPCMessage GlobalTerminal2F_Text_IVisitEveryDay
+    End
+
+GlobalTerminal2F_ExpertF:
+    NPCMessage GlobalTerminal2F_Text_ThisIsAlmostScandalous
+    End
+
+GlobalTerminal2F_PokefanF:
+    NPCMessage GlobalTerminal2F_Text_CombinationWasWonderful
+    End
+
+GlobalTerminal2F_Beauty:
+    NPCMessage GlobalTerminal2F_Text_DifferentImpressions
+    End
+
+GlobalTerminal2F_Lass:
+    NPCMessage GlobalTerminal2F_Text_BackdropFromNiceLady
+    End
+
+GlobalTerminal2F_Twin:
+    NPCMessage GlobalTerminal2F_Text_ILikeSneakingGlances
+    End
+
+GlobalTerminal2F_BgSignWarp1F:
+    EventMessage GlobalTerminal2F_Text_WarpsTo1F
+    End
+
+GlobalTerminal2F_BgSignWarp3F:
+    EventMessage GlobalTerminal2F_Text_WarpsTo3F
+    End
+
+GlobalTerminal2F_Dummy1:
+    End
+
+GlobalTerminal2F_BoxDataMachine:
+    PlaySE SE_CONFIRM_sseq_3
     LockAll
-    FacePlayer
-    Message 0
-    WaitABXPadPress
+    SetVar VAR_0x8005, 6
+    GoTo GlobalTerminal2F_BoxDataMenu
+    End
+
+GlobalTerminal2F_BoxDataMenu:
+    Message GlobalTerminal2F_Text_ConnectForBoxData
+    InitLocalTextMenu 31, 11, 0, VAR_RESULT
+    SetMenuXOriginToRight
+    AddMenuEntryImm GlobalTerminal2F_Text_Use, 0
+    AddMenuEntryImm GlobalTerminal2F_Text_Info, 1
+    AddMenuEntryImm GlobalTerminal2F_Text_Cancel, 2
+    ShowMenu
+    SetVar VAR_0x8008, VAR_RESULT
+    GoToIfEq VAR_0x8008, 0, GlobalTerminal2F_UseBoxDataMachine
+    GoToIfEq VAR_0x8008, 1, GlobalTerminal2F_ExplainBoxData
+    GoTo GlobalTerminal2F_BoxDataMachineEnd
+    End
+
+GlobalTerminal2F_BoxDataMachineEnd:
     CloseMessage
     ReleaseAll
     End
 
-_004D:
-    PlayFanfare SEQ_SE_CONFIRM
-    LockAll
-    FacePlayer
-    Message 1
-    WaitABXPadPress
-    CloseMessage
-    ReleaseAll
-    End
-
-_0060:
-    PlayFanfare SEQ_SE_CONFIRM
-    LockAll
-    FacePlayer
-    Message 2
-    WaitABXPadPress
-    CloseMessage
-    ReleaseAll
-    End
-
-_0073:
-    PlayFanfare SEQ_SE_CONFIRM
-    LockAll
-    FacePlayer
-    Message 3
-    WaitABXPadPress
-    CloseMessage
-    ReleaseAll
-    End
-
-_0086:
-    PlayFanfare SEQ_SE_CONFIRM
-    LockAll
-    FacePlayer
-    Message 4
-    WaitABXPadPress
-    CloseMessage
-    ReleaseAll
-    End
-
-_0099:
-    PlayFanfare SEQ_SE_CONFIRM
-    LockAll
-    FacePlayer
-    Message 5
-    WaitABXPadPress
-    CloseMessage
-    ReleaseAll
-    End
-
-_00AC:
-    PlayFanfare SEQ_SE_CONFIRM
-    LockAll
-    FacePlayer
-    Message 6
-    WaitABXPadPress
-    CloseMessage
-    ReleaseAll
-    End
-
-_00BF:
-    PlayFanfare SEQ_SE_CONFIRM
-    LockAll
-    FacePlayer
-    Message 7
-    WaitABXPadPress
-    CloseMessage
-    ReleaseAll
-    End
-
-_00D2:
-    PlayFanfare SEQ_SE_CONFIRM
-    LockAll
-    FacePlayer
-    Message 8
-    WaitABXPadPress
-    CloseMessage
-    ReleaseAll
-    End
-
-_00E5:
-    PlayFanfare SEQ_SE_CONFIRM
-    LockAll
-    Message 9
-    WaitABXPadPress
-    CloseMessage
-    ReleaseAll
-    End
-
-_00F6:
-    PlayFanfare SEQ_SE_CONFIRM
-    LockAll
-    Message 10
-    WaitABXPadPress
-    CloseMessage
-    ReleaseAll
-    End
-
-_0107:
-    End
-
-_0109:
-    PlayFanfare SEQ_SE_CONFIRM
-    LockAll
-    SetVar 0x8005, 6
-    GoTo _011D
-    End
-
-_011D:
-    Message 13
-    ScrCmd_041 31, 11, 0, 1, 0x800C
-    ScrCmd_33A 1
-    ScrCmd_042 15, 0
-    ScrCmd_042 16, 1
-    ScrCmd_042 17, 2
-    ScrCmd_043
-    SetVar 0x8008, 0x800C
-    GoToIfEq 0x8008, 0, _0167
-    GoToIfEq 0x8008, 1, _0188
-    GoTo _0161
-    End
-
-_0161:
-    CloseMessage
-    ReleaseAll
-    End
-
-_0167:
-    CallCommonScript 0x7D6
-    SetVar 0x800C, 0x4000
-    GoToIfEq 0x800C, 0, _0161
+GlobalTerminal2F_UseBoxDataMachine:
+    Common_SaveGame
+    SetVar VAR_RESULT, VAR_MAP_LOCAL_0x00
+    GoToIfEq VAR_RESULT, 0, GlobalTerminal2F_BoxDataMachineEnd
     CloseMessage
     CallCommonScript 0x802
     ReleaseAll
     End
 
-_0188:
-    Message 14
-    GoTo _011D
+GlobalTerminal2F_ExplainBoxData:
+    Message GlobalTerminal2F_Text_ExplainBoxData
+    GoTo GlobalTerminal2F_BoxDataMenu
     End
 
-_0193:
-    PlayFanfare SEQ_SE_CONFIRM
+GlobalTerminal2F_DressUpDataMachine:
+    PlaySE SE_CONFIRM_sseq_3
     LockAll
-    SetVar 0x8005, 5
-    GoTo _01A7
+    SetVar VAR_0x8005, 5
+    GoTo GlobalTerminal2F_DressUpDataMenu
     End
 
-_01A7:
-    Message 11
-    ScrCmd_041 31, 11, 0, 1, 0x800C
-    ScrCmd_33A 1
-    ScrCmd_042 15, 0
-    ScrCmd_042 16, 1
-    ScrCmd_042 17, 2
-    ScrCmd_043
-    SetVar 0x8008, 0x800C
-    GoToIfEq 0x8008, 0, _01F1
-    GoToIfEq 0x8008, 1, _0212
-    GoTo _01EB
+GlobalTerminal2F_DressUpDataMenu:
+    Message GlobalTerminal2F_Text_ConnectForDressUpData
+    InitLocalTextMenu 31, 11, 0, VAR_RESULT
+    SetMenuXOriginToRight
+    AddMenuEntryImm GlobalTerminal2F_Text_Use, 0
+    AddMenuEntryImm GlobalTerminal2F_Text_Info, 1
+    AddMenuEntryImm GlobalTerminal2F_Text_Cancel, 2
+    ShowMenu
+    SetVar VAR_0x8008, VAR_RESULT
+    GoToIfEq VAR_0x8008, 0, GlobalTerminal2F_UseDressUpDataMachine
+    GoToIfEq VAR_0x8008, 1, GlobalTerminal2F_ExplainDressUpData
+    GoTo GlobalTerminal2F_DressUpDataMachineEnd
     End
 
-_01EB:
+GlobalTerminal2F_DressUpDataMachineEnd:
     CloseMessage
     ReleaseAll
     End
 
-_01F1:
-    CallCommonScript 0x7D6
-    SetVar 0x800C, 0x4000
-    GoToIfEq 0x800C, 0, _01EB
+GlobalTerminal2F_UseDressUpDataMachine:
+    Common_SaveGame
+    SetVar VAR_RESULT, VAR_MAP_LOCAL_0x00
+    GoToIfEq VAR_RESULT, 0, GlobalTerminal2F_DressUpDataMachineEnd
     CloseMessage
     CallCommonScript 0x802
     ReleaseAll
     End
 
-_0212:
-    Message 12
-    GoTo _01A7
+GlobalTerminal2F_ExplainDressUpData:
+    Message GlobalTerminal2F_Text_ExplainDressUpData
+    GoTo GlobalTerminal2F_DressUpDataMenu
+    End
 
-    .byte 2
-    .byte 0
-    .byte 0
-    .byte 0
-    .byte 0
+    .balign 4, 0

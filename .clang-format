@@ -1,6 +1,5 @@
 ---
 BasedOnStyle: WebKit
-Language: Cpp
 LineEnding: LF
 ColumnLimit: 0
 
@@ -54,12 +53,15 @@ IndentGotoLabels: false
 IndentPPDirectives: None
 IndentWidth: 4
 
+Macros:
+  - FX32_ONE=0x0000000000001000L
+
 SortIncludes: CaseSensitive
 IncludeBlocks: Regroup
 IncludeCategories:
   - Regex: '((<.+>)|("nitro/.*\.h"))'
     Priority: 1
-  - Regex: '"(consts|constants)/.*\.h"'
+  - Regex: '"(consts|constants|generated)/.*\.h"'
     Priority: 2
   - Regex: '"(struct_(decls|defs))/.*\.h"'
     Priority: 3
@@ -69,7 +71,7 @@ IncludeCategories:
     Priority: 4
   - Regex: '"[[:alnum:]_]+\.(h|naix)"'
     Priority: 5
-  - Regex: '.*'
+  - Regex: ".*"
     Priority: 7
 
 InsertTrailingCommas: Wrapped
@@ -78,9 +80,6 @@ KeepEmptyLinesAtEOF: false
 MaxEmptyLinesToKeep: 1
 RemoveParentheses: ReturnStatement
 RemoveSemicolon: true
-
-# QualifierAlignment: Custom
-# QualifierOrder: [static, inline, const, volatile, type]
 
 SpaceAfterCStyleCast: false
 SpaceAfterLogicalNot: false
@@ -96,3 +95,4 @@ SpacesInLineCommentPrefix:
   Minimum: 1
   Maximum: -1
 SpacesInParens: Never
+SpacesInAngles: Leave

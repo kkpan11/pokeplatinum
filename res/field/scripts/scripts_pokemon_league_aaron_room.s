@@ -1,74 +1,75 @@
-    .include "macros/scrcmd.inc"
+#include "macros/scrcmd.inc"
+#include "res/text/bank/pokemon_league_aaron_room.h"
+#include "res/field/events/events_pokemon_league_aaron_room.h"
 
-    .data
 
-    ScriptEntry _000A
-    ScriptEntry _00B7
-    .short 0xFD13
+    ScriptEntry PokemonLeagueAaronRoom_Aaron
+    ScriptEntry PokemonLeagueAaronRoom_OnFrame_EnterRoom
+    ScriptEntryEnd
 
-_000A:
-    PlayFanfare SEQ_SE_CONFIRM
+PokemonLeagueAaronRoom_Aaron:
+    PlaySE SE_CONFIRM_sseq_3
     LockAll
     FacePlayer
-    GoToIfSet 176, _00AC
-    ScrCmd_0EA 0x105
-    Message 0
+    GoToIfSet FLAG_DEFEATED_AARON, PokemonLeagueAaronRoom_AaronPostBattle
+    PlayTrainerEncounterBGM TRAINER_ELITE_FOUR_AARON
+    Message PokemonLeagueAaronRoom_Text_AaronIntro
     CloseMessage
-    CallIfUnset 214, _007A
-    CallIfSet 214, _0082
-    ScrCmd_0EC 0x800C
-    GoToIfEq 0x800C, 0, _00A6
-    SetFlag 176
-    PlayFanfare SEQ_SE_DP_KI_GASYAN
-    ScrCmd_065 2
-    CallIfUnset 214, _008A
-    CallIfSet 214, _0098
-    Message 1
-    WaitABXPadPress
-    CloseMessage
-    ReleaseAll
-    End
-
-_007A:
-    ScrCmd_0E5 0x105, 0
-    Return
-
-_0082:
-    ScrCmd_0E5 0x362, 0
-    Return
-
-_008A:
-    ScrCmd_1CD 11, 0x105, 0, 0, 0
-    Return
-
-_0098:
-    ScrCmd_1CD 11, 0x362, 0, 0, 0
-    Return
-
-_00A6:
-    ScrCmd_0EB
-    ReleaseAll
-    End
-
-_00AC:
-    Message 2
-    WaitABXPadPress
+    CallIfUnset FLAG_ARRESTED_CHARON_STARK_MOUNTAIN, PokemonLeagueAaronRoom_StartAaronBattle
+    CallIfSet FLAG_ARRESTED_CHARON_STARK_MOUNTAIN, PokemonLeagueAaronRoom_StartAaronRematchBattle
+    CheckWonBattle VAR_RESULT
+    GoToIfEq VAR_RESULT, FALSE, PokemonLeagueAaronRoom_BlackOut
+    SetFlag FLAG_DEFEATED_AARON
+    PlaySE SEQ_SE_DP_KI_GASYAN_sseq
+    RemoveObject LOCALID_EXIT_DOOR
+    CallIfUnset FLAG_ARRESTED_CHARON_STARK_MOUNTAIN, PokemonLeagueAaronRoom_CreateJournalEventDefeatedAaron
+    CallIfSet FLAG_ARRESTED_CHARON_STARK_MOUNTAIN, PokemonLeagueAaronRoom_CreateJournalEventDefeatedRematchAaron
+    Message PokemonLeagueAaronRoom_Text_AaronDefeat
+    WaitButton
     CloseMessage
     ReleaseAll
     End
 
-_00B7:
+PokemonLeagueAaronRoom_StartAaronBattle:
+    StartTrainerBattle TRAINER_ELITE_FOUR_AARON
+    Return
+
+PokemonLeagueAaronRoom_StartAaronRematchBattle:
+    StartTrainerBattle TRAINER_ELITE_FOUR_AARON_REMATCH
+    Return
+
+PokemonLeagueAaronRoom_CreateJournalEventDefeatedAaron:
+    CreateJournalEvent LOCATION_EVENT_BEAT_ELITE_FOUR_MEMBER, TRAINER_ELITE_FOUR_AARON
+    Return
+
+PokemonLeagueAaronRoom_CreateJournalEventDefeatedRematchAaron:
+    CreateJournalEvent LOCATION_EVENT_BEAT_ELITE_FOUR_MEMBER, TRAINER_ELITE_FOUR_AARON_REMATCH
+    Return
+
+PokemonLeagueAaronRoom_BlackOut:
+    BlackOutFromBattle
+    ReleaseAll
+    End
+
+PokemonLeagueAaronRoom_AaronPostBattle:
+    Message PokemonLeagueAaronRoom_Text_AaronPostBattle
+    WaitButton
+    CloseMessage
+    ReleaseAll
+    End
+
+PokemonLeagueAaronRoom_OnFrame_EnterRoom:
     LockAll
-    ApplyMovement 0xFF, _00DC
+    ApplyMovement LOCALID_PLAYER, PokemonLeagueAaronRoom_Movement_PlayerEnterRoom
     WaitMovement
-    PlayFanfare SEQ_SE_DP_KI_GASYAN
-    ClearFlag 0x282
-    ScrCmd_064 1
-    SetVar 0x4001, 1
+    PlaySE SEQ_SE_DP_KI_GASYAN_sseq
+    ClearFlag FLAG_HIDE_POKEMON_LEAGUE_AARON_ROOM_ENTRANCE_DOOR
+    AddObject LOCALID_ENTRANCE_DOOR
+    SetVar VAR_MAP_LOCAL_0x01, 1
     ReleaseAll
     End
 
     .balign 4, 0
-_00DC:
-    MoveAction_00C 2
+PokemonLeagueAaronRoom_Movement_PlayerEnterRoom:
+    WalkNormalNorth 2
     EndMovement

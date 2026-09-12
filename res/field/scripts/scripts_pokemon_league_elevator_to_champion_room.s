@@ -1,26 +1,25 @@
-    .include "macros/scrcmd.inc"
+#include "macros/scrcmd.inc"
 
-    .data
 
-    ScriptEntry _000E
-    ScriptEntry _0029
-    ScriptEntry _0031
-    .short 0xFD13
+    ScriptEntry PokemonLeagueElevatorToChampionRoom_OnTransition
+    ScriptEntry PokemonLeagueElevatorToChampionRoom_DisablePlatformLift
+    ScriptEntry PokemonLeagueElevatorToChampionRoom_CoordEvent_PlatformLift
+    ScriptEntryEnd
 
-_000E:
-    SetVar 0x4000, 0
-    ScrCmd_25B
-    ScrCmd_25D 0x4001
-    GoToIfEq 0x4001, 0, _0029
+PokemonLeagueElevatorToChampionRoom_OnTransition:
+    SetVar VAR_MAP_LOCAL_0x00, 0
+    InitPersistedMapFeaturesForPlatformLift
+    CheckPlatformLiftNotUsedWhenEnteredMap VAR_MAP_LOCAL_0x01
+    GoToIfEq VAR_MAP_LOCAL_0x01, FALSE, PokemonLeagueElevatorToChampionRoom_DisablePlatformLift
     End
 
-_0029:
-    SetVar 0x4000, 1
+PokemonLeagueElevatorToChampionRoom_DisablePlatformLift:
+    SetVar VAR_MAP_LOCAL_0x00, 1
     End
 
-_0031:
-    ScrCmd_25C
-    SetVar 0x4000, 1
+PokemonLeagueElevatorToChampionRoom_CoordEvent_PlatformLift:
+    TriggerPlatformLift
+    SetVar VAR_MAP_LOCAL_0x00, 1
     End
 
-    .byte 0
+    .balign 4, 0

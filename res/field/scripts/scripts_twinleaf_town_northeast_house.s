@@ -1,31 +1,30 @@
-    .include "macros/scrcmd.inc"
+#include "macros/scrcmd.inc"
+#include "res/text/bank/twinleaf_town_northeast_house.h"
 
-    .data
 
-    ScriptEntry _0006
-    .short 0xFD13
+    ScriptEntry TwinleafTownNortheastHouse_Guitarist
+    ScriptEntryEnd
 
-_0006:
-    PlayFanfare SEQ_SE_CONFIRM
+TwinleafTownNortheastHouse_Guitarist:
+    PlaySE SE_CONFIRM_sseq_3
     LockAll
     FacePlayer
-    GoToIfGe 0x4095, 1, _002F
-    GoTo _0021
+    GoToIfGe VAR_VISITED_LAKE_VERITY_WITH_RIVAL, 1, TwinleafTownNortheastHouse_AdventureLongTimeAgo
+    GoTo TwinleafTownNortheastHouse_YoureOffToHangWithRival
 
-_0021:
-    ScrCmd_0CE 0
-    Message 0
-    WaitABXPadPress
+TwinleafTownNortheastHouse_YoureOffToHangWithRival:
+    BufferRivalName 0
+    Message TwinleafTownNortheastHouse_Text_YoureOffToHangWithRival
+    WaitButton
     CloseMessage
     ReleaseAll
     End
 
-_002F:
-    Message 1
-    WaitABXPadPress
+TwinleafTownNortheastHouse_AdventureLongTimeAgo:
+    Message TwinleafTownNortheastHouse_Text_AdventureLongTimeAgo
+    WaitButton
     CloseMessage
     ReleaseAll
     End
 
-    .byte 0
-    .byte 0
+    .balign 4, 0

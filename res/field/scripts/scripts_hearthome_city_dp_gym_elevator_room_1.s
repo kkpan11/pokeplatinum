@@ -1,36 +1,36 @@
-    .include "macros/scrcmd.inc"
+#include "macros/scrcmd.inc"
+#include "res/text/bank/hearthome_city_dp_gym_elevator_room_1.h"
 
-    .data
 
-    ScriptEntry _0012
-    ScriptEntry _0016
-    ScriptEntry _001A
-    ScriptEntry _002B
-    .short 0xFD13
+    ScriptEntry HearthomeCityDPGymElevatorRoom1_OnTransition
+    ScriptEntry HearthomeCityDPGymElevatorRoom1_CoordEvent_MoveLift
+    ScriptEntry HearthomeCityDPGymElevatorRoom1_BgSignCorrect
+    ScriptEntry HearthomeCityDPGymElevatorRoom1_BgSignQuestion
+    ScriptEntryEnd
 
-_0012:
-    ScrCmd_171
+HearthomeCityDPGymElevatorRoom1_OnTransition:
+    InitPersistedMapFeaturesForHearthomeGym
     End
 
-_0016:
-    ScrCmd_172
+HearthomeCityDPGymElevatorRoom1_CoordEvent_MoveLift:
+    MoveHearthomeGymDPLift
     End
 
-_001A:
+HearthomeCityDPGymElevatorRoom1_BgSignCorrect:
     LockAll
-    PlayFanfare SEQ_SE_DP_UG_020
-    Message 1
-    WaitABXPadPress
+    PlaySE SEQ_SE_DP_UG_020_sseq
+    Message HearthomeCityDPGymElevatorRoom1_Text_Correct
+    WaitButton
     CloseMessage
     ReleaseAll
     End
 
-_002B:
-    PlayFanfare SEQ_SE_CONFIRM
+HearthomeCityDPGymElevatorRoom1_BgSignQuestion:
+    PlaySE SE_CONFIRM_sseq_3
     LockAll
-    Message 0
-    PlayFanfare SEQ_SE_DP_MAZYO4
-    WaitABXPadPress
+    Message HearthomeCityDPGymElevatorRoom1_Text_WhatIs3Times13
+    PlaySE SEQ_SE_DP_MAZYO4_sseq
+    WaitButton
     CloseMessage
     ReleaseAll
     End

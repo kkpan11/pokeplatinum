@@ -1,95 +1,93 @@
-    .include "macros/scrcmd.inc"
+#include "macros/scrcmd.inc"
+#include "res/text/bank/route_222_east_house.h"
+#include "generated/size_contest_results.h"
 
-    .data
 
-    ScriptEntry _000A
-    ScriptEntry _0010
-    .short 0xFD13
+    ScriptEntry Route222EastHouse_OnTransition
+    ScriptEntry Route222EastHouse_Fisherman
+    ScriptEntryEnd
 
-_000A:
-    SetFlag 0x9F0
+Route222EastHouse_OnTransition:
+    SetFlag FLAG_FIRST_ARRIVAL_POKEMON_SIZE_JUDGE
     End
 
-_0010:
-    PlayFanfare SEQ_SE_CONFIRM
+Route222EastHouse_Fisherman:
+    PlaySE SE_CONFIRM_sseq_3
     LockAll
     FacePlayer
-    ScrCmd_1C0 0x800C, 223
-    GoToIfEq 0x800C, 0, _00CF
-    Message 1
+    CheckPartyHasSpecies VAR_RESULT, SPECIES_REMORAID
+    GoToIfEq VAR_RESULT, FALSE, Route222EastHouse_NoRemoraid
+    Message Route222EastHouse_Text_DreamtLargeRemoraidWasNoDream
     CloseMessage
-    FadeScreen 6, 1, 0, 0
+    FadeScreenOut
     WaitFadeScreen
-    ScrCmd_191
-    ScrCmd_193 0x8002
-    ScrCmd_0A1
-    FadeScreen 6, 1, 1, 0
+    SelectMoveTutorPokemon
+    GetSelectedPartySlot VAR_0x8002
+    ReturnToField
+    FadeScreenIn
     WaitFadeScreen
-    GoToIfEq 0x8002, 0xFF, _011E
-    ScrCmd_198 0x8002, 0x8001
-    GoToIfNe 0x8001, 223, _0108
-    ScrCmd_1C1 0x800C, 0x8002
-    GoToIfEq 0x800C, 0, _00ED
-    GoToIfEq 0x800C, 1, _00DA
-    ScrCmd_1C3 0, 1, 0x8002
-    Message 2
-    SetVar 0x8004, 6
-    SetVar 0x8005, 1
-    ScrCmd_07D 0x8004, 0x8005, 0x800C
-    GoToIfEq 0x800C, 0, _0113
-    CallCommonScript 0x7FC
-    ScrCmd_1C2 0x8002
-    Message 3
-    WaitABXPadPress
+    GoToIfEq VAR_0x8002, PARTY_SLOT_NONE, Route222EastHouse_ShowNoPokemon
+    GetPartyMonSpecies VAR_0x8002, VAR_0x8001
+    GoToIfNe VAR_0x8001, SPECIES_REMORAID, Route222EastHouse_ShowedOtherSpecies
+    CalcSizeContestResult VAR_RESULT, VAR_0x8002
+    GoToIfEq VAR_RESULT, SIZE_CONTEST_SMALLER, Route222EastHouse_SmallerThanRecord
+    GoToIfEq VAR_RESULT, SIZE_CONTEST_SAME_SIZE, Route222EastHouse_TiedRecord
+    BufferPartyPokemonSize 0, 1, VAR_0x8002
+    Message Route222EastHouse_Text_BetterThanInMyDream
+    SetVar VAR_0x8004, ITEM_NET_BALL
+    SetVar VAR_0x8005, 1
+    GoToIfCannotFitItem VAR_0x8004, VAR_0x8005, VAR_RESULT, Route222EastHouse_BagFull
+    Common_GiveItemQuantity
+    UpdateSizeContestRecord VAR_0x8002
+    Message Route222EastHouse_Text_WillDreamOfBiggerRemoraid
+    WaitButton
     CloseMessage
     ReleaseAll
     End
 
-_00CF:
-    Message 0
-    WaitABXPadPress
+Route222EastHouse_NoRemoraid:
+    Message Route222EastHouse_Text_DreamtLargeRemoraid
+    WaitButton
     CloseMessage
     ReleaseAll
     End
 
-_00DA:
-    ScrCmd_1C4 0, 1, 223
-    Message 4
-    WaitABXPadPress
+Route222EastHouse_TiedRecord:
+    BufferSizeContestRecord 0, 1, SPECIES_REMORAID
+    Message Route222EastHouse_Text_RememberThisSize
+    WaitButton
     CloseMessage
     ReleaseAll
     End
 
-_00ED:
-    ScrCmd_1C3 0, 1, 0x8002
-    ScrCmd_1C4 2, 3, 223
-    Message 5
-    WaitABXPadPress
+Route222EastHouse_SmallerThanRecord:
+    BufferPartyPokemonSize 0, 1, VAR_0x8002
+    BufferSizeContestRecord 2, 3, SPECIES_REMORAID
+    Message Route222EastHouse_Text_KnowAGenius
+    WaitButton
     CloseMessage
     ReleaseAll
     End
 
-_0108:
-    Message 6
-    WaitABXPadPress
+Route222EastHouse_ShowedOtherSpecies:
+    Message Route222EastHouse_Text_DidYouListen
+    WaitButton
     CloseMessage
     ReleaseAll
     End
 
-_0113:
-    Message 7
-    WaitABXPadPress
+Route222EastHouse_BagFull:
+    Message Route222EastHouse_Text_BagJammedFull
+    WaitButton
     CloseMessage
     ReleaseAll
     End
 
-_011E:
-    Message 8
-    WaitABXPadPress
+Route222EastHouse_ShowNoPokemon:
+    Message Route222EastHouse_Text_DenyMeasureRemoraid
+    WaitButton
     CloseMessage
     ReleaseAll
     End
 
-    .byte 0
-    .byte 0
-    .byte 0
+    .balign 4, 0

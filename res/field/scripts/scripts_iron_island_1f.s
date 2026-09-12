@@ -1,15 +1,14 @@
-    .include "macros/scrcmd.inc"
+#include "macros/scrcmd.inc"
 
-    .data
 
-    ScriptEntry _0006
-    .short 0xFD13
+    ScriptEntry IronIsland1F_OnTransition
+    ScriptEntryEnd
 
-_0006:
-    SetFlag 0x9DB
+IronIsland1F_OnTransition:
+    SetFlag FLAG_FIRST_ARRIVAL_IRON_ISLAND_INTERIOR
     End
 
-    .byte 2
-    .byte 0
-    .byte 0
-    .byte 0
+IronIsland1F_Unused:
+    End
+
+    .balign 4, 0

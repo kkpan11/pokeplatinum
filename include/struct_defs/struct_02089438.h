@@ -2,14 +2,14 @@
 #define POKEPLATINUM_STRUCT_02089438_H
 
 #include "game_options.h"
-#include "strbuf.h"
+#include "string_gf.h"
 
 typedef struct {
     int unk_00;
     int unk_04[5];
     int unk_18;
-    Strbuf *unk_1C;
-    Options *unk_20;
+    String *unk_1C;
+    Options *options;
     int unk_24;
     u32 unk_28;
     u32 unk_2C;

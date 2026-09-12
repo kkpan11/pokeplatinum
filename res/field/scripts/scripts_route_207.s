@@ -1,205 +1,174 @@
-    .include "macros/scrcmd.inc"
+#include "macros/scrcmd.inc"
+#include "res/text/bank/menu_entries.h"
+#include "res/text/bank/route_207.h"
+#include "res/field/events/events_route_207.h"
 
-    .data
 
-    ScriptEntry _001E
-    ScriptEntry _004E
-    ScriptEntry _01B0
-    ScriptEntry _01C3
-    ScriptEntry _01EC
-    ScriptEntry _0203
-    ScriptEntry _021A
-    .short 0xFD13
+    ScriptEntry Route207_OnTransition
+    ScriptEntry Route207_CoordEvent_Counterpart
+    ScriptEntry Route207_Dummy3
+    ScriptEntry Route207_CyclistM
+    ScriptEntry Route207_ArrowSignpostMtCoronet
+    ScriptEntry Route207_ArrowSignpostOreburghCity
+    ScriptEntry Route207_TrainerTipsSignpost
+    ScriptEntryEnd
 
-_001E:
-    ScrCmd_14D 0x4000
-    GoToIfEq 0x4000, 0, _003E
-    GoToIfEq 0x4000, 1, _0046
+Route207_OnTransition:
+    GetPlayerGender VAR_MAP_LOCAL_0x00
+    GoToIfEq VAR_MAP_LOCAL_0x00, GENDER_MALE, Route207_SetCounterpartGraphicsDawn
+    GoToIfEq VAR_MAP_LOCAL_0x00, GENDER_FEMALE, Route207_SetCounterpartGraphicsLucas
     End
 
-_003E:
-    SetVar 0x4020, 97
+Route207_SetCounterpartGraphicsDawn:
+    SetVar VAR_OBJ_GFX_ID_0, OBJ_EVENT_GFX_PLAYER_F
     End
 
-_0046:
-    SetVar 0x4020, 0
+Route207_SetCounterpartGraphicsLucas:
+    SetVar VAR_OBJ_GFX_ID_0, OBJ_EVENT_GFX_PLAYER_M
     End
 
-_004E:
+Route207_CoordEvent_Counterpart:
     LockAll
-    ScrCmd_069 0x8004, 0x8005
-    ScrCmd_186 18, 0x14B, 0x8005
-    Call _008E
-    ApplyMovement 18, _0194
+    GetPlayerMapPos VAR_0x8004, VAR_0x8005
+    SetObjectEventPos LOCALID_COUNTERPART, 331, VAR_0x8005
+    Call Route207_ShowCounterpart
+    ApplyMovement LOCALID_COUNTERPART, Route207_Movement_CounterpartNoticePlayer
     WaitMovement
-    CallCommonScript 0x7F8
-    ApplyMovement 18, _01A0
+    Common_SetCounterpartBGM
+    ApplyMovement LOCALID_COUNTERPART, Route207_Movement_CounterpartWalkToPlayer
     WaitMovement
-    ApplyMovement 0xFF, _0174
+    ApplyMovement LOCALID_PLAYER, Route207_Movement_PlayerFaceCounterpart
     WaitMovement
-    GoTo _009C
+    GoTo Route207_Counterpart
     End
 
-_008E:
-    ClearFlag 0x1CC
-    ScrCmd_064 18
-    ScrCmd_062 18
+Route207_ShowCounterpart:
+    ClearFlag FLAG_HIDE_ROUTE_207_COUNTERPART
+    AddObject LOCALID_COUNTERPART
+    LockObject LOCALID_COUNTERPART
     Return
 
-_009C:
-    ScrCmd_14D 0x800C
-    GoToIfEq 0x800C, 0, _00B3
-    GoTo _00F1
+Route207_Counterpart:
+    GetPlayerGender VAR_RESULT
+    GoToIfEq VAR_RESULT, GENDER_MALE, Route207_Dawn
+    GoTo Route207_Lucas
 
-_00B3:
-    ScrCmd_0CD 0
-    Message 0
-    ScrCmd_044 30, 13, 0, 0, 0x800C
-    ScrCmd_33A 1
-    ScrCmd_046 137, 0xFF, 0
-    ScrCmd_046 138, 0xFF, 1
-    ScrCmd_047
-    Message 1
-    Call _012F
-    Message 2
-    Call _0145
-    Message 3
-    GoTo _0156
+Route207_Dawn:
+    BufferPlayerName 0
+    Message Route207_Text_DawnChooseWhichHand
+    InitGlobalTextListMenu 30, 13, 0, VAR_RESULT, NO_EXIT_ON_B
+    SetMenuXOriginToRight
+    AddListMenuEntry MenuEntries_Text_CounterpartHand_Right, 0
+    AddListMenuEntry MenuEntries_Text_CounterpartHand_Left, 1
+    ShowListMenu
+    Message Route207_Text_DawnYouWantTheVsSeeker
+    Call Route207_GiveVsSeeker
+    Message Route207_Text_DawnHaveThisTooThen
+    Call Route207_GivePoketchAppDowsingMachine
+    Message Route207_Text_DawnUseDowsingMachineOften
+    GoTo Route207_CounterpartLeave
 
-_00F1:
-    ScrCmd_0CD 0
-    Message 4
-    ScrCmd_044 30, 13, 0, 0, 0x800C
-    ScrCmd_33A 1
-    ScrCmd_046 137, 0xFF, 0
-    ScrCmd_046 138, 0xFF, 1
-    ScrCmd_047
-    Message 5
-    Call _012F
-    Message 6
-    Call _0145
-    Message 7
-    GoTo _0156
+Route207_Lucas:
+    BufferPlayerName 0
+    Message Route207_Text_LucasChooseAHand
+    InitGlobalTextListMenu 30, 13, 0, VAR_RESULT, NO_EXIT_ON_B
+    SetMenuXOriginToRight
+    AddListMenuEntry MenuEntries_Text_CounterpartHand_Right, 0
+    AddListMenuEntry MenuEntries_Text_CounterpartHand_Left, 1
+    ShowListMenu
+    Message Route207_Text_LucasYouWantTheVsSeeker
+    Call Route207_GiveVsSeeker
+    Message Route207_Text_LucasHaveThisTooThen
+    Call Route207_GivePoketchAppDowsingMachine
+    Message Route207_Text_LucasTryTouchingDowsingMachine
+    GoTo Route207_CounterpartLeave
 
-_012F:
-    SetFlag 0x97F
-    SetVar 0x8004, 0x1BB
-    SetVar 0x8005, 1
-    CallCommonScript 0x7FC
+Route207_GiveVsSeeker:
+    SetFlag FLAG_UNLOCKED_VS_SEEKER_LVL_1
+    SetVar VAR_0x8004, ITEM_VS_SEEKER
+    SetVar VAR_0x8005, 1
+    Common_GiveItemQuantity
     Return
 
-_0145:
-    SetVar 0x8004, 6
-    CallCommonScript 0x7D9
-    ScrCmd_0D7 1, 6
+Route207_GivePoketchAppDowsingMachine:
+    SetVar VAR_0x8004, POKETCH_APPID_DOWSINGMACHINE
+    Common_GivePoketchApp
+    BufferPoketchAppName 1, POKETCH_APPID_DOWSINGMACHINE
     Return
 
-_0156:
+Route207_CounterpartLeave:
     CloseMessage
-    ApplyMovement 18, _01A8
+    ApplyMovement LOCALID_COUNTERPART, Route207_Movement_CounterpartLeave
     WaitMovement
-    ScrCmd_065 18
-    CallCommonScript 0x7F9
-    SetVar 0x408C, 1
+    RemoveObject LOCALID_COUNTERPART
+    Common_FadeToDefaultMusic
+    SetVar VAR_ROUTE_207_COUNTERPART_TRIGGER_STATE, 1
     ReleaseAll
     End
 
     .balign 4, 0
-_0174:
-    MoveAction_022
+Route207_Movement_PlayerFaceCounterpart:
+    WalkOnSpotNormalWest
     EndMovement
 
-    .byte 63
-    .byte 0
-    .byte 8
-    .byte 0
-    .byte 34
-    .byte 0
-    .byte 1
-    .byte 0
-    .byte 254
-    .byte 0
-    .byte 0
-    .byte 0
-    .byte 63
-    .byte 0
-    .byte 1
-    .byte 0
-    .byte 32
-    .byte 0
-    .byte 1
-    .byte 0
-    .byte 254
-    .byte 0
-    .byte 0
-    .byte 0
+Route207_Movement_Unused:
+    Delay8 8
+    WalkOnSpotNormalWest
+    EndMovement
 
-    .balign 4, 0
-_0194:
-    MoveAction_00F 3
-    MoveAction_04B
+Route207_Movement_Unused2:
+    Delay8 1
+    WalkOnSpotNormalNorth
     EndMovement
 
     .balign 4, 0
-_01A0:
-    MoveAction_00F 5
+Route207_Movement_CounterpartNoticePlayer:
+    WalkNormalEast 3
+    EmoteExclamationMark
     EndMovement
 
     .balign 4, 0
-_01A8:
-    MoveAction_00E 8
+Route207_Movement_CounterpartWalkToPlayer:
+    WalkNormalEast 5
     EndMovement
 
-_01B0:
-    PlayFanfare SEQ_SE_CONFIRM
+    .balign 4, 0
+Route207_Movement_CounterpartLeave:
+    WalkNormalWest 8
+    EndMovement
+
+Route207_Dummy3:
+    NPCMessage Route207_Text_Dummy8
+    End
+
+Route207_CyclistM:
+    PlaySE SE_CONFIRM_sseq_3
     LockAll
     FacePlayer
-    Message 8
-    WaitABXPadPress
+    GoToIfSet FLAG_RECEIVED_BICYCLE, Route207_ChangeGearTakeARun
+    Message Route207_Text_ThatSlopesTooSlippery
+    WaitButton
     CloseMessage
     ReleaseAll
     End
 
-_01C3:
-    PlayFanfare SEQ_SE_CONFIRM
-    LockAll
-    FacePlayer
-    GoToIfSet 130, _01E1
-    Message 9
-    WaitABXPadPress
+Route207_ChangeGearTakeARun:
+    Message Route207_Text_ChangeGearTakeARun
+    WaitButton
     CloseMessage
     ReleaseAll
     End
 
-_01E1:
-    Message 10
-    WaitABXPadPress
-    CloseMessage
-    ReleaseAll
+Route207_ArrowSignpostMtCoronet:
+    ShowArrowSign Route207_Text_SignMtCoronet
     End
 
-_01EC:
-    ScrCmd_036 11, 1, 0, 0x800C
-    ScrCmd_038 3
-    ScrCmd_039
-    ScrCmd_03B 0x800C
-    CallCommonScript 0x7D0
+Route207_ArrowSignpostOreburghCity:
+    ShowArrowSign Route207_Text_SignOreburghCity
     End
 
-_0203:
-    ScrCmd_036 12, 1, 0, 0x800C
-    ScrCmd_038 3
-    ScrCmd_039
-    ScrCmd_03B 0x800C
-    CallCommonScript 0x7D0
+Route207_TrainerTipsSignpost:
+    ShowScrollingSign Route207_Text_TrainerTipsImmobilizedIfAsleepOrParalyzed
     End
 
-_021A:
-    ScrCmd_037 3, 0
-    ScrCmd_038 3
-    ScrCmd_039
-    ScrCmd_03A 13, 0x800C
-    CallCommonScript 0x7D0
-    End
-
-    .byte 0
+    .balign 4, 0

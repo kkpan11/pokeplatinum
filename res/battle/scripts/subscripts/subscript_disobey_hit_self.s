@@ -1,14 +1,13 @@
-    .include "macros/btlcmd.inc"
+#include "macros/btlcmd.inc"
 
-    .data
 
 _000:
     // {0} won’t obey!
-    PrintMessage pl_msg_00000368_00829, TAG_NICKNAME, BTLSCR_ATTACKER
+    PrintMessage BattleStrings_Text_PokemonWontObey, TAG_NICKNAME, BTLSCR_ATTACKER
     Wait 
     WaitButtonABTime 30
     // It hurt itself in its confusion!
-    PrintMessage pl_msg_00000368_00797, TAG_NONE
+    PrintMessage BattleStrings_Text_ItHurtItselfInItsConfusion, TAG_NONE
     Wait 
     WaitButtonABTime 30
     UnlockMoveChoice BTLSCR_ATTACKER

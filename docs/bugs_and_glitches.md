@@ -19,8 +19,22 @@ this is some code
   - [Acid Rain](#acid-rain)
   - [Fire Fang Always Bypasses Wonder Guard](#fire-fang-always-bypasses-wonder-guard)
   - [Post-KO Switch-In AI Scoring Overflow](#post-ko-switch-in-ai-scoring-overflow)
+  - [Using a non-Rage Move After Rage Clears Every Volatile Status Except Rage](#using-a-non-rage-move-after-rage-clears-every-volatile-status-except-rage)
+  - [Trainers Do Not Use The Correct Stats of Pokémon Forms](#trainers-do-not-use-the-correct-stats-of-pokémon-forms)
+- [Battle Animations](#battle-animations)
+  - [Using Facade Moves the Attacker's Sprite One Pixel Up](#using-facade-moves-the-attackers-sprite-one-pixel-up)
+  - [Using DynamicPunch Moves the Target's Sprite One Pixel Left](#using-dynamicpunch-moves-the-targets-sprite-one-pixel-left)
+  - [Using Helping Hand Moves the Target's Sprite One Pixel Left](#using-helping-hand-moves-the-targets-sprite-one-pixel-left)
+  - [Using Strength Moves the Attacker's Sprite Two Pixels Right](#using-strength-moves-the-attackers-sprite-two-pixels-right)
+  - [Using Spit Up Moves the Attacker's Sprite Two Pixels Right](#using-spit-up-moves-the-attackers-sprite-two-pixels-right)
 - [Wild Encounters](#wild-encounters)
   - [Fishing Encounters ignore Sticky Hold and Suction Cups](#fishing-encounters-ignore-sticky-hold-and-suction-cups)
+- [Items](#items)
+  - [Defog HM Uses Water Palette](#defog-hm-uses-water-palette)
+- [Title Screen](#title-screen)
+  - [Giratina Hover Range](#giratina-hover-range)
+- [3D Rendering](#3d-rendering)
+  - [Invalid VRAM Manager Type in G3DPipeline_InitEx](#invalid-vram-manager-type-in-g3dpipeline_initex)
 
 ## Battle Engine
 
@@ -70,13 +84,13 @@ or Uproar is in effect.
   trigger.
 </details>
 
-**Fix:** Edit [`res/battle/res/scripts/subscript_pursuit.s`](https://github.com/pret/pokeplatinum/blob/main/res/battle/scripts/subscripts/subscript_pursuit.s)
+**Fix:** Edit [`res/battle/scripts/subscripts/subscript_pursuit.s`](https://github.com/pret/pokeplatinum/blob/main/res/battle/scripts/subscripts/subscript_pursuit.s)
 
 ```diff
-     UpdateVar OPCODE_ADD, BTLVAR_FAINTED_MON, BATTLER_ENEMY_SLOT_1
+     UpdateVar OPCODE_ADD, BTLVAR_FAINTED_MON, BATTLER_ENEMY_1
      UpdateVar OPCODE_RIGHT_SHIFT, BTLVAR_CALC_TEMP, 0x00000001
      CompareVarToValue OPCODE_NEQ, BTLVAR_CALC_TEMP, 0x00000000, _208
--    ; BUG: Acid Rain (see docs/bugs_and_glitches.md)
+-    // BUG: Acid Rain (see docs/bugs_and_glitches.md)
 -    UpdateVarFromVar OPCODE_SUB_TO_ZERO, BTLVAR_FIELD_CONDITIONS, BTLVAR_SCRIPT_TEMP
 +    UpdateVarFromVar OPCODE_SET, BTLVAR_FAINTED_MON, BTLVAR_SCRIPT_TEMP
      Call BATTLE_SUBSCRIPT_POP_ATTACKER_AND_DEFENDER
@@ -138,6 +152,127 @@ as having a score equivalent to 65 rather than 320.
 +    u32 score, maxScore;
 ```
 
+### Using a non-Rage Move After Rage Clears Every Volatile Status Except Rage
+
+**Fix:** Edit the routine `BattleController_CheckPreMoveActions` in [`src/battle/battle_controller_player.c`](https://github.com/pret/pokeplatinum/blob/e7c9da4c9ff9e9c70c82fd03714cf9a9674d71cc/src/battle/battle_controller_player.c#L845):
+
+```diff
+-    battleCtx->battleMons[battler].statusVolatile &= VOLATILE_CONDITION_RAGE;
++    battleCtx->battleMons[battler].statusVolatile &= ~VOLATILE_CONDITION_RAGE;
+```
+
+### Trainers Do Not Use The Correct Stats of Pokémon Forms
+
+Some Pokémon forms, such as those of Wormadam and Rotom, have different stats. 
+However, Trainers do not use those different stats and instead use the stats
+of the base form (e.g., Sandy Cloak Wormadam would use Plant Cloak's stats).
+
+**Fix:** Edit the routine ``TrainerData_BuildParty`` in [`src/trainer_data.c`](https://github.com/pret/pokeplatinum/blob/cee98713fc2059bc15aab2bbd99e892ffd0a8ca5/src/trainer_data.c#L218):
+
+```diff
+      Pokemon_SetValue(mon, MON_DATA_FORM, &form);
++     Pokemon_CalcStats(mon);
+```
+
+There are multiple Trainer Pokémon data types, so there are multiple instances of the form being set.
+Repeat this process for every instance of ``Pokemon_SetValue(mon, MON_DATA_FORM, &form);``.
+
+## Battle Animations
+
+### Using Facade Moves the Attacker's Sprite One Pixel Up
+
+Due to the delays between scale commands being too short, they overlap with
+each other, resulting in the sprite permanently moving upward.
+
+**Fix:** Increase the `Delay` values in [`res/moves/facade/anim.s`](https://github.com/pret/pokeplatinum/blob/main/res/moves/facade/anim.s)
+
+```diff
+-    Delay 8
++    Delay 10
+```
+
+Also update the sound effect timings to sync with the new delays:
+
+```diff
+-    PlayLoopedSoundEffectL SEQ_SE_DP_W207_sseq, 8, 6
++    PlayLoopedSoundEffectL SEQ_SE_DP_W207_sseq, 10, 6
+```
+
+### Using DynamicPunch Moves the Target's Sprite One Pixel Left
+
+Due to the delays between shake commands being too short, they overlap with
+each other, resulting in the sprite permanently moving left.
+
+**Fix:** Increase the `Delay` value in [`res/moves/dynamic_punch/anim.s`](https://github.com/pret/pokeplatinum/blob/main/res/moves/dynamic_punch/anim.s#L18)
+
+```diff
+-    Delay 3
++    Delay 4
+```
+
+### Using Helping Hand Moves the Target's Sprite One Pixel Left
+
+Due to the delays between shake commands being too short, they overlap with
+each other, resulting in the sprite permanently moving left.
+
+**Fix:** Move the `Delay 1` command into the loop in [`res/moves/helping_hand/anim.s`](https://github.com/pret/pokeplatinum/blob/main/res/moves/helping_hand/anim.s#L19)
+
+
+```diff
+-    EndLoop
+-    Delay 1
++    Delay 1
++    EndLoop
+```
+
+### Using Strength Moves the Attacker's Sprite Two Pixels Right
+
+The animation moves the attacker's sprite right and left 2 pixels every other frame
+as it shrinks. Since this happens an odd number of times, the sprite is moved permanently.
+
+**Fix:** Edit the routine `BattleAnimTask_Strength` in [`src/battle_anim/script_funcs_0.c`](https://github.com/pret/pokeplatinum/blob/e7c9da4c9ff9e9c70c82fd03714cf9a9674d71cc/src/battle_anim/script_funcs_0.c#L771)
+
+```diff 
+    } else {
++     Point2D *pos;
++     BattleAnimUtil_GetBattlerDefaultPos(ctx->battleAnimSys, BattleAnimSystem_GetAttacker(ctx->battleAnimSys), pos);
++     PokemonSprite_SetAttribute(ctx->sprite, MON_SPRITE_X_CENTER, pos->x);
+      ctx->state++;
+    }
+```
+
+### Using Spit Up Moves the Attacker's Sprite Two Pixels Right
+
+Essentially the same as Strength.
+
+**Fix:** Edit the routine `BattleAnimTask_ShakeAndScaleAttacker` in [`src/battle_anim/script_funcs_3.c`](https://github.com/pret/pokeplatinum/blob/e7c9da4c9ff9e9c70c82fd03714cf9a9674d71cc/src/battle_anim/script_funcs_3.c#L2286)
+
+```diff 
+    } else {
++     Point2D *pos;
++     BattleAnimUtil_GetBattlerDefaultPos(ctx->battleAnimSys, BattleAnimSystem_GetAttacker(ctx->battleAnimSys), pos);
++     PokemonSprite_SetAttribute(ctx->sprite, MON_SPRITE_X_CENTER, pos->x);
+      ctx->state++;
+    }
+```
+
+## Items
+
+### Defog HM Uses Water Palette
+
+HM05 (Defog) is a Flying-type move, but its TM/HM icon in the bag erroneously
+uses the water-type palette instead of the flying-type palette.
+
+**Fix:** Edit the `icon.palette` entry for the item data in [`res/items/data/hm05.json`](https://github.com/pret/pokeplatinum/blob/main/res/items/data/hm05.json):
+
+```diff
+  "icon": {
+    "sprite": "hm_NCGR",
+-   "palette": "tm_water_NCLR"
++   "palette": "tm_flying_NCLR"
+  },
+```
+
 ## Wild Encounters
 ### Fishing Encounters ignore Sticky Hold and Suction Cups
 
@@ -145,9 +280,55 @@ When calculating the encounter rate for fishing encounters the abilities Sticky
 Hold and Suction Cups are supposed to double the encounter rate. However, due to
 a typo, the encounter rate stays unmodified.
 
-**Fix:** Edit the routine `ov6_0224226C` in [`src/overlay006/ov6_02240C9C.c`](https://github.com/pret/pokeplatinum/blob/4fb8a8f567ebbfc99a1d7f2e5f1e8edd9beb4aa7/src/overlay006/ov6_02240C9C.c#L1390)
+**Fix:** Edit the routine `ModifyEncounterRateWithFieldParams` in [`src/overlay006/wild_encounters.c`](https://github.com/pret/pokeplatinum/blob/4fb8a8f567ebbfc99a1d7f2e5f1e8edd9beb4aa7/src/overlay006/ov6_02240C9C.c#L1390)
 
 ```diff
 -                v0 * 2; // BUG: Abilities do not Increase Fishing Encounter Rate (see docs/bugs_and_glitches.md)
 +                v0 *= 2;
+```
+
+### Surfing and Fishing Encounters ignore Magnet Pull
+
+When generating a wild encounter, the abilities Magnet Pull and Static  
+attempt to force the encountered mon to be respectively Steel or Electric type by
+manipulating the chosen encounter slot. Land encounters properly check each ability in turn,
+but surf and fishing encounters will overwrite Magnet Pull's forced encounter slot with a random one
+due to lacking a check in between Magnet Pull and Static.
+
+```diff
+  v0 = TryGetSlotForTypeMatchAbility(firstPartyMon, encounterFieldParams, encounterTable, MAX_WATER_ENCOUNTERS, TYPE_STEEL, ABILITY_MAGNET_PULL, &encounterSlot);
+-  v0 = TryGetSlotForTypeMatchAbility(firstPartyMon, encounterFieldParams, encounterTable, MAX_WATER_ENCOUNTERS, TYPE_ELECTRIC, ABILITY_STATIC, &encounterSlot);
+-
+-  if (!v0) {
+-      encounterSlot = GetWaterEncounterSlot();
+-  }
++  if (!v0)
++  {
++    v0 = TryGetSlotForTypeMatchAbility(firstPartyMon, encounterFieldParams, encounterTable, MAX_WATER_ENCOUNTERS, TYPE_ELECTRIC, ABILITY_STATIC, &encounterSlot);
++    if (!v0) {
++        encounterSlot = GetWaterEncounterSlot();
++    }
++  }
+```
+
+## Title Screen
+### Giratina Hover Range
+The Giratina model on the title screen hovers up and down slowly, but the range of motion is smaller than intended because the hover angle is incorrectly scaled before being passed to `CalcSineDegrees_Wraparound`, which expects degrees as input.
+
+**Fix:** Edit the hover calculation in the function `TitleScreen_Render` in [`src/applications/title_screen.c`](https://github.com/pret/pokeplatinum/blob/main/src/applications/title_screen.c#L656):
+
+```diff
+-    fx32 offset = CalcSineDegrees_Wraparound((titleScreen->giratinaHoverAngle * 0xFFFF) / 360);
++    fx32 offset = CalcSineDegrees_Wraparound(titleScreen->giratinaHoverAngle);
+```
+
+## 3D Rendering
+### Invalid VRAM Manager Type in G3DPipeline_InitEx
+When creating a new 3D graphics state using `G3DPipeline_InitEx`, with the `plttVramManagerType` parameter set to `VRAM_MANAGER_TYPE_FRAME`, the system will allocate a second texture VRAM manager instead of the intended palette VRAM manager. This bug never actually occurs in the game as the `plttVramManagerType` parameter is always set to `VRAM_MANAGER_TYPE_LINKED_LIST`, but it is still a bug in the code.
+
+**Fix:** Edit the function `G3DPipeline_InitEx` in [`src/g3d_pipeline_state.c`](https://github.com/pret/pokeplatinum/blob/main/src/g3d_pipeline_state.c#L40):
+
+```diff
+- NNS_GfdInitFrmTexVramManager(plttVramSize * PALETTE_VRAM_BLOCK_SIZE, TRUE);
++ NNS_GfdInitFrmPlttVramManager(plttVramSize * PALETTE_VRAM_BLOCK_SIZE, TRUE);
 ```

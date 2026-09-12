@@ -1,17 +1,17 @@
 #ifndef POKEPLATINUM_STRING_TEMPLATE_H
 #define POKEPLATINUM_STRING_TEMPLATE_H
 
-#include "consts/abilities.h"
-#include "consts/gender.h"
-#include "consts/moves.h"
+#include "generated/abilities.h"
+#include "generated/genders.h"
 
-#include "struct_decls/struct_020797DC_decl.h"
-#include "struct_defs/trainer_data.h"
+#include "struct_defs/pokemon.h"
+#include "struct_defs/trainer.h"
 
 #include "enums.h"
-#include "pokemon.h"
+#include "pc_boxes.h"
+#include "record_mixed_rng.h"
 #include "savedata.h"
-#include "strbuf.h"
+#include "string_gf.h"
 #include "trainer_info.h"
 
 #define STRING_TEMPLATE_DEFAULT_MAX_ARGS   8
@@ -26,23 +26,23 @@ typedef struct StringTemplateArgHeader {
 
 typedef struct StringTemplateArg {
     StringTemplateArgHeader header;
-    Strbuf *strbuf;
+    String *string;
 } StringTemplateArg;
 
 typedef struct StringTemplate {
     u32 maxArgs;
-    u32 heapID;
+    enum HeapID heapID;
     StringTemplateArg *args;
-    Strbuf *templateBuf;
+    String *templateBuf;
 } StringTemplate;
 
 StringTemplate *StringTemplate_Default(u32 heapID);
 StringTemplate *StringTemplate_New(u32 maxArgs, u32 maxLen, u32 heapID);
 void StringTemplate_Free(StringTemplate *template);
-void StringTemplate_SetStrbuf(StringTemplate *template, u32 idx, const Strbuf *argVal, u32 unused3, BOOL unused4, u32 unused5);
+void StringTemplate_SetString(StringTemplate *template, u32 idx, const String *argVal, u32 unused_gender, BOOL unused4, u32 language);
 void StringTemplate_SetPlayerName(StringTemplate *template, u32 idx, const TrainerInfo *playerInfo);
-void StringTemplate_SetRivalName(StringTemplate *template, u32 idx, const SaveData *save);
-void StringTemplate_SetCounterpartName(StringTemplate *template, u32 idx, const SaveData *save);
+void StringTemplate_SetRivalName(StringTemplate *template, u32 idx, const SaveData *saveData);
+void StringTemplate_SetCounterpartName(StringTemplate *template, u32 idx, const SaveData *saveData);
 void StringTemplate_SetSpeciesName(StringTemplate *template, u32 idx, BoxPokemon *boxMon);
 void StringTemplate_SetSpeciesNameWithArticle(StringTemplate *template, u32 idx, BoxPokemon *boxMon);
 void StringTemplate_SetSpeciesNameWithArticleByID(StringTemplate *template, u32 idx, u32 species);
@@ -65,10 +65,10 @@ void StringTemplate_SetLocationName(StringTemplate *template, u32 idx, u32 locat
 void StringTemplate_SetPoketchAppName(StringTemplate *template, u32 idx, u32 app);
 void StringTemplate_SetTrainerClassName(StringTemplate *template, u32 idx, u32 trainerClass);
 void StringTemplate_SetTrainerClassNameWithArticle(StringTemplate *template, u32 idx, u32 trainerClass);
-void StringTemplate_SetTrainerClassNameBattle(StringTemplate *template, u32 idx, TrainerData *trainerData);
+void StringTemplate_SetTrainerClassNameBattle(StringTemplate *template, u32 idx, Trainer *trainer);
 void StringTemplate_SetTrainerName(StringTemplate *template, u32 idx, u32 trainerID);
 void StringTemplate_SetFrontierTrainerName(StringTemplate *template, u32 idx, u32 trainerID);
-void StringTemplate_SetTrainerNameBattle(StringTemplate *template, u32 idx, TrainerData *trainerData);
+void StringTemplate_SetTrainerNameBattle(StringTemplate *template, u32 idx, Trainer *trainer);
 void StringTemplate_SetUndergroundItemName(StringTemplate *template, u32 idx, u32 item);
 void StringTemplate_SetUndergroundItemNameWithArticle(StringTemplate *template, u32 idx, u32 item);
 void StringTemplate_SetUndergroundTrapName(StringTemplate *template, u32 idx, u32 trap);
@@ -81,12 +81,12 @@ void StringTemplate_SetUndergroundAnswer(StringTemplate *template, u32 idx, u32 
 void StringTemplate_SetUndergroundGoodsName(StringTemplate *template, u32 idx, u32 goods);
 void StringTemplate_SetUndergroundGoodsNameWithArticle(StringTemplate *template, u32 idx, u32 goods);
 void StringTemplate_SetGenderMarker(StringTemplate *template, u32 idx, enum Gender gender);
-void StringTemplate_SetPCBoxName(StringTemplate *template, u32 idx, const PCBoxes *boxes, u32 boxIdx);
+void StringTemplate_SetPCBoxName(StringTemplate *template, u32 idx, const PCBoxes *pcBoxes, u32 boxIdx);
 void StringTemplate_SetGymName(StringTemplate *template, u32 idx, u32 gym);
 void StringTemplate_SetTimeOfDay(StringTemplate *template, u32 idx, u32 timeOfDay);
 void StringTemplate_SetCountryName(StringTemplate *template, u32 idx, u32 country);
 void StringTemplate_SetCityName(StringTemplate *template, u32 idx, u32 country, u32 city);
-void StringTemplate_SetCustomMessageWord(StringTemplate *template, u32 idx, u16 customMessageWord);
+void StringTemplate_SetEasyChatWord(StringTemplate *template, u32 idx, u16 word);
 void StringTemplate_SetBallSealName(StringTemplate *template, u32 idx, u32 ballSeal);
 void StringTemplate_SetBallSealNamePlural(StringTemplate *template, u32 idx, u32 ballSeal);
 void StringTemplate_SetMetLocationName(StringTemplate *template, u32 idx, u32 location);
@@ -94,7 +94,7 @@ void StringTemplate_SetPoffinName(StringTemplate *template, u32 idx, u32 poffin)
 void StringTemplate_SetContestAccessoryName(StringTemplate *template, u32 idx, u32 accessory);
 void StringTemplate_SetContestAccessoryNameWithArticle(StringTemplate *template, u32 idx, u32 accessory);
 void StringTemplate_SetContestBackdropName(StringTemplate *template, u32 idx, u32 backdrop);
-void StringTemplate_SetUnionGroupName(StringTemplate *template, SaveData *save, int groupID, int idx, int nameType);
+void StringTemplate_SetUnionGroupName(StringTemplate *template, SaveData *saveData, int groupID, int idx, enum RecordMixedRNGName nameType);
 void StringTemplate_SetPlazaMinigameName(StringTemplate *template, u32 idx, enum PlazaMinigame minigame);
 void StringTemplate_SetPlazaEventName(StringTemplate *template, u32 idx, int event);
 void StringTemplate_SetPlazaItemName(StringTemplate *template, u32 idx, u32 item);
@@ -106,9 +106,9 @@ void StringTemplate_SetDEGreeting(StringTemplate *template, u32 idx, u32 greetin
 void StringTemplate_SetESGreeting(StringTemplate *template, u32 idx, u32 greeting);
 void StringTemplate_SetFurniture(StringTemplate *template, u32 idx, u32 furniture);
 void StringTemplate_SetMonthName(StringTemplate *template, u32 idx, u32 month);
-void StringTemplate_SetDepartmentStoreFloor(StringTemplate *template, u32 idx, u32 floor);
+void StringTemplate_SetFloorNumber(StringTemplate *template, u32 idx, u32 floor);
 void StringTemplate_CapitalizeArgAtIndex(StringTemplate *template, u32 idx);
-void StringTemplate_Format(const StringTemplate *template, Strbuf *dst, const Strbuf *fmtString);
+void StringTemplate_Format(const StringTemplate *template, String *dst, const String *fmtString);
 void StringTemplate_ClearArgs(StringTemplate *template);
 
 #endif // POKEPLATINUM_STRING_TEMPLATE_H

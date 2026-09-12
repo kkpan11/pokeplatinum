@@ -9,11 +9,11 @@
 #include "savedata.h"
 
 typedef struct {
-    SaveData *unk_00;
+    SaveData *saveData;
     UnkStruct_0205C22C *unk_04;
-    Options *unk_08;
+    Options *options;
     GameRecords *records;
-    Journal *unk_10;
+    JournalEntry *journalEntry;
 } UnkStruct_0203DE34;
 
 #endif // POKEPLATINUM_STRUCT_0203DE34_H

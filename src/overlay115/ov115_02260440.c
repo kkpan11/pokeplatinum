@@ -3,7 +3,7 @@
 #include <nitro.h>
 #include <string.h>
 
-#include "overlay004/ov4_021D0D80.h"
+#include "nintendo_wfc/main.h"
 #include "overlay114/ov114_0225C700.h"
 #include "overlay114/struct_ov114_0225C76C.h"
 #include "overlay114/struct_ov114_0225C9A8.h"
@@ -21,18 +21,18 @@
 #include "overlay115/struct_ov115_02265AD0.h"
 #include "overlay115/struct_ov115_02265AD4.h"
 
+#include "comm_manager.h"
 #include "communication_information.h"
 #include "communication_system.h"
-#include "core_sys.h"
+#include "graphics.h"
 #include "heap.h"
+#include "narc.h"
+#include "network_icon.h"
 #include "overlay_manager.h"
-#include "unk_02006E3C.h"
-#include "unk_0200F174.h"
-#include "unk_02017728.h"
-#include "unk_0201DBEC.h"
+#include "screen_fade.h"
+#include "system.h"
 #include "unk_020363E8.h"
-#include "unk_020366A0.h"
-#include "unk_020393C8.h"
+#include "vram_transfer.h"
 
 typedef struct UnkStruct_ov115_0226095C_t {
     UnkStruct_ov114_0225D678 *unk_00;
@@ -63,27 +63,27 @@ static void ov115_02260B30(UnkStruct_ov115_0226095C *param0);
 static void ov115_02260B44(UnkStruct_ov115_0226095C *param0, UnkStruct_ov115_02260440 *param1);
 static BOOL ov115_02260BA0(UnkStruct_ov115_0226095C *param0, int param1, const void *param2, int param3);
 
-int ov115_02260440(OverlayManager *param0, int *param1)
+int ov115_02260440(ApplicationManager *appMan, int *param1)
 {
     UnkStruct_ov115_0226095C *v0;
-    UnkStruct_ov115_02260440 *v1 = OverlayManager_Args(param0);
+    UnkStruct_ov115_02260440 *v1 = ApplicationManager_Args(appMan);
     BOOL v2;
 
-    Heap_Create(3, 99, 0x60000);
+    Heap_Create(HEAP_ID_APPLICATION, HEAP_ID_99, 0x60000);
 
-    v0 = OverlayManager_NewData(param0, sizeof(UnkStruct_ov115_0226095C), 99);
+    v0 = ApplicationManager_NewData(appMan, sizeof(UnkStruct_ov115_0226095C), HEAP_ID_99);
     memset(v0, 0, sizeof(UnkStruct_ov115_0226095C));
 
-    ov114_0225C700(&v0->unk_08, v1->unk_39, v1->unk_34, v1->unk_38, &v1->unk_00);
+    ov114_0225C700(&v0->unk_08, v1->unk_39, v1->saveData, v1->unk_38, &v1->unk_00);
     ov115_02260ADC(v0, 99);
 
     return 1;
 }
 
-int ov115_0226048C(OverlayManager *param0, int *param1)
+int ov115_0226048C(ApplicationManager *appMan, int *param1)
 {
-    UnkStruct_ov115_0226095C *v0 = OverlayManager_Data(param0);
-    UnkStruct_ov115_02260440 *v1 = OverlayManager_Args(param0);
+    UnkStruct_ov115_0226095C *v0 = ApplicationManager_Data(appMan);
+    UnkStruct_ov115_02260440 *v1 = ApplicationManager_Args(appMan);
     BOOL v2;
     u32 v3;
 
@@ -91,11 +91,11 @@ int ov115_0226048C(OverlayManager *param0, int *param1)
         switch (v0->unk_78) {
         case 0:
 
-            if (ScreenWipe_Done() == 1) {
-                sub_0200F2C0();
+            if (IsScreenFadeDone() == TRUE) {
+                FinishScreenFade();
             }
 
-            sub_0200F370(0x0);
+            SetColorBrightness(COLOR_BLACK);
             v0->unk_78++;
             break;
         case 1:
@@ -106,7 +106,7 @@ int ov115_0226048C(OverlayManager *param0, int *param1)
         case 2:
             ov115_02260B44(v0, v1);
             return 1;
-            GF_ASSERT(0);
+            GF_ASSERT(FALSE);
             return 1;
         }
 
@@ -116,7 +116,7 @@ int ov115_0226048C(OverlayManager *param0, int *param1)
     switch (*param1) {
     case 0:
 
-        v0->unk_00 = ov114_0225C814(&v0->unk_08, 99);
+        v0->unk_00 = ov114_0225C814(&v0->unk_08, HEAP_ID_99);
 
         (*param1)++;
         break;
@@ -130,11 +130,11 @@ int ov115_0226048C(OverlayManager *param0, int *param1)
         }
         break;
     case 2:
-        if (gCoreSys.heldKeys & PAD_BUTTON_A) {
+        if (gSystem.heldKeys & PAD_BUTTON_A) {
             break;
         }
 
-        SetMainCallback(ov115_02260A50, v0);
+        SetVBlankCallback(ov115_02260A50, v0);
         DisableHBlank();
 
         v0->unk_38 = 0;
@@ -142,7 +142,7 @@ int ov115_0226048C(OverlayManager *param0, int *param1)
         v0->unk_40 = 0;
         memset(v0->unk_84, 0, sizeof(u8) * 4);
 
-        sub_0201DBEC(32, 99);
+        VramTransfer_New(32, HEAP_ID_99);
         ov115_02265A24(v0);
 
         v0->unk_80 = 1;
@@ -154,15 +154,15 @@ int ov115_0226048C(OverlayManager *param0, int *param1)
         v0->unk_46 = ov114_0225C76C(&v0->unk_08, v0->unk_44);
 
         if (v0->unk_44 == 0) {
-            v0->unk_30 = ov115_02260BBC(99, (30 * 40), v0->unk_74, &v0->unk_48);
+            v0->unk_30 = ov115_02260BBC(HEAP_ID_99, (30 * 40), v0->unk_74, &v0->unk_48);
             v0->unk_7C = 1;
         }
 
-        v0->unk_34 = ov115_02260CEC(99, (30 * 40), v0->unk_74, v0->unk_46, &v0->unk_48);
-        sub_02039734();
+        v0->unk_34 = ov115_02260CEC(HEAP_ID_99, (30 * 40), v0->unk_74, v0->unk_46, &v0->unk_48);
+        NetworkIcon_Init();
 
         if (v1->unk_38) {
-            ov4_021D1E74(99);
+            NintendoWFC_StartVoiceChat(HEAP_ID_99);
         }
 
         {
@@ -182,7 +182,7 @@ int ov115_0226048C(OverlayManager *param0, int *param1)
                 v4.unk_01 = 0;
                 break;
             default:
-                GF_ASSERT(0);
+                GF_ASSERT(FALSE);
                 break;
             }
 
@@ -198,13 +198,13 @@ int ov115_0226048C(OverlayManager *param0, int *param1)
             break;
         }
 
-        sub_0200F174(0, 27, 27, 0xffff, 6, 1, 99);
+        StartScreenFade(FADE_BOTH_SCREENS, 27, 27, 0xffff, 6, 1, HEAP_ID_99);
         (*param1)++;
         break;
     case 4:
         ov115_02260DAC(v0->unk_34, 0);
 
-        if (ScreenWipe_Done()) {
+        if (IsScreenFadeDone()) {
             if (v0->unk_44 == 0) {
                 v2 = CommSys_SendData(22, NULL, 0);
 
@@ -302,14 +302,14 @@ int ov115_0226048C(OverlayManager *param0, int *param1)
         }
         break;
     case 11:
-        sub_0200F174(0, 26, 26, 0xffff, 6, 1, 99);
+        StartScreenFade(FADE_BOTH_SCREENS, 26, 26, 0xffff, 6, 1, HEAP_ID_99);
         ov115_02260F70(v0->unk_34, 1);
         (*param1)++;
         break;
     case 12:
         ov115_02260F70(v0->unk_34, 1);
 
-        if (ScreenWipe_Done()) {
+        if (IsScreenFadeDone()) {
             CommTiming_StartSync(3);
             (*param1)++;
         }
@@ -320,7 +320,7 @@ int ov115_0226048C(OverlayManager *param0, int *param1)
         }
 
         if (v1->unk_38) {
-            ov4_021D1F18();
+            NintendoWFC_TerminateVoiceChat();
         }
 
         if (v0->unk_44 == 0) {
@@ -330,9 +330,9 @@ int ov115_0226048C(OverlayManager *param0, int *param1)
 
         ov115_02260D78(v0->unk_34);
         v0->unk_34 = NULL;
-        SetMainCallback(NULL, NULL);
+        SetVBlankCallback(NULL, NULL);
         DisableHBlank();
-        sub_0201DC3C();
+        VramTransfer_Free();
         (*param1)++;
         break;
     case 14: {
@@ -341,7 +341,7 @@ int ov115_0226048C(OverlayManager *param0, int *param1)
         ov114_0225C9A8(&v0->unk_18, v0->unk_08.unk_08);
         v9 = v0->unk_18.unk_10[v0->unk_46];
     }
-        v0->unk_04 = ov114_0225C8E0(&v0->unk_08, &v0->unk_18, 99);
+        v0->unk_04 = ov114_0225C8E0(&v0->unk_08, &v0->unk_18, HEAP_ID_99);
         (*param1)++;
         break;
     case 15: {
@@ -365,10 +365,10 @@ int ov115_0226048C(OverlayManager *param0, int *param1)
     return 0;
 }
 
-int ov115_022608E4(OverlayManager *param0, int *param1)
+int ov115_022608E4(ApplicationManager *appMan, int *param1)
 {
-    UnkStruct_ov115_0226095C *v0 = OverlayManager_Data(param0);
-    UnkStruct_ov115_02260440 *v1 = OverlayManager_Args(param0);
+    UnkStruct_ov115_0226095C *v0 = ApplicationManager_Data(appMan);
+    UnkStruct_ov115_02260440 *v1 = ApplicationManager_Args(appMan);
     BOOL v2;
 
     switch (*param1) {
@@ -377,9 +377,9 @@ int ov115_022608E4(OverlayManager *param0, int *param1)
 
         ov115_02260B30(v0);
 
-        OverlayManager_FreeData(param0);
-        Heap_Destroy(99);
-        CommMan_SetErrorHandling(0, 1);
+        ApplicationManager_FreeData(appMan);
+        Heap_Destroy(HEAP_ID_99);
+        CommManager_SetErrorHandling(0, 1);
 
         if (v2 == 1) {
             return 1;
@@ -412,9 +412,7 @@ void ov115_02260964(UnkStruct_ov115_0226095C *param0)
 
 void ov115_0226096C(UnkStruct_ov115_0226095C *param0, const UnkStruct_ov115_02265AD0 *param1, u32 param2)
 {
-    u32 v0;
-
-    v0 = ov114_0225C76C(&param0->unk_08, param2);
+    u32 v0 = ov114_0225C76C(&param0->unk_08, param2);
     ov115_02260C6C(param0->unk_30, param1, v0);
 }
 
@@ -425,9 +423,7 @@ void ov115_02260988(UnkStruct_ov115_0226095C *param0, const UnkStruct_ov115_0226
 
 void ov115_02260994(UnkStruct_ov115_0226095C *param0, u32 param1, u32 param2)
 {
-    u32 v0;
-
-    v0 = ov114_0225C76C(&param0->unk_08, param2);
+    u32 v0 = ov114_0225C76C(&param0->unk_08, param2);
 
     if (param0->unk_30 != NULL) {
         ov115_02260C7C(param0->unk_30, param1, v0);
@@ -528,7 +524,7 @@ static void ov115_02260ADC(UnkStruct_ov115_0226095C *param0, u32 param1)
     u32 v0;
     int v1;
 
-    param0->unk_48.unk_04 = sub_02007068(189, 0, 0, param1, 0, &v0);
+    param0->unk_48.unk_04 = LoadMemberFromNARC_OutFileSize(NARC_INDEX_APPLICATION__BUCKET__BALLSLOW_DATA, 0, 0, param1, 0, &v0);
     param0->unk_48.unk_00 = v0 / sizeof(UnkStruct_ov115_02262DC4);
 
     for (v1 = 0; v1 < param0->unk_08.unk_08; v1++) {
@@ -539,14 +535,14 @@ static void ov115_02260ADC(UnkStruct_ov115_0226095C *param0, u32 param1)
 
 static void ov115_02260B30(UnkStruct_ov115_0226095C *param0)
 {
-    Heap_FreeToHeap(param0->unk_48.unk_04);
+    Heap_Free(param0->unk_48.unk_04);
     param0->unk_48.unk_04 = NULL;
     param0->unk_48.unk_00 = 0;
 }
 
 static void ov115_02260B44(UnkStruct_ov115_0226095C *param0, UnkStruct_ov115_02260440 *param1)
 {
-    SetMainCallback(NULL, NULL);
+    SetVBlankCallback(NULL, NULL);
     DisableHBlank();
 
     if (param0->unk_00 != NULL) {
@@ -560,11 +556,11 @@ static void ov115_02260B44(UnkStruct_ov115_0226095C *param0, UnkStruct_ov115_022
         }
 
         ov115_02260D78(param0->unk_34);
-        sub_0201DC3C();
+        VramTransfer_Free();
     }
 
     if (param1->unk_38) {
-        ov4_021D1F18();
+        NintendoWFC_TerminateVoiceChat();
     }
 
     if (param0->unk_04 != NULL) {

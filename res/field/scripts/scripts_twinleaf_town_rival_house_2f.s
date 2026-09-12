@@ -1,75 +1,69 @@
-    .include "macros/scrcmd.inc"
+#include "macros/scrcmd.inc"
+#include "res/text/bank/twinleaf_town_rival_house_2f.h"
+#include "res/field/events/events_twinleaf_town_rival_house_2f.h"
 
-    .data
 
-    ScriptEntry _000E
-    ScriptEntry _0090
-    ScriptEntry _00A1
-    .short 0xFD13
+    ScriptEntry TwinleafTownRivalHouse2F_OnFrame_Rival
+    ScriptEntry TwinleafTownRivalHouse2F_Wii
+    ScriptEntry TwinleafTownRivalHouse2F_PC
+    ScriptEntryEnd
 
-_000E:
+TwinleafTownRivalHouse2F_OnFrame_Rival:
     LockAll
-    ScrCmd_0CE 0
-    Message 0
+    BufferRivalName 0
+    Message TwinleafTownRivalHouse2F_Text_TakeBagAndJournal
     CloseMessage
-    ApplyMovement 0, _0060
+    ApplyMovement LOCALID_RIVAL, TwinleafTownRivalHouse2F_Movement_RivalNoticePlayer
     WaitMovement
-    CallCommonScript 0x7FA
-    ScrCmd_0CD 0
-    Message 1
+    Common_SetRivalBGM
+    BufferPlayerName 0
+    Message TwinleafTownRivalHouse2F_Text_WaitingOnTheRoad
     CloseMessage
-    ApplyMovement 0, _006C
-    ApplyMovement 0xFF, _0080
+    ApplyMovement LOCALID_RIVAL, TwinleafTownRivalHouse2F_Movement_RivalLeave
+    ApplyMovement LOCALID_PLAYER, TwinleafTownRivalHouse2F_Movement_PlayerMoveAwayFromStairs
     WaitMovement
-    PlayFanfare SEQ_SE_DP_KAIDAN2
-    ScrCmd_065 0
-    CallCommonScript 0x7FB
-    SetFlag 234
-    SetVar 0x40A3, 1
-    SetVar 0x4070, 2
+    PlaySE SEQ_SE_DP_KAIDAN2_sseq
+    RemoveObject LOCALID_RIVAL
+    Common_FadeToDefaultMusic2
+    SetFlag FLAG_RIVAL_LEFT_HOME
+    SetVar VAR_RIVAL_HOUSE_STATE, 1
+    SetVar VAR_TWINLEAF_TOWN_GUITARIST_TRIGGER_STATE, 2
     ReleaseAll
     End
 
     .balign 4, 0
-_0060:
-    MoveAction_022
-    MoveAction_04B
+TwinleafTownRivalHouse2F_Movement_RivalNoticePlayer:
+    WalkOnSpotNormalWest
+    EmoteExclamationMark
     EndMovement
 
     .balign 4, 0
-_006C:
-    MoveAction_012 4
-    MoveAction_010
-    MoveAction_012 3
-    MoveAction_045
+TwinleafTownRivalHouse2F_Movement_RivalLeave:
+    WalkFastWest 4
+    WalkFastNorth
+    WalkFastWest 3
+    SetInvisible
     EndMovement
 
     .balign 4, 0
-_0080:
-    MoveAction_03F 2
-    MoveAction_00D
-    MoveAction_020
+TwinleafTownRivalHouse2F_Movement_PlayerMoveAwayFromStairs:
+    Delay8 2
+    WalkNormalSouth
+    WalkOnSpotNormalNorth
     EndMovement
 
-_0090:
-    PlayFanfare SEQ_SE_CONFIRM
+TwinleafTownRivalHouse2F_Wii:
+    EventMessage TwinleafTownRivalHouse2F_Text_ItsAWii
+    End
+
+TwinleafTownRivalHouse2F_PC:
+    PlaySE SE_CONFIRM_sseq_3
     LockAll
-    Message 2
-    WaitABXPadPress
+    BufferPlayerName 0
+    Message TwinleafTownRivalHouse2F_Text_PCAdventureRules
+    WaitButton
     CloseMessage
     ReleaseAll
     End
 
-_00A1:
-    PlayFanfare SEQ_SE_CONFIRM
-    LockAll
-    ScrCmd_0CD 0
-    Message 3
-    WaitABXPadPress
-    CloseMessage
-    ReleaseAll
-    End
-
-    .byte 0
-    .byte 0
-    .byte 0
+    .balign 4, 0

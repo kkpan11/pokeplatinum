@@ -16,38 +16,38 @@
 
 struct UnkStruct_ov5_021D1A94_t {
     FieldSystem *fieldSystem;
-    int unk_04;
+    enum HeapID heapID;
     int unk_08;
     UnkStruct_ov5_021D1BEC *unk_0C;
-    SysTaskManager *unk_10;
+    SysTaskManager *sysTaskManager;
 };
 
 struct UnkStruct_ov5_021D1BEC_t {
     UnkStruct_ov5_021D1A94 *unk_00;
-    SysTask *unk_04;
-    SysTask *unk_08;
+    SysTask *sysTask1;
+    SysTask *sysTask2;
     const UnkStruct_ov6_0223E6EC *unk_0C;
     void *unk_10;
 };
 
-UnkStruct_ov5_021D1A94 *ov5_021D1A94(FieldSystem *fieldSystem, int param1, int param2)
+UnkStruct_ov5_021D1A94 *ov5_021D1A94(FieldSystem *fieldSystem, enum HeapID heapID, int param2)
 {
     UnkStruct_ov5_021D1A94 *v0;
     u32 v1;
 
-    v0 = Heap_AllocFromHeap(param1, sizeof(UnkStruct_ov5_021D1A94));
+    v0 = Heap_Alloc(heapID, sizeof(UnkStruct_ov5_021D1A94));
 
     v0->fieldSystem = fieldSystem;
-    v0->unk_04 = param1;
+    v0->heapID = heapID;
     v0->unk_08 = param2;
-    v0->unk_0C = Heap_AllocFromHeap(param1, sizeof(UnkStruct_ov5_021D1BEC) * param2);
+    v0->unk_0C = Heap_Alloc(heapID, sizeof(UnkStruct_ov5_021D1BEC) * param2);
 
     MI_CpuClear32(v0->unk_0C, sizeof(UnkStruct_ov5_021D1BEC) * param2);
 
     v1 = SysTaskManager_GetRequiredSize(param2);
 
-    v0->unk_10 = Heap_AllocFromHeap(param1, v1);
-    v0->unk_10 = SysTaskManager_Init(param2, v0->unk_10);
+    v0->sysTaskManager = Heap_Alloc(heapID, v1);
+    v0->sysTaskManager = SysTaskManager_Init(param2, v0->sysTaskManager);
 
     return v0;
 }
@@ -60,21 +60,21 @@ void ov5_021D1AE4(UnkStruct_ov5_021D1A94 *param0)
         ov5_021D1BEC(&param0->unk_0C[v0]);
     }
 
-    Heap_FreeToHeap(param0->unk_0C);
-    Heap_FreeToHeap(param0->unk_10);
-    Heap_FreeToHeap(param0);
+    Heap_Free(param0->unk_0C);
+    Heap_Free(param0->sysTaskManager);
+    Heap_Free(param0);
 }
 
 void ov5_021D1B18(UnkStruct_ov5_021D1A94 *param0)
 {
-    SysTaskManager_ExecuteTasks(param0->unk_10);
+    SysTaskManager_ExecuteTasks(param0->sysTaskManager);
 }
 
 static void ov5_021D1B24(SysTask *param0, void *param1)
 {
     UnkStruct_ov5_021D1BEC *v0 = param1;
 
-    if (sub_0203CD5C(v0->unk_00->fieldSystem)) {
+    if (FieldSystem_IsRunningFieldMapInner(v0->unk_00->fieldSystem)) {
         if (v0->unk_0C->unk_10) {
             v0->unk_0C->unk_10(v0, v0->unk_00->fieldSystem, v0->unk_10);
         }
@@ -85,7 +85,7 @@ static void ov5_021D1B48(SysTask *param0, void *param1)
 {
     UnkStruct_ov5_021D1BEC *v0 = param1;
 
-    if (sub_0203CD5C(v0->unk_00->fieldSystem)) {
+    if (FieldSystem_IsRunningFieldMapInner(v0->unk_00->fieldSystem)) {
         if (v0->unk_0C->unk_14) {
             v0->unk_0C->unk_14(v0, v0->unk_00->fieldSystem, v0->unk_10);
         }
@@ -98,17 +98,17 @@ UnkStruct_ov5_021D1BEC *ov5_021D1B6C(UnkStruct_ov5_021D1A94 *param0, const UnkSt
     UnkStruct_ov5_021D1BEC *v1;
 
     for (v1 = param0->unk_0C, v0 = 0; v0 < param0->unk_08; v1++, v0++) {
-        if (v1->unk_04 == NULL) {
-            v1->unk_04 = SysTask_Start(ov5_021D1B24, v1, param1->unk_00);
-            v1->unk_08 = SysTaskManager_AddTask(param0->unk_10, ov5_021D1B48, v1, param1->unk_00);
+        if (v1->sysTask1 == NULL) {
+            v1->sysTask1 = SysTask_Start(ov5_021D1B24, v1, param1->unk_00);
+            v1->sysTask2 = SysTaskManager_AddTask(param0->sysTaskManager, ov5_021D1B48, v1, param1->unk_00);
             v1->unk_00 = param0;
             v1->unk_0C = param1;
 
-            GF_ASSERT(v1->unk_04 != NULL);
-            GF_ASSERT(v1->unk_08 != NULL);
+            GF_ASSERT(v1->sysTask1 != NULL);
+            GF_ASSERT(v1->sysTask2 != NULL);
 
             if (param1->unk_04 != 0) {
-                v1->unk_10 = Heap_AllocFromHeap(param0->unk_04, param1->unk_04);
+                v1->unk_10 = Heap_Alloc(param0->heapID, param1->unk_04);
             }
 
             if (param1->unk_08) {
@@ -119,13 +119,13 @@ UnkStruct_ov5_021D1BEC *ov5_021D1B6C(UnkStruct_ov5_021D1A94 *param0, const UnkSt
         }
     }
 
-    GF_ASSERT(0);
+    GF_ASSERT(FALSE);
     return NULL;
 }
 
 void ov5_021D1BEC(UnkStruct_ov5_021D1BEC *param0)
 {
-    if (param0->unk_04 == NULL) {
+    if (param0->sysTask1 == NULL) {
         return;
     }
 
@@ -134,11 +134,11 @@ void ov5_021D1BEC(UnkStruct_ov5_021D1BEC *param0)
     }
 
     if (param0->unk_0C->unk_04 != 0) {
-        Heap_FreeToHeap(param0->unk_10);
+        Heap_Free(param0->unk_10);
     }
 
-    SysTask_Done(param0->unk_04);
-    SysTask_Done(param0->unk_08);
+    SysTask_Done(param0->sysTask1);
+    SysTask_Done(param0->sysTask2);
 
     MI_CpuClear32(param0, sizeof(UnkStruct_ov5_021D1BEC));
 }

@@ -3,869 +3,738 @@
 #include <nitro.h>
 #include <string.h>
 
-#include "struct_decls/struct_0200112C_decl.h"
-#include "struct_decls/struct_02001AF4_decl.h"
-#include "struct_decls/struct_02002F38_decl.h"
-#include "struct_decls/struct_02006C24_decl.h"
-#include "struct_decls/struct_0200C6E4_decl.h"
-#include "struct_decls/struct_0200C704_decl.h"
-#include "struct_decls/struct_02013A04_decl.h"
-#include "struct_defs/archived_sprite.h"
-#include "struct_defs/sentence.h"
-#include "struct_defs/sprite_template.h"
-#include "struct_defs/struct_0200D0F4.h"
-#include "struct_defs/struct_02013A04_t.h"
-#include "struct_defs/struct_0205AA50.h"
-#include "struct_defs/struct_02081CF4.h"
+#include "constants/battle_frontier_movements.h"
+#include "constants/field_base_tiles.h"
+#include "constants/narc.h"
 
+#include "applications/party_menu/main.h"
 #include "overlay063/ov63_0222BE18.h"
 #include "overlay063/ov63_0222CCE4.h"
 #include "overlay063/ov63_0222D77C.h"
 #include "overlay063/struct_ov63_0222BEC0_decl.h"
 #include "overlay063/struct_ov63_0222CCB8.h"
-#include "overlay084/struct_ov84_02240FA8.h"
-#include "overlay104/ov104_0222E63C.h"
-#include "overlay104/ov104_0222E930.h"
-#include "overlay104/struct_ov104_0222E930_decl.h"
-#include "overlay104/struct_ov104_0222E930_t.h"
+#include "overlay104/defs.h"
+#include "overlay104/frontier_script_context.h"
+#include "overlay104/frontier_script_manager.h"
 #include "overlay104/struct_ov104_0222FEDC.h"
 #include "overlay104/struct_ov104_02230BE4.h"
-#include "overlay104/struct_ov104_022320B4_decl.h"
-#include "overlay104/struct_ov104_022320B4_t.h"
-#include "overlay104/struct_ov104_02232B78.h"
 #include "overlay104/struct_ov104_0223319C.h"
 #include "overlay104/struct_ov104_022331E8.h"
-#include "overlay104/struct_ov104_0223C4CC.h"
 
-#include "cell_actor.h"
-#include "core_sys.h"
+#include "battle_frontier.h"
+#include "bg_window.h"
+#include "character_sprite.h"
+#include "easy_chat_sentence.h"
+#include "font.h"
 #include "game_options.h"
 #include "heap.h"
+#include "list_menu.h"
+#include "menu.h"
 #include "message.h"
 #include "narc.h"
+#include "palette.h"
+#include "pltt_transfer.h"
 #include "pokemon.h"
 #include "pokemon_icon.h"
+#include "render_text.h"
+#include "render_window.h"
 #include "save_player.h"
-#include "strbuf.h"
+#include "screen_fade.h"
+#include "sound_playback.h"
+#include "sprite.h"
+#include "sprite_system.h"
+#include "string_gf.h"
+#include "string_list.h"
 #include "string_template.h"
 #include "sys_task.h"
 #include "sys_task_manager.h"
-#include "unk_0200112C.h"
-#include "unk_02001AF4.h"
-#include "unk_02002328.h"
-#include "unk_02002B7C.h"
-#include "unk_02002F38.h"
-#include "unk_02005474.h"
-#include "unk_0200C6E4.h"
-#include "unk_0200DA60.h"
-#include "unk_0200F174.h"
-#include "unk_020131EC.h"
-#include "unk_02014A84.h"
-#include "unk_02018340.h"
-#include "unk_0201D670.h"
-#include "unk_0201F834.h"
-#include "unk_0207E0B8.h"
-#include "unk_0209B6F8.h"
+#include "system.h"
+#include "text.h"
 
-typedef struct UnkStruct_ov104_02232B5C_t {
-    UnkStruct_ov104_022320B4 *unk_00;
-    SysTask *unk_04;
-    Window unk_08;
-    Window *unk_18;
-    Strbuf *unk_1C[28];
-    MessageLoader *unk_8C;
-    StringTemplate *unk_90;
-    u8 unk_94;
-    u8 unk_95;
-    u8 unk_96;
-    u8 unk_97_0 : 1;
-    u8 unk_97_1 : 1;
-    u8 unk_97_2 : 4;
-    u8 unk_97_6 : 1;
-    u8 unk_97_7 : 1;
-    u8 unk_98;
-    u8 unk_99;
-    u8 unk_9A;
-    u8 unk_9B;
-    u16 *unk_9C;
-    u16 *unk_A0;
-    UnkStruct_02081CF4 unk_A4;
-    UIControlData *unk_B0;
-    ResourceMetadata unk_B4[28];
-    UnkStruct_ov84_02240FA8 unk_194;
-    BmpList *unk_1B4;
-    u16 unk_1B8;
-    u16 unk_1BA;
-    ResourceMetadata unk_1BC[28];
-    u16 unk_29C[28];
-    u16 unk_2D4;
-} UnkStruct_ov104_02232B5C;
+#define LIST_MENU_ENTRY_NO_ALT_TEXT 0xFF
+#define LIST_MENU_BUILDER_HEADER    0xFA
+#define LIST_MENU_MAX_DISPLAY       8
+#define CURSOR_MARGIN_SIZE          12
+
+#define MON_SPRITE_BASE_RESOURCE_ID       2000
+#define ITEM_SPRITE_BASE_RESOURCE_ID      2009
+#define ITEM_SPRITE_SECONDARY_RESOURCE_ID 2001
 
 typedef struct {
     u16 unk_00;
     u16 unk_02;
 } UnkStruct_ov104_022419A0;
 
-static void ov104_02231FC4(UnkStruct_ov104_022320B4 *param0);
-static void ov104_02232034(UnkStruct_ov104_022320B4 *param0, const MessageLoader *param1, u32 param2);
-static void ov104_02232050(UnkStruct_ov104_022320B4 *param0, int param1, int param2, int param3, int param4);
-static void ov104_0223214C(UnkStruct_ov104_022320B4 *param0, UnkStruct_ov104_02232B5C *param1, u8 param2, u8 param3, u8 param4, u8 param5, u16 *param6, StringTemplate *param7, MessageLoader *param8);
-UnkStruct_ov104_02232B5C *ov104_02232258(UnkStruct_ov104_022320B4 *param0, u8 param1, u8 param2, u8 param3, u8 param4, u16 *param5, StringTemplate *param6, MessageLoader *param7);
-void ov104_022322A8(UnkStruct_ov104_02232B5C *param0, u32 param1, u32 param2, u32 param3);
-void ov104_022322B0(UnkStruct_ov104_02232B5C *param0);
-static void ov104_02232390(UnkStruct_ov104_02232B5C *param0, u32 param1, u32 param2, u32 param3);
-static u32 ov104_02232414(UnkStruct_ov104_02232B5C *param0);
-static void ov104_02232454(UnkStruct_ov104_02232B5C *param0);
-static void ov104_022324C8(SysTask *param0, void *param1);
-static void ov104_02232570(UnkStruct_ov104_02232B5C *param0);
-static void ov104_022325D8(UnkStruct_ov104_02232B5C *param0);
-static void ov104_02232AC4(UnkStruct_ov104_02232B5C *param0, u16 param1, u32 param2);
-void ov104_022320B4(UnkStruct_ov104_022320B4 *param0, u8 param1, u16 param2, u16 param3, u16 param4, s16 param5, u8 param6);
-static void ov104_022320FC(Strbuf *param0, u16 param1, u16 param2, u16 param3, u16 param4);
-static BOOL ov104_02233184(UnkStruct_ov104_0222E930 *param0);
-UnkStruct_ov104_02232B5C *ov104_022325FC(UnkStruct_ov104_022320B4 *param0, u8 param1, u8 param2, u8 param3, u8 param4, u16 *param5, StringTemplate *param6, MessageLoader *param7);
-void ov104_0223261C(UnkStruct_ov104_02232B5C *param0, u32 param1, u32 param2, u32 param3);
-void ov104_02232624(UnkStruct_ov104_02232B5C *param0);
-static void ov104_02232750(UnkStruct_ov104_02232B5C *param0, u32 param1, u32 param2, u32 param3);
-static u32 ov104_022327F0(UnkStruct_ov104_02232B5C *param0);
-static void ov104_02232830(UnkStruct_ov104_02232B5C *param0);
-static void ov104_0223293C(BmpList *param0, u32 param1, u8 param2);
-static void ov104_02232960(BmpList *param0, u32 param1, u8 param2);
-static void ov104_0223296C(SysTask *param0, void *param1);
-static void ov104_02232A58(UnkStruct_ov104_02232B5C *param0, u8 param1);
-static void ov104_02232B2C(UnkStruct_ov104_02232B5C *param0);
-void ov104_02232B5C(UnkStruct_ov104_02232B5C *param0);
-void ov104_022330FC(UnkStruct_ov104_0222E930 *param0, u16 *param1);
-void ov104_0223310C(UnkStruct_ov104_0222E930 *param0, u16 *param1, u32 param2);
-extern void ov104_0223327C(UnkStruct_ov104_02232B5C *param0, int param1);
-extern void ov104_02233298(UnkStruct_ov104_02232B5C *param0, int param1);
+static void OpenMessageBox(FrontierScriptManager *scriptMan);
+static void GetMessage(FrontierScriptManager *scriptMan, const MessageLoader *msgLoader, u32 entryID);
+static void PrintMessage(FrontierScriptManager *scriptMan, enum Font font, int renderDelay, BOOL canSpeedUp, int autoScroll);
+static void FrontierMenuManager_Init(FrontierScriptManager *scriptMan, FrontierMenuManager *menuManager, u8 anchorX, u8 anchorY, u8 initialCursorPos, u8 canExitWithB, u16 *selectedOptionPtr, StringTemplate *strTemplate, MessageLoader *msgLoader);
+static void AddMenuEntry(FrontierMenuManager *menuManager, u32 entryID, u32 altTextEntryID, u32 index);
+static u32 CalcMenuWidth(FrontierMenuManager *menuManager);
+static void SetupSingleColumnMenu(FrontierMenuManager *menuManager);
+static void MenuSysTaskCallback(SysTask *task, void *data);
+static void FreeManagerWithMenu(FrontierMenuManager *menuManager);
+static void UpdateMenuAltText(FrontierMenuManager *menuManager);
+static void PrintListMenuAltText(FrontierMenuManager *menuManager, u16 entryID, u32 printerDelay);
+static void ShowSentence(FrontierScriptManager *scriptMan, u8 renderDelay, u16 sentenceType, u16 sentenceID, u16 word1, s16 word2, u8 canSpeedUp);
+static void GetStringFromSentence(String *msgBuf, u16 sentenceType, u16 sentenceID, u16 word1, u16 word2);
+static BOOL WaitForFinishedPrinting(FrontierScriptContext *ctx);
+static void AddListMenuEntry(FrontierMenuManager *menuManager, u32 entryID, u32 altTextEntryID, u32 index);
+static u32 CalcListMenuWidth(FrontierMenuManager *param0);
+static void InitListMenuTemplate(FrontierMenuManager *menuManager);
+static void SetListMenuItemAltColor(ListMenu *listMenu, u32 index, u8 yOffset);
+static void ListMenuDummyCursorCallback(ListMenu *listMenu, u32 index, u8 onInit);
+static void ListMenuSysTaskCallback(SysTask *task, void *data);
+static void FreeManagerWithListMenu(FrontierMenuManager *menuManager, u8 playSound);
+static void UpdateListMenuAltText(FrontierMenuManager *menuManager);
 
-void ov104_02231F74(UnkStruct_ov104_022320B4 *param0, const MessageLoader *param1, u16 param2, u8 param3, UnkStruct_ov104_0222FEDC *param4)
+void FrontierShowMessage(FrontierScriptManager *scriptMan, const MessageLoader *msgLoader, u16 messageID, u8 canSpeedUp, FrontierMessageOptions *msgOptions)
 {
-    u8 v0;
-    u8 v1;
-    u8 v2;
+    u8 renderDelay;
+    u8 autoScroll;
+    u8 font;
 
-    ov104_02231FC4(param0);
-    ov104_02232034(param0, param1, param2);
+    OpenMessageBox(scriptMan);
+    GetMessage(scriptMan, msgLoader, messageID);
 
-    if (param4 == NULL) {
-        UnkStruct_ov104_0223C4CC *v3 = ov104_0222E924(param0);
-        UnkStruct_ov104_02230BE4 *v4;
+    if (msgOptions == NULL) {
+        FrontierGraphics *graphics = FrontierScriptManager_GetGraphics(scriptMan);
+        FieldFrontierDTO *fieldData = BattleFrontier_GetFieldData(graphics->frontier);
 
-        v4 = sub_0209B970(v3->unk_08);
-
-        v0 = Options_TextFrameDelay(v4->unk_04);
-        v1 = 0;
-        v2 = 1;
+        renderDelay = Options_TextFrameDelay(fieldData->options);
+        autoScroll = AUTO_SCROLL_DISABLED;
+        font = FONT_MESSAGE;
     } else {
-        v0 = param4->unk_00;
-        v1 = param4->unk_01;
-        v2 = param4->unk_02;
+        renderDelay = msgOptions->renderDelay;
+        autoScroll = msgOptions->scrollFlags;
+        font = msgOptions->font;
     }
 
-    ov104_02232050(param0, v2, v0, param3, v1);
+    PrintMessage(scriptMan, font, renderDelay, canSpeedUp, autoScroll);
 }
 
-static void ov104_02231FC4(UnkStruct_ov104_022320B4 *param0)
+static void OpenMessageBox(FrontierScriptManager *scriptMan)
 {
-    UnkStruct_ov104_0223C4CC *v0 = ov104_0222E924(param0);
+    FrontierGraphics *graphics = FrontierScriptManager_GetGraphics(scriptMan);
 
-    if (param0->unk_5A == 0) {
-        BGL_AddWindow(
-            v0->unk_00, &param0->unk_64, 1, 2, 19, 27, 4, 13, (((1024 - (18 + 12)) - 9) - (27 * 4)));
-        BGL_FillWindow(&param0->unk_64, 15);
-        sub_0200E060(&param0->unk_64, 0, (1024 - (18 + 12)), 11);
+    if (scriptMan->isMsgBoxOpen == FALSE) {
+        Window_Add(
+            graphics->bgConfig, &scriptMan->msgWindow, BG_LAYER_MAIN_1, 2, 19, 27, 4, 13, BASE_TILE_STANDARD_WINDOW_FRAME - MESSAGE_WINDOW_TILE_COUNT);
+        Window_FillTilemap(&scriptMan->msgWindow, 15);
+        Window_DrawMessageBoxWithScrollCursor(&scriptMan->msgWindow, 0, BASE_TILE_SCROLLING_MESSAGE_BOX, 11);
 
-        param0->unk_5A = 1;
+        scriptMan->isMsgBoxOpen = TRUE;
     } else {
-        BGL_FillWindow(&param0->unk_64, 15);
+        Window_FillTilemap(&scriptMan->msgWindow, 15);
     }
 }
 
-static void ov104_02232034(UnkStruct_ov104_022320B4 *param0, const MessageLoader *param1, u32 param2)
+static void GetMessage(FrontierScriptManager *scriptMan, const MessageLoader *msgLoader, u32 entryID)
 {
-    MessageLoader_GetStrbuf(param1, param2, param0->unk_4C);
-    StringTemplate_Format(param0->unk_44, param0->unk_48, param0->unk_4C);
+    MessageLoader_GetString(msgLoader, entryID, scriptMan->fmtString);
+    StringTemplate_Format(scriptMan->strTemplate, scriptMan->string, scriptMan->fmtString);
 }
 
-static void ov104_02232050(UnkStruct_ov104_022320B4 *param0, int param1, int param2, int param3, int param4)
+static void PrintMessage(FrontierScriptManager *scriptMan, enum Font font, int renderDelay, BOOL canSpeedUp, int autoScroll)
 {
-    sub_02002AC8(param3);
-    sub_02002AE4(param4);
-    sub_02002B20(0);
-    param0->unk_50 = PrintStringSimple(&param0->unk_64, param1, param0->unk_48, 0, 0, param2, NULL);
+    RenderControlFlags_SetCanABSpeedUpPrint(canSpeedUp);
+    RenderControlFlags_SetAutoScrollFlags(autoScroll);
+    RenderControlFlags_SetSpeedUpOnTouch(FALSE);
+    scriptMan->printerID = Text_AddPrinterWithParams(&scriptMan->msgWindow, font, scriptMan->string, 0, 0, renderDelay, NULL);
 }
 
-void ov104_02232088(UnkStruct_ov104_022320B4 *param0)
+void Frontier_CloseMessage(FrontierScriptManager *scriptMan)
 {
-    GF_ASSERT(param0->unk_5A == 1);
+    GF_ASSERT(scriptMan->isMsgBoxOpen == TRUE);
 
-    sub_0200E084(&param0->unk_64, 0);
-    BGL_DeleteWindow(&param0->unk_64);
+    Window_EraseMessageBox(&scriptMan->msgWindow, FALSE);
+    Window_Remove(&scriptMan->msgWindow);
 
-    param0->unk_5A = 0;
+    scriptMan->isMsgBoxOpen = FALSE;
 }
 
-void ov104_022320B4(UnkStruct_ov104_022320B4 *param0, u8 param1, u16 param2, u16 param3, u16 param4, s16 param5, u8 param6)
+static void ShowSentence(FrontierScriptManager *scriptMan, u8 renderDelay, u16 sentenceType, u16 sentenceID, u16 word1, s16 word2, u8 canSpeedUp)
 {
-    Sentence v0;
+    OpenMessageBox(scriptMan);
 
-    ov104_02231FC4(param0);
+    GetStringFromSentence(scriptMan->string, sentenceType, sentenceID, word1, word2);
 
-    ov104_022320FC(param0->unk_48, param2, param3, param4, param5);
-
-    if (param6 != 0xFF) {
-        ov104_02232050(param0, 1, param1, param6, 0);
+    if (canSpeedUp != 0xFF) {
+        PrintMessage(scriptMan, FONT_MESSAGE, renderDelay, canSpeedUp, AUTO_SCROLL_DISABLED);
     } else {
-        ov104_02232050(param0, 1, 0, param6, 0);
+        PrintMessage(scriptMan, FONT_MESSAGE, TEXT_SPEED_INSTANT, canSpeedUp, AUTO_SCROLL_DISABLED);
     }
 }
 
-static void ov104_022320FC(Strbuf *param0, u16 param1, u16 param2, u16 param3, u16 param4)
+static void GetStringFromSentence(String *msgBuf, u16 sentenceType, u16 sentenceID, u16 word1, u16 word2)
 {
-    Sentence v0;
-    Strbuf *v1;
+    EasyChatSentence sentence;
+    String *string;
 
-    sub_02014A84(&v0);
-    sub_02014CE0(&v0, param1, param2);
-    sub_02014CF8(&v0, 0, param3);
-    sub_02014CF8(&v0, 1, param4);
+    EasyChatSentence_Init(&sentence);
+    EasyChatSentence_SetTypeAndID(&sentence, sentenceType, sentenceID);
+    EasyChatSentence_SetWord(&sentence, 0, word1);
+    EasyChatSentence_SetWord(&sentence, 1, word2);
 
-    v1 = sub_02014B34(&v0, 32);
-    Strbuf_Copy(param0, v1);
-    Strbuf_Free(v1);
+    string = EasyChatSentence_ToString(&sentence, HEAP_ID_FIELD3);
+    String_Copy(msgBuf, string);
+    String_Free(string);
 }
 
-static void ov104_0223214C(UnkStruct_ov104_022320B4 *param0, UnkStruct_ov104_02232B5C *param1, u8 param2, u8 param3, u8 param4, u8 param5, u16 *param6, StringTemplate *param7, MessageLoader *param8)
+static void FrontierMenuManager_Init(FrontierScriptManager *scriptMan, FrontierMenuManager *menuManager, u8 anchorX, u8 anchorY, u8 initialCursorPos, u8 canExitWithB, u16 *selectedOptionPtr, StringTemplate *strTemplate, MessageLoader *msgLoader)
 {
-    int v0;
+    int i;
 
-    if (param8 == NULL) {
-        param1->unk_8C = MessageLoader_Init(1, 26, 361, param0->unk_34);
-        param1->unk_97_1 = 1;
+    if (msgLoader == NULL) {
+        menuManager->msgLoader = MessageLoader_Init(MSG_LOADER_LOAD_ON_DEMAND, NARC_INDEX_MSGDATA__PL_MSG, TEXT_BANK_MENU_ENTRIES, scriptMan->heapID);
+        menuManager->freeMsgLoaderOnDelete = TRUE;
     } else {
-        param1->unk_8C = param8;
-        param1->unk_97_1 = 0;
+        menuManager->msgLoader = msgLoader;
+        menuManager->freeMsgLoaderOnDelete = FALSE;
     }
 
-    param1->unk_90 = param7;
+    menuManager->strTemplate = strTemplate;
+    menuManager->scriptMan = scriptMan;
+    menuManager->selectedOptionPtr = selectedOptionPtr;
 
-    param1->unk_00 = param0;
-    param1->unk_A0 = param6;
+    *menuManager->selectedOptionPtr = 0;
 
-    *param1->unk_A0 = 0;
+    menuManager->canExitWithB = canExitWithB;
+    menuManager->initialCursorPos = initialCursorPos;
+    menuManager->anchorX = anchorX;
+    menuManager->anchorY = anchorY;
+    menuManager->optionCount = 0;
+    menuManager->parent = &scriptMan->msgWindow;
+    menuManager->sysTaskDelay = 3;
+    menuManager->cursorPos = initialCursorPos;
 
-    param1->unk_97_0 = param5;
-    param1->unk_96 = param4;
-    param1->unk_98 = param2;
-    param1->unk_99 = param3;
-    param1->unk_9B = 0;
-    param1->unk_18 = &param0->unk_64;
-    param1->unk_94 = 3;
-    param1->unk_2D4 = param4;
-
-    for (v0 = 0; v0 < 28; v0++) {
-        param1->unk_B4[v0].unk_00 = NULL;
-        param1->unk_B4[v0].unk_04 = 0;
+    for (i = 0; i < FRONTIER_MENU_ENTRIES_MAX; i++) {
+        menuManager->menuChoiceStrings[i].entry = NULL;
+        menuManager->menuChoiceStrings[i].index = 0;
     }
 
-    for (v0 = 0; v0 < 28; v0++) {
-        param1->unk_1BC[v0].unk_00 = NULL;
-        param1->unk_1BC[v0].unk_04 = 0;
-        param1->unk_29C[v0] = 0xff;
+    for (i = 0; i < FRONTIER_MENU_ENTRIES_MAX; i++) {
+        menuManager->listMenuChoiceStrings[i].entry = NULL;
+        menuManager->listMenuChoiceStrings[i].index = 0;
+        menuManager->choicesAltTextEntryIDs[i] = LIST_MENU_ENTRY_NO_ALT_TEXT;
     }
 
-    for (v0 = 0; v0 < 28; v0++) {
-        param1->unk_1C[v0] = Strbuf_Init((40 * 2), param0->unk_34);
+    for (i = 0; i < FRONTIER_MENU_ENTRIES_MAX; i++) {
+        menuManager->choiceStringBuffers[i] = String_Init(80, scriptMan->heapID);
     }
 
-    *param1->unk_A0 = 0xeeee;
-
-    return;
+    *menuManager->selectedOptionPtr = LIST_MENU_NO_SELECTION_YET;
 }
 
-UnkStruct_ov104_02232B5C *ov104_02232258(UnkStruct_ov104_022320B4 *param0, u8 param1, u8 param2, u8 param3, u8 param4, u16 *param5, StringTemplate *param6, MessageLoader *param7)
+FrontierMenuManager *FrontierMenuManager_New(FrontierScriptManager *scriptMan, u8 anchorX, u8 anchorY, u8 initalCursorPos, u8 canExitWithB, u16 *selectedOptionPtr, StringTemplate *strTemplate, MessageLoader *msgLoader)
 {
-    UnkStruct_ov104_02232B5C *v0;
-    int v1;
+    FrontierMenuManager *menuManager = Heap_Alloc(scriptMan->heapID, sizeof(FrontierMenuManager));
 
-    v0 = Heap_AllocFromHeap(param0->unk_34, sizeof(UnkStruct_ov104_02232B5C));
-
-    if (v0 == NULL) {
+    if (menuManager == NULL) {
         return NULL;
     }
 
-    memset(v0, 0, sizeof(UnkStruct_ov104_02232B5C));
+    memset(menuManager, 0, sizeof(FrontierMenuManager));
 
-    ov104_0223214C(param0, v0, param1, param2, param3, param4, param5, param6, param7);
+    FrontierMenuManager_Init(scriptMan, menuManager, anchorX, anchorY, initalCursorPos, canExitWithB, selectedOptionPtr, strTemplate, msgLoader);
 
-    return v0;
+    return menuManager;
 }
 
-void ov104_022322A8(UnkStruct_ov104_02232B5C *param0, u32 param1, u32 param2, u32 param3)
+void FrontierMenuManager_AddMenuEntry(FrontierMenuManager *menuManager, u32 entryID, u32 altTextEntryID, u32 index)
 {
-    ov104_02232390(param0, param1, param2, param3);
-    return;
+    AddMenuEntry(menuManager, entryID, altTextEntryID, index);
 }
 
-void ov104_022322B0(UnkStruct_ov104_02232B5C *param0)
+void FrontierMenuManager_ShowMenu(FrontierMenuManager *menuManager)
 {
-    u32 v0;
-    UnkStruct_ov104_0223C4CC *v1 = ov104_0222E924(param0->unk_00);
+    u32 menuWidth;
+    FrontierGraphics *graphics = FrontierScriptManager_GetGraphics(menuManager->scriptMan);
 
-    v0 = ov104_02232414(param0);
-    if (v0 % 8 == 0) {
-        v0 /= 8;
+    menuWidth = CalcMenuWidth(menuManager);
+    if (menuWidth % TILE_WIDTH_PIXELS == 0) {
+        menuWidth /= TILE_WIDTH_PIXELS;
     } else {
-        v0 = v0 / 8 + 1;
+        menuWidth = menuWidth / TILE_WIDTH_PIXELS + 1;
     }
 
-    if (param0->unk_97_6) {
-        param0->unk_98 -= v0;
+    if (menuManager->anchorRight) {
+        menuManager->anchorX -= menuWidth;
     }
-    if (param0->unk_97_7) {
-        param0->unk_99 -= param0->unk_9B * 2;
+    if (menuManager->anchorBottom) {
+        menuManager->anchorY -= menuManager->optionCount * 2;
     }
 
-    BGL_AddWindow(v1->unk_00, &param0->unk_08, 1, param0->unk_98, param0->unk_99, v0, param0->unk_9B * 2, 14, 1);
-    Window_Show(&param0->unk_08, 1, 985, 12);
-    ov104_02232454(param0);
-    param0->unk_B0 = sub_02001B9C(&param0->unk_A4, param0->unk_96, param0->unk_00->unk_34);
-    ov104_022325D8(param0);
-    param0->unk_04 = SysTask_Start(ov104_022324C8, param0, 0);
+    Window_Add(graphics->bgConfig, &menuManager->window, BG_LAYER_MAIN_1, menuManager->anchorX, menuManager->anchorY, menuWidth, menuManager->optionCount * 2, 14, 1);
+    Window_DrawStandardFrame(&menuManager->window, TRUE, 985, 12);
+    SetupSingleColumnMenu(menuManager);
+    menuManager->menu = Menu_NewSimple(&menuManager->menuTemplate, menuManager->initialCursorPos, menuManager->scriptMan->heapID);
+    UpdateMenuAltText(menuManager);
+    menuManager->sysTask = SysTask_Start(MenuSysTaskCallback, menuManager, 0);
 }
 
-static void ov104_02232390(UnkStruct_ov104_02232B5C *param0, u32 param1, u32 param2, u32 param3)
+static void AddMenuEntry(FrontierMenuManager *menuManager, u32 entryID, u32 altTextEntryID, u32 index)
 {
-    int v0;
-    void *v1;
+    String *entryBuf = String_Init(80, menuManager->scriptMan->heapID);
 
-    {
-        Strbuf *v2 = Strbuf_Init((40 * 2), param0->unk_00->unk_34);
+    MessageLoader_GetString(menuManager->msgLoader, entryID, entryBuf);
+    StringTemplate_Format(menuManager->strTemplate, menuManager->choiceStringBuffers[menuManager->optionCount], entryBuf);
+    menuManager->menuChoiceStrings[menuManager->optionCount].entry = menuManager->choiceStringBuffers[menuManager->optionCount];
+    String_Free(entryBuf);
 
-        MessageLoader_GetStrbuf(param0->unk_8C, param1, v2);
-        StringTemplate_Format(param0->unk_90, param0->unk_1C[param0->unk_9B], v2);
-        param0->unk_B4[param0->unk_9B].unk_00 = (const void *)param0->unk_1C[param0->unk_9B];
-        Strbuf_Free(v2);
-    }
-
-    param0->unk_29C[param0->unk_9B] = param2;
-    param0->unk_B4[param0->unk_9B].unk_04 = param3;
-    param0->unk_9B++;
-
-    return;
+    menuManager->choicesAltTextEntryIDs[menuManager->optionCount] = altTextEntryID;
+    menuManager->menuChoiceStrings[menuManager->optionCount].index = index;
+    menuManager->optionCount++;
 }
 
-static u32 ov104_02232414(UnkStruct_ov104_02232B5C *param0)
+static u32 CalcMenuWidth(FrontierMenuManager *menuManager)
 {
-    int v0;
-    u32 v1, v2;
+    u32 maxWidth = 0;
 
-    v1 = 0;
-    v2 = 0;
-
-    for (v0 = 0; v0 < param0->unk_9B; v0++) {
-        if (param0->unk_B4[v0].unk_00 == NULL) {
+    for (int i = 0; i < menuManager->optionCount; i++) {
+        if (menuManager->menuChoiceStrings[i].entry == NULL) {
             break;
         }
 
-        v1 = sub_02002D7C(0, (Strbuf *)param0->unk_B4[v0].unk_00, 0);
+        u32 entryWidth = Font_CalcStringWidth(FONT_SYSTEM, menuManager->menuChoiceStrings[i].entry, 0);
 
-        if (v2 < v1) {
-            v2 = v1;
+        if (maxWidth < entryWidth) {
+            maxWidth = entryWidth;
         }
     }
 
-    return v2 + 12;
+    return maxWidth + CURSOR_MARGIN_SIZE;
 }
 
-static void ov104_02232454(UnkStruct_ov104_02232B5C *param0)
+static void SetupSingleColumnMenu(FrontierMenuManager *menuManager)
 {
-    param0->unk_A4.unk_00 = param0->unk_B4;
-    param0->unk_A4.unk_04 = &param0->unk_08;
-    param0->unk_A4.unk_08 = 0;
-    param0->unk_A4.unk_09 = 1;
-    param0->unk_A4.unk_0A = param0->unk_9B;
-    param0->unk_A4.unk_0B_0 = 0;
-    param0->unk_A4.unk_0B_4 = 0;
+    menuManager->menuTemplate.choices = menuManager->menuChoiceStrings;
+    menuManager->menuTemplate.window = &menuManager->window;
+    menuManager->menuTemplate.fontID = FONT_SYSTEM;
+    menuManager->menuTemplate.xSize = 1;
+    menuManager->menuTemplate.ySize = menuManager->optionCount;
+    menuManager->menuTemplate.lineSpacing = 0;
+    menuManager->menuTemplate.suppressCursor = FALSE;
 
-    if (param0->unk_9B >= 4) {
-        param0->unk_A4.unk_0B_6 = 1;
+    if (menuManager->optionCount >= 4) {
+        menuManager->menuTemplate.loopAround = TRUE;
     } else {
-        param0->unk_A4.unk_0B_6 = 0;
+        menuManager->menuTemplate.loopAround = FALSE;
     }
-
-    return;
 }
 
-static void ov104_022324C8(SysTask *param0, void *param1)
+static void MenuSysTaskCallback(SysTask *task, void *data)
 {
-    u32 v0;
-    UnkStruct_ov104_02232B5C *v1 = param1;
+    FrontierMenuManager *menuManager = data;
 
-    if (v1->unk_94 != 0) {
-        v1->unk_94--;
+    if (menuManager->sysTaskDelay != 0) {
+        menuManager->sysTaskDelay--;
         return;
     }
 
-    if (ScreenWipe_Done() == 0) {
+    if (!IsScreenFadeDone()) {
         return;
     }
 
-    v0 = sub_02001BE0(v1->unk_B0);
+    u32 selectedEntry = Menu_ProcessInput(menuManager->menu);
 
-    if ((gCoreSys.pressedKeysRepeatable & PAD_KEY_UP) || (gCoreSys.pressedKeysRepeatable & PAD_KEY_DOWN) || (gCoreSys.pressedKeysRepeatable & PAD_KEY_LEFT) || (gCoreSys.pressedKeysRepeatable & PAD_KEY_RIGHT)) {
-        ov104_022325D8(v1);
+    if (JOY_REPEAT(PAD_KEY_UP) || JOY_REPEAT(PAD_KEY_DOWN) || JOY_REPEAT(PAD_KEY_LEFT) || JOY_REPEAT(PAD_KEY_RIGHT)) {
+        UpdateMenuAltText(menuManager);
     }
 
-    if (*v1->unk_A0 == 0xeedd) {
-        ov104_02232570(param1);
+    if (*menuManager->selectedOptionPtr == 0xeedd) {
+        FreeManagerWithMenu(data);
     } else {
-        switch (v0) {
-        case 0xffffffff:
+        switch (selectedEntry) {
+        case MENU_NOTHING_CHOSEN:
             break;
-        case 0xfffffffe:
-            if (v1->unk_97_0 == 1) {
-                *v1->unk_A0 = 0xfffe;
-                ov104_02232570(param1);
+        case MENU_CANCEL:
+            if (menuManager->canExitWithB == TRUE) {
+                *menuManager->selectedOptionPtr = MENU_CANCEL;
+                FreeManagerWithMenu(data);
             }
             break;
         default:
-            *v1->unk_A0 = v0;
-            ov104_02232570(param1);
+            *menuManager->selectedOptionPtr = selectedEntry;
+            FreeManagerWithMenu(data);
             break;
         }
     }
-
-    return;
 }
 
-static void ov104_02232570(UnkStruct_ov104_02232B5C *param0)
+static void FreeManagerWithMenu(FrontierMenuManager *menuManager)
 {
-    int v0;
+    Sound_PlayEffect(SE_CONFIRM_sseq_3);
 
-    Sound_PlayEffect(1500);
+    Menu_Free(menuManager->menu, NULL);
+    Window_EraseStandardFrame(menuManager->menuTemplate.window, FALSE);
+    Window_Remove(menuManager->menuTemplate.window);
 
-    sub_02001BC4(param0->unk_B0, NULL);
-    Window_Clear(param0->unk_A4.unk_04, 0);
-    BGL_DeleteWindow(param0->unk_A4.unk_04);
-
-    for (v0 = 0; v0 < 28; v0++) {
-        Strbuf_Free(param0->unk_1C[v0]);
+    for (int i = 0; i < FRONTIER_MENU_ENTRIES_MAX; i++) {
+        String_Free(menuManager->choiceStringBuffers[i]);
     }
 
-    if (param0->unk_97_1 == 1) {
-        MessageLoader_Free(param0->unk_8C);
+    if (menuManager->freeMsgLoaderOnDelete == TRUE) {
+        MessageLoader_Free(menuManager->msgLoader);
     }
 
-    SysTask_Done(param0->unk_04);
-    Heap_FreeToHeap(param0);
-    return;
+    SysTask_Done(menuManager->sysTask);
+    Heap_Free(menuManager);
 }
 
-static void ov104_022325D8(UnkStruct_ov104_02232B5C *param0)
+static void UpdateMenuAltText(FrontierMenuManager *menuManager)
 {
-    u8 v0;
+    u8 cursorPos = Menu_GetCursorPos(menuManager->menu);
 
-    v0 = sub_02001DC4(param0->unk_B0);
-
-    if (param0->unk_29C[v0] != 0xff) {
-        ov104_02232AC4(param0, param0->unk_29C[v0], 0);
+    if (menuManager->choicesAltTextEntryIDs[cursorPos] != LIST_MENU_ENTRY_NO_ALT_TEXT) {
+        PrintListMenuAltText(menuManager, menuManager->choicesAltTextEntryIDs[cursorPos], TEXT_SPEED_INSTANT);
     }
-
-    return;
 }
 
-UnkStruct_ov104_02232B5C *ov104_022325FC(UnkStruct_ov104_022320B4 *param0, u8 param1, u8 param2, u8 param3, u8 param4, u16 *param5, StringTemplate *param6, MessageLoader *param7)
+FrontierMenuManager *FrontierMenuManager_New2(FrontierScriptManager *scriptMan, u8 anchorX, u8 anchorY, u8 initialCursorPos, u8 canExitWithB, u16 *selectedOptionPtr, StringTemplate *strTemplate, MessageLoader *msgLoader)
 {
-    return ov104_02232258(param0, param1, param2, param3, param4, param5, param6, param7);
+    return FrontierMenuManager_New(scriptMan, anchorX, anchorY, initialCursorPos, canExitWithB, selectedOptionPtr, strTemplate, msgLoader);
 }
 
-void ov104_0223261C(UnkStruct_ov104_02232B5C *param0, u32 param1, u32 param2, u32 param3)
+void FrontierMenuManager_AddListMenuEntry(FrontierMenuManager *menuManager, u32 entry, u32 altTextEntryID, u32 index)
 {
-    ov104_02232750(param0, param1, param2, param3);
-    return;
+    AddListMenuEntry(menuManager, entry, altTextEntryID, index);
 }
 
-void ov104_02232624(UnkStruct_ov104_02232B5C *param0)
+void FrontierMenuManager_ShowListMenu(FrontierMenuManager *menuManager)
 {
-    u32 v0;
-    UnkStruct_ov104_0223C4CC *v1 = ov104_0222E924(param0->unk_00);
+    FrontierGraphics *graphics = FrontierScriptManager_GetGraphics(menuManager->scriptMan);
 
-    v0 = ov104_022327F0(param0);
-    if (v0 % 8 == 0) {
-        v0 /= 8;
+    u32 menuWidth = CalcListMenuWidth(menuManager);
+    if (menuWidth % TILE_WIDTH_PIXELS == 0) {
+        menuWidth /= TILE_WIDTH_PIXELS;
     } else {
-        v0 = v0 / 8 + 1;
+        menuWidth = menuWidth / TILE_WIDTH_PIXELS + 1;
     }
 
-    if (param0->unk_97_6) {
-        param0->unk_98 -= v0;
+    if (menuManager->anchorRight) {
+        menuManager->anchorX -= menuWidth;
     }
 
-    if (param0->unk_9B > 8) {
-        if (param0->unk_97_7) {
-            param0->unk_99 -= 8 * 2;
+    if (menuManager->optionCount > LIST_MENU_MAX_DISPLAY) {
+        if (menuManager->anchorBottom) {
+            menuManager->anchorY -= LIST_MENU_MAX_DISPLAY * 2;
         }
-        BGL_AddWindow(v1->unk_00, &param0->unk_08, 1, param0->unk_98, param0->unk_99, v0, 8 * 2, 14, 1);
+        Window_Add(graphics->bgConfig, &menuManager->window, 1, menuManager->anchorX, menuManager->anchorY, menuWidth, 8 * 2, 14, 1);
     } else {
-        if (param0->unk_97_7) {
-            param0->unk_99 -= param0->unk_9B * 2;
+        if (menuManager->anchorBottom) {
+            menuManager->anchorY -= menuManager->optionCount * 2;
         }
-        BGL_AddWindow(v1->unk_00, &param0->unk_08, 1, param0->unk_98, param0->unk_99, v0, param0->unk_9B * 2, 14, 1);
+        Window_Add(graphics->bgConfig, &menuManager->window, 1, menuManager->anchorX, menuManager->anchorY, menuWidth, menuManager->optionCount * 2, 14, 1);
     }
-    Window_Show(&param0->unk_08, 1, 985, 12);
-    ov104_02232830(param0);
-    param0->unk_1B4 = sub_0200112C((const UnkStruct_ov84_02240FA8 *)&param0->unk_194, 0, param0->unk_96, param0->unk_00->unk_34);
-    ov104_02232B2C(param0);
-    param0->unk_04 = SysTask_Start(ov104_0223296C, param0, 0);
+    Window_DrawStandardFrame(&menuManager->window, 1, 985, 12);
+    InitListMenuTemplate(menuManager);
+    menuManager->listMenu = ListMenu_New(&menuManager->listMenuTemplate, 0, menuManager->initialCursorPos, menuManager->scriptMan->heapID);
+    UpdateListMenuAltText(menuManager);
+    menuManager->sysTask = SysTask_Start(ListMenuSysTaskCallback, menuManager, 0);
 }
 
-static void ov104_02232750(UnkStruct_ov104_02232B5C *param0, u32 param1, u32 param2, u32 param3)
+static void AddListMenuEntry(FrontierMenuManager *menuManager, u32 entryID, u32 altTextEntryID, u32 index)
 {
-    int v0;
-    void *v1;
+    String *fmtStr = String_Init(80, menuManager->scriptMan->heapID);
 
-    {
-        Strbuf *v2 = Strbuf_Init((40 * 2), param0->unk_00->unk_34);
+    MessageLoader_GetString(menuManager->msgLoader, entryID, fmtStr);
+    StringTemplate_Format(menuManager->strTemplate, menuManager->choiceStringBuffers[menuManager->optionCount], fmtStr);
+    menuManager->listMenuChoiceStrings[menuManager->optionCount].entry = menuManager->choiceStringBuffers[menuManager->optionCount];
 
-        MessageLoader_GetStrbuf(param0->unk_8C, param1, v2);
-        StringTemplate_Format(param0->unk_90, param0->unk_1C[param0->unk_9B], v2);
-        param0->unk_1BC[param0->unk_9B].unk_00 = (const void *)param0->unk_1C[param0->unk_9B];
+    String_Free(fmtStr);
 
-        Strbuf_Free(v2);
-    }
-
-    if (param3 == 0xfa) {
-        param0->unk_1BC[param0->unk_9B].unk_04 = 0xfffffffd;
+    if (index == LIST_MENU_BUILDER_HEADER) {
+        menuManager->listMenuChoiceStrings[menuManager->optionCount].index = MENU_HEADER;
     } else {
-        param0->unk_1BC[param0->unk_9B].unk_04 = param3;
+        menuManager->listMenuChoiceStrings[menuManager->optionCount].index = index;
     }
 
-    param0->unk_29C[param0->unk_9B] = param2;
-    param0->unk_9B++;
-
-    return;
+    menuManager->choicesAltTextEntryIDs[menuManager->optionCount] = altTextEntryID;
+    menuManager->optionCount++;
 }
 
-static u32 ov104_022327F0(UnkStruct_ov104_02232B5C *param0)
+static u32 CalcListMenuWidth(FrontierMenuManager *param0)
 {
-    int v0;
-    u32 v1, v2;
+    u32 maxWidth = 0;
 
-    v1 = 0;
-    v2 = 0;
-
-    for (v0 = 0; v0 < param0->unk_9B; v0++) {
-        if (param0->unk_1BC[v0].unk_00 == NULL) {
+    for (int i = 0; i < param0->optionCount; i++) {
+        if (param0->listMenuChoiceStrings[i].entry == NULL) {
             break;
         }
 
-        v1 = sub_02002D7C(0, (Strbuf *)param0->unk_1BC[v0].unk_00, 0);
+        u32 entryWidth = Font_CalcStringWidth(FONT_SYSTEM, param0->listMenuChoiceStrings[i].entry, 0);
 
-        if (v2 < v1) {
-            v2 = v1;
+        if (maxWidth < entryWidth) {
+            maxWidth = entryWidth;
         }
     }
 
-    return v2 + 12;
+    return maxWidth + CURSOR_MARGIN_SIZE;
 }
 
-static void ov104_02232830(UnkStruct_ov104_02232B5C *param0)
+static void InitListMenuTemplate(FrontierMenuManager *menuManager)
 {
-    param0->unk_194.unk_00 = param0->unk_1BC;
-    param0->unk_194.unk_04 = ov104_02232960;
-    param0->unk_194.unk_08 = ov104_0223293C;
-    param0->unk_194.unk_0C = &param0->unk_08;
-
-    param0->unk_194.unk_10 = param0->unk_9B;
-    param0->unk_194.unk_12 = 8;
-
-    param0->unk_194.unk_14 = 1;
-    param0->unk_194.unk_15 = 12;
-    param0->unk_194.unk_16 = 2;
-    param0->unk_194.unk_17_0 = 1;
-
-    param0->unk_194.unk_17_4 = 1;
-    param0->unk_194.unk_18_0 = 15;
-    param0->unk_194.unk_18_4 = 2;
-
-    param0->unk_194.unk_1A_0 = 0;
-    param0->unk_194.unk_1A_3 = 16;
-
-    param0->unk_194.unk_1A_7 = 0;
-
-    param0->unk_194.unk_1A_9 = 0;
-    param0->unk_194.unk_1A_15 = 0;
-
-    param0->unk_194.unk_1C = (void *)param0;
-    return;
+    menuManager->listMenuTemplate.choices = menuManager->listMenuChoiceStrings;
+    menuManager->listMenuTemplate.cursorCallback = ListMenuDummyCursorCallback;
+    menuManager->listMenuTemplate.printCallback = SetListMenuItemAltColor;
+    menuManager->listMenuTemplate.window = &menuManager->window;
+    menuManager->listMenuTemplate.count = menuManager->optionCount;
+    menuManager->listMenuTemplate.maxDisplay = LIST_MENU_MAX_DISPLAY;
+    menuManager->listMenuTemplate.headerXOffset = 1;
+    menuManager->listMenuTemplate.textXOffset = CURSOR_MARGIN_SIZE;
+    menuManager->listMenuTemplate.cursorXOffset = 2;
+    menuManager->listMenuTemplate.yOffset = 1;
+    menuManager->listMenuTemplate.textColorFg = 1;
+    menuManager->listMenuTemplate.textColorBg = 15;
+    menuManager->listMenuTemplate.textColorShadow = 2;
+    menuManager->listMenuTemplate.letterSpacing = 0;
+    menuManager->listMenuTemplate.lineSpacing = 0;
+    menuManager->listMenuTemplate.pagerMode = PAGER_MODE_NONE;
+    menuManager->listMenuTemplate.fontID = FONT_SYSTEM;
+    menuManager->listMenuTemplate.cursorType = 0;
+    menuManager->listMenuTemplate.parent = menuManager;
 }
 
-static void ov104_0223293C(BmpList *param0, u32 param1, u8 param2)
+static void SetListMenuItemAltColor(ListMenu *listMenu, u32 index, u8 yOffset)
 {
-    if (param1 == 0xfffffffd) {
-        sub_0200147C(param0, 3, 15, 4);
+    if (index == MENU_HEADER) {
+        ListMenu_SetAltTextColors(listMenu, 3, 15, 4);
     } else {
-        sub_0200147C(param0, 1, 15, 2);
+        ListMenu_SetAltTextColors(listMenu, 1, 15, 2);
     }
 }
 
-static void ov104_02232960(BmpList *param0, u32 param1, u8 param2)
+static void ListMenuDummyCursorCallback(ListMenu *listMenu, u32 index, u8 onInit)
 {
-    u32 v0, v1;
-    u16 v2 = 0;
-    u16 v3 = 0;
-    UnkStruct_ov104_02232B5C *v4 = (UnkStruct_ov104_02232B5C *)sub_02001504(param0, 19);
-
-    return;
+    ListMenu_GetAttribute(listMenu, LIST_MENU_PARENT);
 }
 
-static void ov104_0223296C(SysTask *param0, void *param1)
+static void ListMenuSysTaskCallback(SysTask *task, void *data)
 {
-    u16 v0;
-    u32 v1;
-    UnkStruct_ov104_02232B5C *v2;
+    FrontierMenuManager *menuManager = data;
 
-    v2 = (UnkStruct_ov104_02232B5C *)param1;
-
-    if (v2->unk_94 != 0) {
-        v2->unk_94--;
+    if (menuManager->sysTaskDelay != 0) {
+        menuManager->sysTaskDelay--;
         return;
     }
 
-    if (ScreenWipe_Done() == 0) {
+    if (!IsScreenFadeDone()) {
         return;
     }
 
-    v1 = sub_02001288(v2->unk_1B4);
+    u32 selectedEntry = ListMenu_ProcessInput(menuManager->listMenu);
+    u16 cursorPos = menuManager->cursorPos;
 
-    v0 = v2->unk_2D4;
-    sub_020014D0(v2->unk_1B4, &v2->unk_2D4);
+    ListMenu_CalcTrueCursorPos(menuManager->listMenu, &menuManager->cursorPos);
 
-    if (v0 != v2->unk_2D4) {
-        Sound_PlayEffect(1500);
+    if (cursorPos != menuManager->cursorPos) {
+        Sound_PlayEffect(SE_CONFIRM_sseq_3);
     }
 
-    if ((gCoreSys.pressedKeysRepeatable & PAD_KEY_UP) || (gCoreSys.pressedKeysRepeatable & PAD_KEY_DOWN) || (gCoreSys.pressedKeysRepeatable & PAD_KEY_LEFT) || (gCoreSys.pressedKeysRepeatable & PAD_KEY_RIGHT)) {
-        ov104_02232B2C(v2);
+    if (JOY_REPEAT(PAD_KEY_UP) || JOY_REPEAT(PAD_KEY_DOWN) || JOY_REPEAT(PAD_KEY_LEFT) || JOY_REPEAT(PAD_KEY_RIGHT)) {
+        UpdateListMenuAltText(menuManager);
     }
 
-    if (*v2->unk_A0 == 0xeedd) {
-        ov104_02232A58(param1, 0);
+    if (*menuManager->selectedOptionPtr == 0xeedd) {
+        FreeManagerWithListMenu(data, FALSE);
     } else {
-        switch (v1) {
-        case 0xffffffff:
+        switch (selectedEntry) {
+        case MENU_NOTHING_CHOSEN:
             break;
-        case 0xfffffffe:
-            if (v2->unk_97_0 == 1) {
-                Sound_PlayEffect(1500);
-                *v2->unk_A0 = 0xfffe;
+        case MENU_CANCEL:
+            if (menuManager->canExitWithB == TRUE) {
+                Sound_PlayEffect(SE_CONFIRM_sseq_3);
+                *menuManager->selectedOptionPtr = MENU_CANCEL;
 
-                ov104_02232A58(param1, 1);
+                FreeManagerWithListMenu(data, TRUE);
             }
 
             break;
         default:
-            Sound_PlayEffect(1500);
-            *v2->unk_A0 = v1;
+            Sound_PlayEffect(SE_CONFIRM_sseq_3);
+            *menuManager->selectedOptionPtr = selectedEntry;
 
-            ov104_02232A58(param1, 1);
+            FreeManagerWithListMenu(data, TRUE);
             break;
         }
     }
-
-    return;
 }
 
-static void ov104_02232A58(UnkStruct_ov104_02232B5C *param0, u8 param1)
+static void FreeManagerWithListMenu(FrontierMenuManager *menuManager, u8 playSound)
 {
-    int v0;
-
-    if (param1 == 1) {
-        Sound_PlayEffect(1500);
+    if (playSound == TRUE) {
+        Sound_PlayEffect(SE_CONFIRM_sseq_3);
     }
 
-    sub_02001384(param0->unk_1B4, NULL, NULL);
-    Window_Clear(param0->unk_194.unk_0C, 0);
-    BGL_DeleteWindow(&param0->unk_08);
+    ListMenu_Free(menuManager->listMenu, NULL, NULL);
+    Window_EraseStandardFrame(menuManager->listMenuTemplate.window, FALSE);
+    Window_Remove(&menuManager->window);
 
-    for (v0 = 0; v0 < 28; v0++) {
-        Strbuf_Free(param0->unk_1C[v0]);
+    for (int i = 0; i < FRONTIER_MENU_ENTRIES_MAX; i++) {
+        String_Free(menuManager->choiceStringBuffers[i]);
     }
 
-    if (param0->unk_97_1 == 1) {
-        MessageLoader_Free(param0->unk_8C);
+    if (menuManager->freeMsgLoaderOnDelete == TRUE) {
+        MessageLoader_Free(menuManager->msgLoader);
     }
 
-    SysTask_Done(param0->unk_04);
-    Heap_FreeToHeap(param0);
-    return;
+    SysTask_Done(menuManager->sysTask);
+    Heap_Free(menuManager);
 }
 
-static void ov104_02232AC4(UnkStruct_ov104_02232B5C *param0, u16 param1, u32 param2)
+static void PrintListMenuAltText(FrontierMenuManager *menuManager, u16 entryID, u32 printerDelay)
 {
-    Strbuf *v0 = Strbuf_Init((40 * 2), param0->unk_00->unk_34);
-    Strbuf *v1 = Strbuf_Init((40 * 2), param0->unk_00->unk_34);
+    String *fmtStr = String_Init(80, menuManager->scriptMan->heapID);
+    String *displayStr = String_Init(80, menuManager->scriptMan->heapID);
 
-    BGL_FillWindow(param0->unk_18, 15);
+    Window_FillTilemap(menuManager->parent, 15);
 
-    MessageLoader_GetStrbuf(param0->unk_8C, param1, v0);
+    MessageLoader_GetString(menuManager->msgLoader, entryID, fmtStr);
+    StringTemplate_Format(menuManager->strTemplate, displayStr, fmtStr);
 
-    StringTemplate_Format(param0->unk_90, v1, v0);
+    Text_AddPrinterWithParams(menuManager->parent, FONT_MESSAGE, displayStr, 0, 0, printerDelay, NULL);
 
-    PrintStringSimple(param0->unk_18, 1, v1, 0, 0, param2, NULL);
-
-    Strbuf_Free(v0);
-    Strbuf_Free(v1);
-    return;
+    String_Free(fmtStr);
+    String_Free(displayStr);
 }
 
-static void ov104_02232B2C(UnkStruct_ov104_02232B5C *param0)
+static void UpdateListMenuAltText(FrontierMenuManager *menuManager)
 {
-    sub_020014D0(param0->unk_1B4, &param0->unk_1BA);
+    ListMenu_CalcTrueCursorPos(menuManager->listMenu, &menuManager->listMenuAltTextIndex);
 
-    if (param0->unk_29C[param0->unk_1BA] != 0xff) {
-        ov104_02232AC4(param0, param0->unk_29C[param0->unk_1BA], 0);
+    if (menuManager->choicesAltTextEntryIDs[menuManager->listMenuAltTextIndex] != LIST_MENU_ENTRY_NO_ALT_TEXT) {
+        PrintListMenuAltText(menuManager, menuManager->choicesAltTextEntryIDs[menuManager->listMenuAltTextIndex], TEXT_SPEED_INSTANT);
     }
-
-    return;
 }
 
-void ov104_02232B5C(UnkStruct_ov104_02232B5C *param0)
+void FrontierMenuManager_FreeListMenu(FrontierMenuManager *menuManager)
 {
-    UnkStruct_ov104_02232B5C *v0;
-
-    if (param0 == NULL) {
+    if (menuManager == NULL) {
         return;
     }
 
-    v0 = (UnkStruct_ov104_02232B5C *)param0;
-
-    *v0->unk_A0 = 0xfffe;
-
-    ov104_02232A58(param0, 0);
-    return;
+    *menuManager->selectedOptionPtr = MENU_CANCEL;
+    FreeManagerWithListMenu(menuManager, FALSE);
 }
 
-__attribute__((aligned(4))) static const u8 Unk_ov104_0223F9A4[] = {
-    0x1,
-    0x2,
-    0x4,
-    0x8,
-    0xF,
-    0x10,
-    0x20
+// clang-format off
+static const u8 sFrontierMovementDelayLengths[] = {
+    [FRONTIER_MOVEMENT_DELAY_1 - FRONTIER_MOVEMENT_DELAY_OFFSET] =  1,
+    [FRONTIER_MOVEMENT_DELAY_2 - FRONTIER_MOVEMENT_DELAY_OFFSET] =  2,
+    [FRONTIER_MOVEMENT_DELAY_4 - FRONTIER_MOVEMENT_DELAY_OFFSET] =  4,
+    [FRONTIER_MOVEMENT_DELAY_8 - FRONTIER_MOVEMENT_DELAY_OFFSET] =  8,
+    [FRONTIER_MOVEMENT_DELAY_15 - FRONTIER_MOVEMENT_DELAY_OFFSET] = 15,
+    [FRONTIER_MOVEMENT_DELAY_16 - FRONTIER_MOVEMENT_DELAY_OFFSET] = 16,
+    [FRONTIER_MOVEMENT_DELAY_32 - FRONTIER_MOVEMENT_DELAY_OFFSET] = 32
 };
 
-static UnkStruct_ov104_022419A0 Unk_ov104_022419A0[] = {
-    { 0x0, 0x0 },
-    { 0x0, 0x1 },
-    { 0x0, 0x2 },
-    { 0x0, 0x3 },
-    { 0x2, 0x0 },
-    { 0x2, 0x1 },
-    { 0x2, 0x2 },
-    { 0x2, 0x3 },
-    { 0x6, 0x0 },
-    { 0x6, 0x1 },
-    { 0x6, 0x2 },
-    { 0x6, 0x3 },
-    { 0x7, 0x0 },
-    { 0x7, 0x1 },
-    { 0x7, 0x2 },
-    { 0x7, 0x3 },
-    { 0xA, 0x0 },
-    { 0xA, 0x1 },
-    { 0xA, 0x2 },
-    { 0xA, 0x3 },
-    { 0xB, 0x0 },
-    { 0xB, 0x1 },
-    { 0xB, 0x2 },
-    { 0xB, 0x3 },
-    { 0x8, 0x0 },
-    { 0x8, 0x1 },
-    { 0x8, 0x2 },
-    { 0x8, 0x3 },
-    { 0x9, 0x0 },
-    { 0x9, 0x1 },
-    { 0x9, 0x2 },
-    { 0x9, 0x3 }
+static UnkStruct_ov104_022419A0 sFrontierMovementActions[] = {
+    [FRONTIER_MOVEMENT_FACE_NORTH] =                { 0x0, 0x0 },
+    [FRONTIER_MOVEMENT_FACE_SOUTH] =                { 0x0, 0x1 },
+    [FRONTIER_MOVEMENT_FACE_WEST] =                 { 0x0, 0x2 },
+    [FRONTIER_MOVEMENT_FACE_EAST] =                 { 0x0, 0x3 },
+    [FRONTIER_MOVEMENT_WALK_NORTH] =                { 0x2, 0x0 },
+    [FRONTIER_MOVEMENT_WALK_SOUTH] =                { 0x2, 0x1 },
+    [FRONTIER_MOVEMENT_WALK_WEST] =                 { 0x2, 0x2 },
+    [FRONTIER_MOVEMENT_WALK_EAST] =                 { 0x2, 0x3 },
+    [FRONTIER_MOVEMENT_WALK_SLOW_NORTH] =           { 0x6, 0x0 },
+    [FRONTIER_MOVEMENT_WALK_SLOW_SOUTH] =           { 0x6, 0x1 },
+    [FRONTIER_MOVEMENT_WALK_SLOW_WEST] =            { 0x6, 0x2 },
+    [FRONTIER_MOVEMENT_WALK_SLOW_EAST] =            { 0x6, 0x3 },
+    [FRONTIER_MOVEMENT_WALK_FAST_NORTH] =           { 0x7, 0x0 },
+    [FRONTIER_MOVEMENT_WALK_FAST_SOUTH] =           { 0x7, 0x1 },
+    [FRONTIER_MOVEMENT_WALK_FAST_WEST] =            { 0x7, 0x2 },
+    [FRONTIER_MOVEMENT_WALK_FAST_EAST] =            { 0x7, 0x3 },
+    [FRONTIER_MOVEMENT_WALK_ON_SPOT_NORTH] =        { 0xA, 0x0 },
+    [FRONTIER_MOVEMENT_WALK_ON_SPOT_SOUTH] =        { 0xA, 0x1 },
+    [FRONTIER_MOVEMENT_WALK_ON_SPOT_WEST] =         { 0xA, 0x2 },
+    [FRONTIER_MOVEMENT_WALK_ON_SPOT_EAST] =         { 0xA, 0x3 },
+    [FRONTIER_MOVEMENT_WALK_ON_SPOT_SLOW_NORTH] =   { 0xB, 0x0 },
+    [FRONTIER_MOVEMENT_WALK_ON_SPOT_SLOW_SOUTH] =   { 0xB, 0x1 },
+    [FRONTIER_MOVEMENT_WALK_ON_SPOT_SLOW_WEST] =    { 0xB, 0x2 },
+    [FRONTIER_MOVEMENT_WALK_ON_SPOT_SLOW_EAST] =    { 0xB, 0x3 },
+    [FRONTIER_MOVEMENT_WALK_ON_SPOT_FAST_NORTH] =   { 0x8, 0x0 },
+    [FRONTIER_MOVEMENT_WALK_ON_SPOT_FAST_SOUTH] =   { 0x8, 0x1 },
+    [FRONTIER_MOVEMENT_WALK_ON_SPOT_FAST_WEST] =    { 0x8, 0x2 },
+    [FRONTIER_MOVEMENT_WALK_ON_SPOT_FAST_EAST] =    { 0x8, 0x3 },
+    [FRONTIER_MOVEMENT_WALK_ON_SPOT_FASTER_NORTH] = { 0x9, 0x0 },
+    [FRONTIER_MOVEMENT_WALK_ON_SPOT_FASTER_SOUTH] = { 0x9, 0x1 },
+    [FRONTIER_MOVEMENT_WALK_ON_SPOT_FASTER_WEST] =  { 0x9, 0x2 },
+    [FRONTIER_MOVEMENT_WALK_ON_SPOT_FASTER_EAST] =  { 0x9, 0x3 }
 };
+// clang-format on
 
-void ov104_02232B78(SysTask *param0, void *param1)
+void FrontierObject_DoAnimation(SysTask *task, void *data)
 {
-    UnkStruct_ov104_02232B78 *v0 = param1;
+    FrontierAnimData *animData = data;
     UnkStruct_ov63_0222CCB8 v1;
-    u16 v2, v3;
+    u16 action = animData->animCmd->action;
+    u16 count = animData->animCmd->count;
 
-    v2 = v0->unk_0C->unk_00;
-    v3 = v0->unk_0C->unk_02;
-
-    switch (v0->unk_00) {
+    switch (animData->state) {
     case 0:
-        if (v2 == 0xfd13) {
-            v0->unk_00 = 2;
+        if (action == FRONTIER_MOVEMENT_END_MOVEMENT) {
+            animData->state = 2;
             break;
         }
     case 1:
-        if (ov63_0222BF90(v0->unk_14->unk_00, 5) == 0) {
-            if ((v2 >= (32 + 0)) && (v2 <= (32 + 6))) {
-                v0->unk_02++;
+        if (ov63_0222BF90(animData->frontierObj->unk_00, 5) == 0) {
+            if (action >= FRONTIER_MOVEMENT_DELAY_1 && action <= FRONTIER_MOVEMENT_DELAY_32) {
+                animData->delay++;
 
-                if (v0->unk_02 >= Unk_ov104_0223F9A4[v2 - (32 + 0)]) {
-                    v0->unk_02 = 0;
-                    v0->unk_0C++;
+                if (animData->delay >= sFrontierMovementDelayLengths[action - FRONTIER_MOVEMENT_DELAY_OFFSET]) {
+                    animData->delay = 0;
+                    animData->animCmd++;
                 }
                 break;
-            } else if ((v2 >= (32 + 7)) && (v2 < ((32 + 7) + 2))) {
-                switch (v2) {
-                case ((32 + 7) + 0):
-                    ov63_0222D008(v0->unk_14->unk_04, 1);
+            } else if (action >= FRONTIER_MOVEMENT_WARP_IN && action < NUM_FRONTIER_MOVEMENTS) {
+                switch (action) {
+                case FRONTIER_MOVEMENT_WARP_IN:
+                    ov63_0222D008(animData->frontierObj->sprite, TRUE);
                     break;
-                case ((32 + 7) + 1):
-                    ov63_0222D008(v0->unk_14->unk_04, 0);
+                case FRONTIER_MOVEMENT_WARP_OUT:
+                    ov63_0222D008(animData->frontierObj->sprite, FALSE);
                     break;
                 default:
-                    GF_ASSERT(0);
+                    GF_ASSERT(FALSE);
                     break;
                 }
 
-                v0->unk_0C++;
+                animData->animCmd++;
                 break;
             }
 
-            ov104_02232C80(&v1, v0->unk_14->unk_00, v0->unk_04, v2);
-            ov63_0222D7C8(v0->unk_10, &v1);
+            ov104_02232C80(&v1, animData->frontierObj->unk_00, animData->localID, action);
+            ov63_0222D7C8(animData->unk_10, &v1);
 
-            v0->unk_01++;
+            animData->elapsed++;
 
-            if (v0->unk_01 >= v3) {
-                v0->unk_01 = 0;
-                v0->unk_0C++;
+            if (animData->elapsed >= count) {
+                animData->elapsed = 0;
+                animData->animCmd++;
             }
 
-            v0->unk_00 = 0;
+            animData->state = 0;
         }
         break;
     case 2:
-        if (ov63_0222BF90(v0->unk_14->unk_00, 5) == 0) {
-            (*(v0->unk_08))--;
-            v0->unk_14->unk_38 = NULL;
-            Heap_FreeToHeap(v0);
-            SysTask_Done(param0);
+        if (ov63_0222BF90(animData->frontierObj->unk_00, 5) == 0) {
+            (*animData->totalMovementCount)--;
+            animData->frontierObj->movementTask = NULL;
+            Heap_Free(animData);
+            SysTask_Done(task);
             return;
         }
         break;
     }
 }
 
-void ov104_02232C80(UnkStruct_ov63_0222CCB8 *param0, UnkStruct_ov63_0222BEC0 *param1, int param2, int param3)
+void ov104_02232C80(UnkStruct_ov63_0222CCB8 *param0, UnkStruct_ov63_0222BEC0 *param1, int param2, int action)
 {
     param0->unk_07 = param2;
-    param0->unk_06 = Unk_ov104_022419A0[param3].unk_02;
-    param0->unk_04 = Unk_ov104_022419A0[param3].unk_00;
+    param0->unk_06 = sFrontierMovementActions[action].unk_02;
+    param0->unk_04 = sFrontierMovementActions[action].unk_00;
 
     if ((param0->unk_04 == 2) || (param0->unk_04 == 3) || (param0->unk_04 == 6)) {
         param0->unk_00 = ov63_0222C0F0(param1);
@@ -874,24 +743,24 @@ void ov104_02232C80(UnkStruct_ov63_0222CCB8 *param0, UnkStruct_ov63_0222BEC0 *pa
     }
 }
 
-void ov104_02232CE0(UnkStruct_ov104_0223C4CC *param0, Pokemon *param1, int param2, int param3, int param4, int param5, int param6, int param7, int param8, u16 param9)
+void ov104_02232CE0(FrontierGraphics *param0, Pokemon *param1, enum HeapID heapID, int param3, int param4, int param5, int param6, int param7, int param8, u16 param9)
 {
-    SpriteRenderer *v0 = param0->unk_34.unk_00;
-    SpriteGfxHandler *v1 = param0->unk_34.unk_04;
-    PaletteData *v2 = param0->unk_04;
-    ArchivedSprite v3;
+    SpriteSystem *v0 = param0->spriteSystem;
+    SpriteManager *v1 = param0->spriteMan;
+    PaletteData *v2 = param0->plttData;
+    PokemonSpriteTemplate v3;
     void *v4;
-    CellActorData *v5;
+    ManagedSprite *v5;
 
     {
         NARC *v6;
 
-        v6 = NARC_ctor(NARC_INDEX_BATTLE__GRAPHIC__PL_BATT_OBJ, param2);
+        v6 = NARC_ctor(NARC_INDEX_BATTLE__GRAPHIC__PL_BATT_OBJ, heapID);
 
-        SpriteRenderer_LoadCharResObjFromOpenNarc(v0, v1, v6, 112, 0, NNS_G2D_VRAM_TYPE_2DMAIN, param3);
-        SpriteRenderer_LoadPalette(v2, 2, v0, v1, v6, 111, 0, NNS_G2D_VRAM_TYPE_2DMAIN, 1, param3);
-        SpriteRenderer_LoadCellResObjFromOpenNarc(v0, v1, v6, 113, 0, param3);
-        SpriteRenderer_LoadAnimResObjFromOpenNarc(v0, v1, v6, 114, 0, param3);
+        SpriteSystem_LoadCharResObjFromOpenNarc(v0, v1, v6, 112, FALSE, NNS_G2D_VRAM_TYPE_2DMAIN, param3);
+        SpriteSystem_LoadPaletteBufferFromOpenNarc(v2, PLTTBUF_MAIN_OBJ, v0, v1, v6, 111, FALSE, NNS_G2D_VRAM_TYPE_2DMAIN, 1, param3);
+        SpriteSystem_LoadCellResObjFromOpenNarc(v0, v1, v6, 113, FALSE, param3);
+        SpriteSystem_LoadAnimResObjFromOpenNarc(v0, v1, v6, 114, FALSE, param3);
         NARC_dtor(v6);
     }
 
@@ -909,25 +778,25 @@ void ov104_02232CE0(UnkStruct_ov104_0223C4CC *param0, Pokemon *param1, int param
         v8.plttIdx = 0;
         v8.vramType = NNS_G2D_VRAM_TYPE_2DMAIN;
         v8.bgPriority = param7;
-        v8.transferToVRAM = FALSE;
+        v8.vramTransfer = FALSE;
 
         for (v7 = 0; v7 < 6; v7++) {
             v8.resources[v7] = param3;
         }
 
-        v5 = SpriteActor_LoadResources(v0, v1, &v8);
-        sub_0200D330(v5);
+        v5 = SpriteSystem_NewSprite(v0, v1, &v8);
+        ManagedSprite_TickFrame(v5);
     }
 
     {
-        u32 v9, v10;
+        u32 personality, species;
 
-        v4 = Heap_AllocFromHeap(param2, (10 * 10 * ((8 / 2) * 8)));
-        v9 = Pokemon_GetValue(param1, MON_DATA_PERSONALITY, NULL);
-        v10 = Pokemon_GetValue(param1, MON_DATA_SPECIES, NULL);
+        v4 = Heap_Alloc(heapID, 10 * 10 * ((8 / 2) * 8));
+        personality = Pokemon_GetValue(param1, MON_DATA_PERSONALITY, NULL);
+        species = Pokemon_GetValue(param1, MON_DATA_SPECIES, NULL);
 
-        Pokemon_BuildArchivedSprite(&v3, param1, 2);
-        sub_020136A4(v3.archive, v3.character, param2, 0, 0, 10, 10, v4, v9, 0, 2, v10);
+        Pokemon_BuildSpriteTemplate(&v3, param1, 2);
+        CharacterSprite_LoadPokemonSpriteRect(v3.narcID, v3.character, heapID, 0, 0, 10, 10, v4, personality, FALSE, 2, species);
     }
 
     {
@@ -935,185 +804,180 @@ void ov104_02232CE0(UnkStruct_ov104_0223C4CC *param0, Pokemon *param1, int param
         NNSG2dImagePaletteProxy *v12;
         int v13;
 
-        v11 = SpriteActor_ImageProxy(v5->unk_00);
+        v11 = Sprite_GetImageProxy(v5->sprite);
         DC_FlushRange(v4, sizeof(10 * 10 * ((8 / 2) * 8)));
-        GX_LoadOBJ(v4, v11->vramLocation.baseAddrOfVram[NNS_G2D_VRAM_TYPE_2DMAIN], (10 * 10 * ((8 / 2) * 8)));
+        GX_LoadOBJ(v4, v11->vramLocation.baseAddrOfVram[NNS_G2D_VRAM_TYPE_2DMAIN], 10 * 10 * ((8 / 2) * 8));
 
-        v12 = CellActor_GetPaletteProxy(v5->unk_00);
-        v13 = sub_0201FAB4(v12, NNS_G2D_VRAM_TYPE_2DMAIN);
+        v12 = Sprite_GetPaletteProxy(v5->sprite);
+        v13 = PlttTransfer_GetPlttOffset(v12, NNS_G2D_VRAM_TYPE_2DMAIN);
 
-        PaletteSys_LoadPalette(v2, v3.archive, v3.palette, param2, 2, 0x20, v13 * 16);
+        PaletteData_LoadBufferFromFileStart(v2, v3.narcID, v3.palette, heapID, PLTTBUF_MAIN_OBJ, PALETTE_SIZE_BYTES, PLTT_DEST(v13));
 
         if (param8 > 0) {
-            sub_020039B0(v2, 2, v13 * 16, 16, param8, param9);
+            PaletteData_Blend(v2, PLTTBUF_MAIN_OBJ, v13 * 16, 16, param8, param9);
         }
     }
 
-    Heap_FreeToHeap(v4);
+    Heap_Free(v4);
 
     GF_ASSERT(param0->unk_80[param3 - 50000] == NULL);
     param0->unk_80[param3 - 50000] = v5;
 }
 
-void ov104_02232E80(UnkStruct_ov104_0223C4CC *param0, int param1)
+void ov104_02232E80(FrontierGraphics *param0, int param1)
 {
-    sub_0200D0F4(param0->unk_80[param1 - 50000]);
+    Sprite_DeleteAndFreeResources(param0->unk_80[param1 - 50000]);
 
     param0->unk_80[param1 - 50000] = NULL;
 
-    SpriteGfxHandler_UnloadCharObjById(param0->unk_34.unk_04, param1);
-    SpriteGfxHandler_UnloadPlttObjById(param0->unk_34.unk_04, param1);
-    SpriteGfxHandler_UnloadCellObjById(param0->unk_34.unk_04, param1);
-    SpriteGfxHandler_UnloadAnimObjById(param0->unk_34.unk_04, param1);
+    SpriteManager_UnloadCharObjById(param0->spriteMan, param1);
+    SpriteManager_UnloadPlttObjById(param0->spriteMan, param1);
+    SpriteManager_UnloadCellObjById(param0->spriteMan, param1);
+    SpriteManager_UnloadAnimObjById(param0->spriteMan, param1);
 }
 
-static const SpriteTemplate Unk_ov104_0223F9E0 = {
-    0x0,
-    0x0,
-    0x0,
-    0x0,
-    0x64,
-    0x0,
-    NNS_G2D_VRAM_TYPE_2DMAIN,
-    { 0x7D0, 0x7D0, 0x7D0, 0x7D0, 0xffffffff, 0xffffffff },
-    0x1,
-    0x0
+static const SpriteTemplate sMonSpriteTemplate = {
+    .x = 0,
+    .y = 0,
+    .z = 0,
+    .animIdx = 0,
+    .priority = 100,
+    .plttIdx = 0,
+    .vramType = NNS_G2D_VRAM_TYPE_2DMAIN,
+    .resources = { MON_SPRITE_BASE_RESOURCE_ID, MON_SPRITE_BASE_RESOURCE_ID, MON_SPRITE_BASE_RESOURCE_ID, MON_SPRITE_BASE_RESOURCE_ID, -1, -1 },
+    .bgPriority = 1,
+    .vramTransfer = FALSE,
 };
 
-static const SpriteTemplate Unk_ov104_0223F9AC = {
-    0x0,
-    0x0,
-    0x0,
-    0x0,
-    0x63,
-    0x0,
-    NNS_G2D_VRAM_TYPE_2DMAIN,
-    { 0x7D9, 0x7D1, 0x7D1, 0x7D1, 0xffffffff, 0xffffffff },
-    0x1,
-    0x0
+static const SpriteTemplate sItemSpriteTemplate = {
+    .x = 0,
+    .y = 0,
+    .z = 0,
+    .animIdx = 0,
+    .priority = 99,
+    .plttIdx = 0,
+    .vramType = NNS_G2D_VRAM_TYPE_2DMAIN,
+    .resources = { ITEM_SPRITE_BASE_RESOURCE_ID, ITEM_SPRITE_SECONDARY_RESOURCE_ID, ITEM_SPRITE_SECONDARY_RESOURCE_ID, ITEM_SPRITE_SECONDARY_RESOURCE_ID, -1, -1 },
+    .bgPriority = 1,
+    .vramTransfer = FALSE,
 };
 
-void ov104_02232EC0(UnkStruct_ov104_0223C4CC *param0)
+void BattleFrontier_LoadMonSpriteData(FrontierGraphics *graphics)
 {
-    sub_0200CD7C(param0->unk_04, 2, param0->unk_34.unk_00, param0->unk_34.unk_04, 19, PokeIconPalettesFileIndex(), 0, 3, NNS_G2D_VRAM_TYPE_2DMAIN, 2000);
-    sub_0200CE0C(param0->unk_34.unk_00, param0->unk_34.unk_04, 19, PokeIcon32KCellsFileIndex(), 0, 2000);
-    sub_0200CE3C(param0->unk_34.unk_00, param0->unk_34.unk_04, 19, PokeIcon32KAnimationFileIndex(), 0, 2000);
+    SpriteSystem_LoadPaletteBuffer(graphics->plttData, PLTTBUF_MAIN_OBJ, graphics->spriteSystem, graphics->spriteMan, NARC_INDEX_POKETOOL__ICONGRA__PL_POKE_ICON, PokeIconPalettesFileIndex(), FALSE, 3, NNS_G2D_VRAM_TYPE_2DMAIN, MON_SPRITE_BASE_RESOURCE_ID);
+    SpriteSystem_LoadCellResObj(graphics->spriteSystem, graphics->spriteMan, NARC_INDEX_POKETOOL__ICONGRA__PL_POKE_ICON, PokeIcon32KCellsFileIndex(), FALSE, MON_SPRITE_BASE_RESOURCE_ID);
+    SpriteSystem_LoadAnimResObj(graphics->spriteSystem, graphics->spriteMan, NARC_INDEX_POKETOOL__ICONGRA__PL_POKE_ICON, PokeIcon32KAnimationFileIndex(), FALSE, MON_SPRITE_BASE_RESOURCE_ID);
 }
 
-void ov104_02232F28(UnkStruct_ov104_0223C4CC *param0)
+void BattleFrontier_UnloadMonSpriteData(FrontierGraphics *graphics)
 {
-    SpriteGfxHandler_UnloadCellObjById(param0->unk_34.unk_04, 2000);
-    SpriteGfxHandler_UnloadAnimObjById(param0->unk_34.unk_04, 2000);
-    SpriteGfxHandler_UnloadPlttObjById(param0->unk_34.unk_04, 2000);
+    SpriteManager_UnloadCellObjById(graphics->spriteMan, MON_SPRITE_BASE_RESOURCE_ID);
+    SpriteManager_UnloadAnimObjById(graphics->spriteMan, MON_SPRITE_BASE_RESOURCE_ID);
+    SpriteManager_UnloadPlttObjById(graphics->spriteMan, MON_SPRITE_BASE_RESOURCE_ID);
 }
 
-CellActorData *ov104_02232F4C(UnkStruct_ov104_0223C4CC *param0, Pokemon *param1, int param2, int param3, int param4)
+ManagedSprite *BattleFrontier_CreateMonSprite(FrontierGraphics *graphics, Pokemon *mon, int resourceID, int x, int y)
 {
-    CellActorData *v0;
-    SpriteTemplate v1;
+    ManagedSprite *sprite;
+    SpriteTemplate template;
 
-    GF_ASSERT(param2 < (2008 - 2000));
+    GF_ASSERT(resourceID < ITEM_SPRITE_BASE_RESOURCE_ID - 1 - MON_SPRITE_BASE_RESOURCE_ID);
 
-    sub_0200D888(
-        param0->unk_34.unk_00, param0->unk_34.unk_04, 19, Pokemon_IconSpriteIndex(param1), 0, NNS_G2D_VRAM_TYPE_2DMAIN, 2000 + param2);
+    SpriteSystem_LoadCharResObjAtEndWithHardwareMappingType(
+        graphics->spriteSystem, graphics->spriteMan, NARC_INDEX_POKETOOL__ICONGRA__PL_POKE_ICON, Pokemon_IconSpriteIndex(mon), FALSE, NNS_G2D_VRAM_TYPE_2DMAIN, MON_SPRITE_BASE_RESOURCE_ID + resourceID);
 
-    v1 = Unk_ov104_0223F9E0;
+    template = sMonSpriteTemplate;
 
-    v1.resources[0] += param2;
-    v1.x = param3;
-    v1.y = param4;
-    v1.priority = 200;
+    template.resources[0] += resourceID;
+    template.x = x;
+    template.y = y;
+    template.priority = 200;
 
-    v0 = SpriteActor_LoadResources(param0->unk_34.unk_00, param0->unk_34.unk_04, &v1);
+    sprite = SpriteSystem_NewSprite(graphics->spriteSystem, graphics->spriteMan, &template);
 
-    CellActor_SetExplicitPaletteOffsetAutoAdjust(v0->unk_00, Pokemon_IconPaletteIndex(param1));
-    sub_0200D330(v0);
+    Sprite_SetExplicitPaletteOffsetAutoAdjust(sprite->sprite, Pokemon_IconPaletteIndex(mon));
+    ManagedSprite_TickFrame(sprite);
 
-    return v0;
+    return sprite;
 }
 
-void ov104_02232FD4(UnkStruct_ov104_0223C4CC *param0, CellActorData *param1, int param2)
+void BattleFrontier_DeleteMonSprite(FrontierGraphics *graphics, ManagedSprite *sprite, int resourceID)
 {
-    SpriteGfxHandler_UnloadCharObjById(param0->unk_34.unk_04, 2000 + param2);
-    sub_0200D0F4(param1);
+    SpriteManager_UnloadCharObjById(graphics->spriteMan, MON_SPRITE_BASE_RESOURCE_ID + resourceID);
+    Sprite_DeleteAndFreeResources(sprite);
 }
 
-void ov104_02232FEC(UnkStruct_ov104_0223C4CC *param0)
+void BattleFrontier_LoadItemSpriteData(FrontierGraphics *graphics)
 {
-    NARC *v0;
+    NARC *narc = NARC_ctor(NARC_INDEX_GRAPHIC__PL_PLIST_GRA, HEAP_ID_94);
 
-    v0 = NARC_ctor(NARC_INDEX_GRAPHIC__PL_PLIST_GRA, 94);
-
-    SpriteRenderer_LoadPalette(param0->unk_04, 2, param0->unk_34.unk_00, param0->unk_34.unk_04, v0, sub_02081934(), 0, 1, NNS_G2D_VRAM_TYPE_2DMAIN, 2001);
-    SpriteRenderer_LoadCellResObjFromOpenNarc(param0->unk_34.unk_00, param0->unk_34.unk_04, v0, sub_02081938(), 0, 2001);
-    SpriteRenderer_LoadAnimResObjFromOpenNarc(param0->unk_34.unk_00, param0->unk_34.unk_04, v0, sub_0208193C(), 0, 2001);
-    sub_0200D888(param0->unk_34.unk_00, param0->unk_34.unk_04, 20, sub_02081930(), 0, NNS_G2D_VRAM_TYPE_2DMAIN, 2009);
-    NARC_dtor(v0);
+    SpriteSystem_LoadPaletteBufferFromOpenNarc(graphics->plttData, PLTTBUF_MAIN_OBJ, graphics->spriteSystem, graphics->spriteMan, narc, sub_02081934(), FALSE, 1, NNS_G2D_VRAM_TYPE_2DMAIN, ITEM_SPRITE_SECONDARY_RESOURCE_ID);
+    SpriteSystem_LoadCellResObjFromOpenNarc(graphics->spriteSystem, graphics->spriteMan, narc, sub_02081938(), FALSE, ITEM_SPRITE_SECONDARY_RESOURCE_ID);
+    SpriteSystem_LoadAnimResObjFromOpenNarc(graphics->spriteSystem, graphics->spriteMan, narc, sub_0208193C(), FALSE, ITEM_SPRITE_SECONDARY_RESOURCE_ID);
+    SpriteSystem_LoadCharResObjAtEndWithHardwareMappingType(graphics->spriteSystem, graphics->spriteMan, NARC_INDEX_GRAPHIC__PL_PLIST_GRA, sub_02081930(), FALSE, NNS_G2D_VRAM_TYPE_2DMAIN, ITEM_SPRITE_BASE_RESOURCE_ID);
+    NARC_dtor(narc);
 }
 
-void ov104_0223307C(UnkStruct_ov104_0223C4CC *param0)
+void BattleFrontier_UnloadItemSpriteData(FrontierGraphics *graphics)
 {
-    SpriteGfxHandler_UnloadCharObjById(param0->unk_34.unk_04, 2009);
-    SpriteGfxHandler_UnloadCellObjById(param0->unk_34.unk_04, 2001);
-    SpriteGfxHandler_UnloadAnimObjById(param0->unk_34.unk_04, 2001);
-    SpriteGfxHandler_UnloadPlttObjById(param0->unk_34.unk_04, 2001);
+    SpriteManager_UnloadCharObjById(graphics->spriteMan, ITEM_SPRITE_BASE_RESOURCE_ID);
+    SpriteManager_UnloadCellObjById(graphics->spriteMan, ITEM_SPRITE_SECONDARY_RESOURCE_ID);
+    SpriteManager_UnloadAnimObjById(graphics->spriteMan, ITEM_SPRITE_SECONDARY_RESOURCE_ID);
+    SpriteManager_UnloadPlttObjById(graphics->spriteMan, ITEM_SPRITE_SECONDARY_RESOURCE_ID);
 }
 
-CellActorData *ov104_022330AC(UnkStruct_ov104_0223C4CC *param0, int param1, int param2)
+ManagedSprite *BattleFrontier_CreateItemSprite(FrontierGraphics *graphics, int x, int y)
 {
-    CellActorData *v0;
-    SpriteTemplate v1;
+    ManagedSprite *sprite;
+    SpriteTemplate template;
 
-    v1 = Unk_ov104_0223F9AC;
+    template = sItemSpriteTemplate;
 
-    v1.x = param1;
-    v1.y = param2;
-    v1.priority = 300;
+    template.x = x;
+    template.y = y;
+    template.priority = 300;
 
-    v0 = SpriteActor_LoadResources(param0->unk_34.unk_00, param0->unk_34.unk_04, &v1);
-    sub_0200D330(v0);
+    sprite = SpriteSystem_NewSprite(graphics->spriteSystem, graphics->spriteMan, &template);
+    ManagedSprite_TickFrame(sprite);
 
-    return v0;
+    return sprite;
 }
 
-void ov104_022330F0(UnkStruct_ov104_0223C4CC *param0, CellActorData *param1)
+void BattleFrontier_DeleteItemSprite(FrontierGraphics *graphics, ManagedSprite *sprite)
 {
-    sub_0200D0F4(param1);
+    Sprite_DeleteAndFreeResources(sprite);
 }
 
-void ov104_022330FC(UnkStruct_ov104_0222E930 *param0, u16 *param1)
+void BattleFrontier_PrintNormalTrainerMessage(FrontierScriptContext *ctx, u16 *args)
 {
-    ov104_0223310C(param0, param1, 614);
-    return;
+    BattleFrontier_PrintTrainerMessage(ctx, args, TEXT_BANK_FRONTIER_TRAINER_MESSAGES);
 }
 
-void ov104_0223310C(UnkStruct_ov104_0222E930 *param0, u16 *param1, u32 param2)
+void BattleFrontier_PrintTrainerMessage(FrontierScriptContext *ctx, u16 *args, u32 bankID)
 {
-    u8 v0;
-    MessageLoader *v1;
-    UnkStruct_ov104_02230BE4 *v2 = sub_0209B970(param0->unk_00->unk_00);
+    MessageLoader *msgLoader;
+    FieldFrontierDTO *fieldData = BattleFrontier_GetFieldData(ctx->scriptMan->frontier);
 
-    if (param1[0] == 0xFFFF) {
-        v1 = MessageLoader_Init(1, 26, param2, 32);
+    if (args[0] == 0xFFFF) {
+        msgLoader = MessageLoader_Init(MSG_LOADER_LOAD_ON_DEMAND, NARC_INDEX_MSGDATA__PL_MSG, bankID, HEAP_ID_FIELD3);
 
-        ov104_02231F74(param0->unk_00, v1, param1[1], 1, NULL);
-        MessageLoader_Free(v1);
+        FrontierShowMessage(ctx->scriptMan, msgLoader, args[1], 1, NULL);
+        MessageLoader_Free(msgLoader);
     } else {
-        v0 = Options_TextFrameDelay(SaveData_Options(v2->unk_08));
-        ov104_022320B4(param0->unk_00, v0, param1[0], param1[1], param1[2], param1[3], 1);
+        u8 frameDelay = Options_TextFrameDelay(SaveData_GetOptions(fieldData->saveData));
+        ShowSentence(ctx->scriptMan, frameDelay, args[0], args[1], args[2], args[3], TRUE);
     }
 
-    ov104_0222E974(param0, ov104_02233184);
-    return;
+    FrontierScriptContext_Pause(ctx, WaitForFinishedPrinting);
 }
 
-static BOOL ov104_02233184(UnkStruct_ov104_0222E930 *param0)
+static BOOL WaitForFinishedPrinting(FrontierScriptContext *ctx)
 {
-    if (Message_Printing(param0->unk_00->unk_50) == 0) {
-        return 1;
+    if (!Text_IsPrinterActive(ctx->scriptMan->printerID)) {
+        return TRUE;
     }
 
-    return 0;
+    return FALSE;
 }
 
 void ov104_0223319C(SysTask *param0, void *param1)
@@ -1159,12 +1023,12 @@ void ov104_022331E8(SysTask *param0, void *param1)
     }
 }
 
-void ov104_0223327C(UnkStruct_ov104_02232B5C *param0, int param1)
+void FrontierMenuManager_SetHorizontalAnchor(FrontierMenuManager *menuManager, BOOL anchorRight)
 {
-    param0->unk_97_6 = param1;
+    menuManager->anchorRight = anchorRight;
 }
 
-void ov104_02233298(UnkStruct_ov104_02232B5C *param0, int param1)
+void FrontierMenuManager_SetVerticalAnchor(FrontierMenuManager *menuManager, BOOL anchorBottom)
 {
-    param0->unk_97_7 = param1;
+    menuManager->anchorBottom = anchorBottom;
 }

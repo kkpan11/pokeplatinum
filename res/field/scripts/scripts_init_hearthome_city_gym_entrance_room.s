@@ -1,13 +1,11 @@
-    .include "macros/scrcmd.inc"
+#include "macros/scrcmd.inc"
 
-    .data
 
-    .byte 1
-    ScriptEntry _0006
-    .byte 0
+    InitScriptEntry_OnFrameTable InitScriptFrameTable
+    InitScriptEntryEnd
 
-_0006:
-    .short 0x40D1, 0, 3
-    .short 0
+InitScriptFrameTable:
+    InitScriptGoToIfEqual VAR_HAS_ENTERED_HEARTHOME_GYM_BEFORE, FALSE, 3
+    InitScriptFrameTableEnd
 
-    .balign 4, 0
+    InitScriptEnd

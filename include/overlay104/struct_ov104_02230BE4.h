@@ -1,8 +1,6 @@
 #ifndef POKEPLATINUM_STRUCT_OV104_02230BE4_H
 #define POKEPLATINUM_STRUCT_OV104_02230BE4_H
 
-#include "struct_defs/struct_0209C370.h"
-
 #include "field/field_system_decl.h"
 
 #include "bag.h"
@@ -10,18 +8,18 @@
 #include "journal.h"
 #include "savedata.h"
 
-typedef struct {
-    void *unk_00;
-    const Options *unk_04;
-    SaveData *unk_08;
-    Journal *unk_0C;
-    UnkStruct_0207D99C *unk_10;
+typedef struct FieldFrontierDTO {
+    void *facilityData;
+    const Options *options;
+    SaveData *saveData;
+    JournalEntry *journalEntry;
+    BagCursor *bagCursor;
     int unk_14;
     int unk_18;
-    int unk_1C;
-    UnkStruct_0209C370 *unk_20;
-    u8 unk_24;
+    int mapHeaderID;
+    u8 *subscreenCursorOn;
+    u8 sceneID;
     FieldSystem *fieldSystem;
-} UnkStruct_ov104_02230BE4;
+} FieldFrontierDTO;
 
 #endif // POKEPLATINUM_STRUCT_OV104_02230BE4_H

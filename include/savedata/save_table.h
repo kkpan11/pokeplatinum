@@ -3,14 +3,14 @@
 
 #include "constants/savedata/save_table.h"
 
-#include "struct_decls/struct_0202442C_decl.h"
-#include "struct_decls/struct_02024440_decl.h"
-#include "struct_decls/struct_020308A0_decl.h"
-#include "struct_decls/struct_020797DC_decl.h"
-#include "struct_defs/struct_0202440C.h"
-#include "struct_defs/struct_0202DF8C.h"
-#include "struct_defs/struct_0202F264.h"
+#include "struct_defs/battle_recording.h"
+#include "struct_defs/tv.h"
 
+#include "battle_hall_win_records.h"
+#include "hall_of_fame_entries.h"
+#include "mystery_gift.h"
+#include "pal_park_transfers.h"
+#include "pc_boxes.h"
 #include "savedata.h"
 
 typedef int (*SaveEntrySizeFunc)(void);
@@ -33,98 +33,98 @@ extern const int gExtraSaveTableSize;
  *
  * This routine also performs a standard CRC of the sector before loading it.
  *
- * @param save
+ * @param saveData
  * @return Address of the TVBroadcast sector of the save data.
  */
-TVBroadcast *SaveData_TVBroadcast(SaveData *save);
+TVBroadcast *SaveData_GetTVBroadcast(SaveData *saveData);
 
 /**
  * @brief Loads the PCBoxes sector of the save data.
  *
  * This routine does NOT perform any CRC on the sectors before loading them.
  *
- * @param save
+ * @param saveData
  * @return Address of the PCBoxes sector of the save data.
  */
-PCBoxes *SaveData_PCBoxes(SaveData *save);
+PCBoxes *SaveData_GetPCBoxes(SaveData *saveData);
 
 /**
  * @brief Loads the MysteryGift sector of the save data.
  *
  * This routine also performs a standard CRC of the sector before loading it.
  *
- * @param save
+ * @param saveData
  * @return Address of the MysteryGift sector of the save data.
  */
-MysteryGift *SaveData_MysteryGift(SaveData *save);
+MysteryGift *SaveData_GetMysteryGift(SaveData *saveData);
 
 /**
- * @brief Loads the PalParkTransfer sector of the save data.
+ * @brief Loads the MigratedPokemon sector of the save data.
  *
  * This routine does NOT perform any CRC on the sectors before loading them.
  *
- * @param save
- * @return Address of the PalParkTransfer sector of the save data.
+ * @param saveData
+ * @return Address of the MigratedPokemon sector of the save data.
  */
-PalParkTransfer *SaveData_PalParkTransfer(SaveData *save);
+MigratedPokemon *SaveData_GetPalParkTransfer(SaveData *saveData);
 
 /**
  * @brief Loads the HallOfFame sector from the extended save data.
  *
- * @param save          The save data.
+ * @param saveData      The save data.
  * @param heapID        Heap on which to allocate the HallOfFame sector.
  * @param resultCode    Load-result opcode output.
  * @return Address of the allocated HallOfFame data.
  */
-HallOfFame *SaveData_HallOfFame(SaveData *save, int heapID, int *resultCode);
+HallOfFame *SaveData_HallOfFame(SaveData *saveData, enum HeapID heapID, int *resultCode);
 
 /**
  * @brief Saves a mirror of the given HallOfFame data into the extended save.
  *
- * @param save          The save data.
+ * @param saveData      The save data.
  * @param hof           The hall-of-fame data to save.
  * @return Save-result opcode.
  */
-int SaveData_SaveHallOfFame(SaveData *save, HallOfFame *hof);
+int SaveData_SaveHallOfFame(SaveData *saveData, HallOfFame *hof);
 
 /**
  * @brief Loads the BattleRecording sector from the extended save data.
  *
- * @param save          The save data.
+ * @param saveData      The save data.
  * @param heapID        Heap on which to allocate the BattleRecording sector.
  * @param resultCode    Load-result opcode output.
  * @param recNum        Which recording slot to load.
  * @return Address of the allocated BattleRecording data.
  */
-BattleRecording *SaveData_BattleRecording(SaveData *save, int heapID, int *resultCode, int recNum);
+BattleRecording *SaveData_GetBattleRecording(SaveData *saveData, enum HeapID heapID, int *resultCode, int recNum);
 
 /**
  * @brief Saves a mirror of the given BattleRecording data into the extended save.
  *
- * @param save          The save data.
+ * @param saveData      The save data.
  * @param rec           The battle recording data to save.
  * @param recNum        Which recording slot to save.
  * @return Save-result opcode.
  */
-int SaveData_SaveBattleRecording(SaveData *save, BattleRecording *rec, int recNum);
+int SaveData_SaveBattleRecording(SaveData *saveData, BattleRecording *rec, int recNum);
 
 /**
- * @brief Loads the BattleFrontierStage sector from the extended save data.
+ * @brief Loads the BattleFrontierHallWinRecords sector from the extended save data.
  *
- * @param save          The save data.
+ * @param saveData      The save data.
  * @param heapID        Heap on which to allocate the BattleRecording sector.
  * @param resultCode    Load-result opcode output.
- * @return Address of the allocated BattleFrontierStage data.
+ * @return Address of the allocated BattleHallWinRecords data.
  */
-BattleFrontierStage *SaveData_BattleFrontierStage(SaveData *save, int heapID, int *resultCode);
+BattleHallWinRecords *SaveData_BattleHallWinRecords(SaveData *saveData, enum HeapID heapID, int *resultCode);
 
 /**
  * @brief Saves a mirror of the given BattleRecording data into the extended save.
  *
- * @param save          The save data.
+ * @param saveData      The save data.
  * @param frontier      The battle frontier data to save.
  * @return Save-result opcode.
  */
-int SaveData_SaveBattleFrontierStage(SaveData *save, BattleFrontierStage *frontier);
+int SaveData_SaveBattleHallWinRecords(SaveData *saveData, BattleHallWinRecords *records);
 
 #endif // POKEPLATINUM_SAVEDATA_LOAD_HELPERS_H

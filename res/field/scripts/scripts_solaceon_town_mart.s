@@ -1,49 +1,25 @@
-    .include "macros/scrcmd.inc"
+#include "macros/scrcmd.inc"
+#include "res/text/bank/solaceon_town_mart.h"
 
-    .data
 
-    ScriptEntry _0012
-    ScriptEntry _0028
-    ScriptEntry _003E
-    ScriptEntry _0051
-    .short 0xFD13
+    ScriptEntry SolaceonTownMart_CommonVendor
+    ScriptEntry SolaceonTownMart_SpecialtyVendor
+    ScriptEntry SolaceonTownMart_NinjaBoy
+    ScriptEntry SolaceonTownMart_Pokefan
+    ScriptEntryEnd
 
-_0012:
-    PlayFanfare SEQ_SE_CONFIRM
-    LockAll
-    FacePlayer
-    CallCommonScript 0x7E3
-    ScrCmd_035
-    ScrCmd_147 1
-    ReleaseAll
+SolaceonTownMart_CommonVendor:
+    PokeMartCommonWithGreeting
     End
 
-_0028:
-    PlayFanfare SEQ_SE_CONFIRM
-    LockAll
-    FacePlayer
-    CallCommonScript 0x7E3
-    ScrCmd_035
-    ScrCmd_148 6
-    ReleaseAll
+SolaceonTownMart_SpecialtyVendor:
+    PokeMartSpecialtiesWithGreeting MART_SPECIALTIES_ID_SOLACEON
     End
 
-_003E:
-    PlayFanfare SEQ_SE_CONFIRM
-    LockAll
-    FacePlayer
-    Message 0
-    WaitABXPadPress
-    CloseMessage
-    ReleaseAll
+SolaceonTownMart_NinjaBoy:
+    NPCMessage SolaceonTownMart_Text_NeedPCToSealPokeBalls
     End
 
-_0051:
-    PlayFanfare SEQ_SE_CONFIRM
-    LockAll
-    FacePlayer
-    Message 1
-    WaitABXPadPress
-    CloseMessage
-    ReleaseAll
+SolaceonTownMart_Pokefan:
+    NPCMessage SolaceonTownMart_Text_ConsiderSuperRepels
     End

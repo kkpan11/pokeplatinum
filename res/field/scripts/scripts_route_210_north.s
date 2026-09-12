@@ -1,36 +1,22 @@
-    .include "macros/scrcmd.inc"
+#include "macros/scrcmd.inc"
+#include "res/text/bank/route_210_north.h"
 
-    .data
 
-    ScriptEntry _000E
-    ScriptEntry _0021
-    ScriptEntry _0038
-    .short 0xFD13
+    ScriptEntry Route210North_BlackBelt
+    ScriptEntry Route210North_ArrowSignpostCelesticTown
+    ScriptEntry Route210North_SignboardGrandmaWilmasHouse
+    ScriptEntryEnd
 
-_000E:
-    PlayFanfare SEQ_SE_CONFIRM
-    LockAll
-    FacePlayer
-    Message 0
-    WaitABXPadPress
-    CloseMessage
-    ReleaseAll
+Route210North_BlackBelt:
+    NPCMessage Route210North_Text_HowDoesDefogWork
     End
 
-_0021:
-    ScrCmd_036 1, 1, 0, 0x800C
-    ScrCmd_038 3
-    ScrCmd_039
-    ScrCmd_03B 0x800C
-    CallCommonScript 0x7D0
+Route210North_ArrowSignpostCelesticTown:
+    ShowArrowSign Route210North_Text_SignCelesticTown
     End
 
-_0038:
-    ScrCmd_036 2, 2, 0, 0x800C
-    ScrCmd_038 3
-    ScrCmd_039
-    ScrCmd_03B 0x800C
-    CallCommonScript 0x7D0
+Route210North_SignboardGrandmaWilmasHouse:
+    ShowLandmarkSign Route210North_Text_SignGrandmaWilmasHouse
     End
 
-    .byte 0
+    .balign 4, 0

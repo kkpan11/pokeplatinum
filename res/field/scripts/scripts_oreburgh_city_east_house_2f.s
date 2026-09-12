@@ -1,63 +1,49 @@
-    .include "macros/scrcmd.inc"
+#include "macros/scrcmd.inc"
+#include "res/text/bank/oreburgh_city_east_house_2f.h"
 
-    .data
 
-    ScriptEntry _0012
-    ScriptEntry _0025
-    ScriptEntry _0081
-    ScriptEntry _0083
-    .short 0xFD13
+    ScriptEntry OreburghCityEastHouse2F_Gentleman
+    ScriptEntry OreburghCityEastHouse2F_Youngster
+    ScriptEntry OreburghCityEastHouse2F_Dummy3
+    ScriptEntry OreburghCityEastHouse2F_ScientistM
+    ScriptEntryEnd
 
-_0012:
-    PlayFanfare SEQ_SE_CONFIRM
+OreburghCityEastHouse2F_Gentleman:
+    NPCMessage OreburghCityEastHouse2F_Text_OperatedWithUtmostCare
+    End
+
+OreburghCityEastHouse2F_Youngster:
+    PlaySE SE_CONFIRM_sseq_3
     LockAll
     FacePlayer
-    Message 0
-    WaitABXPadPress
+    GoToIfSet FLAG_RECEIVED_OREBURGH_CITY_EAST_HOUSE_2F_GREAT_BALL, OreburghCityEastHouse2F_IThinkAboutBestPokeBalls
+    Message OreburghCityEastHouse2F_Text_HereHaveThis
+    SetVar VAR_0x8004, ITEM_GREAT_BALL
+    SetVar VAR_0x8005, 1
+    GoToIfCannotFitItem VAR_0x8004, VAR_0x8005, VAR_RESULT, OreburghCityEastHouse2F_BagIsFull
+    Common_GiveItemQuantity
+    SetFlag FLAG_RECEIVED_OREBURGH_CITY_EAST_HOUSE_2F_GREAT_BALL
+    GoTo OreburghCityEastHouse2F_IThinkAboutBestPokeBalls
+    End
+
+OreburghCityEastHouse2F_IThinkAboutBestPokeBalls:
+    Message OreburghCityEastHouse2F_Text_IThinkAboutBestPokeBalls
+    WaitButton
     CloseMessage
     ReleaseAll
     End
 
-_0025:
-    PlayFanfare SEQ_SE_CONFIRM
-    LockAll
-    FacePlayer
-    GoToIfSet 0x10A, _006C
-    Message 1
-    SetVar 0x8004, 3
-    SetVar 0x8005, 1
-    ScrCmd_07D 0x8004, 0x8005, 0x800C
-    GoToIfEq 0x800C, 0, _0077
-    CallCommonScript 0x7FC
-    SetFlag 0x10A
-    GoTo _006C
-    End
-
-_006C:
-    Message 2
-    WaitABXPadPress
+OreburghCityEastHouse2F_BagIsFull:
+    Common_MessageBagIsFull
     CloseMessage
     ReleaseAll
     End
 
-_0077:
-    CallCommonScript 0x7E1
-    CloseMessage
-    ReleaseAll
+OreburghCityEastHouse2F_Dummy3:
     End
 
-_0081:
+OreburghCityEastHouse2F_ScientistM:
+    NPCMessage OreburghCityEastHouse2F_Text_FullyAutomatedSystem
     End
 
-_0083:
-    PlayFanfare SEQ_SE_CONFIRM
-    LockAll
-    FacePlayer
-    Message 3
-    WaitABXPadPress
-    CloseMessage
-    ReleaseAll
-    End
-
-    .byte 0
-    .byte 0
+    .balign 4, 0

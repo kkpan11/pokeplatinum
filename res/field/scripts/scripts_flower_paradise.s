@@ -1,70 +1,70 @@
-    .include "macros/scrcmd.inc"
+#include "macros/scrcmd.inc"
+#include "generated/distribution_events.h"
+#include "res/text/bank/flower_paradise.h"
+#include "res/field/events/events_flower_paradise.h"
 
-    .data
 
-    ScriptEntry _000E
-    ScriptEntry _0062
-    ScriptEntry _007D
-    .short 0xFD13
+    ScriptEntry FlowerParadise_OnTransition
+    ScriptEntry FlowerParadise_OnLoad
+    ScriptEntry FlowerParadise_Shaymin
+    ScriptEntryEnd
 
-_000E:
-    SetFlag 0x9D5
-    ScrCmd_22D 2, 0x4000
-    GoToIfEq 0x4000, 0, _005C
-    ScrCmd_07E 0x1C4, 1, 0x4000
-    GoToIfEq 0x4000, 0, _005C
-    ScrCmd_28B 1, 0x4000
-    GoToIfEq 0x4000, 0, _005C
-    GoToIfSet 0x123, _005C
-    ClearFlag 0x251
+FlowerParadise_OnTransition:
+    SetFlag FLAG_FIRST_ARRIVAL_FLOWER_PARADISE
+    GetNationalDexEnabled VAR_MAP_LOCAL_0x00
+    GoToIfEq VAR_MAP_LOCAL_0x00, FALSE, FlowerParadise_HideShaymin
+    CheckItem ITEM_OAKS_LETTER, 1, VAR_MAP_LOCAL_0x00
+    GoToIfEq VAR_MAP_LOCAL_0x00, FALSE, FlowerParadise_HideShaymin
+    CheckDistributionEvent DISTRIBUTION_EVENT_SHAYMIN, VAR_MAP_LOCAL_0x00
+    GoToIfEq VAR_MAP_LOCAL_0x00, FALSE, FlowerParadise_HideShaymin
+    GoToIfSet FLAG_CAUGHT_SHAYMIN, FlowerParadise_HideShaymin
+    ClearFlag FLAG_HIDE_FLOWER_PARADISE_SHAYMIN
     End
 
-_005C:
-    SetFlag 0x251
+FlowerParadise_HideShaymin:
+    SetFlag FLAG_HIDE_FLOWER_PARADISE_SHAYMIN
     End
 
-_0062:
-    GoToIfSet 142, _006F
+FlowerParadise_OnLoad:
+    GoToIfSet FLAG_MAP_LOCAL_REMOVE_OBJECT, FlowerParadise_RemoveShaymin
     End
 
-_006F:
-    SetFlag 0x251
-    ScrCmd_065 0
-    ClearFlag 142
+FlowerParadise_RemoveShaymin:
+    SetFlag FLAG_HIDE_FLOWER_PARADISE_SHAYMIN
+    RemoveObject LOCALID_SHAYMIN
+    ClearFlag FLAG_MAP_LOCAL_REMOVE_OBJECT
     End
 
-_007D:
-    PlayFanfare SEQ_SE_CONFIRM
+FlowerParadise_Shaymin:
+    PlaySE SE_CONFIRM_sseq_3
     LockAll
     FacePlayer
-    ScrCmd_04C 0x1EC, 0
-    Message 0
+    PlayCry SPECIES_SHAYMIN
+    Message FlowerParadise_Text_KyuuUuhn
     CloseMessage
-    SetFlag 142
-    ScrCmd_318 0x1EC, 30
-    ClearFlag 142
-    ScrCmd_0EC 0x800C
-    GoToIfEq 0x800C, 0, _00D7
-    ScrCmd_2BC 0x800C
-    GoToIfEq 0x800C, 1, _00C8
-    SetFlag 0x123
+    SetFlag FLAG_MAP_LOCAL_REMOVE_OBJECT
+    StartFatefulEncounter SPECIES_SHAYMIN, 30
+    ClearFlag FLAG_MAP_LOCAL_REMOVE_OBJECT
+    CheckWonBattle VAR_RESULT
+    GoToIfEq VAR_RESULT, FALSE, FlowerParadise_BlackOut
+    CheckDidNotCapture VAR_RESULT
+    GoToIfEq VAR_RESULT, TRUE, FlowerParadise_ShayminDisappearedAmongFlowers
+    SetFlag FLAG_CAUGHT_SHAYMIN
     ReleaseAll
     End
 
-_00C8:
-    Message 1
-    WaitABXPadPress
+FlowerParadise_ShayminDisappearedAmongFlowers:
+    Message FlowerParadise_Text_ShayminDisappearedAmongFlowers
+    WaitButton
     CloseMessage
-    ClearFlag 0x251
+    ClearFlag FLAG_HIDE_FLOWER_PARADISE_SHAYMIN
     ReleaseAll
     End
 
-_00D7:
-    ScrCmd_0EB
-    ClearFlag 0x251
+FlowerParadise_BlackOut:
+    BlackOutFromBattle
+    ClearFlag FLAG_HIDE_FLOWER_PARADISE_SHAYMIN
     ReleaseAll
     End
 
-    .byte 0
-    .byte 0
-    .byte 0
+    .balign 4, 0

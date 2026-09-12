@@ -10,9 +10,9 @@
 #include "overlay005/struct_ov5_021D1BEC_decl.h"
 #include "overlay006/struct_ov6_0223E6EC.h"
 
+#include "map_tile_behavior.h"
 #include "player_avatar.h"
-#include "unk_02054D00.h"
-#include "unk_0205DAC8.h"
+#include "terrain_collision_manager.h"
 
 typedef struct {
     int unk_00;
@@ -39,8 +39,8 @@ static void ov5_021EE768(UnkStruct_ov5_021D1BEC *param0, FieldSystem *fieldSyste
     u8 v3;
     UnkStruct_ov5_021EE75C *v4 = (UnkStruct_ov5_021EE75C *)param2;
 
-    v1 = Player_GetXPos(fieldSystem->playerAvatar);
-    v2 = Player_GetZPos(fieldSystem->playerAvatar);
+    v1 = PlayerAvatar_GetXPos(fieldSystem->playerAvatar);
+    v2 = PlayerAvatar_GetZPos(fieldSystem->playerAvatar);
 
     if ((v4->unk_00 == v1) && (v4->unk_04 == v2)) {
         return;
@@ -49,11 +49,11 @@ static void ov5_021EE768(UnkStruct_ov5_021D1BEC *param0, FieldSystem *fieldSyste
     v4->unk_00 = v1;
     v4->unk_04 = v2;
 
-    v0 = sub_02054F94(fieldSystem, v1, v2);
+    v0 = TerrainCollisionManager_GetTileBehavior(fieldSystem, v1, v2);
 
-    if (sub_0205DD84(v0)) {
+    if (TileBehavior_IsBikeSlopeBottom(v0)) {
         v3 = 0;
-    } else if (sub_0205DD78(v0)) {
+    } else if (TileBehavior_IsBikeSlopeTop(v0)) {
         v3 = 1;
     } else {
         return;

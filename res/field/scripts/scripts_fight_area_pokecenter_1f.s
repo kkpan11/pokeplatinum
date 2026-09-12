@@ -1,46 +1,28 @@
-    .include "macros/scrcmd.inc"
+#include "macros/scrcmd.inc"
+#include "res/text/bank/fight_area_pokecenter_1f.h"
+#include "res/field/events/events_fight_area_pokecenter_1f.h"
 
-    .data
 
-    ScriptEntry _0012
-    ScriptEntry _001E
-    ScriptEntry _0031
-    ScriptEntry _0044
-    .short 0xFD13
+    ScriptEntry FightAreaPokecenter1F_Nurse
+    ScriptEntry FightAreaPokecenter1F_Guitarist
+    ScriptEntry FightAreaPokecenter1F_Waitress
+    ScriptEntry FightAreaPokecenter1F_BlackBelt
+    ScriptEntryEnd
 
-_0012:
-    SetVar 0x8007, 0
-    CallCommonScript 0x7D2
+FightAreaPokecenter1F_Nurse:
+    Common_CallPokecenterNurse LOCALID_FIGHT_AREA_NURSE
     End
 
-_001E:
-    PlayFanfare SEQ_SE_CONFIRM
-    LockAll
-    FacePlayer
-    Message 0
-    WaitABXPadPress
-    CloseMessage
-    ReleaseAll
+FightAreaPokecenter1F_Guitarist:
+    NPCMessage FightAreaPokecenter1F_Text_BattleFrontiersTough
     End
 
-_0031:
-    PlayFanfare SEQ_SE_CONFIRM
-    LockAll
-    FacePlayer
-    Message 1
-    WaitABXPadPress
-    CloseMessage
-    ReleaseAll
+FightAreaPokecenter1F_Waitress:
+    NPCMessage FightAreaPokecenter1F_Text_BestTrainersAtBattleZone
     End
 
-_0044:
-    PlayFanfare SEQ_SE_CONFIRM
-    LockAll
-    FacePlayer
-    Message 2
-    WaitABXPadPress
-    CloseMessage
-    ReleaseAll
+FightAreaPokecenter1F_BlackBelt:
+    NPCMessage FightAreaPokecenter1F_Text_ToToughenMyself
     End
 
-    .byte 0
+    .balign 4, 0

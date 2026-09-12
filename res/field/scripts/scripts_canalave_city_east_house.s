@@ -1,85 +1,86 @@
-    .include "macros/scrcmd.inc"
+#include "constants/moves.h"
+#include "macros/scrcmd.inc"
+#include "res/text/bank/canalave_city_east_house.h"
 
-    .data
 
-    ScriptEntry _0006
-    .short 0xFD13
+    ScriptEntry CanalaveCityEastHouse_MoveDeleter
+    ScriptEntryEnd
 
-_0006:
-    PlayFanfare SEQ_SE_CONFIRM
+CanalaveCityEastHouse_MoveDeleter:
+    PlaySE SE_CONFIRM_sseq_3
     LockAll
     FacePlayer
-    GoToIfSet 1, _0026
-    Message 0
-    SetFlag 1
-    GoTo _0026
+    GoToIfSet FLAG_MAP_LOCAL_0x01, CanalaveCityEastHouse_AskForgetSomeMoves
+    Message CanalaveCityEastHouse_Text_ImTheMoveDeleter
+    SetFlag FLAG_MAP_LOCAL_0x01
+    GoTo CanalaveCityEastHouse_AskForgetSomeMoves
 
-_0026:
-    Message 1
-    ScrCmd_03E 0x800C
-    GoToIfEq 0x800C, 0, _0049
-    GoToIfEq 0x800C, 1, _0130
+CanalaveCityEastHouse_AskForgetSomeMoves:
+    Message CanalaveCityEastHouse_Text_ForgetSomeMoves
+    ShowYesNoMenu VAR_RESULT
+    GoToIfEq VAR_RESULT, MENU_YES, CanalaveCityEastHouse_WhichPokemon
+    GoToIfEq VAR_RESULT, MENU_NO, CanalaveCityEastHouse_RememberMe
     End
 
-_0049:
-    Message 2
+CanalaveCityEastHouse_WhichPokemon:
+    Message CanalaveCityEastHouse_Text_WhichPokemon
     CloseMessage
-    GoTo _0054
+    GoTo CanalaveCityEastHouse_TryForgetMove
 
-_0054:
-    FadeScreen 6, 1, 0, 0
+CanalaveCityEastHouse_TryForgetMove:
+    FadeScreenOut
     WaitFadeScreen
-    ScrCmd_191
-    ScrCmd_193 0x8002
-    ScrCmd_0A1
-    FadeScreen 6, 1, 1, 0
+    SelectMoveTutorPokemon
+    GetSelectedPartySlot VAR_0x8002
+    ReturnToField
+    FadeScreenIn
     WaitFadeScreen
-    GoToIfEq 0x8002, 0xFF, _0130
-    ScrCmd_198 0x8002, 0x8001
-    GoToIfEq 0x8001, 0, _011A
-    ScrCmd_1C8 0x800C, 0x8002
-    GoToIfEq 0x800C, 1, _0125
-    Message 6
+    GoToIfEq VAR_0x8002, PARTY_SLOT_NONE, CanalaveCityEastHouse_RememberMe
+    GetPartyMonSpecies VAR_0x8002, VAR_0x8001
+    GoToIfEq VAR_0x8001, SPECIES_NONE, CanalaveCityEastHouse_NoEggKnowsMoves
+    GetPartyMonMoveCount VAR_RESULT, VAR_0x8002
+    GoToIfEq VAR_RESULT, 1, CanalaveCityEastHouse_KnowsOnlyOneMove
+    Message CanalaveCityEastHouse_Text_WhichMove
     CloseMessage
-    FadeScreen 6, 1, 0, 0
+    FadeScreenOut
     WaitFadeScreen
-    ScrCmd_1C6 0x8002
-    ScrCmd_1C7 0x8001
-    ScrCmd_0A1
-    FadeScreen 6, 1, 1, 0
+    SelectPartyMonMove VAR_0x8002
+    GetSelectedPartyMonMove VAR_0x8001
+    ReturnToField
+    FadeScreenIn
     WaitFadeScreen
-    GoToIfEq 0x8001, 0xFF, _0049
-    ScrCmd_1CB 0, 0x8002, 0x8001
-    Message 7
-    ScrCmd_03E 0x800C
-    GoToIfEq 0x800C, 0, _0105
-    GoToIfEq 0x800C, 1, _0049
+    GoToIfEq VAR_0x8001, MOVE_NOT_SELECTED, CanalaveCityEastHouse_WhichPokemon
+    BufferPartyMoveName 0, VAR_0x8002, VAR_0x8001
+    Message CanalaveCityEastHouse_Text_ShouldMoveBeForgotten
+    ShowYesNoMenu VAR_RESULT
+    GoToIfEq VAR_RESULT, MENU_YES, CanalaveCityEastHouse_ForgotMoveCompletely
+    GoToIfEq VAR_RESULT, MENU_NO, CanalaveCityEastHouse_WhichPokemon
     End
 
-_0105:
-    ScrCmd_1C9 0x8002, 0x8001
-    Message 8
-    ScrCmd_04E 0x48D
-    ScrCmd_04F
-    WaitABXPadPress
+CanalaveCityEastHouse_ForgotMoveCompletely:
+    ClearPartyMonMoveSlot VAR_0x8002, VAR_0x8001
+    Message CanalaveCityEastHouse_Text_ForgotMoveCompletely
+    PlayFanfare SEQ_WASURE_sseq
+    WaitFanfare
+    WaitButton
     CloseMessage
     End
 
-_011A:
-    Message 5
+CanalaveCityEastHouse_NoEggKnowsMoves:
+    Message CanalaveCityEastHouse_Text_NoEggKnowsMoves
     CloseMessage
-    GoTo _0054
+    GoTo CanalaveCityEastHouse_TryForgetMove
 
-_0125:
-    Message 4
+CanalaveCityEastHouse_KnowsOnlyOneMove:
+    Message CanalaveCityEastHouse_Text_KnowsOnlyOneMove
     CloseMessage
-    GoTo _0054
+    GoTo CanalaveCityEastHouse_TryForgetMove
 
-_0130:
-    Message 3
-    WaitABXPadPress
+CanalaveCityEastHouse_RememberMe:
+    Message CanalaveCityEastHouse_Text_RememberMe
+    WaitButton
     CloseMessage
     ReleaseAll
     End
 
-    .byte 0
+    .balign 4, 0

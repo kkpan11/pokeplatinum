@@ -1,74 +1,58 @@
-    .include "macros/scrcmd.inc"
+#include "macros/scrcmd.inc"
+#include "res/text/bank/floaroma_town_middle_house.h"
 
-    .data
 
-    ScriptEntry _000E
-    ScriptEntry _0021
-    ScriptEntry _00A9
-    .short 0xFD13
+    ScriptEntry FloaromaTownMiddleHouse_PokemonBreederF
+    ScriptEntry FloaromaTownMiddleHouse_Twin
+    ScriptEntry FloaromaTownMiddleHouse_Clefairy
+    ScriptEntryEnd
 
-_000E:
-    PlayFanfare SEQ_SE_CONFIRM
+FloaromaTownMiddleHouse_PokemonBreederF:
+    NPCMessage FloaromaTownMiddleHouse_Text_FloaromaTownWasBarren
+    End
+
+FloaromaTownMiddleHouse_Twin:
+    PlaySE SE_CONFIRM_sseq_3
     LockAll
     FacePlayer
-    Message 0
-    WaitABXPadPress
+    GoToIfSet FLAG_RECEIVED_FLOAROMA_TOWN_MIDDLE_HOUSE_TM88, FloaromaTownMiddleHouse_UsingPluckEatsBerry
+    Message FloaromaTownMiddleHouse_Text_CuteHowPokemonPluckBerries
+    ShowYesNoMenu VAR_RESULT
+    GoToIfEq VAR_RESULT, MENU_YES, FloaromaTownMiddleHouse_HeresTMForPluck
+    GoToIfEq VAR_RESULT, MENU_NO, FloaromaTownMiddleHouse_IJustLikeWeirdThings
+    End
+
+FloaromaTownMiddleHouse_IJustLikeWeirdThings:
+    Message FloaromaTownMiddleHouse_Text_IJustLikeWeirdThings
+    WaitButton
     CloseMessage
     ReleaseAll
     End
 
-_0021:
-    PlayFanfare SEQ_SE_CONFIRM
-    LockAll
-    FacePlayer
-    GoToIfSet 131, _0094
-    Message 1
-    ScrCmd_03E 0x800C
-    GoToIfEq 0x800C, 0, _0062
-    GoToIfEq 0x800C, 1, _0057
-    End
-
-_0057:
-    Message 3
-    WaitABXPadPress
+FloaromaTownMiddleHouse_HeresTMForPluck:
+    Message FloaromaTownMiddleHouse_Text_HeresTMForPluck
+    SetVar VAR_0x8004, ITEM_TM88
+    SetVar VAR_0x8005, 1
+    GoToIfCannotFitItem VAR_0x8004, VAR_0x8005, VAR_RESULT, FloaromaTownMiddleHouse_BagIsFull
+    SetFlag FLAG_RECEIVED_FLOAROMA_TOWN_MIDDLE_HOUSE_TM88
+    Common_GiveItemQuantityNoLineFeed
     CloseMessage
     ReleaseAll
     End
 
-_0062:
-    Message 2
-    SetVar 0x8004, 0x19F
-    SetVar 0x8005, 1
-    ScrCmd_07D 0x8004, 0x8005, 0x800C
-    GoToIfEq 0x800C, 0, _009F
-    SetFlag 131
-    CallCommonScript 0x7E0
+FloaromaTownMiddleHouse_UsingPluckEatsBerry:
+    Message FloaromaTownMiddleHouse_Text_UsingPluckEatsBerry
+    WaitButton
     CloseMessage
     ReleaseAll
     End
 
-_0094:
-    Message 4
-    WaitABXPadPress
+FloaromaTownMiddleHouse_BagIsFull:
+    Common_MessageBagIsFull
     CloseMessage
     ReleaseAll
     End
 
-_009F:
-    CallCommonScript 0x7E1
-    CloseMessage
-    ReleaseAll
-    End
-
-_00A9:
-    PlayFanfare SEQ_SE_CONFIRM
-    LockAll
-    FacePlayer
-    ScrCmd_04B 0x5DC
-    ScrCmd_04C 35, 0
-    Message 5
-    ScrCmd_04D
-    WaitABXPadPress
-    CloseMessage
-    ReleaseAll
+FloaromaTownMiddleHouse_Clefairy:
+    PokemonCryAndMessage SPECIES_CLEFAIRY, FloaromaTownMiddleHouse_Text_ClefairyCry
     End

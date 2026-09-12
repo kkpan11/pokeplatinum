@@ -1,6 +1,5 @@
-    .include "macros/btlcmd.inc"
+#include "macros/btlcmd.inc"
 
-    .data
 
 _000:
     CompareMonDataToValue OPCODE_FLAG_SET, BTLSCR_DEFENDER, BATTLEMON_MOVE_EFFECTS_MASK, MOVE_EFFECT_SEMI_INVULNERABLE, _023
@@ -8,7 +7,7 @@ _000:
     Call BATTLE_SUBSCRIPT_ATTACK_MESSAGE_AND_ANIMATION
     Transform 
     // {0} transformed into {1}!
-    PrintMessage pl_msg_00000368_00345, TAG_NICKNAME_POKE, BTLSCR_ATTACKER, BTLSCR_DEFENDER
+    PrintMessage BattleStrings_Text_PokemonTransformedIntoPokemon_AllyAlly, TAG_NICKNAME_POKE, BTLSCR_ATTACKER, BTLSCR_DEFENDER
     Wait 
     WaitButtonABTime 30
     End 

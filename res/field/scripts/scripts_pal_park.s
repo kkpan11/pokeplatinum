@@ -1,171 +1,160 @@
-    .include "macros/scrcmd.inc"
+#include "macros/scrcmd.inc"
+#include "res/text/bank/pal_park.h"
+#include "res/field/events/events_pal_park.h"
 
-    .data
 
-    ScriptEntry _001A
-    ScriptEntry _0020
-    ScriptEntry _008D
-    ScriptEntry _00B9
-    ScriptEntry _00E9
-    ScriptEntry _012C
-    .short 0xFD13
+    ScriptEntry PalPark_OnTransition
+    ScriptEntry PalPark_OnFrame_Countdown
+    ScriptEntry PalPark_CoordEvent_CaughtAllPokemon
+    ScriptEntry PalPark_RetireFromMenu
+    ScriptEntry PalPark_CoordEvent_RetireFromGate
+    ScriptEntry PalPark_Worker
+    ScriptEntryEnd
 
-_001A:
-    SetFlag 0x9CB
+PalPark_OnTransition:
+    SetFlag FLAG_FIRST_ARRIVAL_PAL_PARK
     End
 
-_0020:
-    PlayFanfare SEQ_SE_CONFIRM
+PalPark_OnFrame_Countdown:
+    PlaySE SE_CONFIRM_sseq_3
     LockAll
-    MessageInstant 9
-    WaitTime 30, 0x800C
-    MessageInstant 10
-    PlayFanfare SEQ_SE_DP_DECIDE
-    WaitTime 30, 0x800C
-    MessageInstant 11
-    PlayFanfare SEQ_SE_DP_DECIDE
-    WaitTime 30, 0x800C
-    MessageInstant 12
-    PlayFanfare SEQ_SE_DP_DECIDE
-    WaitTime 30, 0x800C
-    MessageInstant 13
-    PlayFanfare SEQ_SE_DP_CON_016
-    WaitTime 30, 0x800C
-    ScrCmd_253 0
-    SetVar 0x40F3, 1
-    SetFlag 0x995
-    ScrCmd_050 0x42D
+    MessageInstant PalPark_Text_LetTheCountdownBegin
+    WaitTime 30, VAR_RESULT
+    MessageInstant PalPark_Text_Three
+    PlaySE SEQ_SE_DP_DECIDE_sseq
+    WaitTime 30, VAR_RESULT
+    MessageInstant PalPark_Text_Two
+    PlaySE SEQ_SE_DP_DECIDE_sseq
+    WaitTime 30, VAR_RESULT
+    MessageInstant PalPark_Text_One
+    PlaySE SEQ_SE_DP_DECIDE_sseq
+    WaitTime 30, VAR_RESULT
+    MessageInstant PalPark_Text_Start
+    PlaySE SEQ_SE_DP_CON_016_sseq
+    WaitTime 30, VAR_RESULT
+    SetInCatchingShowFlag
+    SetVar VAR_PAL_PARK_STATE, 1
+    SetFlag FLAG_ALT_MUSIC_PAL_PARK
+    PlayMusic SEQ_D_SAFARI_sseq
     CloseMessage
     ReleaseAll
     End
 
-    .byte 83
-    .byte 2
-    .byte 0
-    .byte 0
-    .byte 40
-    .byte 0
-    .byte 243
-    .byte 64
-    .byte 1
-    .byte 0
-    .byte 49
-    .byte 0
-    .byte 52
-    .byte 0
-    .byte 97
-    .byte 0
-    .byte 2
-    .byte 0
-
-_008D:
-    PlayFanfare SEQ_SE_CONFIRM
-    LockAll
-    PlayFanfare SEQ_SE_DP_PINPON
-    ScrCmd_0CD 0
-    Message 5
-    ScrCmd_050 0x3EA
-    ScrCmd_04E 0x486
-    ScrCmd_04F
+PalPark_Unused:
+    SetInCatchingShowFlag
+    SetVar VAR_PAL_PARK_STATE, 1
+    WaitButton
     CloseMessage
     ReleaseAll
-    SetVar 0x40F3, 1
-    Call _01C0
     End
 
-_00B9:
-    PlayFanfare SEQ_SE_CONFIRM
+PalPark_CoordEvent_CaughtAllPokemon:
+    PlaySE SE_CONFIRM_sseq_3
     LockAll
-    Message 8
-    ScrCmd_03E 0x800C
+    PlaySE SEQ_SE_DP_PINPON_sseq
+    BufferPlayerName 0
+    Message PalPark_Text_DingDongCongratulations
+    PlayMusic SEQ_SILENCE_FIELD_sseq_1
+    PlayFanfare SEQ_FANFA4_sseq
+    WaitFanfare
     CloseMessage
-    GoToIfEq 0x800C, 0, _00D9
     ReleaseAll
+    SetVar VAR_PAL_PARK_STATE, 1
+    Call PalPark_ClearFlagAndWarpOut
     End
 
-_00D9:
-    SetVar 0x40F3, 2
-    ReleaseAll
-    Call _01C0
-    End
-
-_00E9:
-    PlayFanfare SEQ_SE_CONFIRM
+PalPark_RetireFromMenu:
+    PlaySE SE_CONFIRM_sseq_3
     LockAll
-    Call _0170
+    Message PalPark_Text_WouldYouLikeToRetire
+    ShowYesNoMenu VAR_RESULT
     CloseMessage
-    GoToIfEq 0x800C, 0, _0114
-    SetVar 0x40F3, 2
+    GoToIfEq VAR_RESULT, MENU_YES, PalPark_RetireFromMenu_WarpOut
     ReleaseAll
-    Call _01C0
     End
 
-_0114:
-    ApplyMovement 0xFF, _0124
+PalPark_RetireFromMenu_WarpOut:
+    SetVar VAR_PAL_PARK_STATE, 2
+    ReleaseAll
+    Call PalPark_ClearFlagAndWarpOut
+    End
+
+PalPark_CoordEvent_RetireFromGate:
+    PlaySE SE_CONFIRM_sseq_3
+    LockAll
+    Call PalPark_AskPlayerRetireFromCatchingShow
+    CloseMessage
+    GoToIfEq VAR_RESULT, FALSE, PalPark_PlayerWalkNorth
+    SetVar VAR_PAL_PARK_STATE, 2
+    ReleaseAll
+    Call PalPark_ClearFlagAndWarpOut
+    End
+
+PalPark_PlayerWalkNorth:
+    ApplyMovement LOCALID_PLAYER, PalPark_Movement_PlayerWalkNorth
     WaitMovement
     ReleaseAll
     End
 
     .balign 4, 0
-_0124:
-    MoveAction_00C
+PalPark_Movement_PlayerWalkNorth:
+    WalkNormalNorth
     EndMovement
 
-_012C:
-    PlayFanfare SEQ_SE_CONFIRM
+PalPark_Worker:
+    PlaySE SE_CONFIRM_sseq_3
     LockAll
     FacePlayer
-    Call _0170
+    Call PalPark_AskPlayerRetireFromCatchingShow
     CloseMessage
-    GoToIfEq 0x800C, 0, _0159
-    SetVar 0x40F3, 2
+    GoToIfEq VAR_RESULT, FALSE, PalPark_WorkerWalkOnSpotWest
+    SetVar VAR_PAL_PARK_STATE, 2
     ReleaseAll
-    Call _01C0
+    Call PalPark_ClearFlagAndWarpOut
     End
 
-_0159:
-    ApplyMovement 0, _0168
+PalPark_WorkerWalkOnSpotWest:
+    ApplyMovement LOCALID_WORKER, PalPark_Movement_WorkerWalkOnSpotWest
     WaitMovement
     ReleaseAll
     End
 
     .balign 4, 0
-_0168:
-    MoveAction_022
+PalPark_Movement_WorkerWalkOnSpotWest:
+    WalkOnSpotNormalWest
     EndMovement
 
-_0170:
-    Message 0
-    ScrCmd_03E 0x800C
-    GoToIfEq 0x800C, 0, _01B5
-    ScrCmd_14D 0x800C
-    GoToIfEq 0x800C, 1, _01A5
-    ScrCmd_0CD 0
-    Message 2
-    WaitABXPadPress
-    SetVar 0x800C, 0
+PalPark_AskPlayerRetireFromCatchingShow:
+    Message PalPark_Text_RetireWithoutAllPokemon
+    ShowYesNoMenu VAR_RESULT
+    GoToIfEq VAR_RESULT, MENU_YES, PalPark_RetireFromCatchingShow
+    GetPlayerGender VAR_RESULT
+    GoToIfEq VAR_RESULT, GENDER_FEMALE, PalPark_NotRetireFromCatchingShow_Female
+    BufferPlayerName 0
+    Message PalPark_Text_ThatTheSpirit_Male
+    WaitButton
+    SetVar VAR_RESULT, FALSE
     Return
 
-_01A5:
-    ScrCmd_0CD 0
-    Message 3
-    WaitABXPadPress
-    SetVar 0x800C, 0
+PalPark_NotRetireFromCatchingShow_Female:
+    BufferPlayerName 0
+    Message PalPark_Text_ThatTheSpirit_Female
+    WaitButton
+    SetVar VAR_RESULT, FALSE
     Return
 
-_01B5:
-    Message 1
-    SetVar 0x800C, 1
+PalPark_RetireFromCatchingShow:
+    Message PalPark_Text_ImDisappointed
+    SetVar VAR_RESULT, TRUE
     Return
 
-_01C0:
-    ScrCmd_253 1
-    FadeScreen 6, 1, 0, 0
+PalPark_ClearFlagAndWarpOut:
+    ClearInCatchingShowFlag
+    FadeScreenOut
     WaitFadeScreen
-    ScrCmd_0BE 0x189, 0, 7, 7, 1
-    FadeScreen 6, 1, 1, 0
+    Warp MAP_HEADER_PAL_PARK_LOBBY, 7, 7, DIR_SOUTH
+    FadeScreenIn
     WaitFadeScreen
     Return
 
-    .byte 0
-    .byte 0
+    .balign 4, 0

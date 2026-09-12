@@ -1,152 +1,152 @@
-    .include "macros/scrcmd.inc"
+#include "macros/scrcmd.inc"
+#include "res/text/bank/iron_ruins.h"
 
-    .data
 
-    ScriptEntry _0026
-    ScriptEntry _003D
-    ScriptEntry _012D
-    ScriptEntry _0148
-    ScriptEntry _0163
-    ScriptEntry _017E
-    ScriptEntry _0199
-    ScriptEntry _01B4
-    ScriptEntry _01CF
-    .short 0xFD13
+    ScriptEntry IronRuins_OnTransition
+    ScriptEntry IronRuins_Statue
+    ScriptEntry IronRuins_DotNorthWest
+    ScriptEntry IronRuins_DotNorthEast
+    ScriptEntry IronRuins_DotWest
+    ScriptEntry IronRuins_DotMiddle
+    ScriptEntry IronRuins_DotEast
+    ScriptEntry IronRuins_DotSouthWest
+    ScriptEntry IronRuins_DotSouthEast
+    ScriptEntryEnd
 
-_0026:
-    GoToIfLt 0x4069, 0x118, _0035
+IronRuins_OnTransition:
+    GoToIfLt VAR_IRON_RUINS_STATE, RUINS_STATE_DID_NOT_CATCH_REGI, IronRuins_ResetState
     End
 
-_0035:
-    SetVar 0x4069, 0
+IronRuins_ResetState:
+    SetVar VAR_IRON_RUINS_STATE, 0
     End
 
-_003D:
-    PlayFanfare SEQ_SE_CONFIRM
+IronRuins_Statue:
+    PlaySE SE_CONFIRM_sseq_3
     LockAll
     FacePlayer
-    GoToIfEq 0x4069, 0x122, _00ED
-    GoToIfEq 0x4069, 0x118, _00F8
-    GoToIfUnset 0x964, _010F
-    ScrCmd_32B 0x800C
-    GoToIfEq 0x800C, 0, _011A
-    GoToIfEq 0x4069, 0x10E, _00AE
-    GoToIfLt 0x4069, 0x104, _011A
-    ScrCmd_04B 0x5DC
+    GoToIfEq VAR_IRON_RUINS_STATE, RUINS_STATE_CAUGHT_REGI, IronRuins_CaughtRegisteelStatueStoppedEmanatingPower
+    GoToIfEq VAR_IRON_RUINS_STATE, RUINS_STATE_DID_NOT_CATCH_REGI, IronRuins_DidNotCatchRegisteelStatueStoppedEmanatingPower
+    GoToIfUnset FLAG_GAME_COMPLETED, IronRuins_BecomeStrongerYouMust
+    CheckPartyHasFatefulEncounterRegigigas VAR_RESULT
+    GoToIfEq VAR_RESULT, 0, IronRuins_ItsAStatueOfAPokemon
+    GoToIfEq VAR_IRON_RUINS_STATE, RUINS_STATE_ACTIVATED_STATUE, IronRuins_EncounterRegisteel
+    GoToIfLt VAR_IRON_RUINS_STATE, RUINS_STATE_ACTIVATED_ALL_DOTS, IronRuins_ItsAStatueOfAPokemon
+    WaitSE SE_CONFIRM_sseq_3
     ScrCmd_29F 1
-    SetVar 0x4069, 0x10E
-    Message 1
-    GoTo _0125
+    SetVar VAR_IRON_RUINS_STATE, RUINS_STATE_ACTIVATED_STATUE
+    Message IronRuins_Text_SomethingChangedInTheAir
+    GoTo IronRuins_StatueEnd
     End
 
-_00AE:
-    ScrCmd_04C 0x17B, 0
-    Message 2
-    ScrCmd_04D
+IronRuins_EncounterRegisteel:
+    PlayCry SPECIES_REGISTEEL
+    Message IronRuins_Text_RegisteelCry
+    WaitCry
     CloseMessage
-    ScrCmd_2BD 0x17B, 30
-    ScrCmd_0EC 0x800C
-    GoToIfEq 0x800C, 0, _0109
-    ScrCmd_2BC 0x800C
-    GoToIfEq 0x800C, 1, _00F8
-    SetVar 0x4069, 0x122
+    StartLegendaryBattle SPECIES_REGISTEEL, 30
+    CheckWonBattle VAR_RESULT
+    GoToIfEq VAR_RESULT, FALSE, IronRuins_BlackOut
+    CheckDidNotCapture VAR_RESULT
+    GoToIfEq VAR_RESULT, TRUE, IronRuins_DidNotCatchRegisteelStatueStoppedEmanatingPower
+    SetVar VAR_IRON_RUINS_STATE, RUINS_STATE_CAUGHT_REGI
     ReleaseAll
     End
 
-_00ED:
-    Message 3
-    GoTo _0125
+IronRuins_CaughtRegisteelStatueStoppedEmanatingPower:
+    Message IronRuins_Text_StatueStoppedEmanatingPower
+    GoTo IronRuins_StatueEnd
     End
 
-_00F8:
-    SetVar 0x4069, 0x118
-    Message 3
-    GoTo _0125
+IronRuins_DidNotCatchRegisteelStatueStoppedEmanatingPower:
+    SetVar VAR_IRON_RUINS_STATE, RUINS_STATE_DID_NOT_CATCH_REGI
+    Message IronRuins_Text_StatueStoppedEmanatingPower
+    GoTo IronRuins_StatueEnd
     End
 
-_0109:
-    ScrCmd_0EB
+IronRuins_BlackOut:
+    BlackOutFromBattle
     ReleaseAll
     End
 
-_010F:
-    Message 4
-    GoTo _0125
+IronRuins_BecomeStrongerYouMust:
+    Message IronRuins_Text_BecomeStrongerYouMust
+    GoTo IronRuins_StatueEnd
     End
 
-_011A:
-    Message 0
-    GoTo _0125
+IronRuins_ItsAStatueOfAPokemon:
+    Message IronRuins_Text_ItsAStatueOfAPokemon
+    GoTo IronRuins_StatueEnd
     End
 
-_0125:
-    WaitABXPadPress
+IronRuins_StatueEnd:
+    WaitButton
     CloseMessage
     ReleaseAll
     End
 
-_012D:
-    SetVar 0x4001, 1
-    GoToIfGe 0x4069, 0x104, _020D
-    GoTo _01EA
+IronRuins_DotNorthWest:
+    SetVar VAR_MAP_LOCAL_0x01, 1
+    GoToIfGe VAR_IRON_RUINS_STATE, RUINS_STATE_ACTIVATED_ALL_DOTS, IronRuins_DotEnd
+    GoTo IronRuins_ActivateDot
     End
 
-_0148:
-    SetVar 0x4002, 1
-    GoToIfGe 0x4069, 0x104, _020D
-    GoTo _01EA
+IronRuins_DotNorthEast:
+    SetVar VAR_MAP_LOCAL_0x02, 1
+    GoToIfGe VAR_IRON_RUINS_STATE, RUINS_STATE_ACTIVATED_ALL_DOTS, IronRuins_DotEnd
+    GoTo IronRuins_ActivateDot
     End
 
-_0163:
-    SetVar 0x4003, 1
-    GoToIfGe 0x4069, 0x104, _020D
-    GoTo _01EA
+IronRuins_DotWest:
+    SetVar VAR_MAP_LOCAL_0x03, 1
+    GoToIfGe VAR_IRON_RUINS_STATE, RUINS_STATE_ACTIVATED_ALL_DOTS, IronRuins_DotEnd
+    GoTo IronRuins_ActivateDot
     End
 
-_017E:
-    SetVar 0x4004, 1
-    GoToIfGe 0x4069, 0x104, _020D
-    GoTo _01EA
+IronRuins_DotMiddle:
+    SetVar VAR_MAP_LOCAL_0x04, 1
+    GoToIfGe VAR_IRON_RUINS_STATE, RUINS_STATE_ACTIVATED_ALL_DOTS, IronRuins_DotEnd
+    GoTo IronRuins_ActivateDot
     End
 
-_0199:
-    SetVar 0x4005, 1
-    GoToIfGe 0x4069, 0x104, _020D
-    GoTo _01EA
+IronRuins_DotEast:
+    SetVar VAR_MAP_LOCAL_0x05, 1
+    GoToIfGe VAR_IRON_RUINS_STATE, RUINS_STATE_ACTIVATED_ALL_DOTS, IronRuins_DotEnd
+    GoTo IronRuins_ActivateDot
     End
 
-_01B4:
-    SetVar 0x4006, 1
-    GoToIfGe 0x4069, 0x104, _020D
-    GoTo _01EA
+IronRuins_DotSouthWest:
+    SetVar VAR_MAP_LOCAL_0x06, 1
+    GoToIfGe VAR_IRON_RUINS_STATE, RUINS_STATE_ACTIVATED_ALL_DOTS, IronRuins_DotEnd
+    GoTo IronRuins_ActivateDot
     End
 
-_01CF:
-    SetVar 0x4007, 1
-    GoToIfGe 0x4069, 0x104, _020D
-    GoTo _01EA
+IronRuins_DotSouthEast:
+    SetVar VAR_MAP_LOCAL_0x07, 1
+    GoToIfGe VAR_IRON_RUINS_STATE, RUINS_STATE_ACTIVATED_ALL_DOTS, IronRuins_DotEnd
+    GoTo IronRuins_ActivateDot
     End
 
-_01EA:
+IronRuins_ActivateDot:
     LockAll
-    ScrCmd_069 0x8004, 0x8005
-    ScrCmd_32C 0x4069, 0x24C, 0x8004, 0x8005
-    GoToIfGe 0x4069, 0x104, _020F
+    GetPlayerMapPos VAR_0x8004, VAR_0x8005
+    ActivateRegiRuinsDot VAR_IRON_RUINS_STATE, DOT_TYPE_IRON_RUINS, VAR_0x8004, VAR_0x8005
+    GoToIfGe VAR_IRON_RUINS_STATE, RUINS_STATE_ACTIVATED_ALL_DOTS, IronRuins_ActivateStatue
     ReleaseAll
     End
 
-_020D:
+IronRuins_DotEnd:
     End
 
-_020F:
-    GoToIfUnset 0x964, _020D
-    ScrCmd_04B 0x5DC
+IronRuins_ActivateStatue:
+    GoToIfUnset FLAG_GAME_COMPLETED, IronRuins_DotEnd
+    WaitSE SE_CONFIRM_sseq_3
     ScrCmd_29F 1
-    SetVar 0x4069, 0x10E
-    Message 1
-    WaitABXPadPress
+    SetVar VAR_IRON_RUINS_STATE, RUINS_STATE_ACTIVATED_STATUE
+    Message IronRuins_Text_SomethingChangedInTheAir
+    WaitButton
     CloseMessage
     ReleaseAll
     End
 
-    .byte 0
+    .balign 4, 0

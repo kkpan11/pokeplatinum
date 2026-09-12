@@ -1,94 +1,95 @@
-    .include "macros/scrcmd.inc"
+#include "macros/scrcmd.inc"
+#include "res/text/bank/sunyshore_city_east_house.h"
+#include "generated/natures.h"
 
-    .data
 
-    ScriptEntry _0006
-    .short 0xFD13
+    ScriptEntry SunyshoreCityEastHouse_Scientist
+    ScriptEntryEnd
 
-_0006:
-    PlayFanfare SEQ_SE_CONFIRM
+SunyshoreCityEastHouse_Scientist:
+    PlaySE SE_CONFIRM_sseq_3
     LockAll
     FacePlayer
-    GoToIfGe 0x40B5, 1, _002C
-    SetVar 0x40B5, 1
-    Message 0
-    WaitABXPadPress
+    GoToIfGe VAR_SUNYSHORE_CITY_EAST_HOUSE_SCIENTIST_STATE, 1, SunyshoreCityEastHouse_TryCheckNatures
+    SetVar VAR_SUNYSHORE_CITY_EAST_HOUSE_SCIENTIST_STATE, 1
+    Message SunyshoreCityEastHouse_Text_MayISeeNatures
+    WaitButton
     CloseMessage
     ReleaseAll
     End
 
-_002C:
-    ScrCmd_134 18, 0x800C
-    GoToIfEq 0x800C, 1, _0125
-    ScrCmd_134 17, 0x800C
-    GoToIfEq 0x800C, 1, _00A7
-    ScrCmd_134 16, 0x800C
-    GoToIfEq 0x800C, 1, _0089
-    GoTo _006B
+SunyshoreCityEastHouse_TryCheckNatures:
+    CheckPoketchAppRegistered POKETCH_APPID_ROULETTE, VAR_RESULT
+    GoToIfEq VAR_RESULT, TRUE, SunyshoreCityEastHouse_AppsMayOutnumberPokemon
+    CheckPoketchAppRegistered POKETCH_APPID_DOTART, VAR_RESULT
+    GoToIfEq VAR_RESULT, TRUE, SunyshoreCityEastHouse_CheckQuirkyNature
+    CheckPoketchAppRegistered POKETCH_APPID_CALENDAR, VAR_RESULT
+    GoToIfEq VAR_RESULT, TRUE, SunyshoreCityEastHouse_CheckNaiveNature
+    GoTo SunyshoreCityEastHouse_CheckSeriousNature
 
-_006B:
-    ScrCmd_213 0x8000, 12
-    GoToIfNe 0x8000, 0xFF, _00C5
-    Message 1
-    WaitABXPadPress
+SunyshoreCityEastHouse_CheckSeriousNature:
+    FindPartySlotWithNature VAR_0x8000, NATURE_SERIOUS
+    GoToIfNe VAR_0x8000, PARTY_SLOT_NONE, SunyshoreCityEastHouse_GiveCalendarApp
+    Message SunyshoreCityEastHouse_Text_LikeToSeeSeriousNature
+    WaitButton
     CloseMessage
     ReleaseAll
     End
 
-_0089:
-    ScrCmd_213 0x8000, 14
-    GoToIfNe 0x8000, 0xFF, _00E5
-    Message 2
-    WaitABXPadPress
+SunyshoreCityEastHouse_CheckNaiveNature:
+    FindPartySlotWithNature VAR_0x8000, NATURE_NAIVE
+    GoToIfNe VAR_0x8000, PARTY_SLOT_NONE, SunyshoreCityEastHouse_GiveDotArtistApp
+    Message SunyshoreCityEastHouse_Text_LikeToSeeNaiveNature
+    WaitButton
     CloseMessage
     ReleaseAll
     End
 
-_00A7:
-    ScrCmd_213 0x8000, 24
-    GoToIfNe 0x8000, 0xFF, _0105
-    Message 3
-    WaitABXPadPress
+SunyshoreCityEastHouse_CheckQuirkyNature:
+    FindPartySlotWithNature VAR_0x8000, NATURE_QUIRKY
+    GoToIfNe VAR_0x8000, PARTY_SLOT_NONE, SunyshoreCityEastHouse_GiveRouletteApp
+    Message SunyshoreCityEastHouse_Text_LikeToSeeQuirkyNature
+    WaitButton
     CloseMessage
     ReleaseAll
     End
 
-_00C5:
-    ScrCmd_198 0x8000, 0x8001
-    ScrCmd_0D0 0, 0x8000
-    Message 4
-    SetVar 0x8004, 16
-    CallCommonScript 0x7D9
-    WaitABXPadPress
+SunyshoreCityEastHouse_GiveCalendarApp:
+    GetPartyMonSpecies VAR_0x8000, VAR_0x8001
+    BufferPartyMonSpecies 0, VAR_0x8000
+    Message SunyshoreCityEastHouse_Text_IllGiveCalendarApp
+    SetVar VAR_0x8004, POKETCH_APPID_CALENDAR
+    Common_GivePoketchApp
+    WaitButton
     CloseMessage
     ReleaseAll
     End
 
-_00E5:
-    ScrCmd_198 0x8000, 0x8001
-    ScrCmd_0D0 0, 0x8000
-    Message 5
-    SetVar 0x8004, 17
-    CallCommonScript 0x7D9
-    WaitABXPadPress
+SunyshoreCityEastHouse_GiveDotArtistApp:
+    GetPartyMonSpecies VAR_0x8000, VAR_0x8001
+    BufferPartyMonSpecies 0, VAR_0x8000
+    Message SunyshoreCityEastHouse_Text_IllGiveDotArtistApp
+    SetVar VAR_0x8004, POKETCH_APPID_DOTART
+    Common_GivePoketchApp
+    WaitButton
     CloseMessage
     ReleaseAll
     End
 
-_0105:
-    ScrCmd_198 0x8000, 0x8001
-    ScrCmd_0D0 0, 0x8000
-    Message 6
-    SetVar 0x8004, 18
-    CallCommonScript 0x7D9
-    WaitABXPadPress
+SunyshoreCityEastHouse_GiveRouletteApp:
+    GetPartyMonSpecies VAR_0x8000, VAR_0x8001
+    BufferPartyMonSpecies 0, VAR_0x8000
+    Message SunyshoreCityEastHouse_Text_IllGiveRouletteApp
+    SetVar VAR_0x8004, POKETCH_APPID_ROULETTE
+    Common_GivePoketchApp
+    WaitButton
     CloseMessage
     ReleaseAll
     End
 
-_0125:
-    Message 7
-    WaitABXPadPress
+SunyshoreCityEastHouse_AppsMayOutnumberPokemon:
+    Message SunyshoreCityEastHouse_Text_AppsMayOutnumberPokemon
+    WaitButton
     CloseMessage
     ReleaseAll
     End

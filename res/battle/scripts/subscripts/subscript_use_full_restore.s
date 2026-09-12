@@ -1,9 +1,8 @@
-    .include "macros/btlcmd.inc"
+#include "macros/btlcmd.inc"
 
-    .data
 
 _000:
-    SetHealthbarStatus BTLSCR_ATTACKER, BATTLE_ANIMATION_NONE
+    SetHealthBoxStatusIcon BTLSCR_ATTACKER, BATTLE_ANIMATION_NONE
     WaitButtonABTime 30
     UpdateMonData OPCODE_SET, BTLSCR_ATTACKER, BATTLEMON_STATUS, MON_CONDITION_NONE
     UpdateMonData OPCODE_FLAG_OFF, BTLSCR_ATTACKER, BATTLEMON_VOLATILE_STATUS, VOLATILE_CONDITION_CONFUSION

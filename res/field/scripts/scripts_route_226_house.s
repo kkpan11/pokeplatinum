@@ -1,88 +1,82 @@
-    .include "macros/scrcmd.inc"
+#include "macros/scrcmd.inc"
+#include "constants/npc_trades.h"
+#include "res/text/bank/route_226_house.h"
 
-    .data
 
-    ScriptEntry _000E
-    ScriptEntry _0014
-    ScriptEntry _00E7
-    .short 0xFD13
+    ScriptEntry Route226House_OnTransition
+    ScriptEntry Route226House_Meister
+    ScriptEntry Route226House_BgSign
+    ScriptEntryEnd
 
-_000E:
-    SetFlag 0x9F1
+Route226House_OnTransition:
+    SetFlag FLAG_FIRST_ARRIVAL_THE_MEISTERS_HOUSE
     End
 
-_0014:
-    PlayFanfare SEQ_SE_CONFIRM
+Route226House_Meister:
+    PlaySE SE_CONFIRM_sseq_3
     LockAll
     FacePlayer
-    GoToIfSet 245, _00DC
-    GoToIfSet 246, _0046
-    Message 0
-    ScrCmd_22B
-    SetFlag 246
-    Message 1
-    WaitABXPadPress
+    GoToIfSet FLAG_TRADED_FOR_FOPPA_MAGIKARP, Route226House_MakeFriendsAnywhere
+    GoToIfSet FLAG_ENABLED_POKEDEX_LANGUAGE_DETECTION, Route226House_AskTrade
+    Message Route226House_Text_ImTheMeister
+    TurnOnPokedexLanguageDetection
+    SetFlag FLAG_ENABLED_POKEDEX_LANGUAGE_DETECTION
+    Message Route226House_Text_PowerUpPokedex
+    WaitButton
     CloseMessage
     ReleaseAll
     End
 
-_0046:
-    Message 2
-    ScrCmd_03E 0x800C
-    GoToIfEq 0x800C, 0, _0060
-    GoTo _00D1
+Route226House_AskTrade:
+    Message Route226House_Text_AskTradeFinneonForMagikarp
+    ShowYesNoMenu VAR_RESULT
+    GoToIfEq VAR_RESULT, MENU_YES, Route226House_TryTrade
+    GoTo Route226House_ThisIsATragedy
 
-_0060:
+Route226House_TryTrade:
     CloseMessage
-    FadeScreen 6, 1, 0, 0
+    FadeScreenOut
     WaitFadeScreen
-    ScrCmd_2A5
-    ScrCmd_193 0x800C
-    ScrCmd_0A1
-    FadeScreen 6, 1, 1, 0
+    SelectPokemonToTrade
+    FadeScreenIn
     WaitFadeScreen
-    GoToIfEq 0x800C, 0xFF, _00D1
-    ScrCmd_226 3
-    SetVar 0x8004, 0x800C
-    ScrCmd_198 0x8004, 0x8005
-    ScrCmd_228 0x800C
-    GoToIfNe 0x8005, 0x800C, _00C4
-    ScrCmd_229 0x8004
-    ScrCmd_22A
-    SetFlag 245
-    Message 3
-    WaitABXPadPress
+    GoToIfEq VAR_RESULT, PARTY_SLOT_NONE, Route226House_ThisIsATragedy
+    InitNPCTrade NPC_TRADE_FOPPA_MAGIKARP
+    SetVar VAR_0x8004, VAR_RESULT
+    GetPartyMonSpecies VAR_0x8004, VAR_0x8005
+    GetNPCTradeRequestedSpecies VAR_RESULT
+    GoToIfNe VAR_0x8005, VAR_RESULT, Route226House_ThatIsNoFinneon
+    StartNPCTrade VAR_0x8004
+    FinishNPCTrade
+    SetFlag FLAG_TRADED_FOR_FOPPA_MAGIKARP
+    Message Route226House_Text_DankeSchon
+    WaitButton
     CloseMessage
     ReleaseAll
     End
 
-_00C4:
-    ScrCmd_22A
-    Message 4
-    WaitABXPadPress
+Route226House_ThatIsNoFinneon:
+    FinishNPCTrade
+    Message Route226House_Text_ThatIsNoFinneon
+    WaitButton
     CloseMessage
     ReleaseAll
     End
 
-_00D1:
-    Message 5
-    WaitABXPadPress
+Route226House_ThisIsATragedy:
+    Message Route226House_Text_ThisIsATragedy
+    WaitButton
     CloseMessage
     ReleaseAll
     End
 
-_00DC:
-    Message 6
-    WaitABXPadPress
+Route226House_MakeFriendsAnywhere:
+    Message Route226House_Text_MakeFriendsAnywhere
+    WaitButton
     CloseMessage
     ReleaseAll
     End
 
-_00E7:
-    PlayFanfare SEQ_SE_CONFIRM
-    LockAll
-    Message 7
-    WaitABXPadPress
-    CloseMessage
-    ReleaseAll
+Route226House_BgSign:
+    EventMessage Route226House_Text_VisitedOver150Countries
     End

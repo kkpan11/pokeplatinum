@@ -1,11 +1,10 @@
-    .include "macros/scrcmd.inc"
+#include "macros/scrcmd.inc"
 
-    .data
 
-    ScriptEntry _0006
-    .short 0xFD13
+    ScriptEntry TurnbackCavePillar2Room4_OnTransition
+    ScriptEntryEnd
 
-_0006:
-    AddVar 0x410C, 1
-    ScrCmd_285 0x410B, 0x410C
+TurnbackCavePillar2Room4_OnTransition:
+    AddVar VAR_TURNBACK_CAVE_ROOMS_VISITED, 1
+    InitTurnbackCave VAR_TURNBACK_CAVE_PILLARS_SEEN, VAR_TURNBACK_CAVE_ROOMS_VISITED
     End

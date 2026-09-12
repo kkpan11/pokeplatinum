@@ -1,110 +1,95 @@
-    .include "macros/scrcmd.inc"
+#include "macros/scrcmd.inc"
+#include "res/text/bank/eterna_city_pokecenter_1f.h"
+#include "res/field/events/events_eterna_city_pokecenter_1f.h"
 
-    .data
 
-    ScriptEntry _0016
-    ScriptEntry _0022
-    ScriptEntry _0035
-    ScriptEntry _005E
-    ScriptEntry _007D
-    .short 0xFD13
+    ScriptEntry EternaCityPokecenter1F_Nurse
+    ScriptEntry EternaCityPokecenter1F_BattleGirl
+    ScriptEntry EternaCityPokecenter1F_SchoolKidM
+    ScriptEntry EternaCityPokecenter1F_Buneary
+    ScriptEntry EternaCityPokecenter1F_PokemonBreederF
+    ScriptEntryEnd
 
-_0016:
-    SetVar 0x8007, 3
-    CallCommonScript 0x7D2
+EternaCityPokecenter1F_Nurse:
+    Common_CallPokecenterNurse LOCALID_ETERNA_NURSE
     End
 
-_0022:
-    PlayFanfare SEQ_SE_CONFIRM
+EternaCityPokecenter1F_BattleGirl:
+    NPCMessage EternaCityPokecenter1F_Text_FaintMeansNoPowerToBattle
+    End
+
+EternaCityPokecenter1F_SchoolKidM:
+    PlaySE SE_CONFIRM_sseq_3
     LockAll
     FacePlayer
-    Message 0
-    WaitABXPadPress
+    GoToIfSet FLAG_TEAM_GALACTIC_LEFT_ETERNA_BUILDING, EternaCityPokecenter1F_IGotMyPokemonBack
+    Message EternaCityPokecenter1F_Text_TeamGalacticTookMyPokemon
+    WaitButton
     CloseMessage
     ReleaseAll
     End
 
-_0035:
-    PlayFanfare SEQ_SE_CONFIRM
+EternaCityPokecenter1F_IGotMyPokemonBack:
+    Message EternaCityPokecenter1F_Text_IGotMyPokemonBack
+    WaitButton
+    CloseMessage
+    ReleaseAll
+    End
+
+EternaCityPokecenter1F_Buneary:
+    PokemonCryAndMessage SPECIES_BUNEARY, EternaCityPokecenter1F_Text_BunearyBunbun
+    End
+
+EternaCityPokecenter1F_PokemonBreederF:
+    PlaySE SE_CONFIRM_sseq_3
     LockAll
     FacePlayer
-    GoToIfSet 129, _0053
-    Message 1
-    WaitABXPadPress
+    GoToIfEq VAR_MAP_LOCAL_0x02, 1, EternaCityPokecenter1F_PokemonWillOpenUp
+    CheckPoketchAppRegistered POKETCH_APPID_FRIENDSHIPCHECKER, VAR_RESULT
+    GoToIfEq VAR_RESULT, FALSE, EternaCityPokecenter1F_GivePoketchAppFriendshipChecker
+    GetFirstNonEggInParty VAR_0x8000
+    BufferPartyMonSpecies 0, VAR_0x8000
+    Message EternaCityPokecenter1F_Text_OhYourPokemon
+    GetPartyMonFriendship VAR_RESULT, VAR_0x8000
+    GoToIfGe VAR_RESULT, 120, EternaCityPokecenter1F_ItSeemsToLikeYou
+    GoToIfGe VAR_RESULT, 70, EternaCityPokecenter1F_ItsBecomingComfortable
+    GoTo EternaCityPokecenter1F_NeedsToGetUsedToYou
+    End
+
+EternaCityPokecenter1F_GivePoketchAppFriendshipChecker:
+    Message EternaCityPokecenter1F_Text_ShowHowClosePokemonFeel
+    SetVar VAR_MAP_LOCAL_0x02, 1
+    SetVar VAR_0x8004, POKETCH_APPID_FRIENDSHIPCHECKER
+    Common_GivePoketchApp
+    WaitButton
     CloseMessage
     ReleaseAll
     End
 
-_0053:
-    Message 2
-    WaitABXPadPress
+EternaCityPokecenter1F_PokemonWillOpenUp:
+    Message EternaCityPokecenter1F_Text_PokemonWillOpenUp
+    WaitButton
     CloseMessage
     ReleaseAll
     End
 
-_005E:
-    PlayFanfare SEQ_SE_CONFIRM
-    LockAll
-    FacePlayer
-    ScrCmd_04B 0x5DC
-    ScrCmd_04C 0x1AB, 0
-    Message 3
-    ScrCmd_04D
-    WaitABXPadPress
+EternaCityPokecenter1F_ItSeemsToLikeYou:
+    Message EternaCityPokecenter1F_Text_ItSeemsToLikeYou
+    WaitButton
     CloseMessage
     ReleaseAll
     End
 
-_007D:
-    PlayFanfare SEQ_SE_CONFIRM
-    LockAll
-    FacePlayer
-    GoToIfEq 0x4002, 1, _00F4
-    ScrCmd_134 5, 0x800C
-    GoToIfEq 0x800C, 0, _00D9
-    ScrCmd_247 0x8000
-    ScrCmd_0D0 0, 0x8000
-    Message 6
-    ScrCmd_1B9 0x800C, 0x8000
-    GoToIfGe 0x800C, 120, _00FF
-    GoToIfGe 0x800C, 70, _010A
-    GoTo _0115
-    End
-
-_00D9:
-    Message 4
-    SetVar 0x4002, 1
-    SetVar 0x8004, 5
-    CallCommonScript 0x7D9
-    WaitABXPadPress
+EternaCityPokecenter1F_ItsBecomingComfortable:
+    Message EternaCityPokecenter1F_Text_ItsBecomingComfortable
+    WaitButton
     CloseMessage
     ReleaseAll
     End
 
-_00F4:
-    Message 5
-    WaitABXPadPress
-    CloseMessage
-    ReleaseAll
-    End
-
-_00FF:
-    Message 7
-    WaitABXPadPress
-    CloseMessage
-    ReleaseAll
-    End
-
-_010A:
-    Message 8
-    WaitABXPadPress
-    CloseMessage
-    ReleaseAll
-    End
-
-_0115:
-    Message 9
-    WaitABXPadPress
+EternaCityPokecenter1F_NeedsToGetUsedToYou:
+    Message EternaCityPokecenter1F_Text_NeedsToGetUsedToYou
+    WaitButton
     CloseMessage
     ReleaseAll
     End

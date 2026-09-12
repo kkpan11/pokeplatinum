@@ -1,6 +1,5 @@
-    .include "macros/btlcmd.inc"
+#include "macros/btlcmd.inc"
 
-    .data
 
 _000:
     CompareVarToValue OPCODE_FLAG_SET, BTLVAR_MOVE_STATUS_FLAGS, MOVE_STATUS_MISSED|MOVE_STATUS_SEMI_INVULNERABLE, _057
@@ -14,7 +13,7 @@ _000:
     UpdateMonData OPCODE_FLAG_ON, BTLSCR_DEFENDER, BATTLEMON_MOVE_EFFECTS_MASK, MOVE_EFFECT_EMBARGO
     UpdateMonData OPCODE_SET, BTLSCR_DEFENDER, BATTLEMON_EMBARGO_TURNS, 5
     // {0} can’t use items anymore!
-    PrintMessage pl_msg_00000368_01135, TAG_NICKNAME, BTLSCR_DEFENDER
+    PrintMessage BattleStrings_Text_PokemonCantUseItemsAnymore_Ally, TAG_NICKNAME, BTLSCR_DEFENDER
     Wait 
     WaitButtonABTime 30
     End 

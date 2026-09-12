@@ -1,39 +1,29 @@
-    .include "macros/scrcmd.inc"
+#include "macros/scrcmd.inc"
+#include "res/text/bank/turnback_cave_entrance.h"
 
-    .data
 
-    ScriptEntry _000A
-    ScriptEntry _002A
-    .short 0xFD13
+    ScriptEntry TurnbackCaveEntrance_OnTransition
+    ScriptEntry TurnbackCaveEntrance_Inscription
+    ScriptEntryEnd
 
-_000A:
-    SetFlag 0x9D4
-    Call _001C
-    ScrCmd_285 0x410B, 0x410C
+TurnbackCaveEntrance_OnTransition:
+    SetFlag FLAG_FIRST_ARRIVAL_TURNBACK_CAVE
+    Call TurnbackCaveEntrance_ResetVars
+    InitTurnbackCave VAR_TURNBACK_CAVE_PILLARS_SEEN, VAR_TURNBACK_CAVE_ROOMS_VISITED
     End
 
-_001C:
-    SetVar 0x410B, 0
-    SetVar 0x410C, 0
+TurnbackCaveEntrance_ResetVars:
+    SetVar VAR_TURNBACK_CAVE_PILLARS_SEEN, 0
+    SetVar VAR_TURNBACK_CAVE_ROOMS_VISITED, 0
     Return
 
-_002A:
-    GoToIfSet 0x121, _0046
-    PlayFanfare SEQ_SE_CONFIRM
-    LockAll
-    Message 0
-    WaitABXPadPress
-    CloseMessage
-    ReleaseAll
+TurnbackCaveEntrance_Inscription:
+    GoToIfSet FLAG_CAUGHT_GIRATINA, TurnbackCaveEntrance_PastThreePillarsOfferUp
+    EventMessage TurnbackCaveEntrance_Text_PastThreePillars
     End
 
-_0046:
-    PlayFanfare SEQ_SE_CONFIRM
-    LockAll
-    Message 1
-    WaitABXPadPress
-    CloseMessage
-    ReleaseAll
+TurnbackCaveEntrance_PastThreePillarsOfferUp:
+    EventMessage TurnbackCaveEntrance_Text_PastThreePillarsOfferUp
     End
 
-    .byte 0
+    .balign 4, 0

@@ -4,6 +4,8 @@
 #include <string.h>
 
 #include "constants/heap.h"
+#include "constants/versions.h"
+#include "generated/map_headers.h"
 
 #include "field/field_system.h"
 #include "overlay006/wild_encounters.h"
@@ -13,35 +15,35 @@
 #include "map_object.h"
 #include "narc.h"
 
-static void MapHeaderData_LoadEvents(MapHeaderData *data, int headerID);
+static void MapHeaderData_LoadEvents(MapHeaderData *data, enum MapHeaderID mapHeaderID);
 static void MapHeaderData_ParseEvents(MapHeaderData *data);
 static void MapHeaderData_LoadInitScripts(MapHeaderData *data, int headerID);
 
-void MapHeaderData_Init(FieldSystem *fieldSystem, enum HeapId heapID)
+void MapHeaderData_Init(FieldSystem *fieldSystem, enum HeapID heapID)
 {
     GF_ASSERT(fieldSystem->mapHeaderData == NULL);
-    fieldSystem->mapHeaderData = Heap_AllocFromHeap(heapID, sizeof(MapHeaderData));
+    fieldSystem->mapHeaderData = Heap_Alloc(heapID, sizeof(MapHeaderData));
 }
 
 void MapHeaderData_Free(FieldSystem *fieldSystem)
 {
     GF_ASSERT(fieldSystem->mapHeaderData != NULL);
-    Heap_FreeToHeap(fieldSystem->mapHeaderData);
+    Heap_Free(fieldSystem->mapHeaderData);
 }
 
-void MapHeaderData_Load(FieldSystem *fieldSystem, int headerID)
+void MapHeaderData_Load(FieldSystem *fieldSystem, enum MapHeaderID mapHeaderID)
 {
     GF_ASSERT(fieldSystem->mapHeaderData != NULL);
 
-    MapHeaderData_LoadEvents(fieldSystem->mapHeaderData, headerID);
+    MapHeaderData_LoadEvents(fieldSystem->mapHeaderData, mapHeaderID);
     MapHeaderData_ParseEvents(fieldSystem->mapHeaderData);
-    MapHeaderData_LoadWildEncounters(&fieldSystem->mapHeaderData->wildEncounters, headerID);
-    MapHeaderData_LoadInitScripts(fieldSystem->mapHeaderData, headerID);
+    MapHeaderData_LoadWildEncounters(&fieldSystem->mapHeaderData->wildEncounters, mapHeaderID);
+    MapHeaderData_LoadInitScripts(fieldSystem->mapHeaderData, mapHeaderID);
 }
 
-static void MapHeaderData_LoadEvents(MapHeaderData *data, int headerID)
+static void MapHeaderData_LoadEvents(MapHeaderData *data, enum MapHeaderID mapHeaderID)
 {
-    int eventsID = MapHeader_GetEventsArchiveID(headerID);
+    int eventsID = MapHeader_GetEventsArchiveID(mapHeaderID);
     GF_ASSERT(NARC_GetMemberSizeByIndexPair(NARC_INDEX_FIELDDATA__EVENTDATA__ZONE_EVENT, eventsID) < sizeof(data->tmpEventsBuf));
     NARC_ReadWholeMemberByIndexPair(data->tmpEventsBuf, NARC_INDEX_FIELDDATA__EVENTDATA__ZONE_EVENT, eventsID);
 }
@@ -53,7 +55,7 @@ void sub_0203A418(FieldSystem *fieldSystem)
     GF_ASSERT(fieldSystem->mapHeaderData != NULL);
 
     if (numObjectEvents != 0) {
-        sub_02062068(fieldSystem->mapObjMan, fieldSystem->location->mapId, numObjectEvents, fieldSystem->mapHeaderData->objectEvents);
+        sub_02062068(fieldSystem->mapObjMan, fieldSystem->location->mapHeaderID, numObjectEvents, fieldSystem->mapHeaderData->objectEvents);
     }
 }
 
@@ -191,67 +193,36 @@ BOOL MapHeaderData_SetBgEventPos(FieldSystem *fieldSystem, u16 index, u16 x, u16
     return TRUE;
 }
 
+#define CONSUME_EVENTS(T, dataTEvents, dataNumTEvents) \
+    do {                                               \
+        (dataNumTEvents) = *(u32 *)events;             \
+        events += sizeof(u32);                         \
+        if ((dataNumTEvents) != 0) {                   \
+            (dataTEvents) = (const T *)events;         \
+        } else {                                       \
+            (dataTEvents) = NULL;                      \
+        }                                              \
+        events += sizeof(T) * (dataNumTEvents);        \
+    } while (0)
+
 static void MapHeaderData_ParseEvents(MapHeaderData *data)
 {
     const u8 *events = (const u8 *)data->tmpEventsBuf;
 
-    // bgEvents
-    {
-        data->numBgEvents = *(u32 *)events;
-        events += sizeof(u32);
-        if (data->numBgEvents != 0) {
-            data->bgEvents = (const BgEvent *)events;
-        } else {
-            data->bgEvents = NULL;
-        }
-        events += sizeof(BgEvent) * data->numBgEvents;
-    }
-
-    // objectEvents
-    {
-        data->numObjectEvents = *(u32 *)events;
-        events += sizeof(u32);
-        if (data->numObjectEvents != 0) {
-            data->objectEvents = (const ObjectEvent *)events;
-        } else {
-            data->objectEvents = NULL;
-        }
-        events += sizeof(ObjectEvent) * data->numObjectEvents;
-    }
-
-    // warpEvents
-    {
-        data->numWarpEvents = *(u32 *)events;
-        events += sizeof(u32);
-        if (data->numWarpEvents != 0) {
-            data->warpEvents = (const WarpEvent *)events;
-        } else {
-            data->warpEvents = NULL;
-        }
-        events += sizeof(WarpEvent) * data->numWarpEvents;
-    }
-
-    // coordEvents
-    {
-        data->numCoordEvents = *(u32 *)events;
-        events += sizeof(u32);
-        if (data->numCoordEvents != 0) {
-            data->coordEvents = (const CoordEvent *)events;
-        } else {
-            data->coordEvents = NULL;
-        }
-        events += sizeof(CoordEvent) * data->numCoordEvents;
-    }
+    CONSUME_EVENTS(BgEvent, data->bgEvents, data->numBgEvents);
+    CONSUME_EVENTS(ObjectEvent, data->objectEvents, data->numObjectEvents);
+    CONSUME_EVENTS(WarpEvent, data->warpEvents, data->numWarpEvents);
+    CONSUME_EVENTS(CoordEvent, data->coordEvents, data->numCoordEvents);
 }
 
-void MapHeaderData_LoadWildEncounters(WildEncounters *data, int headerID)
+void MapHeaderData_LoadWildEncounters(WildEncounters *data, enum MapHeaderID mapHeaderID)
 {
     memset(data, 0, sizeof(WildEncounters));
-    if (MapHeader_HasWildEncounters(headerID)) {
-        int narcIndex = (GAME_VERSION == DIAMOND || GAME_VERSION == PLATINUM)
+    if (MapHeader_HasWildEncounters(mapHeaderID)) {
+        enum NarcID narcID = (GAME_VERSION == VERSION_DIAMOND || GAME_VERSION == VERSION_PLATINUM)
             ? NARC_INDEX_FIELDDATA__ENCOUNTDATA__PL_ENC_DATA
             : NARC_INDEX_FIELDDATA__ENCOUNTDATA__P_ENC_DATA;
-        NARC_ReadWholeMemberByIndexPair(data, narcIndex, MapHeader_GetWildEncountersArchiveID(headerID));
+        NARC_ReadWholeMemberByIndexPair(data, narcID, MapHeader_GetWildEncountersArchiveID(mapHeaderID));
     }
 }
 
@@ -270,13 +241,13 @@ static void MapHeaderData_LoadInitScripts(MapHeaderData *data, int headerID)
     NARC_ReadWholeMemberByIndexPair(data->initScripts, NARC_INDEX_FIELDDATA__SCRIPT__SCR_SEQ, initScriptsID);
 }
 
-const u8 *MapHeaderData_GetInitScripts(const FieldSystem *fieldSystem)
+const u8 *MapHeaderData_GetInitScriptBytes(const FieldSystem *fieldSystem)
 {
     GF_ASSERT(fieldSystem->mapHeaderData != NULL);
     return (const u8 *)&fieldSystem->mapHeaderData->initScripts;
 }
 
-BOOL MapHeaderData_IsAnyObjectEventAtPos(const FieldSystem *fieldSystem, u16 x, u16 z)
+BOOL MapHeaderData_IsPosFreeOfObjectEvents(const FieldSystem *fieldSystem, u16 x, u16 z)
 {
     const MapHeaderData *data = fieldSystem->mapHeaderData;
 

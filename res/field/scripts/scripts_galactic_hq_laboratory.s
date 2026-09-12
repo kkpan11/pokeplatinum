@@ -1,41 +1,22 @@
-    .include "macros/scrcmd.inc"
+#include "macros/scrcmd.inc"
+#include "res/text/bank/galactic_hq_laboratory.h"
 
-    .data
 
-    ScriptEntry _000E
-    ScriptEntry _0021
-    ScriptEntry _0034
-    .short 0xFD13
+    ScriptEntry GalacticHQLaboratory_ScientistM
+    ScriptEntry GalacticHQLaboratory_ScientistF
+    ScriptEntry GalacticHQLaboratory_Machine
+    ScriptEntryEnd
 
-_000E:
-    PlayFanfare SEQ_SE_CONFIRM
-    LockAll
-    FacePlayer
-    Message 0
-    WaitABXPadPress
-    CloseMessage
-    ReleaseAll
+GalacticHQLaboratory_ScientistM:
+    NPCMessage GalacticHQLaboratory_Text_ExperimentWentTooFar
     End
 
-_0021:
-    PlayFanfare SEQ_SE_CONFIRM
-    LockAll
-    FacePlayer
-    Message 1
-    WaitABXPadPress
-    CloseMessage
-    ReleaseAll
+GalacticHQLaboratory_ScientistF:
+    NPCMessage GalacticHQLaboratory_Text_IFeelTooSickened
     End
 
-_0034:
-    PlayFanfare SEQ_SE_CONFIRM
-    LockAll
-    Message 2
-    WaitABXPadPress
-    CloseMessage
-    ReleaseAll
+GalacticHQLaboratory_Machine:
+    EventMessage GalacticHQLaboratory_Text_SomethingInGreenFluid
     End
 
-    .byte 0
-    .byte 0
-    .byte 0
+    .balign 4, 0

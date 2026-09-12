@@ -1,111 +1,113 @@
-    .include "macros/scrcmd.inc"
+#include "macros/scrcmd.inc"
+#include "generated/hidden_locations.h"
+#include "res/text/bank/newmoon_island.h"
+#include "res/field/events/events_newmoon_island.h"
 
-    .data
 
-    ScriptEntry _000A
-    ScriptEntry _0037
-    .short 0xFD13
+    ScriptEntry NewmoonIsland_OnTransition
+    ScriptEntry NewmoonIsland_Sailor
+    ScriptEntryEnd
 
-_000A:
-    SetFlag 0x9E4
-    ScrCmd_270 1, 1
-    ClearFlag 0x279
-    CallIfUnset 0x158, _0024
+NewmoonIsland_OnTransition:
+    SetFlag FLAG_FIRST_ARRIVAL_NEWMOON_ISLAND
+    EnableHiddenLocation HIDDEN_LOCATION_NEWMOON_ISLAND
+    ClearFlag FLAG_HIDE_NEWMOON_ISLAND_SAILOR
+    CallIfUnset FLAG_CAUGHT_DARKRAI, NewmoonIsland_TryHideSailor
     End
 
-_0024:
-    GoToIfNe 0x40F8, 2, _0035
-    SetFlag 0x279
-_0035:
+NewmoonIsland_TryHideSailor:
+    GoToIfNe VAR_DARKRAI_EVENT_STATE, 2, NewmoonIsland_OnTransitionReturn
+    SetFlag FLAG_HIDE_NEWMOON_ISLAND_SAILOR
+NewmoonIsland_OnTransitionReturn:
     Return
 
-_0037:
-    PlayFanfare SEQ_SE_CONFIRM
+NewmoonIsland_Sailor:
+    PlaySE SE_CONFIRM_sseq_3
     LockAll
     FacePlayer
-    ScrCmd_1BD 0x8004
-    Message 0
-    ScrCmd_03E 0x800C
-    GoToIfEq 0x800C, 0, _005D
-    GoTo _009D
+    GetPlayerDir VAR_0x8004
+    Message NewmoonIsland_Text_SailBackToCanalave
+    ShowYesNoMenu VAR_RESULT
+    GoToIfEq VAR_RESULT, MENU_YES, NewmoonIsland_TakeShipToCanalave
+    GoTo NewmoonIsland_AllRightThen
 
-_005D:
-    Message 1
+NewmoonIsland_TakeShipToCanalave:
+    Message NewmoonIsland_Text_AnchorsAweigh
     CloseMessage
-    Call _00A8
-    CallIfEq 0x8004, 1, _00C2
-    CallIfEq 0x8004, 2, _00DC
-    CallIfEq 0x8004, 0, _00F6
-    ScrCmd_23D 0, 2, 33, 44, 0x2EE
+    Call NewmoonIsland_SailorEnterShip
+    CallIfEq VAR_0x8004, DIR_SOUTH, NewmoonIsland_PlayerEnterShipSouth
+    CallIfEq VAR_0x8004, DIR_WEST, NewmoonIsland_PlayerEnterShipWest
+    CallIfEq VAR_0x8004, DIR_NORTH, NewmoonIsland_PlayerEnterShipNorth
+    TakeShipToCanalave
     ReleaseAll
     End
 
-_009D:
-    Message 2
-    WaitABXPadPress
+NewmoonIsland_AllRightThen:
+    Message NewmoonIsland_Text_AllRightThen
+    WaitButton
     CloseMessage
     ReleaseAll
     End
 
-_00A8:
-    ApplyMovement 0, _0110
+NewmoonIsland_SailorEnterShip:
+    ApplyMovement LOCALID_SAILOR, NewmoonIslandForest_Movement_SailorWalkToShip
     WaitMovement
-    PlayFanfare SEQ_SE_DP_KAIDAN2
-    ApplyMovement 0, _011C
-    WaitMovement
-    Return
-
-_00C2:
-    ApplyMovement 0xFF, _0124
-    WaitMovement
-    PlayFanfare SEQ_SE_DP_KAIDAN2
-    ApplyMovement 0xFF, _011C
+    PlaySE SEQ_SE_DP_KAIDAN2_sseq
+    ApplyMovement LOCALID_SAILOR, NewmoonIslandForest_Movement_SetInvisible
     WaitMovement
     Return
 
-_00DC:
-    ApplyMovement 0xFF, _0134
+NewmoonIsland_PlayerEnterShipSouth:
+    ApplyMovement LOCALID_PLAYER, NewmoonIslandForest_Movement_PlayerWalkToShipSouth
     WaitMovement
-    PlayFanfare SEQ_SE_DP_KAIDAN2
-    ApplyMovement 0xFF, _011C
-    WaitMovement
-    Return
-
-_00F6:
-    ApplyMovement 0xFF, _0140
-    WaitMovement
-    PlayFanfare SEQ_SE_DP_KAIDAN2
-    ApplyMovement 0xFF, _011C
+    PlaySE SEQ_SE_DP_KAIDAN2_sseq
+    ApplyMovement LOCALID_PLAYER, NewmoonIslandForest_Movement_SetInvisible
     WaitMovement
     Return
 
+NewmoonIsland_PlayerEnterShipWest:
+    ApplyMovement LOCALID_PLAYER, NewmoonIslandForest_Movement_PlayerWalkToShipWest
+    WaitMovement
+    PlaySE SEQ_SE_DP_KAIDAN2_sseq
+    ApplyMovement LOCALID_PLAYER, NewmoonIslandForest_Movement_SetInvisible
+    WaitMovement
+    Return
+
+NewmoonIsland_PlayerEnterShipNorth:
+    ApplyMovement LOCALID_PLAYER, NewmoonIslandForest_Movement_PlayerWalkToShipNorth
+    WaitMovement
+    PlaySE SEQ_SE_DP_KAIDAN2_sseq
+    ApplyMovement LOCALID_PLAYER, NewmoonIslandForest_Movement_SetInvisible
+    WaitMovement
+    Return
+
     .balign 4, 0
-_0110:
-    MoveAction_00E
-    MoveAction_040
+NewmoonIslandForest_Movement_SailorWalkToShip:
+    WalkNormalWest
+    Delay15
     EndMovement
 
     .balign 4, 0
-_011C:
-    MoveAction_045
+NewmoonIslandForest_Movement_SetInvisible:
+    SetInvisible
     EndMovement
 
     .balign 4, 0
-_0124:
-    MoveAction_00D
-    MoveAction_00E 2
-    MoveAction_040
+NewmoonIslandForest_Movement_PlayerWalkToShipSouth:
+    WalkNormalSouth
+    WalkNormalWest 2
+    Delay15
     EndMovement
 
     .balign 4, 0
-_0134:
-    MoveAction_00E 2
-    MoveAction_040
+NewmoonIslandForest_Movement_PlayerWalkToShipWest:
+    WalkNormalWest 2
+    Delay15
     EndMovement
 
     .balign 4, 0
-_0140:
-    MoveAction_00C
-    MoveAction_00E 2
-    MoveAction_040
+NewmoonIslandForest_Movement_PlayerWalkToShipNorth:
+    WalkNormalNorth
+    WalkNormalWest 2
+    Delay15
     EndMovement

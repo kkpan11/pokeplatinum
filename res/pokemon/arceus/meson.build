@@ -1,4 +1,4 @@
-personal_files += files('data.json')
+species_data_files += files('data.json', 'sprite_data.json')
 
 poke_icon_files += files('icon.png')
 
@@ -79,3 +79,5 @@ otherpoke_index += {
     '224': files('forms/dark/normal.pal'),
     '225': files('forms/dark/shiny.pal'),
 }
+
+pokefoot_files += files('footprint.png')

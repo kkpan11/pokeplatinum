@@ -1,10 +1,9 @@
-    .include "macros/btlcmd.inc"
+#include "macros/btlcmd.inc"
 
-    .data
 
 _000:
     // Can’t escape!
-    PrintMessage pl_msg_00000368_00042, TAG_NONE
+    PrintMessage BattleStrings_Text_CantEscape, TAG_NONE
     Wait 
     WaitButtonABTime 30
     End 

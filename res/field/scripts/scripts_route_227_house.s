@@ -1,39 +1,39 @@
-    .include "macros/scrcmd.inc"
+#include "macros/scrcmd.inc"
+#include "res/text/bank/route_227_house.h"
 
-    .data
 
-    ScriptEntry _0006
-    .short 0xFD13
+    ScriptEntry Route227House_ExpertF
+    ScriptEntryEnd
 
-_0006:
-    PlayFanfare SEQ_SE_CONFIRM
+Route227House_ExpertF:
+    PlaySE SE_CONFIRM_sseq_3
     LockAll
     FacePlayer
-    Message 0
-    ScrCmd_03E 0x800C
-    GoToIfEq 0x800C, 0, _0031
-    GoToIfEq 0x800C, 1, _0079
+    Message Route227House_Text_RestUp
+    ShowYesNoMenu VAR_RESULT
+    GoToIfEq VAR_RESULT, MENU_YES, Route227House_RestUp
+    GoToIfEq VAR_RESULT, MENU_NO, Route227House_IsThatRight
     End
 
-_0031:
-    Message 1
+Route227House_RestUp:
+    Message Route227House_Text_GetSomeRest
     CloseMessage
-    FadeScreen 6, 1, 0, 0
+    FadeScreenOut
     WaitFadeScreen
-    ScrCmd_04E 0x48E
-    ScrCmd_04F
-    ScrCmd_14E
-    FadeScreen 6, 1, 1, 0
+    PlayFanfare SEQ_ASA_sseq
+    WaitFanfare
+    HealParty
+    FadeScreenIn
     WaitFadeScreen
-    Message 2
-    ScrCmd_03E 0x800C
-    GoToIfEq 0x800C, 0, _0031
-    GoToIfEq 0x800C, 1, _0079
+    Message Route227House_Text_RestUpAgain
+    ShowYesNoMenu VAR_RESULT
+    GoToIfEq VAR_RESULT, MENU_YES, Route227House_RestUp
+    GoToIfEq VAR_RESULT, MENU_NO, Route227House_IsThatRight
     End
 
-_0079:
-    Message 3
-    WaitABXPadPress
+Route227House_IsThatRight:
+    Message Route227House_Text_IsThatRight
+    WaitButton
     CloseMessage
     ReleaseAll
     End

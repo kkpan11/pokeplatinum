@@ -1,14 +1,47 @@
+# This build file contains all definitions for building filesystem archives
+# and source code data tables related to Pokemon data. Specifically, it handles:
+#   - Base Species Data:
+#     - pl_personal - base stats, abilities, types, etc. for each species
+#     - evo - evolution lines for each species
+#     - wotbl - moves learned by-level for each species
+#     - ppark - data related to the Catching Show for each species (e.g., where
+#       the species will spawn, its points value, etc.)
+#     - height - Y offsets applied to each species' front and back sprites
+#     - pl_poke_data - Sprite animation sequences, frame data, and shadow sizes
+#       applied to a species' front and back sprites
+#     - pms - table of offspring for each species
+#     - tutorable_moves.h - a table of moves which can be tutored, including the
+#       cost of each shard to tutor it and which tutor provides it; ordinarily,
+#       this might be move-level data, but it is kept here for simplicity in
+#       validating an individual species' learnset of tutorable moves.
+#     - species_learnsets_by_tutor.h - a table of bitmasks for each species which
+#       defines what tutorable moves they can learn.
+#   - Graphics:
+#     - pl_pokegra - front and back sprites for each species and gender
+#     - pl_otherpoke - front and back sprites for alternate forms
+#     - pl_poke_icon - party/box menu icons for each species and some alternate
+#       forms
+#   - Pokedex:
+#     - footprint_data.h - a table of footprint sizes for each Pokemon, as used by
+#       Dr. Footstep and the Pokedex
+#     - regional_to_national - Regional-to-National Pokedex mappings
+#     - national_to_regional - National-to-Regional Pokedex mappings
+#     - zukan_data - Pokedex information for each species
+
 #######################
 ## SOURCE FILE LISTS ##
 #######################
-personal_files = []
+species_data_files = []
 poke_icon_files = []
 pokegra_files = []
+cry_banks = []
+cry_waves = []
 otherpoke_index = {} # otherpoke uses a unique, non-uniform structure
 
-# pl_poke_icon has some shared files that are listed at the beginning
-# of the NARC.
-poke_icon_shared = files(
+pokemon_data_root = meson.current_source_dir()
+
+# 1. These static files must always exist.
+icons_shared = files(
     '.shared/pl_poke_icon.pal',
     '.shared/pl_poke_icon_anim_01.json',
     '.shared/pl_poke_icon_cell_01.json',
@@ -18,7 +51,7 @@ poke_icon_shared = files(
     '.shared/pl_poke_icon_cell_03.json',
 )
 
-otherpoke_shared = files(
+form_sprites_shared = files(
     '.shared/substitute_back.png',
     '.shared/substitute_front.png',
     '.shared/substitute.pal',
@@ -26,530 +59,63 @@ otherpoke_shared = files(
     '.shared/shadows.pal',
 )
 
-sinnoh_pokedex = files('sinnoh_pokedex.json')
+pokefoot_files = []
 
+sinnoh_pokedex = files('sinnoh_pokedex.json')
 pl_growtbl_files = files('.shared/exp_tables.csv')
 
-# Process mons in national dex order
-pokemon_subdirs = [
-    '000',  # Glitch pokemon "-----" aka DPBox, Invisible Shiny Bulbasau
-    'bulbasaur',
-    'ivysaur',
-    'venusaur',
-    'charmander',
-    'charmeleon',
-    'charizard',
-    'squirtle',
-    'wartortle',
-    'blastoise',
-    'caterpie',
-    'metapod',
-    'butterfree',
-    'weedle',
-    'kakuna',
-    'beedrill',
-    'pidgey',
-    'pidgeotto',
-    'pidgeot',
-    'rattata',
-    'raticate',
-    'spearow',
-    'fearow',
-    'ekans',
-    'arbok',
-    'pikachu',
-    'raichu',
-    'sandshrew',
-    'sandslash',
-    'nidoran_f',
-    'nidorina',
-    'nidoqueen',
-    'nidoran_m',
-    'nidorino',
-    'nidoking',
-    'clefairy',
-    'clefable',
-    'vulpix',
-    'ninetales',
-    'jigglypuff',
-    'wigglytuff',
-    'zubat',
-    'golbat',
-    'oddish',
-    'gloom',
-    'vileplume',
-    'paras',
-    'parasect',
-    'venonat',
-    'venomoth',
-    'diglett',
-    'dugtrio',
-    'meowth',
-    'persian',
-    'psyduck',
-    'golduck',
-    'mankey',
-    'primeape',
-    'growlithe',
-    'arcanine',
-    'poliwag',
-    'poliwhirl',
-    'poliwrath',
-    'abra',
-    'kadabra',
-    'alakazam',
-    'machop',
-    'machoke',
-    'machamp',
-    'bellsprout',
-    'weepinbell',
-    'victreebel',
-    'tentacool',
-    'tentacruel',
-    'geodude',
-    'graveler',
-    'golem',
-    'ponyta',
-    'rapidash',
-    'slowpoke',
-    'slowbro',
-    'magnemite',
-    'magneton',
-    'farfetchd',
-    'doduo',
-    'dodrio',
-    'seel',
-    'dewgong',
-    'grimer',
-    'muk',
-    'shellder',
-    'cloyster',
-    'gastly',
-    'haunter',
-    'gengar',
-    'onix',
-    'drowzee',
-    'hypno',
-    'krabby',
-    'kingler',
-    'voltorb',
-    'electrode',
-    'exeggcute',
-    'exeggutor',
-    'cubone',
-    'marowak',
-    'hitmonlee',
-    'hitmonchan',
-    'lickitung',
-    'koffing',
-    'weezing',
-    'rhyhorn',
-    'rhydon',
-    'chansey',
-    'tangela',
-    'kangaskhan',
-    'horsea',
-    'seadra',
-    'goldeen',
-    'seaking',
-    'staryu',
-    'starmie',
-    'mr_mime',
-    'scyther',
-    'jynx',
-    'electabuzz',
-    'magmar',
-    'pinsir',
-    'tauros',
-    'magikarp',
-    'gyarados',
-    'lapras',
-    'ditto',
-    'eevee',
-    'vaporeon',
-    'jolteon',
-    'flareon',
-    'porygon',
-    'omanyte',
-    'omastar',
-    'kabuto',
-    'kabutops',
-    'aerodactyl',
-    'snorlax',
-    'articuno',
-    'zapdos',
-    'moltres',
-    'dratini',
-    'dragonair',
-    'dragonite',
-    'mewtwo',
-    'mew',
-    'chikorita',
-    'bayleef',
-    'meganium',
-    'cyndaquil',
-    'quilava',
-    'typhlosion',
-    'totodile',
-    'croconaw',
-    'feraligatr',
-    'sentret',
-    'furret',
-    'hoothoot',
-    'noctowl',
-    'ledyba',
-    'ledian',
-    'spinarak',
-    'ariados',
-    'crobat',
-    'chinchou',
-    'lanturn',
-    'pichu',
-    'cleffa',
-    'igglybuff',
-    'togepi',
-    'togetic',
-    'natu',
-    'xatu',
-    'mareep',
-    'flaaffy',
-    'ampharos',
-    'bellossom',
-    'marill',
-    'azumarill',
-    'sudowoodo',
-    'politoed',
-    'hoppip',
-    'skiploom',
-    'jumpluff',
-    'aipom',
-    'sunkern',
-    'sunflora',
-    'yanma',
-    'wooper',
-    'quagsire',
-    'espeon',
-    'umbreon',
-    'murkrow',
-    'slowking',
-    'misdreavus',
-    'unown',
-    'wobbuffet',
-    'girafarig',
-    'pineco',
-    'forretress',
-    'dunsparce',
-    'gligar',
-    'steelix',
-    'snubbull',
-    'granbull',
-    'qwilfish',
-    'scizor',
-    'shuckle',
-    'heracross',
-    'sneasel',
-    'teddiursa',
-    'ursaring',
-    'slugma',
-    'magcargo',
-    'swinub',
-    'piloswine',
-    'corsola',
-    'remoraid',
-    'octillery',
-    'delibird',
-    'mantine',
-    'skarmory',
-    'houndour',
-    'houndoom',
-    'kingdra',
-    'phanpy',
-    'donphan',
-    'porygon2',
-    'stantler',
-    'smeargle',
-    'tyrogue',
-    'hitmontop',
-    'smoochum',
-    'elekid',
-    'magby',
-    'miltank',
-    'blissey',
-    'raikou',
-    'entei',
-    'suicune',
-    'larvitar',
-    'pupitar',
-    'tyranitar',
-    'lugia',
-    'ho_oh',
-    'celebi',
-    'treecko',
-    'grovyle',
-    'sceptile',
-    'torchic',
-    'combusken',
-    'blaziken',
-    'mudkip',
-    'marshtomp',
-    'swampert',
-    'poochyena',
-    'mightyena',
-    'zigzagoon',
-    'linoone',
-    'wurmple',
-    'silcoon',
-    'beautifly',
-    'cascoon',
-    'dustox',
-    'lotad',
-    'lombre',
-    'ludicolo',
-    'seedot',
-    'nuzleaf',
-    'shiftry',
-    'taillow',
-    'swellow',
-    'wingull',
-    'pelipper',
-    'ralts',
-    'kirlia',
-    'gardevoir',
-    'surskit',
-    'masquerain',
-    'shroomish',
-    'breloom',
-    'slakoth',
-    'vigoroth',
-    'slaking',
-    'nincada',
-    'ninjask',
-    'shedinja',
-    'whismur',
-    'loudred',
-    'exploud',
-    'makuhita',
-    'hariyama',
-    'azurill',
-    'nosepass',
-    'skitty',
-    'delcatty',
-    'sableye',
-    'mawile',
-    'aron',
-    'lairon',
-    'aggron',
-    'meditite',
-    'medicham',
-    'electrike',
-    'manectric',
-    'plusle',
-    'minun',
-    'volbeat',
-    'illumise',
-    'roselia',
-    'gulpin',
-    'swalot',
-    'carvanha',
-    'sharpedo',
-    'wailmer',
-    'wailord',
-    'numel',
-    'camerupt',
-    'torkoal',
-    'spoink',
-    'grumpig',
-    'spinda',
-    'trapinch',
-    'vibrava',
-    'flygon',
-    'cacnea',
-    'cacturne',
-    'swablu',
-    'altaria',
-    'zangoose',
-    'seviper',
-    'lunatone',
-    'solrock',
-    'barboach',
-    'whiscash',
-    'corphish',
-    'crawdaunt',
-    'baltoy',
-    'claydol',
-    'lileep',
-    'cradily',
-    'anorith',
-    'armaldo',
-    'feebas',
-    'milotic',
-    'castform',
-    'kecleon',
-    'shuppet',
-    'banette',
-    'duskull',
-    'dusclops',
-    'tropius',
-    'chimecho',
-    'absol',
-    'wynaut',
-    'snorunt',
-    'glalie',
-    'spheal',
-    'sealeo',
-    'walrein',
-    'clamperl',
-    'huntail',
-    'gorebyss',
-    'relicanth',
-    'luvdisc',
-    'bagon',
-    'shelgon',
-    'salamence',
-    'beldum',
-    'metang',
-    'metagross',
-    'regirock',
-    'regice',
-    'registeel',
-    'latias',
-    'latios',
-    'kyogre',
-    'groudon',
-    'rayquaza',
-    'jirachi',
-    'deoxys',
-    'turtwig',
-    'grotle',
-    'torterra',
-    'chimchar',
-    'monferno',
-    'infernape',
-    'piplup',
-    'prinplup',
-    'empoleon',
-    'starly',
-    'staravia',
-    'staraptor',
-    'bidoof',
-    'bibarel',
-    'kricketot',
-    'kricketune',
-    'shinx',
-    'luxio',
-    'luxray',
-    'budew',
-    'roserade',
-    'cranidos',
-    'rampardos',
-    'shieldon',
-    'bastiodon',
-    'burmy',
-    'wormadam',
-    'mothim',
-    'combee',
-    'vespiquen',
-    'pachirisu',
-    'buizel',
-    'floatzel',
-    'cherubi',
-    'cherrim',
-    'shellos',
-    'gastrodon',
-    'ambipom',
-    'drifloon',
-    'drifblim',
-    'buneary',
-    'lopunny',
-    'mismagius',
-    'honchkrow',
-    'glameow',
-    'purugly',
-    'chingling',
-    'stunky',
-    'skuntank',
-    'bronzor',
-    'bronzong',
-    'bonsly',
-    'mime_jr',
-    'happiny',
-    'chatot',
-    'spiritomb',
-    'gible',
-    'gabite',
-    'garchomp',
-    'munchlax',
-    'riolu',
-    'lucario',
-    'hippopotas',
-    'hippowdon',
-    'skorupi',
-    'drapion',
-    'croagunk',
-    'toxicroak',
-    'carnivine',
-    'finneon',
-    'lumineon',
-    'mantyke',
-    'snover',
-    'abomasnow',
-    'weavile',
-    'magnezone',
-    'lickilicky',
-    'rhyperior',
-    'tangrowth',
-    'electivire',
-    'magmortar',
-    'togekiss',
-    'yanmega',
-    'leafeon',
-    'glaceon',
-    'gliscor',
-    'mamoswine',
-    'porygon_z',
-    'gallade',
-    'probopass',
-    'dusknoir',
-    'froslass',
-    'rotom',
-    'uxie',
-    'mesprit',
-    'azelf',
-    'dialga',
-    'palkia',
-    'heatran',
-    'regigigas',
-    'giratina',
-    'cresselia',
-    'phione',
-    'manaphy',
-    'darkrai',
-    'shaymin',
-    'arceus',
-    'egg',
-    'bad_egg'
-]
-
-foreach pokemon : pokemon_subdirs
-    subdir(pokemon)
+# 2. Register species and forms. The contents of each output file is a listing
+#    of subdirectories which contains some assets that must be compiled.
+species_consts = fs.read(species_txt).splitlines()
+species_dirnames = []
+foreach species : species_consts
+  species_dirnames += species.replace('SPECIES_', '').to_lower()
 endforeach
 
+# This data file form_registry.json defines orderings of alternate forms in
+# certain archives. Each species in the file is mapped to an object whose keys
+# are the "names" of its alternate forms. Each form is then mapped to a type:
+#   - data, which denotes that the form has separate data entries (e.g., in
+#     pl_personal and wotbl)
+#   - icon, which denotes that the form has a unique box/party menu icon
+#   - sprite, which denotes that the form has a unique front and back sprite
+# These types are hierarchical; data-type forms have unique icons and sprites,
+# and icon-type forms have unique sprites. For example:
+#   - Deoxys-Attack has a unique base stats file, party/menu icon, and sprite.
+#   - Unown forms have unique party/menu icons and sprites, but not unique base
+#     stats.
+#   - Castform forms have only unique sprites.
+form_registry_json = files('form_registry.json')
 
-# Order of extra personal files for mon forms
-personal_files += [
-    deoxys_attack_personal,
-    deoxys_defense_personal,
-    deoxys_speed_personal,
-    wormadam_sandy_personal,
-    wormadam_trash_personal,
-    giratina_origin_personal,
-    shaymin_sky_personal,
-    rotom_heat_personal,
-    rotom_wash_personal,
-    rotom_frost_personal,
-    rotom_fan_personal,
-    rotom_mow_personal
-]
+form_registry = custom_target('form_registry',
+    output: [
+        'form_data.order',
+        'form_icons.order',
+        'form_sprites.order',
+    ],
+    input: form_registry_json,
+    command: [ ordergen_forms_py, '@INPUT@', '@OUTPUT0@', '@OUTPUT1@', '@OUTPUT2@' ],
+)
+form_data_order = form_registry[0]
+form_icons_order = form_registry[1]
+form_sprites_order = form_registry[2]
+
+
+# 3. Walk species subdirectories; `species_dirnames` is the authority.
+foreach species : species_dirnames
+    subdir(species)
+    if species not in ['none', 'egg', 'bad_egg']
+        cry_banks += files(species / 'cry.txt')
+        cry_waves += files(species / 'cry.wav')
+    endif
+endforeach
+
+# Stash the listing of species in an environment so that other processes can make
+# use of it.
+species_env = environment()
+species_env.append('SPECIES', species_dirnames, separator: ';')
+species_env.append('PYTHONPATH', meson.project_build_root()) # For python scripts
+
 
 # The last icon added to the list before this should have been
 # the basic egg icon.
@@ -608,195 +174,233 @@ foreach key : range(num_keys)
 endforeach
 
 
-# Generate NARCs
-wotbl_narc = custom_target('wotbl.narc',
-    output: 'wotbl.narc',
-    input: personal_files,
-    env: json2bin_env,
+# 4. Compile assets. Compilers take registries as inputs and declare dependencies
+#    on the actual source files. The former prevents command line bloat; the
+#    latter maintains that compilation must reoccur when source files change.
+species_orders = custom_target('species_orders',
+    output: [
+        'pokefoot.order',
+    ],
+    command: [ ordergen_species_py, '@OUTPUT0@' ],
+    env: species_env,
     depends: [ py_consts_generators ],
+)
+pokefoot_order = species_orders[0]
+
+
+species_data = custom_target('species_data',
+    output: [
+        'pl_personal.narc',
+        'evo.narc',
+        'wotbl.narc',
+        'height.narc',
+        'zukan_data_gira.narc',
+        'zukan_data.narc',
+        'ppark.narc',
+        'pl_poke_data.narc',
+        'pms.narc',
+        'tutorable_moves.h',
+        'species_learnsets_by_tutor.h',
+        'species_footprint_sizes.h',
+        'species_footprint_types.h',
+        'species_egg_moves.h',
+        'species_icon_palettes.h',
+        'species_name.json',
+        'species_name_with_articles.json',
+        'species_pokedex_entry_en.json',
+        'species_pokedex_entry_fr.json',
+        'species_pokedex_entry_de.json',
+        'species_pokedex_entry_it.json',
+        'species_pokedex_entry_es.json',
+        'species_pokedex_entry_jp.json',
+        'species_name_with_natdex_number_en.json',
+        'species_name_with_natdex_number_fr.json',
+        'species_name_with_natdex_number_de.json',
+        'species_name_with_natdex_number_it.json',
+        'species_name_with_natdex_number_es.json',
+        'species_name_with_natdex_number_jp.json',
+        'species_category_en.json',
+        'species_category_fr.json',
+        'species_category_de.json',
+        'species_category_it.json',
+        'species_category_es.json',
+        'species_category_jp.json',
+        'species_category.json',
+        'species_weight_gira.json',
+        'species_weight.json',
+        'species_height_gira.json',
+        'species_height.json',
+    ],
+
     command: [
-        pokemon_wotbl_data_py,
-        '--knarc', knarc_exe,
-        '--source-dir', '@CURRENT_SOURCE_DIR@',
-        '--private-dir', '@PRIVATE_DIR@',
-        '--output-dir', '@OUTDIR@',
-    ]
+        speciesproc_exe,
+        '-M', '@DEPFILE@',
+        '-t', files('move_tutors.json'),
+        '-s', sinnoh_pokedex,
+        '-o', meson.current_build_dir(),
+        pokemon_data_root,
+    ],
+
+    env: species_env,
+    depend_files: species_data_files,
+    depfile: 'species_data.d',
 )
 
-pl_personal_narc = custom_target('pl_personal.narc',
-    output: 'pl_personal.narc',
-    input: personal_files,
-    env: json2bin_env,
-    depends: [ py_consts_generators ],
+species_data_outputs = species_data.to_list()
+h_headers += species_data_outputs.slice(9, 15)
+species_text_banks = species_data_outputs.slice(15, species_data_outputs.length())
+
+pokedex_listings = custom_target('pokedex_listings',
+    output: [
+        'national_to_regional.narc',
+        'regional_to_national.narc',
+        'regional_pokedex_size.h',
+    ],
+
     command: [
-        pokemon_personal_data_py,
-        '--knarc', knarc_exe,
-        '--source-dir', '@CURRENT_SOURCE_DIR@',
-        '--private-dir', '@PRIVATE_DIR@',
-        '--output-dir', '@OUTDIR@',
-    ]
+        dexproc_exe,
+        '-M', '@DEPFILE@',
+        '-o', meson.current_build_dir(),
+        sinnoh_pokedex
+    ],
+
+    depfile: 'pokedex_listings.d',
 )
 
-evo_narc = custom_target('evo.narc',
-    output: 'evo.narc',
-    input: personal_files,
-    env: json2bin_env,
-    depends: [ py_consts_generators ],
-    command: [
-        evo_py,
-        '--knarc', knarc_exe,
-        '--source-dir', '@CURRENT_SOURCE_DIR@',
-        '--private-dir', '@PRIVATE_DIR@',
-        '--output-dir', '@OUTDIR@',
-    ]
-)
+h_headers += pokedex_listings[-1]
 
+# OLD NARCs
 pl_poke_icon_narc = custom_target('pl_poke_icon.narc',
-    output: 'pl_poke_icon.narc',
+    output: [
+        'pl_poke_icon.narc',
+        'pl_poke_icon.naix',
+    ],
     input: [
-        poke_icon_shared,
+        icons_shared,
         poke_icon_files
     ],
+    depends: [ py_consts_generators ],
     command: [
         make_pl_poke_icon_py,
         '--nitrogfx', nitrogfx_exe,
-        '--knarc', knarc_exe,
+        '--narc', nitroarc_exe,
+        '--order-file', files('species_icons.order'),
         '--shared-dir', '@CURRENT_SOURCE_DIR@/.shared',
         '--private-dir', '@PRIVATE_DIR@',
         '--output-dir', '@OUTDIR@',
-        poke_icon_files
-    ]
+        poke_icon_files,
+    ],
 )
+naix_headers += pl_poke_icon_narc[1]
 
 pl_pokegra_narc = custom_target('pl_pokegra.narc',
     output: 'pl_pokegra.narc',
     input: pokegra_files,
+    env: species_env,
+    depends: [ py_consts_generators ],
     command: [
         make_pl_pokegra_py,
         '--nitrogfx', nitrogfx_exe,
-        '--knarc', knarc_exe,
+        '--narc', nitroarc_exe,
         '--source-dir', '@CURRENT_SOURCE_DIR@',
         '--private-dir', '@PRIVATE_DIR@',
         '--output-dir', '@OUTDIR@',
-        pokemon_subdirs
-    ]
+    ],
 )
 
 pl_otherpoke_narc = custom_target('pl_otherpoke.narc',
-    output: 'pl_otherpoke.narc',
+    output: [
+        'pl_otherpoke.narc',
+        'pl_otherpoke.naix',
+    ],
     input: [
         otherpoke_files,
-        otherpoke_shared
+        form_sprites_shared,
     ],
+    depends: [ py_consts_generators ],
     command: [
         make_pl_otherpoke_py,
         '--nitrogfx', nitrogfx_exe,
-        '--knarc', knarc_exe,
+        '--narc', nitroarc_exe,
         '--private-dir', '@PRIVATE_DIR@',
         '--output-dir', '@OUTDIR@',
         '--sprite-entries', '154',
         '--palette-entries', '94',
         otherpoke_files,
-        otherpoke_shared
-    ]
+        form_sprites_shared,
+    ],
 )
-
-height_narc = custom_target('height.narc',
-    output: 'height.narc',
-    input: personal_files,
-    env: json2bin_env,
-    depends: [ py_consts_generators ],
-    command: [
-        make_height_py,
-        '--knarc', knarc_exe,
-        '--source-dir', '@CURRENT_SOURCE_DIR@',
-        '--private-dir', '@PRIVATE_DIR@',
-        '--output-dir', '@OUTDIR@',
-        pokemon_subdirs
-    ]
-)
-
-pl_poke_data_narc = custom_target('pl_poke_data.narc',
-    output: 'pl_poke_data.narc',
-    input: personal_files,
-    env: json2bin_env,
-    depends: [ py_consts_generators ],
-    command: [
-        pl_poke_data_py,
-        '--knarc', knarc_exe,
-        '--source-dir', '@CURRENT_SOURCE_DIR@',
-        '--private-dir', '@PRIVATE_DIR@',
-        '--output-dir', '@OUTDIR@',
-    ]
-)
-
-pl_pokezukan_narc = custom_target('pl_pokezukan.narc',
-    output: 'pl_pokezukan.narc',
-    input: personal_files,
-    env: json2bin_env,
-    command: [
-        make_pl_pokezukan_py,
-        '--knarc', knarc_exe,
-        '--source-dir', '@CURRENT_SOURCE_DIR@',
-        '--private-dir', '@PRIVATE_DIR@',
-        '--output-dir', '@OUTDIR@',
-        sinnoh_pokedex
-    ]
-)
-
-shinzukan_narc = custom_target('shinzukan.narc',
-    output: 'shinzukan.narc',
-    input: personal_files,
-    env: json2bin_env,
-    command: [
-        make_shinzukan_py,
-        '--knarc', knarc_exe,
-        '--source-dir', '@CURRENT_SOURCE_DIR@',
-        '--private-dir', '@PRIVATE_DIR@',
-        '--output-dir', '@OUTDIR@',
-        sinnoh_pokedex
-    ]
-)
+naix_headers += pl_otherpoke_narc[1]
 
 pl_growtbl_narc = custom_target('pl_growtbl.narc',
     output: 'pl_growtbl.narc',
     input: pl_growtbl_files,
     command: [
         make_pl_growtbl_py,
-        '--knarc', knarc_exe,
+        '--narc', nitroarc_exe,
         '--source-dir', '@CURRENT_SOURCE_DIR@',
         '--private-dir', '@PRIVATE_DIR@',
         '--output-dir', '@OUTDIR@',
         pl_growtbl_files
-    ]
-)
-
-species_header_target = meson.current_build_dir()
-
-gen_species_headers = custom_target('gen_species_headers',
-    output: [
-        'tutor_movesets.h',
-        'footprint_data.h',
     ],
-    input: personal_files,
-    env: json2bin_env,
     depends: [ py_consts_generators ],
-    command: [
-        make_species_tables_py,
-        '--tutorable-moves', move_tutors_json,
-        '--source-dir', '@CURRENT_SOURCE_DIR@',
-        '--output-dir', species_header_target,
-    ]
 )
 
-nitrofs_files += pl_personal_narc
-nitrofs_files += evo_narc
+pokefoot_nclr = nclr_gen.process(
+    files('.shared/footprint.pal')
+)
+pokefoot_nanr_lz = nanr_lz_gen.process(
+    files('.shared/footprint_anim.json'),
+    extra_args: [
+        '-nopad',
+    ],
+)
+pokefoot_ncer_lz = ncer_lz_gen.process(
+    files('.shared/footprint_cell.json'),
+    extra_args: [
+        '-nopad',
+    ],
+)
+pokefoot_cell_key = files('.shared/footprint_cell_key.json')
+pokefoot_ncgr_lz = ncgr_lz_gen.process(
+    pokefoot_files,
+    extra_args: [
+        '-cell', pokefoot_cell_key[0].full_path(),
+        '-version101',
+        '-clobbersize',
+        '-mappingtype', '128',
+        '-nopad',
+    ],
+    preserve_path_from: pokemon_data_root,
+)
+
+pokefoot_narc = custom_target('pokefoot.narc',
+    output: [
+        'pokefoot.narc',
+        'pokefoot.naix',
+    ],
+    input: [
+        pokefoot_nclr,
+        pokefoot_nanr_lz,
+        pokefoot_ncer_lz,
+        pokefoot_ncgr_lz,
+    ],
+    command: [
+        nitroarc_exe,
+        '--create',
+        '--index',
+        '--files-from', pokefoot_order,
+        '--file', '@OUTPUT0@',
+        '@PRIVATE_DIR@',
+    ],
+)
+naix_headers += pokefoot_narc[1]
+
+nitrofs_files += species_data
+nitrofs_files += pokedex_listings
+
 nitrofs_files += pl_poke_icon_narc
 nitrofs_files += pl_pokegra_narc
 nitrofs_files += pl_otherpoke_narc
-nitrofs_files += wotbl_narc
-nitrofs_files += height_narc
-nitrofs_files += pl_poke_data_narc
-nitrofs_files += pl_pokezukan_narc
-nitrofs_files += shinzukan_narc
 nitrofs_files += pl_growtbl_narc
+nitrofs_files += pokefoot_narc

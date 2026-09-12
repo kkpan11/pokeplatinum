@@ -1,54 +1,55 @@
-    .include "macros/scrcmd.inc"
+#include "macros/scrcmd.inc"
+#include "res/text/bank/fullmoon_island_forest.h"
+#include "res/field/events/events_fullmoon_island_forest.h"
 
-    .data
 
-    ScriptEntry _000A
-    ScriptEntry _000C
-    .short 0xFD13
+    ScriptEntry FullmoonIslandForest_Dummy1
+    ScriptEntry FullmoonIslandForest_Cresselia
+    ScriptEntryEnd
 
-_000A:
+FullmoonIslandForest_Dummy1:
     End
 
-_000C:
-    PlayFanfare SEQ_SE_CONFIRM
+FullmoonIslandForest_Cresselia:
+    PlaySE SE_CONFIRM_sseq_3
     LockAll
     FacePlayer
-    ScrCmd_208 0x1E8, 1
+    DrawPokemonPreview SPECIES_CRESSELIA, GENDER_FEMALE
     WaitABPress
-    ScrCmd_209
-    ScrCmd_04C 0x1E8, 0
-    ScrCmd_1BD 0x800C
-    CallIfEq 0x800C, 0, _007E
-    ScrCmd_063 0
-    ScrCmd_26A 0, 6, 8
-    ScrCmd_062 0
-    SetFlag 0x24F
-    ScrCmd_065 0
-    ScrCmd_21C 1
-    GoToIfEq 0x4058, 3, _0074
-    ClearFlag 0x452
-    ScrCmd_064 1
-    SetFlag 0x11F
-    Message 0
-    WaitABXPadPress
+    RemovePokemonPreview
+    PlayCry SPECIES_CRESSELIA
+    GetPlayerDir VAR_RESULT
+    CallIfEq VAR_RESULT, DIR_NORTH, FullmoonIslandForest_CresseliaMoveAwayForLunarWing
+    ReleaseObject LOCALID_CRESSELIA
+    FlickerObject LOCALID_CRESSELIA, 6, 8
+    LockObject LOCALID_CRESSELIA
+    SetFlag FLAG_HIDE_FULLMOON_ISLAND_FOREST_CRESSELIA
+    RemoveObject LOCALID_CRESSELIA
+    ActivateRoamingPokemon ROAMING_SLOT_CRESSELIA
+    GoToIfEq VAR_ROAMING_CRESSELIA_STATE, ROAMER_STATE_RESET, FullmoonIslandForest_ResetCresseliaRoamingState
+    ClearFlag FLAG_OBTAINED_FULLMOON_ISLAND_FOREST_LUNAR_WING
+    AddObject LOCALID_ITEM_LUNAR_WING
+    SetFlag FLAG_MET_CRESSELIA
+    Message FullmoonIslandForest_Text_SomethingSparkling
+    WaitButton
     CloseMessage
     ReleaseAll
     End
 
-_0074:
-    SetVar 0x4058, 0
+FullmoonIslandForest_ResetCresseliaRoamingState:
+    SetVar VAR_ROAMING_CRESSELIA_STATE, ROAMER_STATE_ROAMING
     ReleaseAll
     End
 
-_007E:
-    ScrCmd_186 1, 16, 14
-    ApplyMovement 0, _0094
+FullmoonIslandForest_CresseliaMoveAwayForLunarWing:
+    SetObjectEventPos LOCALID_ITEM_LUNAR_WING, 16, 14
+    ApplyMovement LOCALID_CRESSELIA, FullmoonIslandForest_Movement_CresseliaMoveBackNorth
     WaitMovement
     Return
 
     .balign 4, 0
-_0094:
-    MoveAction_047
-    MoveAction_00C
-    MoveAction_048
+FullmoonIslandForest_Movement_CresseliaMoveBackNorth:
+    LockDir
+    WalkNormalNorth
+    UnlockDir
     EndMovement

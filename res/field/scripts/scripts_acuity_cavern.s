@@ -1,54 +1,55 @@
-    .include "macros/scrcmd.inc"
+#include "macros/scrcmd.inc"
+#include "res/text/bank/acuity_cavern.h"
+#include "res/field/events/events_acuity_cavern.h"
 
-    .data
 
-    ScriptEntry _000E
-    ScriptEntry _0014
-    ScriptEntry _002F
-    .short 0xFD13
+    ScriptEntry AcuityCavern_OnTransition
+    ScriptEntry AcuityCavern_OnLoad
+    ScriptEntry AcuityCavern_Uxie
+    ScriptEntryEnd
 
-_000E:
-    SetFlag 0x9E3
+AcuityCavern_OnTransition:
+    SetFlag FLAG_FIRST_ARRIVAL_ACUITY_CAVERN
     End
 
-_0014:
-    GoToIfSet 142, _0021
+AcuityCavern_OnLoad:
+    GoToIfSet FLAG_MAP_LOCAL_REMOVE_OBJECT, AcuityCavern_RemoveUxie
     End
 
-_0021:
-    SetFlag 0x1E1
-    ScrCmd_065 0
-    ClearFlag 142
+AcuityCavern_RemoveUxie:
+    SetFlag FLAG_HIDE_ACUITY_CAVERN_UXIE
+    RemoveObject LOCALID_UXIE
+    ClearFlag FLAG_MAP_LOCAL_REMOVE_OBJECT
     End
 
-_002F:
-    PlayFanfare SEQ_SE_CONFIRM
+AcuityCavern_Uxie:
+    PlaySE SE_CONFIRM_sseq_3
     LockAll
     FacePlayer
-    ScrCmd_04C 0x1E0, 0
-    Message 0
+    PlayCry SPECIES_UXIE
+    Message AcuityCavern_Text_UxieCry
     CloseMessage
-    SetFlag 142
-    ScrCmd_2BD 0x1E0, 50
-    ClearFlag 142
-    ScrCmd_0EC 0x800C
-    GoToIfEq 0x800C, 0, _0085
-    ScrCmd_2BC 0x800C
-    GoToIfEq 0x800C, 1, _007A
-    SetFlag 0x127
+    SetFlag FLAG_MAP_LOCAL_REMOVE_OBJECT
+    StartLegendaryBattle SPECIES_UXIE, 50
+    ClearFlag FLAG_MAP_LOCAL_REMOVE_OBJECT
+    CheckWonBattle VAR_RESULT
+    GoToIfEq VAR_RESULT, FALSE, AcuityCavern_LostBattle
+    CheckDidNotCapture VAR_RESULT
+    GoToIfEq VAR_RESULT, TRUE, AcuityCavern_UxieDisappeared
+    SetFlag FLAG_CAUGHT_UXIE
     ReleaseAll
     End
 
-_007A:
-    Message 1
-    WaitABXPadPress
+AcuityCavern_UxieDisappeared:
+    Message AcuityCavern_Text_UxieDisappeared
+    WaitButton
     CloseMessage
     ReleaseAll
     End
 
-_0085:
-    ScrCmd_0EB
+AcuityCavern_LostBattle:
+    BlackOutFromBattle
     ReleaseAll
     End
 
-    .byte 0
+    .balign 4, 0

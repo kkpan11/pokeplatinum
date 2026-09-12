@@ -1,204 +1,183 @@
-    .include "macros/scrcmd.inc"
+#include "macros/scrcmd.inc"
+#include "res/text/bank/route_203.h"
+#include "res/field/events/events_route_203.h"
 
-    .data
 
-    ScriptEntry _001A
-    ScriptEntry _002D
-    ScriptEntry _0044
-    ScriptEntry _005B
-    ScriptEntry _0070
-    ScriptEntry _0085
-    .short 0xFD13
+    ScriptEntry Route203_Lass
+    ScriptEntry Route203_ArrowSignpostJubilifeCity
+    ScriptEntry Route203_ArrowSignpostOreburghCity
+    ScriptEntry Route203_TrainerTipsSignpostEast
+    ScriptEntry Route203_TrainerTipsSignpostWest
+    ScriptEntry Route203_CoordEvent_Rival
+    ScriptEntryEnd
 
-_001A:
-    PlayFanfare SEQ_SE_CONFIRM
+Route203_Lass:
+    NPCMessage Route203_Text_FavoritePokemonAtTheTop
+    End
+
+Route203_ArrowSignpostJubilifeCity:
+    ShowArrowSign Route203_Text_SignJubilifeCity
+    End
+
+Route203_ArrowSignpostOreburghCity:
+    ShowArrowSign Route203_Text_SignOreburghCity
+    End
+
+Route203_TrainerTipsSignpostEast:
+    ShowScrollingSign Route203_Text_TrainerTipsEvolveCanBeStopped
+    End
+
+Route203_TrainerTipsSignpostWest:
+    ShowScrollingSign Route203_Text_TrainerTipsMovesUsePowerPoints
+    End
+
+Route203_CoordEvent_Rival:
     LockAll
-    FacePlayer
-    Message 2
-    WaitABXPadPress
+    ApplyMovement LOCALID_RIVAL, Route203_Movement_RivalNoticePlayer
+    WaitMovement
+    Common_SetRivalBGM
+    GetPlayerMapPos VAR_0x8004, VAR_0x8005
+    GoToIfEq VAR_0x8005, 757, Route203_RivalWalkToPlayerZ757
+    GoToIfEq VAR_0x8005, 758, Route203_RivalWalkToPlayerZ758
+    GoToIfEq VAR_0x8005, 759, Route203_RivalWalkToPlayerZ759
+    GoToIfEq VAR_0x8005, 760, Route203_RivalWalkToPlayerZ760
+    End
+
+Route203_RivalWalkToPlayerZ757:
+    ApplyMovement LOCALID_RIVAL, Route203_Movement_RivalWalkToPlayerZ757
+    WaitMovement
+    GoTo Route203_RivalIntro
+
+Route203_RivalWalkToPlayerZ758:
+    ApplyMovement LOCALID_RIVAL, Route203_Movement_RivalWalkToPlayerZ758
+    WaitMovement
+    GoTo Route203_RivalIntro
+
+Route203_RivalWalkToPlayerZ759:
+    ApplyMovement LOCALID_RIVAL, Route203_Movement_RivalWalkToPlayerZ759
+    WaitMovement
+    GoTo Route203_RivalIntro
+
+Route203_RivalWalkToPlayerZ760:
+    ApplyMovement LOCALID_RIVAL, Route203_Movement_RivalWalkToPlayerZ760
+    WaitMovement
+    GoTo Route203_RivalIntro
+
+Route203_RivalIntro:
+    BufferRivalName 0
+    BufferPlayerName 1
+    Message Route203_Text_IGotTougher
     CloseMessage
+    GetPlayerStarterSpecies VAR_RESULT
+    GoToIfEq VAR_RESULT, SPECIES_TURTWIG, Route203_StartRivalBattleTurtwig
+    GoToIfEq VAR_RESULT, SPECIES_CHIMCHAR, Route203_StartRivalBattleChimchar
+    GoTo Route203_StartRivalBattlePiplup
+
+Route203_StartRivalBattlePiplup:
+    StartTrainerBattle TRAINER_RIVAL_ROUTE_203_PIPLUP
+    GoTo Route203_RivalBattleEnd
+
+Route203_StartRivalBattleTurtwig:
+    StartTrainerBattle TRAINER_RIVAL_ROUTE_203_TURTWIG
+    GoTo Route203_RivalBattleEnd
+
+Route203_StartRivalBattleChimchar:
+    StartTrainerBattle TRAINER_RIVAL_ROUTE_203_CHIMCHAR
+    GoTo Route203_RivalBattleEnd
+
+Route203_RivalBattleEnd:
+    CheckWonBattle VAR_RESULT
+    GoToIfEq VAR_RESULT, FALSE, Route203_BlackOutRivalBattle
+    BufferRivalName 0
+    Message Route203_Text_WhatDoYouMeanILost
+    CloseMessage
+    GetPlayerMapPos VAR_0x8004, VAR_0x8005
+    GoToIfEq VAR_0x8005, 757, Route203_RivalLeaveZ757
+    GoToIfEq VAR_0x8005, 758, Route203_RivalLeaveZ758
+    GoToIfEq VAR_0x8005, 759, Route203_RivalLeaveZ759
+    GoToIfEq VAR_0x8005, 760, Route203_RivalLeaveZ760
+    End
+
+Route203_RivalLeaveZ757:
+    ApplyMovement LOCALID_RIVAL, Route203_Movement_RivalLeaveZ757
+    WaitMovement
+    GoTo Route203_RemoveRival
+
+Route203_RivalLeaveZ758:
+    ApplyMovement LOCALID_RIVAL, Route203_Movement_RivalLeaveZ758
+    WaitMovement
+    GoTo Route203_RemoveRival
+
+Route203_RivalLeaveZ759:
+    ApplyMovement LOCALID_RIVAL, Route203_Movement_RivalLeaveZ759
+    WaitMovement
+    GoTo Route203_RemoveRival
+
+Route203_RivalLeaveZ760:
+    ApplyMovement LOCALID_RIVAL, Route203_Movement_RivalLeaveZ760
+    WaitMovement
+    GoTo Route203_RemoveRival
+
+Route203_RemoveRival:
+    RemoveObject LOCALID_RIVAL
+    SetVar VAR_ROUTE_203_RIVAL_STATE, 1
     ReleaseAll
     End
 
-_002D:
-    ScrCmd_036 3, 1, 0, 0x800C
-    ScrCmd_038 3
-    ScrCmd_039
-    ScrCmd_03B 0x800C
-    CallCommonScript 0x7D0
-    End
-
-_0044:
-    ScrCmd_036 4, 1, 0, 0x800C
-    ScrCmd_038 3
-    ScrCmd_039
-    ScrCmd_03B 0x800C
-    CallCommonScript 0x7D0
-    End
-
-_005B:
-    ScrCmd_037 3, 0
-    ScrCmd_038 3
-    ScrCmd_039
-    ScrCmd_03A 5, 0x800C
-    CallCommonScript 0x7D0
-    End
-
-_0070:
-    ScrCmd_037 3, 0
-    ScrCmd_038 3
-    ScrCmd_039
-    ScrCmd_03A 6, 0x800C
-    CallCommonScript 0x7D0
-    End
-
-_0085:
-    LockAll
-    ApplyMovement 5, _0268
-    WaitMovement
-    CallCommonScript 0x7FA
-    ScrCmd_069 0x8004, 0x8005
-    GoToIfEq 0x8005, 0x2F5, _00D1
-    GoToIfEq 0x8005, 0x2F6, _00E1
-    GoToIfEq 0x8005, 0x2F7, _00F1
-    GoToIfEq 0x8005, 0x2F8, _0101
-    End
-
-_00D1:
-    ApplyMovement 5, _0230
-    WaitMovement
-    GoTo _0111
-
-_00E1:
-    ApplyMovement 5, _0238
-    WaitMovement
-    GoTo _0111
-
-_00F1:
-    ApplyMovement 5, _0248
-    WaitMovement
-    GoTo _0111
-
-_0101:
-    ApplyMovement 5, _0258
-    WaitMovement
-    GoTo _0111
-
-_0111:
-    ScrCmd_0CE 0
-    ScrCmd_0CD 1
-    Message 0
-    CloseMessage
-    ScrCmd_0DE 0x800C
-    GoToIfEq 0x800C, 0x183, _014C
-    GoToIfEq 0x800C, 0x186, _0158
-    GoTo _0140
-
-_0140:
-    ScrCmd_0E5 247, 0
-    GoTo _0164
-
-_014C:
-    ScrCmd_0E5 248, 0
-    GoTo _0164
-
-_0158:
-    ScrCmd_0E5 249, 0
-    GoTo _0164
-
-_0164:
-    ScrCmd_0EC 0x800C
-    GoToIfEq 0x800C, 0, _0207
-    ScrCmd_0CE 0
-    Message 1
-    CloseMessage
-    ScrCmd_069 0x8004, 0x8005
-    GoToIfEq 0x8005, 0x2F5, _01B9
-    GoToIfEq 0x8005, 0x2F6, _01C9
-    GoToIfEq 0x8005, 0x2F7, _01D9
-    GoToIfEq 0x8005, 0x2F8, _01E9
-    End
-
-_01B9:
-    ApplyMovement 5, _0210
-    WaitMovement
-    GoTo _01F9
-
-_01C9:
-    ApplyMovement 5, _0218
-    WaitMovement
-    GoTo _01F9
-
-_01D9:
-    ApplyMovement 5, _0220
-    WaitMovement
-    GoTo _01F9
-
-_01E9:
-    ApplyMovement 5, _0228
-    WaitMovement
-    GoTo _01F9
-
-_01F9:
-    ScrCmd_065 5
-    SetVar 0x4088, 1
-    ReleaseAll
-    End
-
-_0207:
-    ScrCmd_0EB
+Route203_BlackOutRivalBattle:
+    BlackOutFromBattle
     ReleaseAll
     End
 
     .balign 4, 0
-_0210:
-    MoveAction_013 10
+Route203_Movement_RivalLeaveZ757:
+    WalkFastEast 10
     EndMovement
 
     .balign 4, 0
-_0218:
-    MoveAction_013 10
+Route203_Movement_RivalLeaveZ758:
+    WalkFastEast 10
     EndMovement
 
     .balign 4, 0
-_0220:
-    MoveAction_013 10
+Route203_Movement_RivalLeaveZ759:
+    WalkFastEast 10
     EndMovement
 
     .balign 4, 0
-_0228:
-    MoveAction_013 10
+Route203_Movement_RivalLeaveZ760:
+    WalkFastEast 10
     EndMovement
 
     .balign 4, 0
-_0230:
-    MoveAction_012 4
+Route203_Movement_RivalWalkToPlayerZ757:
+    WalkFastWest 4
     EndMovement
 
     .balign 4, 0
-_0238:
-    MoveAction_012 2
-    MoveAction_011
-    MoveAction_012 2
+Route203_Movement_RivalWalkToPlayerZ758:
+    WalkFastWest 2
+    WalkFastSouth
+    WalkFastWest 2
     EndMovement
 
     .balign 4, 0
-_0248:
-    MoveAction_012 2
-    MoveAction_011 2
-    MoveAction_012 2
+Route203_Movement_RivalWalkToPlayerZ759:
+    WalkFastWest 2
+    WalkFastSouth 2
+    WalkFastWest 2
     EndMovement
 
     .balign 4, 0
-_0258:
-    MoveAction_012 2
-    MoveAction_011 3
-    MoveAction_012 2
+Route203_Movement_RivalWalkToPlayerZ760:
+    WalkFastWest 2
+    WalkFastSouth 3
+    WalkFastWest 2
     EndMovement
 
     .balign 4, 0
-_0268:
-    MoveAction_03F
-    MoveAction_04B
-    MoveAction_03F
+Route203_Movement_RivalNoticePlayer:
+    Delay8
+    EmoteExclamationMark
+    Delay8
     EndMovement

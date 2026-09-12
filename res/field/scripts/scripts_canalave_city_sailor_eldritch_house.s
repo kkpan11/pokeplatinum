@@ -1,229 +1,192 @@
-    .include "macros/scrcmd.inc"
+#include "macros/scrcmd.inc"
+#include "res/text/bank/canalave_city_sailor_eldritch_house.h"
+#include "res/field/events/events_canalave_city_sailor_eldritch_house.h"
 
-    .data
 
-    ScriptEntry _000E
-    ScriptEntry _010B
-    ScriptEntry _00A5
-    .short 0xFD13
+    ScriptEntry CanalaveCitySailorEldritchHouse_OnTransition
+    ScriptEntry CanalaveCitySailorEldritchHouse_LittleBoy
+    ScriptEntry CanalaveCitySailorEldritchHouse_PokefanF
+    ScriptEntryEnd
 
-_000E:
-    GoToIfEq 0x4106, 0, _0037
-    CallIfEq 0x4106, 3, _0073
-    CallIfGe 0x4106, 1, _007B
-_0035:
+CanalaveCitySailorEldritchHouse_OnTransition:
+    GoToIfEq VAR_LUNAR_WING_EVENT_STATE, 0, CanalaveCitySailorEldritchHouse_TryInitLunarWingEvent
+    CallIfEq VAR_LUNAR_WING_EVENT_STATE, 3, CanalaveCitySailorEldritchHouse_ResetLunarWingEventState
+    CallIfGe VAR_LUNAR_WING_EVENT_STATE, 1, CanalaveCitySailorEldritchHouse_SetLittleBoyPokefanFPositionsAtBed
+CanalaveCitySailorEldritchHouse_OnTransitionEnd:
     End
 
-_0037:
-    GoToIfSet 0x12C, _0035
-    ScrCmd_166 0x4000
-    GoToIfEq 0x4000, 0, _0035
-    ScrCmd_22D 2, 0x4000
-    GoToIfEq 0x4000, 0, _0035
-    SetVar 0x4106, 1
-    Call _007B
+CanalaveCitySailorEldritchHouse_TryInitLunarWingEvent:
+    GoToIfSet FLAG_WOKE_UP_CANALAVE_CITY_SAILOR_ELDRITCH_HOUSE_LITTLE_BOY, CanalaveCitySailorEldritchHouse_OnTransitionEnd
+    CheckGameCompleted VAR_MAP_LOCAL_0x00
+    GoToIfEq VAR_MAP_LOCAL_0x00, FALSE, CanalaveCitySailorEldritchHouse_OnTransitionEnd
+    GetNationalDexEnabled VAR_MAP_LOCAL_0x00
+    GoToIfEq VAR_MAP_LOCAL_0x00, FALSE, CanalaveCitySailorEldritchHouse_OnTransitionEnd
+    SetVar VAR_LUNAR_WING_EVENT_STATE, 1
+    Call CanalaveCitySailorEldritchHouse_SetLittleBoyPokefanFPositionsAtBed
     End
 
-_0073:
-    SetVar 0x4106, 0
+CanalaveCitySailorEldritchHouse_ResetLunarWingEventState:
+    SetVar VAR_LUNAR_WING_EVENT_STATE, 0
     Return
 
-_007B:
-    ScrCmd_186 0, 8, 6
-    ScrCmd_189 0, 1
-    ScrCmd_188 0, 0
-    ScrCmd_186 1, 9, 6
-    ScrCmd_189 1, 2
+CanalaveCitySailorEldritchHouse_SetLittleBoyPokefanFPositionsAtBed:
+    SetObjectEventPos LOCALID_LITTLE_BOY, 8, 6
+    SetObjectEventDir LOCALID_LITTLE_BOY, DIR_SOUTH
+    SetObjectEventMovementType LOCALID_LITTLE_BOY, MOVEMENT_TYPE_NONE
+    SetObjectEventPos LOCALID_POKEFAN_F, 9, 6
+    SetObjectEventDir LOCALID_POKEFAN_F, DIR_WEST
     Return
 
-    .byte 30
-    .byte 0
-    .byte 91
-    .byte 2
-    .byte 27
-    .byte 0
+CanalaveCitySailorEldritchHouse_Unused:
+    SetFlag FLAG_HIDE_CANALAVE_CITY_SAILOR_ELDRITCH_HOUSE_SAILOR_ELDRITCH
+    Return
 
-_00A5:
-    SetVar 0x8008, 0x4106
-    GoToIfEq 0x8008, 1, _00E5
-    GoToIfEq 0x8008, 2, _00E5
-    GoToIfEq 0x8008, 3, _00F8
-    PlayFanfare SEQ_SE_CONFIRM
+CanalaveCitySailorEldritchHouse_PokefanF:
+    SetVar VAR_0x8008, VAR_LUNAR_WING_EVENT_STATE
+    GoToIfEq VAR_0x8008, 1, CanalaveCitySailorEldritchHouse_WeFeelFrustrated
+    GoToIfEq VAR_0x8008, 2, CanalaveCitySailorEldritchHouse_WeFeelFrustrated
+    GoToIfEq VAR_0x8008, 3, CanalaveCitySailorEldritchHouse_CantThankYouEnough
+    NPCMessage CanalaveCitySailorEldritchHouse_Text_TooMuchEnergy
+    End
+
+CanalaveCitySailorEldritchHouse_WeFeelFrustrated:
+    NPCMessage CanalaveCitySailorEldritchHouse_Text_WeFeelFrustrated
+    End
+
+CanalaveCitySailorEldritchHouse_CantThankYouEnough:
+    NPCMessage CanalaveCitySailorEldritchHouse_Text_CantThankYouEnough
+    End
+
+CanalaveCitySailorEldritchHouse_LittleBoy:
+    GoToIfEq VAR_LUNAR_WING_EVENT_STATE, 1, CanalaveCitySailorEldritchHouse_BoyThrashingInSleep
+    GoToIfEq VAR_LUNAR_WING_EVENT_STATE, 2, CanalaveCitySailorEldritchHouse_BoyThrashingInSleep
+    GoToIfEq VAR_LUNAR_WING_EVENT_STATE, 3, CanalaveCitySailorEldritchHouse_ScaryDreamDarkPokemon
+    NPCMessage CanalaveCitySailorEldritchHouse_Text_GoingToBeSailor
+    End
+
+CanalaveCitySailorEldritchHouse_ScaryDreamDarkPokemon:
+    NPCMessage CanalaveCitySailorEldritchHouse_Text_ScaryDreamDarkPokemon
+    End
+
+CanalaveCitySailorEldritchHouse_BoyThrashingInSleep:
+    GoToIfUnset FLAG_TALKED_TO_CANALAVE_CITY_SAILOR_ELDRITCH_HOUSE_LITTLE_BOY, CanalaveCitySailorEldritchHouse_FirstTimeBoyThrashingInSleep
+    GoToIfUnset FLAG_MET_CRESSELIA, CanalaveCitySailorEldritchHouse_ThrashingInSleep
+    CheckItem ITEM_LUNAR_WING, 1, VAR_RESULT
+    GoToIfEq VAR_RESULT, FALSE, CanalaveCitySailorEldritchHouse_ThrashingInSleep
+    PlaySE SE_CONFIRM_sseq_3
     LockAll
-    FacePlayer
-    Message 8
-    WaitABXPadPress
+    SetFlag FLAG_WOKE_UP_CANALAVE_CITY_SAILOR_ELDRITCH_HOUSE_LITTLE_BOY
+    SetVar VAR_LUNAR_WING_EVENT_STATE, 3
+    RemoveItem ITEM_LUNAR_WING, 1, VAR_RESULT
+    BufferPlayerName 0
+    Message CanalaveCitySailorEldritchHouse_Text_LunarWingGlows
+    Message CanalaveCitySailorEldritchHouse_Text_LittleBoyWokeUp
+    PlayFanfare SEQ_ASA_sseq
+    WaitFanfare
     CloseMessage
+    WaitTime 15, VAR_RESULT
+    Call CanalaveCitySailorEldritchHouse_SailorEldritchEnter
+    Message CanalaveCitySailorEldritchHouse_Text_YoureAwake
+    Call CanalaveCitySailorEldritchHouse_SailorEldritchFaceSouth
+    Message CanalaveCitySailorEldritchHouse_Text_WellNeverForgetYou
+    Call CanalaveCitySailorEldritchHouse_SailorEldritchFaceEast
+    Message CanalaveCitySailorEldritchHouse_Text_ComeSailWithMe
+    CloseMessage
+    Call CanalaveCitySailorEldritchHouse_SailorEldritchLeave
     ReleaseAll
     End
 
-_00E5:
-    PlayFanfare SEQ_SE_CONFIRM
-    LockAll
-    FacePlayer
-    Message 9
-    WaitABXPadPress
-    CloseMessage
-    ReleaseAll
+CanalaveCitySailorEldritchHouse_ThrashingInSleep:
+    EventMessage CanalaveCitySailorEldritchHouse_Text_ThrashingInSleep
     End
 
-_00F8:
-    PlayFanfare SEQ_SE_CONFIRM
-    LockAll
-    FacePlayer
-    Message 10
-    WaitABXPadPress
-    CloseMessage
-    ReleaseAll
+CanalaveCitySailorEldritchHouse_FirstTimeBoyThrashingInSleep:
+    SetFlag FLAG_TALKED_TO_CANALAVE_CITY_SAILOR_ELDRITCH_HOUSE_LITTLE_BOY
+    SetVar VAR_LUNAR_WING_EVENT_STATE, 2
+    GoTo CanalaveCitySailorEldritchHouse_ThrashingInSleep
     End
 
-_010B:
-    GoToIfEq 0x4106, 1, _0158
-    GoToIfEq 0x4106, 2, _0158
-    GoToIfEq 0x4106, 3, _0145
-    PlayFanfare SEQ_SE_CONFIRM
-    LockAll
-    FacePlayer
-    Message 0
-    WaitABXPadPress
-    CloseMessage
-    ReleaseAll
-    End
-
-_0145:
-    PlayFanfare SEQ_SE_CONFIRM
-    LockAll
-    FacePlayer
-    Message 4
-    WaitABXPadPress
-    CloseMessage
-    ReleaseAll
-    End
-
-_0158:
-    GoToIfUnset 0x133, _01EA
-    GoToIfUnset 0x11F, _01D9
-    ScrCmd_07E 0x1C5, 1, 0x800C
-    GoToIfEq 0x800C, 0, _01D9
-    PlayFanfare SEQ_SE_CONFIRM
-    LockAll
-    SetFlag 0x12C
-    SetVar 0x4106, 3
-    ScrCmd_07C 0x1C5, 1, 0x800C
-    ScrCmd_0CD 0
-    Message 2
-    Message 3
-    ScrCmd_04E 0x48E
-    ScrCmd_04F
-    CloseMessage
-    WaitTime 15, 0x800C
-    Call _01FC
-    Message 5
-    Call _0256
-    Message 6
-    Call _0262
-    Message 7
-    CloseMessage
-    Call _026E
-    ReleaseAll
-    End
-
-_01D9:
-    PlayFanfare SEQ_SE_CONFIRM
-    LockAll
-    Message 1
-    WaitABXPadPress
-    CloseMessage
-    ReleaseAll
-    End
-
-_01EA:
-    SetFlag 0x133
-    SetVar 0x4106, 2
-    GoTo _01D9
-    End
-
-_01FC:
-    PlayFanfare SEQ_SE_DP_KAIDAN2
-    ScrCmd_04B 0x603
-    ClearFlag 0x25B
-    ScrCmd_064 2
-    WaitTime 5, 0x800C
-    ApplyMovement 1, _0294
-    ApplyMovement 0, _0294
-    ApplyMovement 0xFF, _0294
+CanalaveCitySailorEldritchHouse_SailorEldritchEnter:
+    PlaySE SEQ_SE_DP_KAIDAN2_sseq
+    WaitSE SEQ_SE_DP_KAIDAN2_sseq
+    ClearFlag FLAG_HIDE_CANALAVE_CITY_SAILOR_ELDRITCH_HOUSE_SAILOR_ELDRITCH
+    AddObject LOCALID_SAILOR_ELDRITCH
+    WaitTime 5, VAR_RESULT
+    ApplyMovement LOCALID_POKEFAN_F, CanalaveCitySailorEldritchHouse_Movement_FaceWest
+    ApplyMovement LOCALID_LITTLE_BOY, CanalaveCitySailorEldritchHouse_Movement_FaceWest
+    ApplyMovement LOCALID_PLAYER, CanalaveCitySailorEldritchHouse_Movement_FaceWest
     WaitMovement
-    ApplyMovement 2, _02B4
+    ApplyMovement LOCALID_SAILOR_ELDRITCH, CanalaveCitySailorEldritchHouse_Movement_SailorEldritchEnter
     WaitMovement
-    ApplyMovement 0xFF, _02C0
+    ApplyMovement LOCALID_PLAYER, CanalaveCitySailorEldritchHouse_Movement_PlayerMoveAside
     WaitMovement
-    ApplyMovement 2, _02D4
+    ApplyMovement LOCALID_SAILOR_ELDRITCH, CanalaveCitySailorEldritchHouse_Movement_SailorEldritchWalkToLittleBoy
     WaitMovement
-    ApplyMovement 0xFF, _029C
+    ApplyMovement LOCALID_PLAYER, CanalaveCitySailorEldritchHouse_Movement_PlayerFaceNorth
     WaitMovement
     Return
 
-_0256:
-    ApplyMovement 2, _02A4
+CanalaveCitySailorEldritchHouse_SailorEldritchFaceSouth:
+    ApplyMovement LOCALID_SAILOR_ELDRITCH, CanalaveCitySailorEldritchHouse_Movement_SailorEldritchFaceSouth
     WaitMovement
     Return
 
-_0262:
-    ApplyMovement 2, _02AC
+CanalaveCitySailorEldritchHouse_SailorEldritchFaceEast:
+    ApplyMovement LOCALID_SAILOR_ELDRITCH, CanalaveCitySailorEldritchHouse_Movement_SailorEldritchFaceEast
     WaitMovement
     Return
 
-_026E:
-    ApplyMovement 0xFF, _0294
-    ApplyMovement 2, _02DC
+CanalaveCitySailorEldritchHouse_SailorEldritchLeave:
+    ApplyMovement LOCALID_PLAYER, CanalaveCitySailorEldritchHouse_Movement_FaceWest
+    ApplyMovement LOCALID_SAILOR_ELDRITCH, CanalaveCitySailorEldritchHouse_Movement_SailorEldritchLeave
     WaitMovement
-    SetFlag 0x25B
-    ScrCmd_065 2
-    PlayFanfare SEQ_SE_DP_KAIDAN2
-    ScrCmd_04B 0x603
+    SetFlag FLAG_HIDE_CANALAVE_CITY_SAILOR_ELDRITCH_HOUSE_SAILOR_ELDRITCH
+    RemoveObject LOCALID_SAILOR_ELDRITCH
+    PlaySE SEQ_SE_DP_KAIDAN2_sseq
+    WaitSE SEQ_SE_DP_KAIDAN2_sseq
     Return
 
     .balign 4, 0
-_0294:
-    MoveAction_002
+CanalaveCitySailorEldritchHouse_Movement_FaceWest:
+    FaceWest
     EndMovement
 
     .balign 4, 0
-_029C:
-    MoveAction_000
+CanalaveCitySailorEldritchHouse_Movement_PlayerFaceNorth:
+    FaceNorth
     EndMovement
 
     .balign 4, 0
-_02A4:
-    MoveAction_001
+CanalaveCitySailorEldritchHouse_Movement_SailorEldritchFaceSouth:
+    FaceSouth
     EndMovement
 
     .balign 4, 0
-_02AC:
-    MoveAction_003
+CanalaveCitySailorEldritchHouse_Movement_SailorEldritchFaceEast:
+    FaceEast
     EndMovement
 
     .balign 4, 0
-_02B4:
-    MoveAction_00C 2
-    MoveAction_00F 2
+CanalaveCitySailorEldritchHouse_Movement_SailorEldritchEnter:
+    WalkNormalNorth 2
+    WalkNormalEast 2
     EndMovement
 
     .balign 4, 0
-_02C0:
-    MoveAction_000
-    MoveAction_047
-    MoveAction_00D
-    MoveAction_048
+CanalaveCitySailorEldritchHouse_Movement_PlayerMoveAside:
+    FaceNorth
+    LockDir
+    WalkNormalSouth
+    UnlockDir
     EndMovement
 
     .balign 4, 0
-_02D4:
-    MoveAction_00F
+CanalaveCitySailorEldritchHouse_Movement_SailorEldritchWalkToLittleBoy:
+    WalkNormalEast
     EndMovement
 
     .balign 4, 0
-_02DC:
-    MoveAction_00E 3
-    MoveAction_00D 2
+CanalaveCitySailorEldritchHouse_Movement_SailorEldritchLeave:
+    WalkNormalWest 3
+    WalkNormalSouth 2
     EndMovement

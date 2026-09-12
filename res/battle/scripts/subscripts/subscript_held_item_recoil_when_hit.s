@@ -1,6 +1,5 @@
-    .include "macros/btlcmd.inc"
+#include "macros/btlcmd.inc"
 
-    .data
 
 _000:
     CompareMonDataToValue OPCODE_EQU, BTLSCR_DEFENDER, BATTLEMON_CUR_HP, 0, _009
@@ -12,7 +11,7 @@ _009:
     UpdateVarFromVar OPCODE_SET, BTLVAR_MSG_BATTLER_TEMP, BTLVAR_ATTACKER
     Call BATTLE_SUBSCRIPT_UPDATE_HP
     // {0} is hurt by {1}’s {2}!
-    PrintMessage pl_msg_00000368_01160, TAG_NICKNAME_NICKNAME_ITEM, BTLSCR_ATTACKER, BTLSCR_DEFENDER, BTLSCR_DEFENDER
+    PrintMessage BattleStrings_Text_PokemonIsHurtByPokemonsItem_AllyAlly, TAG_NICKNAME_NICKNAME_ITEM, BTLSCR_ATTACKER, BTLSCR_DEFENDER, BTLSCR_DEFENDER
     Wait 
     WaitButtonABTime 30
     RemoveItem BTLSCR_DEFENDER

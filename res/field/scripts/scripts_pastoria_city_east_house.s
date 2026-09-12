@@ -1,89 +1,83 @@
-    .include "macros/scrcmd.inc"
+#include "macros/scrcmd.inc"
+#include "res/text/bank/pastoria_city_east_house.h"
 
-    .data
 
-    ScriptEntry _000A
-    ScriptEntry _0125
-    .short 0xFD13
+    ScriptEntry PastoriaCityEastHouse_MoveManiac
+    ScriptEntry PastoriaCityEastHouse_Youngster
+    ScriptEntryEnd
 
-_000A:
-    PlayFanfare SEQ_SE_CONFIRM
+PastoriaCityEastHouse_MoveManiac:
+    PlaySE SE_CONFIRM_sseq_3
     LockAll
     FacePlayer
-    ScrCmd_33C 4, 93
-    GoToIfUnset 233, _003D
-    ScrCmd_07E 93, 1, 0x800C
-    GoToIfEq 0x800C, 0, _005F
-    GoTo _006A
+    BufferItemNameWithArticle 4, ITEM_HEART_SCALE
+    GoToIfUnset FLAG_TALKED_TO_PASTORIA_CITY_EAST_HOUSE_MOVE_MANIAC, PastoriaCityEastHouse_CheckHeartScale
+    CheckItem ITEM_HEART_SCALE, 1, VAR_RESULT
+    GoToIfEq VAR_RESULT, FALSE, PastoriaCityEastHouse_ComeBackWithHeartScale
+    GoTo PastoriaCityEastHouse_TryTeachMove
 
-_003D:
-    SetFlag 233
-    Message 0
-    ScrCmd_07E 93, 1, 0x800C
-    GoToIfEq 0x800C, 0, _005F
-    GoTo _006A
+PastoriaCityEastHouse_CheckHeartScale:
+    SetFlag FLAG_TALKED_TO_PASTORIA_CITY_EAST_HOUSE_MOVE_MANIAC
+    Message PastoriaCityEastHouse_Text_TeachMoveForHeartScale
+    CheckItem ITEM_HEART_SCALE, 1, VAR_RESULT
+    GoToIfEq VAR_RESULT, FALSE, PastoriaCityEastHouse_ComeBackWithHeartScale
+    GoTo PastoriaCityEastHouse_TryTeachMove
 
-_005F:
-    Message 2
-    WaitABXPadPress
+PastoriaCityEastHouse_ComeBackWithHeartScale:
+    Message PastoriaCityEastHouse_Text_ComeBackWithHeartScale
+    WaitButton
     CloseMessage
     ReleaseAll
     End
 
-_006A:
-    Message 1
-    Message 3
+PastoriaCityEastHouse_TryTeachMove:
+    Message PastoriaCityEastHouse_Text_ThatsAHeartScale
+    Message PastoriaCityEastHouse_Text_TutorWhichPokemon
     CloseMessage
-    FadeScreen 6, 1, 0, 0
+    FadeScreenOut
     WaitFadeScreen
-    ScrCmd_191
-    ScrCmd_193 0x8005
-    ScrCmd_0A1
-    FadeScreen 6, 1, 1, 0
+    SelectMoveTutorPokemon
+    GetSelectedPartySlot VAR_0x8005
+    ReturnToField
+    FadeScreenIn
     WaitFadeScreen
-    GoToIfEq 0x8005, 0xFF, _005F
-    ScrCmd_198 0x8005, 0x800C
-    GoToIfEq 0x800C, 0, _011A
-    ScrCmd_21F 0x800C, 0x8005
-    GoToIfEq 0x800C, 0, _010F
-    Message 4
+    GoToIfEq VAR_0x8005, PARTY_SLOT_NONE, PastoriaCityEastHouse_ComeBackWithHeartScale
+    GetPartyMonSpecies VAR_0x8005, VAR_RESULT
+    GoToIfEq VAR_RESULT, 0, PastoriaCityEastHouse_EggsCantLearnMoves
+    CheckHasLearnableReminderMoves VAR_RESULT, VAR_0x8005
+    GoToIfEq VAR_RESULT, FALSE, PastoriaCityEastHouse_NoMovesToTeach
+    Message PastoriaCityEastHouse_Text_TeachWhichMove
     CloseMessage
-    FadeScreen 6, 1, 0, 0
+    FadeScreenOut
     WaitFadeScreen
-    ScrCmd_221 0x8005
-    ScrCmd_223 0x800C
-    ScrCmd_0A1
-    FadeScreen 6, 1, 1, 0
+    OpenMoveReminderMenu VAR_0x8005
+    CheckLearnedReminderMove VAR_RESULT
+    ReturnToField
+    FadeScreenIn
     WaitFadeScreen
-    GoToIfEq 0x800C, 0xFF, _005F
-    ScrCmd_07C 93, 1, 0x800C
-    ScrCmd_0CD 3
-    Message 16
-    WaitABXPadPress
+    GoToIfEq VAR_RESULT, 0xFF, PastoriaCityEastHouse_ComeBackWithHeartScale
+    RemoveItem ITEM_HEART_SCALE, 1, VAR_RESULT
+    BufferPlayerName 3
+    Message PastoriaCityEastHouse_Text_HandedOverHeartScale
+    WaitButton
     CloseMessage
     ReleaseAll
     End
 
-_010F:
-    Message 5
-    WaitABXPadPress
+PastoriaCityEastHouse_NoMovesToTeach:
+    Message PastoriaCityEastHouse_Text_NoMovesToTeach
+    WaitButton
     CloseMessage
     ReleaseAll
     End
 
-_011A:
-    Message 6
-    WaitABXPadPress
+PastoriaCityEastHouse_EggsCantLearnMoves:
+    Message PastoriaCityEastHouse_Text_EggsCantLearnMoves
+    WaitButton
     CloseMessage
     ReleaseAll
     End
 
-_0125:
-    PlayFanfare SEQ_SE_CONFIRM
-    LockAll
-    FacePlayer
-    Message 17
-    WaitABXPadPress
-    CloseMessage
-    ReleaseAll
+PastoriaCityEastHouse_Youngster:
+    NPCMessage PastoriaCityEastHouse_Text_NewspaperGivesHeartScales
     End

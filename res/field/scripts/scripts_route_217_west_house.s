@@ -1,42 +1,41 @@
-    .include "macros/scrcmd.inc"
+#include "macros/scrcmd.inc"
+#include "res/text/bank/route_217_west_house.h"
 
-    .data
 
-    ScriptEntry _0006
-    .short 0xFD13
+    ScriptEntry Route217WestHouse_Hiker
+    ScriptEntryEnd
 
-_0006:
-    PlayFanfare SEQ_SE_CONFIRM
+Route217WestHouse_Hiker:
+    PlaySE SE_CONFIRM_sseq_3
     LockAll
     FacePlayer
-    GoToIfSet 222, _0039
-    ScrCmd_07E 0x1AB, 1, 0x800C
-    GoToIfEq 0x800C, 1, _0044
-    Message 0
-    WaitABXPadPress
+    GoToIfSet FLAG_RECEIVED_ROUTE_217_WEST_HOUSE_ICICLE_PLATE, Route217WestHouse_IFoundIciclePlate
+    CheckItem ITEM_HM08, 1, VAR_RESULT
+    GoToIfEq VAR_RESULT, TRUE, Route217WestHouse_TryGiveIciclePlate
+    Message Route217WestHouse_Text_IDroppedHM
+    WaitButton
     CloseMessage
     ReleaseAll
     End
 
-_0039:
-    Message 2
-    WaitABXPadPress
+Route217WestHouse_IFoundIciclePlate:
+    Message Route217WestHouse_Text_IFoundIciclePlate
+    WaitButton
     CloseMessage
     ReleaseAll
     End
 
-_0044:
-    Message 1
-    SetVar 0x8004, 0x12E
-    SetVar 0x8005, 1
-    ScrCmd_07D 0x8004, 0x8005, 0x800C
-    GoToIfEq 0x800C, 0, _0076
-    CallCommonScript 0x7FC
-    SetFlag 222
-    GoTo _0039
+Route217WestHouse_TryGiveIciclePlate:
+    Message Route217WestHouse_Text_YouFoundHM
+    SetVar VAR_0x8004, ITEM_ICICLE_PLATE
+    SetVar VAR_0x8005, 1
+    GoToIfCannotFitItem VAR_0x8004, VAR_0x8005, VAR_RESULT, Route217WestHouse_BagIsFull
+    Common_GiveItemQuantity
+    SetFlag FLAG_RECEIVED_ROUTE_217_WEST_HOUSE_ICICLE_PLATE
+    GoTo Route217WestHouse_IFoundIciclePlate
 
-_0076:
-    CallCommonScript 0x7E1
+Route217WestHouse_BagIsFull:
+    Common_MessageBagIsFull
     CloseMessage
     ReleaseAll
     End

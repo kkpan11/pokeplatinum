@@ -3,9 +3,6 @@
 #include <nitro.h>
 #include <string.h>
 
-#include "struct_decls/struct_02002F38_decl.h"
-#include "struct_defs/struct_0200D0F4.h"
-
 #include "overlay116/ov116_02261870.h"
 #include "overlay116/ov116_02266FEC.h"
 #include "overlay116/struct_ov116_0226139C.h"
@@ -21,20 +18,20 @@
 #include "overlay116/struct_ov116_022660A8.h"
 #include "overlay116/union_ov116_02266FEC.h"
 
+#include "bg_window.h"
 #include "easy3d_object.h"
 #include "heap.h"
 #include "inlines.h"
+#include "math_util.h"
+#include "palette.h"
+#include "screen_fade.h"
+#include "sound_playback.h"
+#include "sprite_system.h"
 #include "sys_task.h"
 #include "sys_task_manager.h"
-#include "unk_02002F38.h"
-#include "unk_02005474.h"
-#include "unk_0200C6E4.h"
-#include "unk_0200F174.h"
-#include "unk_02018340.h"
-#include "unk_0201D15C.h"
 
 typedef struct {
-    CellActorData *unk_00;
+    ManagedSprite *unk_00;
     fx32 unk_04;
     fx32 unk_08;
     fx32 unk_0C;
@@ -331,9 +328,9 @@ static void ov116_022647BC(SysTask *param0, void *param1)
         FX32_CONST(+2)
     };
 
-    if ((ScreenWipe_Done() == 0) || (v0->unk_A4->unk_2C.unk_00 == 1)) {
+    if ((IsScreenFadeDone() == FALSE) || (v0->unk_A4->unk_2C.unk_00 == 1)) {
         for (v1 = 0; v1 < 3; v1++) {
-            sub_0200D0F4(v0->unk_08[v1]);
+            Sprite_DeleteAndFreeResources(v0->unk_08[v1]);
         }
 
         v0->unk_00 = 0;
@@ -345,7 +342,7 @@ static void ov116_022647BC(SysTask *param0, void *param1)
     switch (v0->unk_04) {
     case 0:
         for (v1 = 0; v1 < 3; v1++) {
-            sub_0200D638(v0->unk_08[v1], &v2, &v3);
+            ManagedSprite_GetPositionFxXY(v0->unk_08[v1], &v2, &v3);
             ov116_0226469C(&v0->unk_14[v1][0], v2, v2 + v6[v1], FX_F32_TO_FX32(0.3f), 8);
             ov116_0226469C(&v0->unk_14[v1][1], v3, v3 + v7[v1], FX_F32_TO_FX32(0.2f), 8);
         }
@@ -357,13 +354,13 @@ static void ov116_022647BC(SysTask *param0, void *param1)
             v4[v1][0] = ov116_022646FC(&v0->unk_14[v1][0]);
             v4[v1][1] = ov116_022646FC(&v0->unk_14[v1][1]);
 
-            sub_0200D614(v0->unk_08[v1], v0->unk_14[v1][0].unk_00, v0->unk_14[v1][1].unk_00);
+            ManagedSprite_SetPositionFxXY(v0->unk_08[v1], v0->unk_14[v1][0].unk_00, v0->unk_14[v1][1].unk_00);
 
             if ((v4[v1][0] == 0) || (v4[v1][1] == 0)) {
                 v5 = 0;
             }
 
-            sub_0200D330(v0->unk_08[v1]);
+            ManagedSprite_TickFrame(v0->unk_08[v1]);
         }
         if (v5) {
             v0->unk_04++;
@@ -372,7 +369,7 @@ static void ov116_022647BC(SysTask *param0, void *param1)
         break;
     default:
         for (v1 = 0; v1 < 3; v1++) {
-            sub_0200D0F4(v0->unk_08[v1]);
+            Sprite_DeleteAndFreeResources(v0->unk_08[v1]);
         }
 
         v0->unk_00 = 0;
@@ -398,7 +395,7 @@ void ov116_0226493C(UnkStruct_ov116_02262A8C *param0, s16 param1, s16 param2)
 
         for (v1 = 0; v1 < 3; v1++) {
             param0->unk_214C[v0].unk_08[v1] = ov116_022626E8(param0, param1, param2);
-            sub_0200D364(param0->unk_214C[v0].unk_08[v1], ((param1 * (v0 + 1)) + (param2 * (v1 + 1))) % 3);
+            ManagedSprite_SetAnim(param0->unk_214C[v0].unk_08[v1], ((param1 * (v0 + 1)) + (param2 * (v1 + 1))) % 3);
         }
 
         SysTask_Start(ov116_022647BC, &param0->unk_214C[v0], 4096);
@@ -408,8 +405,8 @@ void ov116_0226493C(UnkStruct_ov116_02262A8C *param0, s16 param1, s16 param2)
 
 static inline void inline_ov116_022649E4(UnkStruct_ov116_02264FEC_sub1 *param0)
 {
-    param0->unk_1C = FX_Mul(sub_0201D250(param0->unk_28), FX32_CONST(param0->unk_2E));
-    param0->unk_20 = FX_Mul(sub_0201D264(param0->unk_28), FX32_CONST(param0->unk_30));
+    param0->unk_1C = FX_Mul(CalcSineDegrees_Wraparound(param0->unk_28), FX32_CONST(param0->unk_2E));
+    param0->unk_20 = FX_Mul(CalcCosineDegrees_Wraparound(param0->unk_28), FX32_CONST(param0->unk_30));
 }
 
 static inline void inline_ov116_022649E4_1(UnkStruct_ov116_02264FEC_sub1 *wk, fx32 x, fx32 y)
@@ -417,7 +414,7 @@ static inline void inline_ov116_022649E4_1(UnkStruct_ov116_02264FEC_sub1 *wk, fx
     wk->unk_04 += x;
     wk->unk_08 += y;
 
-    sub_0200D650(wk->unk_00, wk->unk_14 + wk->unk_0C + wk->unk_1C + wk->unk_04, wk->unk_18 + wk->unk_10 + wk->unk_20 + wk->unk_08, FX32_CONST(192 + 32));
+    ManagedSprite_SetPositionFxXYWithSubscreenOffset(wk->unk_00, wk->unk_14 + wk->unk_0C + wk->unk_1C + wk->unk_04, wk->unk_18 + wk->unk_10 + wk->unk_20 + wk->unk_08, FX32_CONST(192 + 32));
 }
 
 static void ov116_022649E4(SysTask *param0, void *param1)
@@ -425,10 +422,10 @@ static void ov116_022649E4(SysTask *param0, void *param1)
     UnkStruct_ov116_02264FEC *v0 = param1;
     UnkStruct_ov116_022649E4 *v1 = v0->unk_00->unk_14;
 
-    if ((ScreenWipe_Done() == 0) || (v1->unk_2C.unk_00 == 1)) {
+    if ((IsScreenFadeDone() == FALSE) || (v1->unk_2C.unk_00 == 1)) {
         *v0->unk_10 = 0;
         SysTask_Done(param0);
-        Heap_FreeToHeap(v0);
+        Heap_Free(v0);
         return;
     }
 
@@ -490,7 +487,7 @@ static void ov116_022649E4(SysTask *param0, void *param1)
         if (v0->unk_08 == 0) {
             v0->unk_08++;
             ov116_02261E0C(v0->unk_00, 1, 0);
-            Sound_PlayEffect(1395);
+            Sound_PlayEffect(SEQ_SE_PL_140_2_2_sseq);
         }
 
         if (v0->unk_08 > 30) {
@@ -508,7 +505,7 @@ static void ov116_022649E4(SysTask *param0, void *param1)
 
                 if (v0->unk_14[v6].unk_32 >= (10 + v0->unk_14[v6].unk_26)) {
                     if (v0->unk_14[v6].unk_32 == (10 + v0->unk_14[v6].unk_26)) {
-                        sub_0200D364(v0->unk_14[v6].unk_00, 0);
+                        ManagedSprite_SetAnim(v0->unk_14[v6].unk_00, 0);
                     }
 
                     if (v0->unk_14[v6].unk_32 == (18 + v0->unk_14[v6].unk_26)) {
@@ -519,7 +516,7 @@ static void ov116_022649E4(SysTask *param0, void *param1)
                         }
                     }
 
-                    SpriteActor_EnableObject(v0->unk_14[v6].unk_00, v0->unk_14[v6].unk_25);
+                    ManagedSprite_SetDrawFlag(v0->unk_14[v6].unk_00, v0->unk_14[v6].unk_25);
 
                     switch (v0->unk_14[v6].unk_27) {
                     case 0:
@@ -589,7 +586,7 @@ static void ov116_022649E4(SysTask *param0, void *param1)
 
     default:
         ov116_02261E0C(v0->unk_00, 0, 0);
-        Heap_FreeToHeap(v0);
+        Heap_Free(v0);
         SysTask_Done(param0);
         break;
     }
@@ -599,7 +596,7 @@ static void ov116_022649E4(SysTask *param0, void *param1)
 
 void ov116_02264FEC(UnkStruct_ov116_02262A8C *param0, BOOL *param1)
 {
-    UnkStruct_ov116_02264FEC *v0 = Heap_AllocFromHeap(106, sizeof(UnkStruct_ov116_02264FEC));
+    UnkStruct_ov116_02264FEC *v0 = Heap_Alloc(HEAP_ID_106, sizeof(UnkStruct_ov116_02264FEC));
 
     v0->unk_00 = param0;
     v0->unk_04 = 0;
@@ -629,12 +626,12 @@ static void ov116_0226501C(UnkStruct_ov116_02265470 *param0)
             param0->unk_00++;
         }
 
-        sub_02003A2C(v3, 0, 0x1, *v1 + *v2, 0x0);
-        sub_02003A2C(v3, 1, 0x1, *v1 + *v2, 0x0);
+        PaletteData_BlendMulti(v3, PLTTBUF_MAIN_BG, 0x1, *v1 + *v2, 0x0);
+        PaletteData_BlendMulti(v3, PLTTBUF_SUB_BG, 0x1, *v1 + *v2, 0x0);
         break;
 
     case 1:
-        Easy3DObject_SetVisibility(&v0->unk_00, 1);
+        Easy3DObject_SetVisible(&v0->unk_00, 1);
         param0->unk_28[0] = 0;
         param0->unk_00++;
         break;
@@ -656,8 +653,8 @@ static void ov116_0226501C(UnkStruct_ov116_02265470 *param0)
             param0->unk_00++;
         }
 
-        sub_02003A2C(v3, 0, 0x1, *v1 + *v2, 0x0);
-        sub_02003A2C(v3, 1, 0x1, *v1 + *v2, 0x0);
+        PaletteData_BlendMulti(v3, PLTTBUF_MAIN_BG, 0x1, *v1 + *v2, 0x0);
+        PaletteData_BlendMulti(v3, PLTTBUF_SUB_BG, 0x1, *v1 + *v2, 0x0);
         break;
 
     default:
@@ -665,7 +662,7 @@ static void ov116_0226501C(UnkStruct_ov116_02265470 *param0)
         param0->unk_04 = 0;
         param0->unk_00 = 0;
 
-        Easy3DObject_SetVisibility(&v0->unk_00, 0);
+        Easy3DObject_SetVisible(&v0->unk_00, 0);
 
         break;
     }
@@ -677,7 +674,7 @@ static void ov116_0226510C(UnkStruct_ov116_02265470 *param0)
     s16 v1, v2;
     s16 v3[] = { 188, 188, 180, 180 };
     BOOL v4[4] = { 1, 1, 1, 1 };
-    CellActorData *v5;
+    ManagedSprite *v5;
 
     if (param0->unk_04 == 0) {
         return;
@@ -691,10 +688,10 @@ static void ov116_0226510C(UnkStruct_ov116_02265470 *param0)
                 continue;
             }
 
-            SpriteActor_GetSpritePositionXY(v5, &v1, &v2);
+            ManagedSprite_GetPositionXY(v5, &v1, &v2);
             if (v2 > v3[v0]) {
                 v2 -= 6;
-                SpriteActor_SetSpritePositionXY(v5, v1, v2);
+                ManagedSprite_SetPositionXY(v5, v1, v2);
                 v4[v0] = 0;
             }
         }
@@ -722,10 +719,10 @@ static void ov116_0226510C(UnkStruct_ov116_02265470 *param0)
                 continue;
             }
 
-            SpriteActor_GetSpritePositionXY(v5, &v1, &v2);
+            ManagedSprite_GetPositionXY(v5, &v1, &v2);
             if (v2 < (192 + 32)) {
                 v2 += 6;
-                SpriteActor_SetSpritePositionXY(v5, v1, v2);
+                ManagedSprite_SetPositionXY(v5, v1, v2);
                 v4[v0] = 0;
             }
         }
@@ -749,7 +746,7 @@ static void ov116_0226510C(UnkStruct_ov116_02265470 *param0)
             continue;
         }
 
-        sub_0200D33C(v5);
+        ManagedSprite_TickTwoFrames(v5);
     }
 }
 
@@ -767,7 +764,7 @@ static void ov116_02265260(UnkStruct_ov116_02265470 *param0)
             UnkStruct_ov116_0226501C *v1 = param0->unk_08[v0];
 
             Easy3DAnim_SetFrame(&v1->unk_88[0], (v0 * 20) % 40);
-            Easy3DObject_SetVisibility(&v1->unk_00, 1);
+            Easy3DObject_SetVisible(&v1->unk_00, 1);
         }
 
         param0->unk_28[9] = 0;
@@ -784,7 +781,7 @@ static void ov116_02265260(UnkStruct_ov116_02265470 *param0)
         for (v0 = 0; v0 < 8; v0++) {
             UnkStruct_ov116_0226501C *v2 = param0->unk_08[v0];
 
-            Easy3DObject_SetVisibility(&v2->unk_00, 0);
+            Easy3DObject_SetVisible(&v2->unk_00, 0);
         }
 
         param0->unk_50[0] = 0;
@@ -830,7 +827,7 @@ static void ov116_0226534C(SysTask *param0, void *param1)
     UnkStruct_ov116_0226534C *v0 = param1;
     UnkStruct_ov116_022649E4 *v1 = v0->unk_84;
 
-    if ((ScreenWipe_Done() == 0) || (v1->unk_2C.unk_00 == 1)) {
+    if ((IsScreenFadeDone() == FALSE) || (v1->unk_2C.unk_00 == 1)) {
         SysTask_Done(param0);
 
         return;
@@ -844,7 +841,7 @@ static void ov116_0226534C(SysTask *param0, void *param1)
         }
     case 4:
         if (v0->unk_08[3].unk_04 == 0) {
-            Sound_PlayEffect(1551);
+            Sound_PlayEffect(SEQ_SE_DP_DENDOU_sseq);
             v0->unk_08[3].unk_04 = 1;
             v0->unk_08[3].unk_50[0] = 0;
         }
@@ -855,7 +852,7 @@ static void ov116_0226534C(SysTask *param0, void *param1)
         }
     case 2:
         if (v0->unk_08[1].unk_04 == 0) {
-            Sound_PlayEffect(1393);
+            Sound_PlayEffect(SEQ_SE_PL_HAND_sseq);
             v0->unk_08[1].unk_04 = 1;
             v0->unk_08[1].unk_50[0] = 0;
         }
@@ -872,7 +869,7 @@ static void ov116_0226534C(SysTask *param0, void *param1)
             v0->unk_08[2].unk_50[0] = 1;
             v0->unk_08[3].unk_50[0] = 1;
             v0->unk_08[4].unk_50[0] = 1;
-            sub_020057A4(1393, 0);
+            Sound_StopEffect(1393, 0);
         }
         break;
     }
@@ -915,10 +912,10 @@ void ov116_02265470(UnkStruct_ov116_02262A8C *param0)
             {
                 s16 v2, v3;
 
-                SpriteActor_GetSpritePositionXY(param0->unk_B8[0], &v2, &v3);
-                SpriteActor_SetSpritePositionXY(param0->unk_B8[0], v2, (192 + 32));
-                SpriteActor_GetSpritePositionXY(param0->unk_B8[1], &v2, &v3);
-                SpriteActor_SetSpritePositionXY(param0->unk_B8[1], v2, (192 + 32));
+                ManagedSprite_GetPositionXY(param0->unk_B8[0], &v2, &v3);
+                ManagedSprite_SetPositionXY(param0->unk_B8[0], v2, (192 + 32));
+                ManagedSprite_GetPositionXY(param0->unk_B8[1], &v2, &v3);
+                ManagedSprite_SetPositionXY(param0->unk_B8[1], v2, (192 + 32));
             }
             break;
         case 2: {
@@ -936,10 +933,10 @@ void ov116_02265470(UnkStruct_ov116_02262A8C *param0)
             {
                 s16 v5, v6;
 
-                SpriteActor_GetSpritePositionXY(param0->unk_B8[2], &v5, &v6);
-                SpriteActor_SetSpritePositionXY(param0->unk_B8[2], v5, (192 + 32));
-                SpriteActor_GetSpritePositionXY(param0->unk_B8[3], &v5, &v6);
-                SpriteActor_SetSpritePositionXY(param0->unk_B8[3], v5, (192 + 32));
+                ManagedSprite_GetPositionXY(param0->unk_B8[2], &v5, &v6);
+                ManagedSprite_SetPositionXY(param0->unk_B8[2], v5, (192 + 32));
+                ManagedSprite_GetPositionXY(param0->unk_B8[3], &v5, &v6);
+                ManagedSprite_SetPositionXY(param0->unk_B8[3], v5, (192 + 32));
             }
             break;
         case 4:
@@ -972,11 +969,11 @@ static void ov116_022655DC(UnkStruct_ov116_022660A8 *param0)
             v2[v3] = ov116_02264774(&param0->unk_34[v3]);
         }
 
-        sub_0201C63C(param0->unk_30->unk_10, 7, 3, param0->unk_34[0].unk_00 >> FX32_SHIFT);
-        sub_0201C63C(param0->unk_30->unk_10, 5, 0, param0->unk_34[1].unk_00 >> FX32_SHIFT);
-        sub_0201C63C(param0->unk_30->unk_10, 6, 0, param0->unk_34[2].unk_00 >> FX32_SHIFT);
-        sub_0201C63C(param0->unk_30->unk_10, 1, 0, param0->unk_34[1].unk_00 >> FX32_SHIFT);
-        sub_0201C63C(param0->unk_30->unk_10, 2, 0, param0->unk_34[2].unk_00 >> FX32_SHIFT);
+        Bg_ScheduleScroll(param0->unk_30->unk_10, 7, 3, param0->unk_34[0].unk_00 >> FX32_SHIFT);
+        Bg_ScheduleScroll(param0->unk_30->unk_10, 5, 0, param0->unk_34[1].unk_00 >> FX32_SHIFT);
+        Bg_ScheduleScroll(param0->unk_30->unk_10, 6, 0, param0->unk_34[2].unk_00 >> FX32_SHIFT);
+        Bg_ScheduleScroll(param0->unk_30->unk_10, 1, 0, param0->unk_34[1].unk_00 >> FX32_SHIFT);
+        Bg_ScheduleScroll(param0->unk_30->unk_10, 2, 0, param0->unk_34[2].unk_00 >> FX32_SHIFT);
 
         if (v2[0] && v2[1] && v2[2]) {
             param0->unk_24++;
@@ -994,8 +991,8 @@ static void ov116_022655DC(UnkStruct_ov116_022660A8 *param0)
         *v1 = 6;
     }
 
-    sub_02003A2C(param0->unk_30->unk_14, 0, 0x1, *v0 + *v1, 0x0);
-    sub_02003A2C(param0->unk_30->unk_14, 1, 0x1, *v0 + *v1, 0x0);
+    PaletteData_BlendMulti(param0->unk_30->unk_14, PLTTBUF_MAIN_BG, 0x1, *v0 + *v1, 0x0);
+    PaletteData_BlendMulti(param0->unk_30->unk_14, PLTTBUF_SUB_BG, 0x1, *v0 + *v1, 0x0);
 }
 
 static void ov116_02265754(UnkStruct_ov116_022660A8 *param0)
@@ -1018,11 +1015,11 @@ static void ov116_02265754(UnkStruct_ov116_022660A8 *param0)
             v2[v3] = ov116_02264774(&param0->unk_34[v3]);
         }
 
-        sub_0201C63C(param0->unk_30->unk_10, 7, 3, param0->unk_34[0].unk_00 >> FX32_SHIFT);
-        sub_0201C63C(param0->unk_30->unk_10, 5, 0, param0->unk_34[1].unk_00 >> FX32_SHIFT);
-        sub_0201C63C(param0->unk_30->unk_10, 6, 0, param0->unk_34[2].unk_00 >> FX32_SHIFT);
-        sub_0201C63C(param0->unk_30->unk_10, 1, 0, param0->unk_34[1].unk_00 >> FX32_SHIFT);
-        sub_0201C63C(param0->unk_30->unk_10, 2, 0, param0->unk_34[2].unk_00 >> FX32_SHIFT);
+        Bg_ScheduleScroll(param0->unk_30->unk_10, 7, 3, param0->unk_34[0].unk_00 >> FX32_SHIFT);
+        Bg_ScheduleScroll(param0->unk_30->unk_10, 5, 0, param0->unk_34[1].unk_00 >> FX32_SHIFT);
+        Bg_ScheduleScroll(param0->unk_30->unk_10, 6, 0, param0->unk_34[2].unk_00 >> FX32_SHIFT);
+        Bg_ScheduleScroll(param0->unk_30->unk_10, 1, 0, param0->unk_34[1].unk_00 >> FX32_SHIFT);
+        Bg_ScheduleScroll(param0->unk_30->unk_10, 2, 0, param0->unk_34[2].unk_00 >> FX32_SHIFT);
 
         if (v2[0] && v2[1] && v2[2]) {
             param0->unk_24++;
@@ -1040,8 +1037,8 @@ static void ov116_02265754(UnkStruct_ov116_022660A8 *param0)
         *v1 = 0;
     }
 
-    sub_02003A2C(param0->unk_30->unk_14, 0, 0x1, *v0 + *v1, 0x0);
-    sub_02003A2C(param0->unk_30->unk_14, 1, 0x1, *v0 + *v1, 0x0);
+    PaletteData_BlendMulti(param0->unk_30->unk_14, PLTTBUF_MAIN_BG, 0x1, *v0 + *v1, 0x0);
+    PaletteData_BlendMulti(param0->unk_30->unk_14, PLTTBUF_SUB_BG, 0x1, *v0 + *v1, 0x0);
 }
 
 static int ov116_022658C8(int param0)
@@ -1157,7 +1154,7 @@ static void ov116_0226591C(SysTask *param0, void *param1)
 
     v2 = *v3->unk_0C;
 
-    if ((ScreenWipe_Done() == 0) || (v3->unk_30->unk_2C.unk_00 == 1)) {
+    if ((IsScreenFadeDone() == FALSE) || (v3->unk_30->unk_2C.unk_00 == 1)) {
         SysTask_Done(param0);
         return;
     }
@@ -1178,9 +1175,9 @@ static void ov116_0226591C(SysTask *param0, void *param1)
                 for (v0 = 0; v0 < 2; v0++) {
                     int v5 = Unk_ov116_02267DA4[v2].unk_0C[v0];
 
-                    sub_0200D430(v4->unk_00[v0].unk_00, 4 + v5);
+                    ManagedSprite_SetExplicitPaletteOffset(v4->unk_00[v0].unk_00, 4 + v5);
                     v5 = Unk_ov116_02267DA4[v2].unk_18[v0];
-                    sub_0200D430(v4->unk_A0[v0].unk_00, 0 + v5);
+                    ManagedSprite_SetExplicitPaletteOffset(v4->unk_A0[v0].unk_00, 0 + v5);
                 }
 
                 SysTask_Start(Unk_ov116_02267DA4[v2].unk_24, v3, 4097);
@@ -1227,7 +1224,7 @@ static void ov116_02265AA4(SysTask *param0, void *param1)
     fx32 v3, v4;
     fx32 v5, v6;
 
-    if ((ScreenWipe_Done() == 0) || (v0->unk_30->unk_2C.unk_00 == 1)) {
+    if ((IsScreenFadeDone() == FALSE) || (v0->unk_30->unk_2C.unk_00 == 1)) {
         SysTask_Done(param0);
         return;
     }
@@ -1240,7 +1237,7 @@ static void ov116_02265AA4(SysTask *param0, void *param1)
         v1->unk_00[0].unk_18 = 64;
         v1->unk_00[0].unk_1C = 24;
 
-        SpriteActor_EnableObject(v1->unk_00[0].unk_00, 1);
+        ManagedSprite_SetDrawFlag(v1->unk_00[0].unk_00, 1);
 
         v1->unk_A0[0].unk_08 = 0;
         v1->unk_A0[0].unk_14 = 128;
@@ -1248,23 +1245,23 @@ static void ov116_02265AA4(SysTask *param0, void *param1)
         v1->unk_A0[0].unk_18 = 64;
         v1->unk_A0[0].unk_1C = 24;
 
-        SpriteActor_EnableObject(v1->unk_A0[0].unk_00, 1);
+        ManagedSprite_SetDrawFlag(v1->unk_A0[0].unk_00, 1);
 
         {
-            sub_0200D67C(v1->unk_00[0].unk_00, &v5, &v6, ((192 + 64) << FX32_SHIFT));
+            ManagedSprite_GetPositionFxXYWithSubscreenOffset(v1->unk_00[0].unk_00, &v5, &v6, ((192 + 64) << FX32_SHIFT));
 
-            v3 = (v1->unk_00[0].unk_14 << FX32_SHIFT) + (sub_0201D250(v1->unk_00[0].unk_08) * v1->unk_00[0].unk_18);
-            v4 = (v1->unk_00[0].unk_16 << FX32_SHIFT) + (sub_0201D264(v1->unk_00[0].unk_08) * v1->unk_00[0].unk_1C);
+            v3 = (v1->unk_00[0].unk_14 << FX32_SHIFT) + (CalcSineDegrees_Wraparound(v1->unk_00[0].unk_08) * v1->unk_00[0].unk_18);
+            v4 = (v1->unk_00[0].unk_16 << FX32_SHIFT) + (CalcCosineDegrees_Wraparound(v1->unk_00[0].unk_08) * v1->unk_00[0].unk_1C);
 
-            sub_0200D650(v1->unk_00[0].unk_00, v3, v4, ((192 + 64) << FX32_SHIFT));
+            ManagedSprite_SetPositionFxXYWithSubscreenOffset(v1->unk_00[0].unk_00, v3, v4, ((192 + 64) << FX32_SHIFT));
             ov116_02264764(&v1->unk_00[0].unk_20, v3, v3 + FX32_CONST(180), ov116_022658C8(v1->unk_148));
             ov116_02264764(&v1->unk_00[0].unk_38, v4, v4 - FX32_CONST(24), ov116_022658C8(v1->unk_148));
-            sub_0200D67C(v1->unk_A0[0].unk_00, &v5, &v6, ((192 + 64) << FX32_SHIFT));
+            ManagedSprite_GetPositionFxXYWithSubscreenOffset(v1->unk_A0[0].unk_00, &v5, &v6, ((192 + 64) << FX32_SHIFT));
 
-            v3 = (v1->unk_A0[0].unk_14 << FX32_SHIFT) + (sub_0201D250(v1->unk_A0[0].unk_08) * v1->unk_A0[0].unk_18);
-            v4 = (v1->unk_A0[0].unk_16 << FX32_SHIFT) - (sub_0201D264(v1->unk_A0[0].unk_08) * v1->unk_A0[0].unk_1C);
+            v3 = (v1->unk_A0[0].unk_14 << FX32_SHIFT) + (CalcSineDegrees_Wraparound(v1->unk_A0[0].unk_08) * v1->unk_A0[0].unk_18);
+            v4 = (v1->unk_A0[0].unk_16 << FX32_SHIFT) - (CalcCosineDegrees_Wraparound(v1->unk_A0[0].unk_08) * v1->unk_A0[0].unk_1C);
 
-            sub_0200D650(v1->unk_A0[0].unk_00, v3, v4, ((192 + 64) << FX32_SHIFT));
+            ManagedSprite_SetPositionFxXYWithSubscreenOffset(v1->unk_A0[0].unk_00, v3, v4, ((192 + 64) << FX32_SHIFT));
             ov116_02264764(&v1->unk_A0[0].unk_20, v3, v3 - FX32_CONST(180), ov116_022658C8(v1->unk_144));
             ov116_02264764(&v1->unk_A0[0].unk_38, v4, v4 + FX32_CONST(24), ov116_022658C8(v1->unk_144));
         }
@@ -1331,7 +1328,7 @@ static BOOL ov116_02265D8C(UnkStruct_ov116_02265D84 *param0, int param1, int par
 
     switch (param0->unk_04) {
     case 0:
-        sub_0200D67C(param0->unk_00, &v1, &v2, ((192 + 64) << FX32_SHIFT));
+        ManagedSprite_GetPositionFxXYWithSubscreenOffset(param0->unk_00, &v1, &v2, ((192 + 64) << FX32_SHIFT));
         if (param2 == 0) {
             ov116_02264764(&param0->unk_20, v1, v1 - FX32_CONST(180), ov116_022658C8(param1));
         } else {
@@ -1348,7 +1345,7 @@ static BOOL ov116_02265D8C(UnkStruct_ov116_02265D84 *param0, int param1, int par
     case 1:
         v0[0] = ov116_02264774(&param0->unk_20);
         ov116_02264774(&param0->unk_38);
-        sub_0200D650(param0->unk_00, param0->unk_20.unk_00, param0->unk_38.unk_00, ((192 + 64) << FX32_SHIFT));
+        ManagedSprite_SetPositionFxXYWithSubscreenOffset(param0->unk_00, param0->unk_20.unk_00, param0->unk_38.unk_00, ((192 + 64) << FX32_SHIFT));
 
         if (v0[0]) {
             return 1;
@@ -1385,7 +1382,7 @@ static BOOL ov116_02265E64(UnkStruct_ov116_02265D84 *param0, int param1, int par
     case 1:
         v0[0] = ov116_02264774(&param0->unk_20);
         ov116_02264774(&param0->unk_38);
-        sub_0200D650(param0->unk_00, param0->unk_20.unk_00, param0->unk_38.unk_00, ((192 + 64) << FX32_SHIFT));
+        ManagedSprite_SetPositionFxXYWithSubscreenOffset(param0->unk_00, param0->unk_20.unk_00, param0->unk_38.unk_00, ((192 + 64) << FX32_SHIFT));
 
         if (v0[0]) {
             return 1;
@@ -1422,7 +1419,7 @@ static BOOL ov116_02265F1C(UnkStruct_ov116_02265D84 *param0, int param1, int par
     case 1:
         v0[0] = ov116_02264774(&param0->unk_20);
         ov116_02264774(&param0->unk_38);
-        sub_0200D650(param0->unk_00, param0->unk_20.unk_00, param0->unk_38.unk_00, ((192 + 64) << FX32_SHIFT));
+        ManagedSprite_SetPositionFxXYWithSubscreenOffset(param0->unk_00, param0->unk_20.unk_00, param0->unk_38.unk_00, ((192 + 64) << FX32_SHIFT));
 
         if (v0[0]) {
             return 1;
@@ -1453,17 +1450,17 @@ static BOOL ov116_02265FD4(UnkStruct_ov116_02265D84 *param0, int param1, int par
             param0->unk_08 = 0;
         }
 
-        sub_0200D67C(param0->unk_00, &v3, &v4, ((192 + 64) << FX32_SHIFT));
+        ManagedSprite_GetPositionFxXYWithSubscreenOffset(param0->unk_00, &v3, &v4, ((192 + 64) << FX32_SHIFT));
 
         if (param2 == 0) {
-            v1 = (param0->unk_14 << FX32_SHIFT) - (sub_0201D250(param0->unk_08) * param0->unk_18);
-            v2 = (param0->unk_16 << FX32_SHIFT) - (sub_0201D264(param0->unk_08) * param0->unk_1C);
+            v1 = (param0->unk_14 << FX32_SHIFT) - (CalcSineDegrees_Wraparound(param0->unk_08) * param0->unk_18);
+            v2 = (param0->unk_16 << FX32_SHIFT) - (CalcCosineDegrees_Wraparound(param0->unk_08) * param0->unk_1C);
         } else {
-            v1 = (param0->unk_14 << FX32_SHIFT) + (sub_0201D250(param0->unk_08) * param0->unk_18);
-            v2 = (param0->unk_16 << FX32_SHIFT) - (sub_0201D264(param0->unk_08) * param0->unk_1C);
+            v1 = (param0->unk_14 << FX32_SHIFT) + (CalcSineDegrees_Wraparound(param0->unk_08) * param0->unk_18);
+            v2 = (param0->unk_16 << FX32_SHIFT) - (CalcCosineDegrees_Wraparound(param0->unk_08) * param0->unk_1C);
         }
 
-        sub_0200D650(param0->unk_00, v1, v2, ((192 + 64) << FX32_SHIFT));
+        ManagedSprite_SetPositionFxXYWithSubscreenOffset(param0->unk_00, v1, v2, ((192 + 64) << FX32_SHIFT));
 
         if (param0->unk_08 == 0) {
             param0->unk_10++;
@@ -1492,7 +1489,7 @@ static void ov116_022660A8(SysTask *param0, void *param1)
     fx32 v4, v5;
     fx32 v6, v7;
 
-    if ((ScreenWipe_Done() == 0) || (v1->unk_30->unk_2C.unk_00 == 1)) {
+    if ((IsScreenFadeDone() == FALSE) || (v1->unk_30->unk_2C.unk_00 == 1)) {
         SysTask_Done(param0);
         return;
     }
@@ -1506,7 +1503,7 @@ static void ov116_022660A8(SysTask *param0, void *param1)
             v2->unk_00[v0].unk_18 = 64;
             v2->unk_00[v0].unk_1C = 24;
 
-            SpriteActor_EnableObject(v2->unk_00[v0].unk_00, 1);
+            ManagedSprite_SetDrawFlag(v2->unk_00[v0].unk_00, 1);
 
             v2->unk_A0[v0].unk_08 = 0;
             v2->unk_A0[v0].unk_14 = 128;
@@ -1514,24 +1511,24 @@ static void ov116_022660A8(SysTask *param0, void *param1)
             v2->unk_A0[v0].unk_18 = 64;
             v2->unk_A0[v0].unk_1C = 24;
 
-            SpriteActor_EnableObject(v2->unk_A0[v0].unk_00, 1);
+            ManagedSprite_SetDrawFlag(v2->unk_A0[v0].unk_00, 1);
 
-            sub_0200D67C(v2->unk_00[v0].unk_00, &v6, &v7, ((192 + 64) << FX32_SHIFT));
-            v4 = (v2->unk_00[v0].unk_14 << FX32_SHIFT) + (sub_0201D250(v2->unk_00[v0].unk_08) * v2->unk_00[v0].unk_18);
-            v5 = (v2->unk_00[v0].unk_16 << FX32_SHIFT) + (sub_0201D264(v2->unk_00[v0].unk_08) * v2->unk_00[v0].unk_1C);
-            sub_0200D650(v2->unk_00[v0].unk_00, v4, v5, ((192 + 64) << FX32_SHIFT));
+            ManagedSprite_GetPositionFxXYWithSubscreenOffset(v2->unk_00[v0].unk_00, &v6, &v7, ((192 + 64) << FX32_SHIFT));
+            v4 = (v2->unk_00[v0].unk_14 << FX32_SHIFT) + (CalcSineDegrees_Wraparound(v2->unk_00[v0].unk_08) * v2->unk_00[v0].unk_18);
+            v5 = (v2->unk_00[v0].unk_16 << FX32_SHIFT) + (CalcCosineDegrees_Wraparound(v2->unk_00[v0].unk_08) * v2->unk_00[v0].unk_1C);
+            ManagedSprite_SetPositionFxXYWithSubscreenOffset(v2->unk_00[v0].unk_00, v4, v5, ((192 + 64) << FX32_SHIFT));
 
-            sub_0200D67C(v2->unk_A0[v0].unk_00, &v6, &v7, ((192 + 64) << FX32_SHIFT));
-            v4 = (v2->unk_A0[v0].unk_14 << FX32_SHIFT) + (sub_0201D250(v2->unk_A0[v0].unk_08) * v2->unk_A0[v0].unk_18);
-            v5 = (v2->unk_A0[v0].unk_16 << FX32_SHIFT) - (sub_0201D264(v2->unk_A0[v0].unk_08) * v2->unk_A0[v0].unk_1C);
-            sub_0200D650(v2->unk_A0[v0].unk_00, v4, v5, ((192 + 64) << FX32_SHIFT));
+            ManagedSprite_GetPositionFxXYWithSubscreenOffset(v2->unk_A0[v0].unk_00, &v6, &v7, ((192 + 64) << FX32_SHIFT));
+            v4 = (v2->unk_A0[v0].unk_14 << FX32_SHIFT) + (CalcSineDegrees_Wraparound(v2->unk_A0[v0].unk_08) * v2->unk_A0[v0].unk_18);
+            v5 = (v2->unk_A0[v0].unk_16 << FX32_SHIFT) - (CalcCosineDegrees_Wraparound(v2->unk_A0[v0].unk_08) * v2->unk_A0[v0].unk_1C);
+            ManagedSprite_SetPositionFxXYWithSubscreenOffset(v2->unk_A0[v0].unk_00, v4, v5, ((192 + 64) << FX32_SHIFT));
         }
 
         ov116_02265D84(&v2->unk_A0[0]);
         ov116_02265D84(&v2->unk_A0[1]);
         ov116_02265D84(&v2->unk_00[0]);
         ov116_02265D84(&v2->unk_00[1]);
-        SpriteActor_EnableObject(v2->unk_00[1].unk_00, 0);
+        ManagedSprite_SetDrawFlag(v2->unk_00[1].unk_00, 0);
         v1->unk_1C++;
     case 1:
         v3[0] = ov116_02265D8C(&v2->unk_A0[0], v2->unk_144, 0, 3);
@@ -1544,7 +1541,7 @@ static void ov116_022660A8(SysTask *param0, void *param1)
             ov116_02265D84(&v2->unk_A0[1]);
             ov116_02265D84(&v2->unk_00[0]);
             ov116_02265D84(&v2->unk_00[1]);
-            SpriteActor_EnableObject(v2->unk_00[1].unk_00, 1);
+            ManagedSprite_SetDrawFlag(v2->unk_00[1].unk_00, 1);
             v1->unk_1C++;
         } else {
             break;
@@ -1619,7 +1616,7 @@ static void ov116_0226644C(SysTask *param0, void *param1)
     fx32 v4, v5;
     fx32 v6, v7;
 
-    if ((ScreenWipe_Done() == 0) || (v1->unk_30->unk_2C.unk_00 == 1)) {
+    if ((IsScreenFadeDone() == FALSE) || (v1->unk_30->unk_2C.unk_00 == 1)) {
         SysTask_Done(param0);
         return;
     }
@@ -1633,7 +1630,7 @@ static void ov116_0226644C(SysTask *param0, void *param1)
             v2->unk_00[v0].unk_18 = 64;
             v2->unk_00[v0].unk_1C = 24;
 
-            SpriteActor_EnableObject(v2->unk_00[v0].unk_00, 1);
+            ManagedSprite_SetDrawFlag(v2->unk_00[v0].unk_00, 1);
 
             v2->unk_A0[v0].unk_08 = 0;
             v2->unk_A0[v0].unk_14 = 128;
@@ -1641,24 +1638,24 @@ static void ov116_0226644C(SysTask *param0, void *param1)
             v2->unk_A0[v0].unk_18 = 64;
             v2->unk_A0[v0].unk_1C = 24;
 
-            SpriteActor_EnableObject(v2->unk_A0[v0].unk_00, 1);
+            ManagedSprite_SetDrawFlag(v2->unk_A0[v0].unk_00, 1);
 
-            sub_0200D67C(v2->unk_00[v0].unk_00, &v6, &v7, ((192 + 64) << FX32_SHIFT));
-            v4 = (v2->unk_00[v0].unk_14 << FX32_SHIFT) + (sub_0201D250(v2->unk_00[v0].unk_08) * v2->unk_00[v0].unk_18);
-            v5 = (v2->unk_00[v0].unk_16 << FX32_SHIFT) + (sub_0201D264(v2->unk_00[v0].unk_08) * v2->unk_00[v0].unk_1C);
-            sub_0200D650(v2->unk_00[v0].unk_00, v4, v5, ((192 + 64) << FX32_SHIFT));
+            ManagedSprite_GetPositionFxXYWithSubscreenOffset(v2->unk_00[v0].unk_00, &v6, &v7, ((192 + 64) << FX32_SHIFT));
+            v4 = (v2->unk_00[v0].unk_14 << FX32_SHIFT) + (CalcSineDegrees_Wraparound(v2->unk_00[v0].unk_08) * v2->unk_00[v0].unk_18);
+            v5 = (v2->unk_00[v0].unk_16 << FX32_SHIFT) + (CalcCosineDegrees_Wraparound(v2->unk_00[v0].unk_08) * v2->unk_00[v0].unk_1C);
+            ManagedSprite_SetPositionFxXYWithSubscreenOffset(v2->unk_00[v0].unk_00, v4, v5, ((192 + 64) << FX32_SHIFT));
 
-            sub_0200D67C(v2->unk_A0[v0].unk_00, &v6, &v7, ((192 + 64) << FX32_SHIFT));
-            v4 = (v2->unk_A0[v0].unk_14 << FX32_SHIFT) + (sub_0201D250(v2->unk_A0[v0].unk_08) * v2->unk_A0[v0].unk_18);
-            v5 = (v2->unk_A0[v0].unk_16 << FX32_SHIFT) - (sub_0201D264(v2->unk_A0[v0].unk_08) * v2->unk_A0[v0].unk_1C);
-            sub_0200D650(v2->unk_A0[v0].unk_00, v4, v5, ((192 + 64) << FX32_SHIFT));
+            ManagedSprite_GetPositionFxXYWithSubscreenOffset(v2->unk_A0[v0].unk_00, &v6, &v7, ((192 + 64) << FX32_SHIFT));
+            v4 = (v2->unk_A0[v0].unk_14 << FX32_SHIFT) + (CalcSineDegrees_Wraparound(v2->unk_A0[v0].unk_08) * v2->unk_A0[v0].unk_18);
+            v5 = (v2->unk_A0[v0].unk_16 << FX32_SHIFT) - (CalcCosineDegrees_Wraparound(v2->unk_A0[v0].unk_08) * v2->unk_A0[v0].unk_1C);
+            ManagedSprite_SetPositionFxXYWithSubscreenOffset(v2->unk_A0[v0].unk_00, v4, v5, ((192 + 64) << FX32_SHIFT));
         }
 
         ov116_02265D84(&v2->unk_A0[0]);
         ov116_02265D84(&v2->unk_A0[1]);
         ov116_02265D84(&v2->unk_00[0]);
         ov116_02265D84(&v2->unk_00[1]);
-        SpriteActor_EnableObject(v2->unk_00[1].unk_00, 0);
+        ManagedSprite_SetDrawFlag(v2->unk_00[1].unk_00, 0);
         v1->unk_1C++;
     case 1:
         v3[0] = ov116_02265D8C(&v2->unk_A0[0], v2->unk_144, 0, 3);
@@ -1670,7 +1667,7 @@ static void ov116_0226644C(SysTask *param0, void *param1)
             ov116_02265D84(&v2->unk_A0[1]);
             ov116_02265D84(&v2->unk_00[0]);
             ov116_02265D84(&v2->unk_00[1]);
-            SpriteActor_EnableObject(v2->unk_00[1].unk_00, 1);
+            ManagedSprite_SetDrawFlag(v2->unk_00[1].unk_00, 1);
             v1->unk_1C++;
         } else {
             break;
@@ -1737,7 +1734,7 @@ static void ov116_022667F4(SysTask *param0, void *param1)
     fx32 v4, v5;
     fx32 v6, v7;
 
-    if ((ScreenWipe_Done() == 0) || (v1->unk_30->unk_2C.unk_00 == 1)) {
+    if ((IsScreenFadeDone() == FALSE) || (v1->unk_30->unk_2C.unk_00 == 1)) {
         SysTask_Done(param0);
         return;
     }
@@ -1751,7 +1748,7 @@ static void ov116_022667F4(SysTask *param0, void *param1)
             v2->unk_00[v0].unk_18 = 64;
             v2->unk_00[v0].unk_1C = 24;
 
-            SpriteActor_EnableObject(v2->unk_00[v0].unk_00, 1);
+            ManagedSprite_SetDrawFlag(v2->unk_00[v0].unk_00, 1);
 
             v2->unk_A0[v0].unk_08 = 0;
             v2->unk_A0[v0].unk_14 = 128;
@@ -1759,24 +1756,24 @@ static void ov116_022667F4(SysTask *param0, void *param1)
             v2->unk_A0[v0].unk_18 = 64;
             v2->unk_A0[v0].unk_1C = 24;
 
-            SpriteActor_EnableObject(v2->unk_A0[v0].unk_00, 1);
+            ManagedSprite_SetDrawFlag(v2->unk_A0[v0].unk_00, 1);
 
-            sub_0200D67C(v2->unk_00[v0].unk_00, &v6, &v7, ((192 + 64) << FX32_SHIFT));
-            v4 = (v2->unk_00[v0].unk_14 << FX32_SHIFT) + (sub_0201D250(v2->unk_00[v0].unk_08) * v2->unk_00[v0].unk_18);
-            v5 = (v2->unk_00[v0].unk_16 << FX32_SHIFT) + (sub_0201D264(v2->unk_00[v0].unk_08) * v2->unk_00[v0].unk_1C);
-            sub_0200D650(v2->unk_00[v0].unk_00, v4, v5, ((192 + 64) << FX32_SHIFT));
+            ManagedSprite_GetPositionFxXYWithSubscreenOffset(v2->unk_00[v0].unk_00, &v6, &v7, ((192 + 64) << FX32_SHIFT));
+            v4 = (v2->unk_00[v0].unk_14 << FX32_SHIFT) + (CalcSineDegrees_Wraparound(v2->unk_00[v0].unk_08) * v2->unk_00[v0].unk_18);
+            v5 = (v2->unk_00[v0].unk_16 << FX32_SHIFT) + (CalcCosineDegrees_Wraparound(v2->unk_00[v0].unk_08) * v2->unk_00[v0].unk_1C);
+            ManagedSprite_SetPositionFxXYWithSubscreenOffset(v2->unk_00[v0].unk_00, v4, v5, ((192 + 64) << FX32_SHIFT));
 
-            sub_0200D67C(v2->unk_A0[v0].unk_00, &v6, &v7, ((192 + 64) << FX32_SHIFT));
-            v4 = (v2->unk_A0[v0].unk_14 << FX32_SHIFT) + (sub_0201D250(v2->unk_A0[v0].unk_08) * v2->unk_A0[v0].unk_18);
-            v5 = (v2->unk_A0[v0].unk_16 << FX32_SHIFT) - (sub_0201D264(v2->unk_A0[v0].unk_08) * v2->unk_A0[v0].unk_1C);
-            sub_0200D650(v2->unk_A0[v0].unk_00, v4, v5, ((192 + 64) << FX32_SHIFT));
+            ManagedSprite_GetPositionFxXYWithSubscreenOffset(v2->unk_A0[v0].unk_00, &v6, &v7, ((192 + 64) << FX32_SHIFT));
+            v4 = (v2->unk_A0[v0].unk_14 << FX32_SHIFT) + (CalcSineDegrees_Wraparound(v2->unk_A0[v0].unk_08) * v2->unk_A0[v0].unk_18);
+            v5 = (v2->unk_A0[v0].unk_16 << FX32_SHIFT) - (CalcCosineDegrees_Wraparound(v2->unk_A0[v0].unk_08) * v2->unk_A0[v0].unk_1C);
+            ManagedSprite_SetPositionFxXYWithSubscreenOffset(v2->unk_A0[v0].unk_00, v4, v5, ((192 + 64) << FX32_SHIFT));
         }
 
         ov116_02265D84(&v2->unk_A0[0]);
         ov116_02265D84(&v2->unk_A0[1]);
         ov116_02265D84(&v2->unk_00[0]);
         ov116_02265D84(&v2->unk_00[1]);
-        SpriteActor_EnableObject(v2->unk_00[1].unk_00, 0);
+        ManagedSprite_SetDrawFlag(v2->unk_00[1].unk_00, 0);
         v1->unk_1C++;
 
     case 1:
@@ -1790,7 +1787,7 @@ static void ov116_022667F4(SysTask *param0, void *param1)
             ov116_02265D84(&v2->unk_A0[1]);
             ov116_02265D84(&v2->unk_00[0]);
             ov116_02265D84(&v2->unk_00[1]);
-            SpriteActor_EnableObject(v2->unk_00[1].unk_00, 1);
+            ManagedSprite_SetDrawFlag(v2->unk_00[1].unk_00, 1);
             v1->unk_1C++;
         } else {
             break;
@@ -1883,7 +1880,7 @@ static void ov116_02266BF0(SysTask *param0, void *param1)
     fx32 v4, v5;
     fx32 v6, v7;
 
-    if ((ScreenWipe_Done() == 0) || (v1->unk_30->unk_2C.unk_00 == 1)) {
+    if ((IsScreenFadeDone() == FALSE) || (v1->unk_30->unk_2C.unk_00 == 1)) {
         SysTask_Done(param0);
         return;
     }
@@ -1897,7 +1894,7 @@ static void ov116_02266BF0(SysTask *param0, void *param1)
             v2->unk_00[v0].unk_18 = 64;
             v2->unk_00[v0].unk_1C = 24;
 
-            SpriteActor_EnableObject(v2->unk_00[v0].unk_00, 1);
+            ManagedSprite_SetDrawFlag(v2->unk_00[v0].unk_00, 1);
 
             v2->unk_A0[v0].unk_08 = 0;
             v2->unk_A0[v0].unk_14 = 128;
@@ -1905,24 +1902,24 @@ static void ov116_02266BF0(SysTask *param0, void *param1)
             v2->unk_A0[v0].unk_18 = 64;
             v2->unk_A0[v0].unk_1C = 24;
 
-            SpriteActor_EnableObject(v2->unk_A0[v0].unk_00, 1);
+            ManagedSprite_SetDrawFlag(v2->unk_A0[v0].unk_00, 1);
 
-            sub_0200D67C(v2->unk_00[v0].unk_00, &v6, &v7, ((192 + 64) << FX32_SHIFT));
-            v4 = (v2->unk_00[v0].unk_14 << FX32_SHIFT) + (sub_0201D250(v2->unk_00[v0].unk_08) * v2->unk_00[v0].unk_18);
-            v5 = (v2->unk_00[v0].unk_16 << FX32_SHIFT) + (sub_0201D264(v2->unk_00[v0].unk_08) * v2->unk_00[v0].unk_1C);
-            sub_0200D650(v2->unk_00[v0].unk_00, v4, v5, ((192 + 64) << FX32_SHIFT));
+            ManagedSprite_GetPositionFxXYWithSubscreenOffset(v2->unk_00[v0].unk_00, &v6, &v7, ((192 + 64) << FX32_SHIFT));
+            v4 = (v2->unk_00[v0].unk_14 << FX32_SHIFT) + (CalcSineDegrees_Wraparound(v2->unk_00[v0].unk_08) * v2->unk_00[v0].unk_18);
+            v5 = (v2->unk_00[v0].unk_16 << FX32_SHIFT) + (CalcCosineDegrees_Wraparound(v2->unk_00[v0].unk_08) * v2->unk_00[v0].unk_1C);
+            ManagedSprite_SetPositionFxXYWithSubscreenOffset(v2->unk_00[v0].unk_00, v4, v5, ((192 + 64) << FX32_SHIFT));
 
-            sub_0200D67C(v2->unk_A0[v0].unk_00, &v6, &v7, ((192 + 64) << FX32_SHIFT));
-            v4 = (v2->unk_A0[v0].unk_14 << FX32_SHIFT) + (sub_0201D250(v2->unk_A0[v0].unk_08) * v2->unk_A0[v0].unk_18);
-            v5 = (v2->unk_A0[v0].unk_16 << FX32_SHIFT) - (sub_0201D264(v2->unk_A0[v0].unk_08) * v2->unk_A0[v0].unk_1C);
-            sub_0200D650(v2->unk_A0[v0].unk_00, v4, v5, ((192 + 64) << FX32_SHIFT));
+            ManagedSprite_GetPositionFxXYWithSubscreenOffset(v2->unk_A0[v0].unk_00, &v6, &v7, ((192 + 64) << FX32_SHIFT));
+            v4 = (v2->unk_A0[v0].unk_14 << FX32_SHIFT) + (CalcSineDegrees_Wraparound(v2->unk_A0[v0].unk_08) * v2->unk_A0[v0].unk_18);
+            v5 = (v2->unk_A0[v0].unk_16 << FX32_SHIFT) - (CalcCosineDegrees_Wraparound(v2->unk_A0[v0].unk_08) * v2->unk_A0[v0].unk_1C);
+            ManagedSprite_SetPositionFxXYWithSubscreenOffset(v2->unk_A0[v0].unk_00, v4, v5, ((192 + 64) << FX32_SHIFT));
         }
 
         ov116_02265D84(&v2->unk_A0[0]);
         ov116_02265D84(&v2->unk_A0[1]);
         ov116_02265D84(&v2->unk_00[0]);
         ov116_02265D84(&v2->unk_00[1]);
-        SpriteActor_EnableObject(v2->unk_00[1].unk_00, 0);
+        ManagedSprite_SetDrawFlag(v2->unk_00[1].unk_00, 0);
         v1->unk_1C++;
     case 1:
         v3[0] = ov116_02265D8C(&v2->unk_A0[0], v2->unk_144, 0, 3);
@@ -1935,7 +1932,7 @@ static void ov116_02266BF0(SysTask *param0, void *param1)
             ov116_02265D84(&v2->unk_A0[1]);
             ov116_02265D84(&v2->unk_00[0]);
             ov116_02265D84(&v2->unk_00[1]);
-            SpriteActor_EnableObject(v2->unk_00[1].unk_00, 1);
+            ManagedSprite_SetDrawFlag(v2->unk_00[1].unk_00, 1);
             v1->unk_1C++;
         } else {
             break;

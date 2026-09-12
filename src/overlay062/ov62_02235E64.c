@@ -1,8 +1,6 @@
 #include <nitro.h>
 #include <string.h>
 
-#include "struct_decls/struct_02023FCC_decl.h"
-#include "struct_defs/struct_0205AA50.h"
 #include "struct_defs/struct_0208C06C.h"
 
 #include "overlay062/ov62_0222F2C0.h"
@@ -14,20 +12,20 @@
 #include "overlay062/struct_ov62_022323B8.h"
 #include "overlay062/struct_ov62_02233F74.h"
 
+#include "bg_window.h"
+#include "graphics.h"
 #include "gx_layers.h"
 #include "heap.h"
 #include "message.h"
+#include "palette.h"
 #include "savedata.h"
-#include "strbuf.h"
+#include "screen_fade.h"
+#include "sprite_system.h"
+#include "string_gf.h"
+#include "text.h"
 #include "touch_screen.h"
-#include "unk_02002F38.h"
-#include "unk_02006E3C.h"
-#include "unk_0200C6E4.h"
-#include "unk_0200F174.h"
+#include "touch_screen_actions.h"
 #include "unk_02012744.h"
-#include "unk_02018340.h"
-#include "unk_0201D670.h"
-#include "unk_02023FCC.h"
 #include "unk_0202F1D4.h"
 #include "unk_0208BA78.h"
 
@@ -39,7 +37,7 @@ typedef struct {
     UnkStruct_ov62_022323B8 unk_10;
     UnkStruct_ov62_02233F74 unk_9C;
     UnkStruct_ov62_022312B0 unk_158[1];
-    UnkStruct_02023FCC *unk_174[1];
+    TouchScreenActions *unk_174[1];
     Window unk_178[2];
     int unk_198;
 } UnkStruct_ov62_02235E64;
@@ -54,7 +52,7 @@ static BOOL ov62_02236624(UnkStruct_0208C06C *param0);
 static BOOL ov62_022366D4(UnkStruct_0208C06C *param0);
 static BOOL ov62_022367B4(UnkStruct_0208C06C *param0);
 static BOOL ov62_02236920(UnkStruct_0208C06C *param0);
-static void ov62_02236AB0(u32 param0, u32 param1, void *param2);
+static void ov62_02236AB0(u32 param0, enum TouchScreenButtonState param1, void *param2);
 static void ov62_02236B2C(UnkStruct_0208C06C *param0);
 static void ov62_02236B64(UnkStruct_0208C06C *param0);
 static void ov62_02236BA8(UnkStruct_0208C06C *param0);
@@ -85,15 +83,15 @@ static const TouchScreenRect Unk_ov62_02248C1C[] = {
 
 static BOOL ov62_02235E64(UnkStruct_0208C06C *param0)
 {
-    UnkStruct_ov62_02235E64 *v0 = Heap_AllocFromHeap(102, sizeof(UnkStruct_ov62_02235E64));
+    UnkStruct_ov62_02235E64 *v0 = Heap_Alloc(HEAP_ID_102, sizeof(UnkStruct_ov62_02235E64));
 
     memset(v0, 0, sizeof(UnkStruct_ov62_02235E64));
     param0->unk_860 = v0;
 
-    sub_02019EBC(param0->unk_14.unk_10, 2);
-    sub_02019EBC(param0->unk_14.unk_10, 3);
-    sub_02019EBC(param0->unk_14.unk_10, 6);
-    sub_02019EBC(param0->unk_14.unk_10, 7);
+    Bg_ClearTilemap(param0->unk_14.unk_10, 2);
+    Bg_ClearTilemap(param0->unk_14.unk_10, 3);
+    Bg_ClearTilemap(param0->unk_14.unk_10, 6);
+    Bg_ClearTilemap(param0->unk_14.unk_10, 7);
 
     ov62_022315C8(&v0->unk_00, &v0->unk_04, 0);
     ov62_0222FB60(param0, 1);
@@ -111,24 +109,24 @@ static BOOL ov62_02235EBC(UnkStruct_0208C06C *param0)
             param0->unk_08++;
         }
 
-        sub_02003A2C(param0->unk_14.unk_14, 2, 0xC, v0->unk_08, param0->unk_14.unk_44);
-        sub_02003A2C(param0->unk_14.unk_14, 3, 0xC, v0->unk_08, param0->unk_14.unk_44);
-        sub_02003A2C(param0->unk_14.unk_14, 1, 0x2, v0->unk_08, param0->unk_14.unk_44);
+        PaletteData_BlendMulti(param0->unk_14.unk_14, PLTTBUF_MAIN_OBJ, 0xC, v0->unk_08, param0->unk_14.unk_44);
+        PaletteData_BlendMulti(param0->unk_14.unk_14, PLTTBUF_SUB_OBJ, 0xC, v0->unk_08, param0->unk_14.unk_44);
+        PaletteData_BlendMulti(param0->unk_14.unk_14, PLTTBUF_SUB_BG, 0x2, v0->unk_08, param0->unk_14.unk_44);
         break;
     case 1:
         ov62_02234540(param0, 1);
         ov62_02231454(param0);
         ov62_02234540(param0, 0);
-        BGL_SetPriority(0, 0);
-        BGL_SetPriority(1, 3);
-        BGL_SetPriority(2, 0);
-        BGL_SetPriority(3, 2);
-        BGL_SetPriority(4, 0);
-        BGL_SetPriority(5, 3);
-        BGL_SetPriority(6, 1);
-        BGL_SetPriority(7, 2);
-        sub_020070E8(param0->unk_14.unk_00, 62, param0->unk_14.unk_10, 3, 0, 0, 0, 102);
-        sub_020070E8(param0->unk_14.unk_00, 62, param0->unk_14.unk_10, 7, 0, 0, 0, 102);
+        Bg_SetPriority(BG_LAYER_MAIN_0, 0);
+        Bg_SetPriority(BG_LAYER_MAIN_1, 3);
+        Bg_SetPriority(BG_LAYER_MAIN_2, 0);
+        Bg_SetPriority(BG_LAYER_MAIN_3, 2);
+        Bg_SetPriority(BG_LAYER_SUB_0, 0);
+        Bg_SetPriority(BG_LAYER_SUB_1, 3);
+        Bg_SetPriority(BG_LAYER_SUB_2, 1);
+        Bg_SetPriority(BG_LAYER_SUB_3, 2);
+        Graphics_LoadTilesToBgLayerFromOpenNARC(param0->unk_14.unk_00, 62, param0->unk_14.unk_10, 3, 0, 0, 0, HEAP_ID_102);
+        Graphics_LoadTilesToBgLayerFromOpenNARC(param0->unk_14.unk_00, 62, param0->unk_14.unk_10, 7, 0, 0, 0, HEAP_ID_102);
         param0->unk_08++;
         break;
     default:
@@ -174,7 +172,7 @@ static BOOL ov62_0223604C(UnkStruct_0208C06C *param0)
         break;
     case 1:
         ov62_02236B2C(param0);
-        v0->unk_174[0] = sub_02023FCC(Unk_ov62_02248C1C, NELEMS(Unk_ov62_02248C1C), ov62_02236AB0, param0, 102);
+        v0->unk_174[0] = TouchScreenActions_RegisterHandler(Unk_ov62_02248C1C, NELEMS(Unk_ov62_02248C1C), ov62_02236AB0, param0, HEAP_ID_102);
         param0->unk_08++;
         break;
     case 2:
@@ -200,7 +198,7 @@ static BOOL ov62_0223604C(UnkStruct_0208C06C *param0)
             param0->unk_08++;
         }
 
-        sub_02003A2C(param0->unk_14.unk_14, 3, 0xC, v0->unk_08, param0->unk_14.unk_44);
+        PaletteData_BlendMulti(param0->unk_14.unk_14, PLTTBUF_SUB_OBJ, 0xC, v0->unk_08, param0->unk_14.unk_44);
         break;
     default:
         ov62_0222FB60(param0, 3);
@@ -214,7 +212,7 @@ static BOOL ov62_02236174(UnkStruct_0208C06C *param0)
 {
     UnkStruct_ov62_02235E64 *v0 = param0->unk_860;
 
-    sub_0202404C(v0->unk_174[0]);
+    TouchScreenActions_HandleAction(v0->unk_174[0]);
     return 0;
 }
 
@@ -286,45 +284,45 @@ static void ov62_022362B8(UnkStruct_0208C06C *param0)
 {
     UnkStruct_ov62_02235E64 *v0 = param0->unk_860;
     Window *v1;
-    Strbuf *v2;
+    String *v2;
     int v3 = 1;
     int v4;
 
     v1 = &v0->unk_178[0];
     Window_Init(v1);
-    BGL_AddWindow(param0->unk_14.unk_10, v1, 6, 4, 6, 10, 2, 14, v3);
-    BGL_FillWindow(v1, 0x0);
+    Window_Add(param0->unk_14.unk_10, v1, 6, 4, 6, 10, 2, 14, v3);
+    Window_FillTilemap(v1, 0x0);
 
-    v2 = MessageLoader_GetNewStrbuf(param0->unk_14.unk_34, 130);
+    v2 = MessageLoader_GetNewString(param0->unk_14.unk_34, 130);
     v4 = ov62_0223429C(v1, v2);
 
-    sub_0201D78C(v1, 0, v2, v4, 0, 0xff, ((u32)(((15 & 0xff) << 16) | ((13 & 0xff) << 8) | ((0 & 0xff) << 0))), NULL);
-    Strbuf_Free(v2);
-    sub_0201A9A4(v1);
+    Text_AddPrinterWithParamsAndColor(v1, FONT_SYSTEM, v2, v4, 0, TEXT_SPEED_NO_TRANSFER, TEXT_COLOR(15, 13, 0), NULL);
+    String_Free(v2);
+    Window_ScheduleCopyToVRAM(v1);
 
     v3 += (10 * 2);
     v1 = &v0->unk_178[1];
 
     Window_Init(v1);
-    BGL_AddWindow(param0->unk_14.unk_10, v1, 6, 18, 6, 10, 2, 14, v3);
-    BGL_FillWindow(v1, 0x0);
+    Window_Add(param0->unk_14.unk_10, v1, 6, 18, 6, 10, 2, 14, v3);
+    Window_FillTilemap(v1, 0x0);
 
-    v2 = MessageLoader_GetNewStrbuf(param0->unk_14.unk_34, 131);
+    v2 = MessageLoader_GetNewString(param0->unk_14.unk_34, 131);
     v4 = ov62_0223429C(v1, v2);
 
-    sub_0201D78C(v1, 0, v2, v4, 0, 0xff, ((u32)(((15 & 0xff) << 16) | ((13 & 0xff) << 8) | ((0 & 0xff) << 0))), NULL);
-    Strbuf_Free(v2);
-    sub_0201A9A4(v1);
+    Text_AddPrinterWithParamsAndColor(v1, FONT_SYSTEM, v2, v4, 0, TEXT_SPEED_NO_TRANSFER, TEXT_COLOR(15, 13, 0), NULL);
+    String_Free(v2);
+    Window_ScheduleCopyToVRAM(v1);
 }
 
 static void ov62_02236398(UnkStruct_0208C06C *param0)
 {
     UnkStruct_ov62_02235E64 *v0 = param0->unk_860;
 
-    sub_0201ACF4(&v0->unk_178[0]);
-    BGL_DeleteWindow(&v0->unk_178[0]);
-    sub_0201ACF4(&v0->unk_178[1]);
-    BGL_DeleteWindow(&v0->unk_178[1]);
+    Window_ClearAndCopyToVRAM(&v0->unk_178[0]);
+    Window_Remove(&v0->unk_178[0]);
+    Window_ClearAndCopyToVRAM(&v0->unk_178[1]);
+    Window_Remove(&v0->unk_178[1]);
 }
 
 static BOOL ov62_022363CC(UnkStruct_0208C06C *param0)
@@ -333,7 +331,7 @@ static BOOL ov62_022363CC(UnkStruct_0208C06C *param0)
 
     switch (param0->unk_08) {
     case 0:
-        sub_02024034(v0->unk_174[0]);
+        TouchScreenActions_Free(v0->unk_174[0]);
         GXLayers_EngineBToggleLayers(GX_PLANEMASK_BG2, 0);
         GXLayers_EngineAToggleLayers(GX_PLANEMASK_BG2, 0);
         ov62_02234540(param0, 1);
@@ -359,12 +357,12 @@ static BOOL ov62_022363CC(UnkStruct_0208C06C *param0)
             param0->unk_08++;
         }
 
-        sub_02003A2C(param0->unk_14.unk_14, 3, 0xC, v0->unk_08, param0->unk_14.unk_44);
+        PaletteData_BlendMulti(param0->unk_14.unk_14, PLTTBUF_SUB_OBJ, 0xC, v0->unk_08, param0->unk_14.unk_44);
         break;
     case 2:
         ov62_022362B8(param0);
         ov62_02231AAC(param0, 296);
-        sub_0200710C(param0->unk_14.unk_00, 84, param0->unk_14.unk_10, 7, 0, 0, 0, 102);
+        Graphics_LoadTilemapToBgLayerFromOpenNARC(param0->unk_14.unk_00, 84, param0->unk_14.unk_10, 7, 0, 0, 0, HEAP_ID_102);
         GXLayers_EngineAToggleLayers(GX_PLANEMASK_BG3, 1);
         GXLayers_EngineBToggleLayers(GX_PLANEMASK_BG3, 1);
         param0->unk_08++;
@@ -378,14 +376,14 @@ static BOOL ov62_022363CC(UnkStruct_0208C06C *param0)
             param0->unk_08++;
         }
 
-        sub_02003A2C(param0->unk_14.unk_14, 3, 0xC, v0->unk_08, param0->unk_14.unk_44);
+        PaletteData_BlendMulti(param0->unk_14.unk_14, PLTTBUF_SUB_OBJ, 0xC, v0->unk_08, param0->unk_14.unk_44);
         break;
     case 4:
         if (TouchScreen_LocationPressed(&Unk_ov62_02248C14[0])) {
             v0->unk_198 = 1;
             ov62_02234520(param0);
 
-            if (SaveData_FullSaveRequired(param0->unk_830)) {
+            if (SaveData_FullSaveRequired(param0->saveData)) {
                 ov62_02231B3C(param0, 298);
             } else {
                 ov62_02231B3C(param0, 299);
@@ -401,7 +399,7 @@ static BOOL ov62_022363CC(UnkStruct_0208C06C *param0)
 
         break;
     case 5:
-        SaveData_Save(param0->unk_830);
+        SaveData_Save(param0->saveData);
         param0->unk_08++;
         break;
     case 6:
@@ -416,7 +414,7 @@ static BOOL ov62_022363CC(UnkStruct_0208C06C *param0)
             param0->unk_08++;
         }
 
-        sub_02003A2C(param0->unk_14.unk_14, 3, 0xC, v0->unk_08, param0->unk_14.unk_44);
+        PaletteData_BlendMulti(param0->unk_14.unk_14, PLTTBUF_SUB_OBJ, 0xC, v0->unk_08, param0->unk_14.unk_44);
         break;
     default:
         if (v0->unk_198 == 1) {
@@ -439,11 +437,11 @@ static BOOL ov62_02236624(UnkStruct_0208C06C *param0)
     switch (param0->unk_08) {
     case 0:
         ov62_02231AAC(param0, 299);
-        sub_0200F174(0, 1, 1, 0x0, 6, 1, 102);
+        StartScreenFade(FADE_BOTH_SCREENS, FADE_TYPE_BRIGHTNESS_IN, FADE_TYPE_BRIGHTNESS_IN, COLOR_BLACK, 6, 1, HEAP_ID_102);
         param0->unk_08++;
         break;
     case 1:
-        if (ScreenWipe_Done() == 1) {
+        if (IsScreenFadeDone() == TRUE) {
             param0->unk_08++;
         }
         break;
@@ -453,9 +451,9 @@ static BOOL ov62_02236624(UnkStruct_0208C06C *param0)
                 int v1;
                 int v2;
 
-                sub_0202F298(param0->unk_830, 102, &v1, NULL, param0->unk_86C);
-                v2 = ov62_022486A4(param0->unk_830, param0->unk_86C);
-                sub_0202F22C();
+                sub_0202F298(param0->saveData, 102, &v1, NULL, param0->unk_86C);
+                v2 = ov62_022486A4(param0->saveData, param0->unk_86C);
+                BattleRecording_Free();
 
                 ov62_022339A0(param0);
                 ov62_022338A8(param0);
@@ -480,11 +478,11 @@ static BOOL ov62_022366D4(UnkStruct_0208C06C *param0)
 
     switch (param0->unk_08) {
     case 0:
-        sub_0200F174(0, 0, 0, 0x0, 6, 1, 102);
+        StartScreenFade(FADE_BOTH_SCREENS, FADE_TYPE_BRIGHTNESS_OUT, FADE_TYPE_BRIGHTNESS_OUT, COLOR_BLACK, 6, 1, HEAP_ID_102);
         param0->unk_08++;
         break;
     case 1:
-        if (ScreenWipe_Done() == 1) {
+        if (IsScreenFadeDone() == TRUE) {
             param0->unk_08++;
         }
         break;
@@ -499,7 +497,7 @@ static BOOL ov62_022366D4(UnkStruct_0208C06C *param0)
             }
 
             ov62_02234540(param0, 0);
-            sub_02024034(v0->unk_174[0]);
+            TouchScreenActions_Free(v0->unk_174[0]);
             ov62_02236BA8(param0);
             ov62_02236C94(param0);
         }
@@ -512,7 +510,7 @@ static BOOL ov62_022366D4(UnkStruct_0208C06C *param0)
         param0->unk_08++;
         break;
     default:
-        Heap_FreeToHeap(v0);
+        Heap_Free(v0);
         return 1;
     }
 
@@ -525,7 +523,7 @@ static BOOL ov62_022367B4(UnkStruct_0208C06C *param0)
 
     switch (param0->unk_08) {
     case 0:
-        sub_02024034(v0->unk_174[0]);
+        TouchScreenActions_Free(v0->unk_174[0]);
         GXLayers_EngineBToggleLayers(GX_PLANEMASK_BG2, 0);
         GXLayers_EngineAToggleLayers(GX_PLANEMASK_BG2, 0);
 
@@ -546,17 +544,17 @@ static BOOL ov62_022367B4(UnkStruct_0208C06C *param0)
             param0->unk_08++;
         }
 
-        sub_02003A2C(param0->unk_14.unk_14, 3, 0xC, v0->unk_08, param0->unk_14.unk_44);
+        PaletteData_BlendMulti(param0->unk_14.unk_14, PLTTBUF_SUB_OBJ, 0xC, v0->unk_08, param0->unk_14.unk_44);
         break;
     case 2:
         ov62_0223376C(param0, 1);
         ov62_02234540(param0, 1);
         ov62_0223146C(param0);
         ov62_02234540(param0, 0);
-        sub_02019EBC(param0->unk_14.unk_10, 2);
-        sub_02019EBC(param0->unk_14.unk_10, 6);
-        sub_02019EBC(param0->unk_14.unk_10, 3);
-        sub_02019EBC(param0->unk_14.unk_10, 7);
+        Bg_ClearTilemap(param0->unk_14.unk_10, 2);
+        Bg_ClearTilemap(param0->unk_14.unk_10, 6);
+        Bg_ClearTilemap(param0->unk_14.unk_10, 3);
+        Bg_ClearTilemap(param0->unk_14.unk_10, 7);
         param0->unk_08++;
         break;
     default:
@@ -567,13 +565,13 @@ static BOOL ov62_022367B4(UnkStruct_0208C06C *param0)
         if (ov62_02231664(&v0->unk_08, 0)) {
             ov62_022318E8(param0);
             ov62_02231688(&v0->unk_08);
-            sub_02003A2C(param0->unk_14.unk_14, 2, 0xC, 16, param0->unk_14.unk_44);
+            PaletteData_BlendMulti(param0->unk_14.unk_14, PLTTBUF_MAIN_OBJ, 0xC, 16, param0->unk_14.unk_44);
             ov62_0222FB44(param0, 1, 1, param0->unk_10);
             ov62_0222FB60(param0, 5);
-            Heap_FreeToHeap(v0);
+            Heap_Free(v0);
         } else {
-            sub_02003A2C(param0->unk_14.unk_14, 3, 0xC, v0->unk_08, param0->unk_14.unk_44);
-            sub_02003A2C(param0->unk_14.unk_14, 1, 0x2, v0->unk_08, param0->unk_14.unk_44);
+            PaletteData_BlendMulti(param0->unk_14.unk_14, PLTTBUF_SUB_OBJ, 0xC, v0->unk_08, param0->unk_14.unk_44);
+            PaletteData_BlendMulti(param0->unk_14.unk_14, PLTTBUF_SUB_BG, 0x2, v0->unk_08, param0->unk_14.unk_44);
         }
 
         break;
@@ -595,7 +593,7 @@ static BOOL ov62_02236920(UnkStruct_0208C06C *param0)
         break;
     case 1:
         ov62_02236B2C(param0);
-        v0->unk_174[0] = sub_02023FCC(Unk_ov62_02248C1C, NELEMS(Unk_ov62_02248C1C), ov62_02236AB0, param0, 102);
+        v0->unk_174[0] = TouchScreenActions_RegisterHandler(Unk_ov62_02248C1C, NELEMS(Unk_ov62_02248C1C), ov62_02236AB0, param0, HEAP_ID_102);
         param0->unk_08++;
         break;
     case 2:
@@ -628,14 +626,14 @@ static BOOL ov62_02236920(UnkStruct_0208C06C *param0)
             v0->unk_198 = 0;
         }
 
-        sub_02003A2C(param0->unk_14.unk_14, 3, 0xC, v0->unk_08, param0->unk_14.unk_44);
+        PaletteData_BlendMulti(param0->unk_14.unk_14, PLTTBUF_SUB_OBJ, 0xC, v0->unk_08, param0->unk_14.unk_44);
         break;
     case 4:
-        sub_0200F174(0, 1, 1, 0x0, 6, 1, 102);
+        StartScreenFade(FADE_BOTH_SCREENS, FADE_TYPE_BRIGHTNESS_IN, FADE_TYPE_BRIGHTNESS_IN, COLOR_BLACK, 6, 1, HEAP_ID_102);
         param0->unk_08++;
         break;
     case 5:
-        if (ScreenWipe_Done() == 1) {
+        if (IsScreenFadeDone() == TRUE) {
             param0->unk_08++;
         }
 
@@ -650,12 +648,12 @@ static BOOL ov62_02236920(UnkStruct_0208C06C *param0)
     return 0;
 }
 
-static void ov62_02236AB0(u32 param0, u32 param1, void *param2)
+static void ov62_02236AB0(u32 param0, enum TouchScreenButtonState param1, void *param2)
 {
     UnkStruct_0208C06C *v0 = param2;
     UnkStruct_ov62_02235E64 *v1 = v0->unk_860;
 
-    if (param1 != 0) {
+    if (param1 != TOUCH_BUTTON_PRESSED) {
         return;
     }
 
@@ -697,7 +695,7 @@ static void ov62_02236B64(UnkStruct_0208C06C *param0)
 
     v1 = &v0->unk_178[0];
     Window_Init(v1);
-    BGL_AddWindow(param0->unk_14.unk_10, v1, 6, 8, 3, 16, 2, 14, v2);
+    Window_Add(param0->unk_14.unk_10, v1, 6, 8, 3, 16, 2, 14, v2);
     ov62_02236BC8(param0, 121);
 }
 
@@ -705,27 +703,27 @@ static void ov62_02236BA8(UnkStruct_0208C06C *param0)
 {
     UnkStruct_ov62_02235E64 *v0 = param0->unk_860;
 
-    sub_0201ACF4(&v0->unk_178[0]);
-    BGL_DeleteWindow(&v0->unk_178[0]);
+    Window_ClearAndCopyToVRAM(&v0->unk_178[0]);
+    Window_Remove(&v0->unk_178[0]);
 }
 
 static void ov62_02236BC8(UnkStruct_0208C06C *param0, int param1)
 {
     UnkStruct_ov62_02235E64 *v0 = param0->unk_860;
     Window *v1;
-    Strbuf *v2;
+    String *v2;
     int v3;
 
     v1 = &v0->unk_178[0];
 
-    BGL_FillWindow(v1, 0x0);
+    Window_FillTilemap(v1, 0x0);
 
-    v2 = MessageLoader_GetNewStrbuf(param0->unk_14.unk_34, param1);
+    v2 = MessageLoader_GetNewString(param0->unk_14.unk_34, param1);
     v3 = ov62_0223429C(v1, v2);
 
-    sub_0201D78C(v1, 0, v2, v3, 0, 0xff, ((u32)(((15 & 0xff) << 16) | ((13 & 0xff) << 8) | ((0 & 0xff) << 0))), NULL);
-    Strbuf_Free(v2);
-    sub_0201A9A4(v1);
+    Text_AddPrinterWithParamsAndColor(v1, FONT_SYSTEM, v2, v3, 0, TEXT_SPEED_NO_TRANSFER, TEXT_COLOR(15, 13, 0), NULL);
+    String_Free(v2);
+    Window_ScheduleCopyToVRAM(v1);
 }
 
 static void ov62_02236C20(UnkStruct_0208C06C *param0)
@@ -739,9 +737,9 @@ static void ov62_02236C20(UnkStruct_0208C06C *param0)
     ov62_0223118C(&v0->unk_158[0], &param0->unk_14, NNS_G2D_VRAM_TYPE_2DSUB);
     ov62_0223124C(&v0->unk_158[0], &param0->unk_14, 3);
 
-    sub_0200D364(v0->unk_158[0].unk_08, 0);
-    SpriteActor_SetSpritePositionXY(v0->unk_158[0].unk_08, 80, 232);
-    sub_020128C4(v0->unk_158[0].unk_0C, 36, -8);
+    ManagedSprite_SetAnim(v0->unk_158[0].unk_08, 0);
+    ManagedSprite_SetPositionXY(v0->unk_158[0].unk_08, 80, 232);
+    FontOAM_SetXY(v0->unk_158[0].unk_0C, 36, -8);
     sub_020129D0(v0->unk_158[0].unk_0C, 1);
 }
 
@@ -750,6 +748,6 @@ static void ov62_02236C94(UnkStruct_0208C06C *param0)
     UnkStruct_ov62_02235E64 *v0 = param0->unk_860;
 
     ov62_022312B0(&v0->unk_158[0]);
-    sub_0200D0F4(v0->unk_158[0].unk_08);
+    Sprite_DeleteAndFreeResources(v0->unk_158[0].unk_08);
     ov62_022313BC(param0);
 }

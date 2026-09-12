@@ -3,36 +3,32 @@
 #include <nitro.h>
 #include <string.h>
 
-#include "struct_decls/struct_02006C24_decl.h"
-#include "struct_decls/struct_02009714_decl.h"
-#include "struct_decls/struct_02009DC8_decl.h"
-#include "struct_decls/struct_02009F38_decl.h"
+#include "constants/heap.h"
 
 #include "field/field_system.h"
 #include "field/field_system_sub2_t.h"
+#include "overlay005/fog_manager.h"
 #include "overlay005/hblank_system.h"
-#include "overlay005/ov5_021D57BC.h"
-#include "overlay005/struct_ov5_021D57D8_decl.h"
 
+#include "bg_window.h"
 #include "buffer_manager.h"
 #include "camera.h"
-#include "cell_actor.h"
 #include "enums.h"
+#include "fx_util.h"
+#include "graphics.h"
 #include "gx_layers.h"
 #include "heap.h"
+#include "math_util.h"
 #include "narc.h"
+#include "render_oam.h"
+#include "render_view.h"
+#include "sound_playback.h"
+#include "sprite.h"
+#include "sprite_resource.h"
+#include "sprite_transfer.h"
+#include "sprite_util.h"
 #include "sys_task.h"
 #include "sys_task_manager.h"
-#include "unk_02005474.h"
-#include "unk_02006E3C.h"
-#include "unk_020093B4.h"
-#include "unk_02009714.h"
-#include "unk_0200A328.h"
-#include "unk_0200A784.h"
-#include "unk_02018340.h"
-#include "unk_0201D15C.h"
-#include "unk_0201E190.h"
-#include "unk_0202309C.h"
 
 typedef struct UnkStruct_ov5_021D5EF8_t {
     UnkStruct_ov5_021D6594 *unk_00;
@@ -50,9 +46,9 @@ typedef struct {
 } UnkStruct_ov5_021F8D90;
 
 typedef struct {
-    UnkStruct_02009DC8 *unk_00[4];
-    CellActorInitParamsEx unk_10;
-    CellActorResourceData unk_40;
+    SpriteResource *unk_00[4];
+    AffineSpriteListTemplate unk_10;
+    SpriteResourcesHeader unk_40;
 } UnkStruct_ov5_021D6690;
 
 typedef struct {
@@ -66,7 +62,7 @@ typedef struct {
 
 typedef struct UnkStruct_ov5_021D6FA8_tag {
     UnkStruct_ov5_021D6594 *unk_00;
-    CellActor *unk_04;
+    Sprite *unk_04;
     void *unk_08;
     s32 unk_0C[10];
     struct UnkStruct_ov5_021D6FA8_tag *unk_34;
@@ -106,11 +102,11 @@ typedef struct {
 typedef void (*UnkFuncPtr_ov5_021D6FF0)(UnkStruct_ov5_021D6FA8 *);
 
 typedef struct {
-    UnkStruct_02009714 *unk_00[4];
-    UnkStruct_02009F38 *unk_10;
+    SpriteResourceCollection *unk_00[4];
+    SpriteResourceTable *unk_10;
     NNSG2dRendererInstance unk_14;
     NNSG2dRenderSurface unk_C0;
-    CellActorCollection *unk_130;
+    SpriteList *unk_130;
     SysTask *unk_134;
 } UnkStruct_ov5_021D61D0;
 
@@ -157,7 +153,7 @@ typedef struct {
 } UnkStruct_ov5_021D6538;
 
 typedef struct {
-    UnkStruct_ov5_021D57D8 *unk_00;
+    FogManager *unk_00;
     UnkStruct_ov5_021D64FC unk_04;
     UnkStruct_ov5_021D64FC unk_18;
     UnkStruct_ov5_021D64FC unk_2C;
@@ -166,7 +162,7 @@ typedef struct {
 } UnkStruct_ov5_021D7308;
 
 typedef struct {
-    UnkStruct_ov5_021D57D8 *unk_00;
+    FogManager *unk_00;
     char unk_04[32];
     s32 unk_24;
     s32 unk_28;
@@ -245,16 +241,16 @@ static BOOL ov5_021D6548(UnkStruct_ov5_021D6538 *param0);
 static void ov5_021D6594(UnkStruct_ov5_021D6594 *param0, int param1, UnkStruct_ov5_021D6690 *param2);
 static void ov5_021D6A2C(UnkStruct_ov5_021D6594 *param0, int param1);
 static void ov5_021D6690(UnkStruct_ov5_021D6594 *param0, int param1, UnkStruct_ov5_021D6690 *param2);
-static UnkStruct_02009DC8 *ov5_021D65C0(UnkStruct_02009F38 *param0, int param1, int param2, UnkStruct_02009714 *param3, NARC *param4, u32 param5);
+static SpriteResource *ov5_021D65C0(SpriteResourceTable *param0, int param1, int param2, SpriteResourceCollection *param3, NARC *param4, u32 param5);
 static void ov5_021D61D0(UnkStruct_ov5_021D61D0 *param0);
-static void ov5_021D6290(UnkStruct_02009F38 *param0, int param1, int param2);
+static void ov5_021D6290(SpriteResourceTable *param0, int param1, int param2);
 static void ov5_021D62BC(UnkStruct_ov5_021D61D0 *param0);
 static void ov5_021D6284(SysTask *param0, void *param1);
-static void ov5_021D630C(CellActor *param0, VecFx32 *param1);
+static void ov5_021D630C(Sprite *param0, VecFx32 *param1);
 static void ov5_021D6FA8(UnkStruct_ov5_021D6FA8 *param0);
 static void ov5_021D6FD8(UnkStruct_ov5_021D6FA8 *param0);
 static UnkStruct_ov5_021D6FA8 *ov5_021D6F00(UnkStruct_ov5_021DB4B8 *param0, int param1);
-static void ov5_021D6F4C(CellActorResourceData *param0, UnkStruct_ov5_021D6594 *param1, UnkStruct_ov5_021D6690 *param2, int param3, int param4);
+static void ov5_021D6F4C(SpriteResourcesHeader *param0, UnkStruct_ov5_021D6594 *param1, UnkStruct_ov5_021D6690 *param2, int param3, int param4);
 static BOOL ov5_021D6A48(UnkStruct_ov5_021D6594 *param0, UnkStruct_ov5_021D69B8 *param1);
 static void ov5_021D6FF0(UnkStruct_ov5_021D6FA8 *param0, UnkFuncPtr_ov5_021D6FF0 param1);
 static void ov5_021D700C(UnkStruct_ov5_021DB4B8 *param0);
@@ -267,10 +263,10 @@ static void ov5_021D6EF0(UnkStruct_ov5_021D6FA8 *param0);
 static void ov5_021D7210(UnkStruct_ov5_021D7210 *param0, UnkStruct_ov5_021DB4B8 *param1, s32 param2, s32 param3, s32 param4, s32 param5, s32 param6, s32 param7, s32 param8, UnkFuncPtr_ov5_021D7210_1 param9);
 static void ov5_021D7238(UnkStruct_ov5_021D7210 *param0, s32 param1, s32 param2, s32 param3, s32 param4);
 static int ov5_021D7244(UnkStruct_ov5_021D7210 *param0);
-static void ov5_021D7308(UnkStruct_ov5_021D7308 *param0, UnkStruct_ov5_021D7480 *param1, UnkStruct_ov5_021D57D8 *param2, int param3, int param4, GXRgb param5, int param6, u32 param7);
+static void ov5_021D7308(UnkStruct_ov5_021D7308 *param0, UnkStruct_ov5_021D7480 *param1, FogManager *param2, int param3, int param4, GXRgb param5, int param6, u32 param7);
 static int ov5_021D735C(UnkStruct_ov5_021D7308 *param0, UnkStruct_ov5_021D7480 *param1, u32 param2);
-static void ov5_021D7384(UnkStruct_ov5_021D57D8 *param0, int param1, int param2, GXRgb param3);
-static void ov5_021D73B0(UnkStruct_ov5_021D7308 *param0, UnkStruct_ov5_021D57D8 *param1, int param2, int param3, GXRgb param4, int param5);
+static void ov5_021D7384(FogManager *param0, int param1, int param2, GXRgb param3);
+static void ov5_021D73B0(UnkStruct_ov5_021D7308 *param0, FogManager *param1, int param2, int param3, GXRgb param4, int param5);
 static BOOL ov5_021D7434(UnkStruct_ov5_021D7308 *param0);
 static void ov5_021D7480(UnkStruct_ov5_021D7480 *param0);
 static void ov5_021D749C(UnkStruct_ov5_021D7480 *param0, int param1, BOOL param2);
@@ -374,9 +370,7 @@ static void ov5_021DB588(fx32 param0, int param1, int param2, int param3, int *p
 
 UnkStruct_ov5_021D5EF8 *ov5_021D5EB8(FieldSystem *fieldSystem)
 {
-    UnkStruct_ov5_021D5EF8 *v0;
-
-    v0 = Heap_AllocFromHeap(4, sizeof(UnkStruct_ov5_021D5EF8));
+    UnkStruct_ov5_021D5EF8 *v0 = Heap_Alloc(HEAP_ID_FIELD1, sizeof(UnkStruct_ov5_021D5EF8));
     memset(v0, 0, sizeof(UnkStruct_ov5_021D5EF8));
 
     v0->unk_00 = ov5_021D6364(fieldSystem);
@@ -399,7 +393,7 @@ void ov5_021D5EF8(UnkStruct_ov5_021D5EF8 *param0)
 
     ov5_021D63A4(&param0->unk_00);
     memset(param0, 0, sizeof(UnkStruct_ov5_021D5EF8));
-    Heap_FreeToHeap(param0);
+    Heap_Free(param0);
 
     param0 = NULL;
 }
@@ -773,21 +767,21 @@ static void ov5_021D61D0(UnkStruct_ov5_021D61D0 *param0)
     int v1;
     int v2;
 
-    sub_0202309C(&param0->unk_14, -FX32_ONE);
+    InitRenderer(&param0->unk_14, -FX32_ONE);
 
     v0.posTopLeft.x = 0;
     v0.posTopLeft.y = 0;
     v0.sizeView.x = (255 << FX32_SHIFT);
     v0.sizeView.y = (192 << FX32_SHIFT);
 
-    sub_0200A8B0(&param0->unk_C0, &v0, NNS_G2D_SURFACETYPE_MAIN2D, &param0->unk_14);
+    RenderOam_InitSurface(&param0->unk_C0, &v0, NNS_G2D_SURFACETYPE_MAIN2D, &param0->unk_14);
 
     for (v1 = 0; v1 < 4; v1++) {
-        param0->unk_00[v1] = sub_02009714(31, v1, 4);
+        param0->unk_00[v1] = SpriteResourceCollection_New(31, v1, HEAP_ID_FIELD1);
     }
 
-    v2 = sub_02009F34();
-    param0->unk_10 = Heap_AllocFromHeap(4, v2 * 4);
+    v2 = SpriteResourceTable_Size();
+    param0->unk_10 = Heap_Alloc(HEAP_ID_FIELD1, v2 * 4);
 
     ov5_021D6290(param0->unk_10, 0, 63);
     ov5_021D6290(param0->unk_10, 1, 64);
@@ -795,13 +789,13 @@ static void ov5_021D61D0(UnkStruct_ov5_021D61D0 *param0)
     ov5_021D6290(param0->unk_10, 3, 62);
 
     {
-        CellActorCollectionParams v3;
+        SpriteListParams v3;
 
         v3.maxElements = 96;
         v3.renderer = &param0->unk_14;
-        v3.heapID = 4;
+        v3.heapID = HEAP_ID_FIELD1;
 
-        param0->unk_130 = CellActorCollection_New(&v3);
+        param0->unk_130 = SpriteList_New(&v3);
         param0->unk_134 = SysTask_Start(ov5_021D6284, param0, 10);
     }
 }
@@ -809,44 +803,41 @@ static void ov5_021D61D0(UnkStruct_ov5_021D61D0 *param0)
 static void ov5_021D6284(SysTask *param0, void *param1)
 {
     UnkStruct_ov5_021D61D0 *v0 = param1;
-    CellActorCollection_Update(v0->unk_130);
+    SpriteList_Update(v0->unk_130);
 }
 
-static void ov5_021D6290(UnkStruct_02009F38 *param0, int param1, int param2)
+static void ov5_021D6290(SpriteResourceTable *param0, int param1, int param2)
 {
-    UnkStruct_02009F38 *v0;
-    void *v1;
+    SpriteResourceTable *v0 = SpriteResourceTable_GetArrayElement(param0, param1);
+    void *v1 = LoadMemberFromNARC(NARC_INDEX_DATA__WEATHER_SYS, param2, 0, HEAP_ID_FIELD1, 1);
 
-    v0 = sub_02009F38(param0, param1);
-    v1 = sub_02006FE8(65, param2, 0, 4, 1);
-
-    sub_02009F40(v1, v0, 4);
-    Heap_FreeToHeap(v1);
+    SpriteResourceTable_LoadFromBinary(v1, v0, HEAP_ID_FIELD1);
+    Heap_Free(v1);
 }
 
 static void ov5_021D62BC(UnkStruct_ov5_021D61D0 *param0)
 {
     int v0;
-    UnkStruct_02009F38 *v1;
+    SpriteResourceTable *v1;
 
     for (v0 = 0; v0 < 4; v0++) {
-        v1 = sub_02009F38(param0->unk_10, v0);
+        v1 = SpriteResourceTable_GetArrayElement(param0->unk_10, v0);
 
-        sub_02009F8C(v1);
-        sub_02009754(param0->unk_00[v0]);
+        SpriteResourceTable_Clear(v1);
+        SpriteResourceCollection_Delete(param0->unk_00[v0]);
     }
 
-    Heap_FreeToHeap(param0->unk_10);
+    Heap_Free(param0->unk_10);
     param0->unk_10 = NULL;
 
-    CellActorCollection_Delete(param0->unk_130);
+    SpriteList_Delete(param0->unk_130);
     param0->unk_130 = NULL;
 
     SysTask_Done(param0->unk_134);
     param0->unk_134 = NULL;
 }
 
-static void ov5_021D630C(CellActor *param0, VecFx32 *param1)
+static void ov5_021D630C(Sprite *param0, VecFx32 *param1)
 {
     if (param1->x > ((255 << FX32_SHIFT) + 64 * FX32_ONE)) {
         param1->x %= ((255 << FX32_SHIFT) + 64 * FX32_ONE);
@@ -864,21 +855,19 @@ static void ov5_021D630C(CellActor *param0, VecFx32 *param1)
         }
     }
 
-    CellActor_SetPosition(param0, param1);
+    Sprite_SetPosition(param0, param1);
 }
 
 UnkStruct_ov5_021D6594 *ov5_021D6364(FieldSystem *fieldSystem)
 {
-    UnkStruct_ov5_021D6594 *v0;
-
-    v0 = Heap_AllocFromHeap(4, sizeof(UnkStruct_ov5_021D6594));
+    UnkStruct_ov5_021D6594 *v0 = Heap_Alloc(HEAP_ID_FIELD1, sizeof(UnkStruct_ov5_021D6594));
     v0->fieldSystem = fieldSystem;
 
     ov5_021D61D0(&v0->unk_08);
 
     v0->unk_00 = Unk_ov5_02201D78;
     v0->unk_04 = Unk_ov5_021F8D90;
-    v0->unk_144 = NARC_ctor(NARC_INDEX_DATA__WEATHER_SYS, 4);
+    v0->unk_144 = NARC_ctor(NARC_INDEX_DATA__WEATHER_SYS, HEAP_ID_FIELD1);
 
     return v0;
 }
@@ -892,7 +881,7 @@ void ov5_021D63A4(UnkStruct_ov5_021D6594 **param0)
             ov5_021D68B8(*param0, v0);
         }
 
-        ov5_021D57FC((*param0)->fieldSystem->unk_48, 1, 0, 0, 0, 0);
+        FogManager_ApplyParameters((*param0)->fieldSystem->fogMan, FOG_PARAMETER_ENABLED, FALSE, GX_FOGBLEND_COLOR_ALPHA, GX_FOGSLOPE_0x8000, 0);
 
         G2_SetBG0Priority(1);
         GXLayers_EngineAToggleLayers(GX_PLANEMASK_BG2, 0);
@@ -900,7 +889,7 @@ void ov5_021D63A4(UnkStruct_ov5_021D6594 **param0)
         ov5_021D62BC(&(*param0)->unk_08);
 
         NARC_dtor((*param0)->unk_144);
-        Heap_FreeToHeapExplicit(4, *param0);
+        Heap_FreeExplicit(HEAP_ID_FIELD1, *param0);
 
         *param0 = NULL;
     }
@@ -928,7 +917,7 @@ BOOL ov5_021D6418(UnkStruct_ov5_021D6594 *param0, int param1, int param2)
         v0 = ov5_021D676C(param0, param2, 2, 1);
         break;
     case 4:
-        if (ov5_021D57EC(param0->fieldSystem->unk_48) == 1) {
+        if (FogManager_IsEnabled(param0->fieldSystem->fogMan) == 1) {
             v0 = ov5_021D676C(param0, param2, 0, 2);
         } else {
             v0 = ov5_021D676C(param0, param2, 0, 1);
@@ -982,9 +971,7 @@ static void ov5_021D64FC(UnkStruct_ov5_021D64FC *param0, int param1, int param2,
 
 static BOOL ov5_021D650C(UnkStruct_ov5_021D64FC *param0)
 {
-    int v0;
-
-    v0 = param0->unk_08 * param0->unk_0C;
+    int v0 = param0->unk_08 * param0->unk_0C;
     v0 = v0 / param0->unk_10;
 
     param0->unk_00 = v0 + param0->unk_04;
@@ -1033,35 +1020,35 @@ static void ov5_021D6594(UnkStruct_ov5_021D6594 *param0, int param1, UnkStruct_o
     ov5_021D6CA0(param0, param1, param2);
 }
 
-static UnkStruct_02009DC8 *ov5_021D65C0(UnkStruct_02009F38 *param0, int param1, int param2, UnkStruct_02009714 *param3, NARC *param4, u32 param5)
+static SpriteResource *ov5_021D65C0(SpriteResourceTable *param0, int param1, int param2, SpriteResourceCollection *param3, NARC *param4, u32 param5)
 {
-    UnkStruct_02009F38 *v0;
-    UnkStruct_02009DC8 *v1;
+    SpriteResourceTable *v0;
+    SpriteResource *v1;
     int v2;
     BOOL v3;
     int v4;
     int v5;
     int v6;
 
-    v0 = sub_02009F38(param0, param1);
-    v2 = sub_02009FE8(v0, param2);
-    v3 = sub_0200A014(v0, param2);
-    v4 = sub_0200A040(v0, param2);
-    v5 = sub_0200A074(v0, param2);
-    v6 = sub_02009FB4(v0, param2);
+    v0 = SpriteResourceTable_GetArrayElement(param0, param1);
+    v2 = SpriteResourceTable_GetNARCEntryMemberIndex(v0, param2);
+    v3 = SpriteResourceTable_IsNARCEntryCompressed(v0, param2);
+    v4 = SpriteResourceTable_GetEntryVRAMType(v0, param2);
+    v5 = SpriteResourceTable_GetPaletteIndex(v0, param2);
+    v6 = SpriteResourceTable_GetEntryID(v0, param2);
 
     switch (param1) {
     case 0:
-        v1 = sub_02009AA8(param3, param4, v2, v3, v6, v4, 4, param5);
+        v1 = SpriteResourceCollection_AddTilesFromEx(param3, param4, v2, v3, v6, v4, 4, param5);
         break;
     case 1:
-        v1 = sub_02009B64(param3, param4, v2, v3, v6, v4, v5, 4, param5);
+        v1 = SpriteResourceCollection_AddPaletteFromEx(param3, param4, v2, v3, v6, v4, v5, 4, param5);
         break;
     case 2:
-        v1 = sub_02009BC4(param3, param4, v2, v3, v6, 2, 4);
+        v1 = SpriteResourceCollection_AddFrom(param3, param4, v2, v3, v6, 2, HEAP_ID_FIELD1);
         break;
     case 3:
-        v1 = sub_02009BC4(param3, param4, v2, v3, v6, 3, 4);
+        v1 = SpriteResourceCollection_AddFrom(param3, param4, v2, v3, v6, 3, HEAP_ID_FIELD1);
         break;
     }
 
@@ -1074,16 +1061,16 @@ static void ov5_021D6690(UnkStruct_ov5_021D6594 *param0, int param1, UnkStruct_o
 
     if (param1 != 0xffff) {
         if (param2->unk_00[0]) {
-            sub_0200A4E4(param2->unk_00[0]);
+            SpriteTransfer_ResetCharTransfer(param2->unk_00[0]);
         }
 
         if (param2->unk_00[1]) {
-            sub_0200A6DC(param2->unk_00[1]);
+            SpriteTransfer_ResetPlttTransfer(param2->unk_00[1]);
         }
 
         for (v0 = 0; v0 < 4; v0++) {
             if (param2->unk_00[v0]) {
-                sub_02009D68(param0->unk_08.unk_00[v0], param2->unk_00[v0]);
+                SpriteResourceCollection_Remove(param0->unk_08.unk_00[v0], param2->unk_00[v0]);
             }
         }
     }
@@ -1104,7 +1091,7 @@ static BOOL ov5_021D66D0(UnkStruct_ov5_021D6594 *param0, int param1)
         v1 = ov5_021D6A48(param0, v0);
 
         if (v1 == 0) {
-            Heap_FreeToHeap(v0->unk_08);
+            Heap_Free(v0->unk_08);
             v0->unk_08 = NULL;
             return 0;
         }
@@ -1176,7 +1163,7 @@ static BOOL ov5_021D676C(UnkStruct_ov5_021D6594 *param0, int param1, int param2,
     v0->unk_08->unk_B8C = *(NNS_G3dGlbGetCameraTarget());
 
     if (v0->unk_04 > 0) {
-        v0->unk_08->unk_B98 = Heap_AllocFromHeap(4, v0->unk_04);
+        v0->unk_08->unk_B98 = Heap_Alloc(HEAP_ID_FIELD1, v0->unk_04);
         memset(v0->unk_08->unk_B98, 0, v0->unk_04);
     } else {
         v0->unk_08->unk_B98 = NULL;
@@ -1226,7 +1213,7 @@ static void ov5_021D68B8(UnkStruct_ov5_021D6594 *param0, int param1)
 
     if (v0->unk_0C != NULL) {
         ov5_021D6690(param0, v0->unk_00, v0->unk_0C);
-        Heap_FreeToHeapExplicit(4, v0->unk_0C);
+        Heap_FreeExplicit(HEAP_ID_FIELD1, v0->unk_0C);
         v0->unk_0C = NULL;
 
         if (v0->unk_14 != NULL) {
@@ -1247,7 +1234,7 @@ static void ov5_021D68B8(UnkStruct_ov5_021D6594 *param0, int param1)
         }
 
         if (v0->unk_08->unk_B98 != NULL) {
-            Heap_FreeToHeapExplicit(4, v0->unk_08->unk_B98);
+            Heap_FreeExplicit(HEAP_ID_FIELD1, v0->unk_08->unk_B98);
             v0->unk_08->unk_B98 = NULL;
         }
 
@@ -1261,11 +1248,11 @@ static void ov5_021D68B8(UnkStruct_ov5_021D6594 *param0, int param1)
             }
         }
 
-        Heap_FreeToHeapExplicit(4, v0->unk_08);
+        Heap_FreeExplicit(HEAP_ID_FIELD1, v0->unk_08);
         v0->unk_08 = NULL;
     }
 
-    ov5_021D57FC(param0->fieldSystem->unk_48, 1, 0, 0, 0, 0);
+    FogManager_ApplyParameters(param0->fieldSystem->fogMan, FOG_PARAMETER_ENABLED, FALSE, GX_FOGBLEND_COLOR_ALPHA, GX_FOGSLOPE_0x8000, 0);
 }
 
 static void ov5_021D69B8(UnkStruct_ov5_021D69B8 *param0)
@@ -1381,7 +1368,7 @@ static BOOL ov5_021D6B60(UnkStruct_ov5_021D6594 *param0, UnkStruct_ov5_021D69B8 
         return 1;
     }
 
-    param1->unk_08 = Heap_AllocFromHeap(4, sizeof(UnkStruct_ov5_021DB4B8));
+    param1->unk_08 = Heap_Alloc(HEAP_ID_FIELD1, sizeof(UnkStruct_ov5_021DB4B8));
 
     if (param1->unk_08 == NULL) {
         return 0;
@@ -1407,7 +1394,7 @@ static BOOL ov5_021D6BC4(UnkStruct_ov5_021D69B8 *param0)
             return 1;
         }
 
-        param0->unk_0C = Heap_AllocFromHeap(4, sizeof(UnkStruct_ov5_021D6690));
+        param0->unk_0C = Heap_Alloc(HEAP_ID_FIELD1, sizeof(UnkStruct_ov5_021D6690));
 
         if (param0->unk_0C == NULL) {
             return 0;
@@ -1438,8 +1425,8 @@ static void ov5_021D6C64(UnkStruct_ov5_021D6594 *param0, int param1, UnkStruct_o
     if (param1 != 0xffff) {
         param2->unk_00[0] = ov5_021D65C0(param0->unk_08.unk_10, 0, param1, param0->unk_08.unk_00[0], param0->unk_144, 1);
 
-        sub_0200A3DC(param2->unk_00[0]);
-        sub_02009D4C(param2->unk_00[0]);
+        SpriteTransfer_RequestCharAtEnd(param2->unk_00[0]);
+        SpriteResource_ReleaseData(param2->unk_00[0]);
     }
 }
 
@@ -1448,8 +1435,8 @@ static void ov5_021D6CA0(UnkStruct_ov5_021D6594 *param0, int param1, UnkStruct_o
     if (param1 != 0xffff) {
         param2->unk_00[1] = ov5_021D65C0(param0->unk_08.unk_10, 1, param1, param0->unk_08.unk_00[1], param0->unk_144, 1);
 
-        sub_0200A640(param2->unk_00[1]);
-        sub_02009D4C(param2->unk_00[1]);
+        SpriteTransfer_RequestPlttFreeSpace(param2->unk_00[1]);
+        SpriteResource_ReleaseData(param2->unk_00[1]);
     }
 }
 
@@ -1457,8 +1444,8 @@ static void ov5_021D6CDC(UnkStruct_ov5_021D6594 *param0, UnkStruct_ov5_021D69B8 
 {
     if (param1->unk_00 != 0xffff) {
         ov5_021D6F4C(&param1->unk_0C->unk_40, param0, param1->unk_0C, 0, 1);
-        memset(&param1->unk_0C->unk_10, 0, sizeof(CellActorInitParamsEx));
-        param1->unk_0C->unk_10.collection = param0->unk_08.unk_130;
+        memset(&param1->unk_0C->unk_10, 0, sizeof(AffineSpriteListTemplate));
+        param1->unk_0C->unk_10.list = param0->unk_08.unk_130;
         param1->unk_0C->unk_10.resourceData = &param1->unk_0C->unk_40;
         param1->unk_0C->unk_10.affineScale.x = FX32_ONE;
         param1->unk_0C->unk_10.affineScale.y = FX32_ONE;
@@ -1472,8 +1459,8 @@ static void ov5_021D6D34(UnkStruct_ov5_021DB4B8 *param0)
     int v0;
 
     for (v0 = 0; v0 < 48; v0++) {
-        param0->unk_48[v0].unk_04 = CellActorCollection_AddEx(&param0->unk_08->unk_10);
-        CellActor_SetDrawFlag(param0->unk_48[v0].unk_04, 0);
+        param0->unk_48[v0].unk_04 = SpriteList_AddAffine(&param0->unk_08->unk_10);
+        Sprite_SetDrawFlag(param0->unk_48[v0].unk_04, FALSE);
         GF_ASSERT(param0->unk_48[v0].unk_04);
     }
 }
@@ -1484,7 +1471,7 @@ static void ov5_021D6D64(UnkStruct_ov5_021DB4B8 *param0)
 
     for (v0 = 0; v0 < 48; v0++) {
         if (param0->unk_48[v0].unk_04) {
-            CellActor_Delete(param0->unk_48[v0].unk_04);
+            Sprite_Delete(param0->unk_48[v0].unk_04);
             param0->unk_48[v0].unk_04 = NULL;
         }
     }
@@ -1499,8 +1486,8 @@ static void ov5_021D6D84(UnkStruct_ov5_021D6594 *param0, int param1)
 
         NNS_G2dGetUnpackedPaletteData(v0.unk_00, &v0.unk_14);
 
-        sub_0201972C(2, v0.unk_14->pRawData, 32, 32 * 6);
-        Heap_FreeToHeap(v0.unk_00);
+        Bg_LoadPalette(BG_LAYER_MAIN_2, v0.unk_14->pRawData, PALETTE_SIZE_BYTES, PLTT_OFFSET(6));
+        Heap_Free(v0.unk_00);
 
         v0.unk_00 = NULL;
     }
@@ -1515,8 +1502,8 @@ static void ov5_021D6DCC(UnkStruct_ov5_021D6594 *param0, int param1)
 
         NNS_G2dGetUnpackedCharacterData(v0.unk_04, &v0.unk_10);
 
-        sub_0201958C(param0->fieldSystem->unk_08, 2, v0.unk_10->pRawData, v0.unk_10->szByte, 0);
-        Heap_FreeToHeap(v0.unk_04);
+        Bg_LoadTiles(param0->fieldSystem->bgConfig, 2, v0.unk_10->pRawData, v0.unk_10->szByte, 0);
+        Heap_Free(v0.unk_04);
 
         v0.unk_04 = NULL;
     }
@@ -1534,11 +1521,11 @@ static void ov5_021D6E20(UnkStruct_ov5_021D6594 *param0, int param1)
 
         NNS_G2dGetUnpackedScreenData(v0.unk_08, &v0.unk_0C);
 
-        sub_02019460(param0->fieldSystem->unk_08, 2, (void *)v0.unk_0C->rawData, v0.unk_0C->szByte, 0);
-        sub_02019574(param0->fieldSystem->unk_08, 2, (void *)v0.unk_0C->rawData, v0.unk_0C->szByte);
-        sub_02019E2C(param0->fieldSystem->unk_08, 2, 0, 0, 32, 32, 6);
-        sub_02019448(param0->fieldSystem->unk_08, 2);
-        Heap_FreeToHeap(v0.unk_08);
+        Bg_CopyTilemapBufferRangeToVRAM(param0->fieldSystem->bgConfig, 2, (void *)v0.unk_0C->rawData, v0.unk_0C->szByte, 0);
+        Bg_LoadTilemapBuffer(param0->fieldSystem->bgConfig, 2, (void *)v0.unk_0C->rawData, v0.unk_0C->szByte);
+        Bg_ChangeTilemapRectPalette(param0->fieldSystem->bgConfig, 2, 0, 0, 32, 32, 6);
+        Bg_CopyTilemapBufferToVRAM(param0->fieldSystem->bgConfig, 2);
+        Heap_Free(v0.unk_08);
 
         v0.unk_08 = NULL;
     }
@@ -1584,31 +1571,31 @@ static UnkStruct_ov5_021D6FA8 *ov5_021D6F00(UnkStruct_ov5_021DB4B8 *param0, int 
     }
 
     GF_ASSERT(v0->unk_04);
-    CellActor_SetDrawFlag(v0->unk_04, 1);
+    Sprite_SetDrawFlag(v0->unk_04, TRUE);
 
     return v0;
 }
 
-static void ov5_021D6F4C(CellActorResourceData *param0, UnkStruct_ov5_021D6594 *param1, UnkStruct_ov5_021D6690 *param2, int param3, int param4)
+static void ov5_021D6F4C(SpriteResourcesHeader *param0, UnkStruct_ov5_021D6594 *param1, UnkStruct_ov5_021D6690 *param2, int param3, int param4)
 {
     int v0[4];
     int v1;
 
     for (v1 = 0; v1 < 4; v1++) {
-        v0[v1] = sub_02009E08(param2->unk_00[v1]);
+        v0[v1] = SpriteResource_GetID(param2->unk_00[v1]);
     }
 
-    sub_020093B4(param0, v0[0], v0[1], v0[2], v0[3], 0xffffffff, 0xffffffff, param3, param4, param1->unk_08.unk_00[0], param1->unk_08.unk_00[1], param1->unk_08.unk_00[2], param1->unk_08.unk_00[3], NULL, NULL);
+    SpriteResourcesHeader_Init(param0, v0[0], v0[1], v0[2], v0[3], 0xffffffff, 0xffffffff, param3, param4, param1->unk_08.unk_00[0], param1->unk_08.unk_00[1], param1->unk_08.unk_00[2], param1->unk_08.unk_00[3], NULL, NULL);
 }
 
 static void ov5_021D6FA8(UnkStruct_ov5_021D6FA8 *param0)
 {
-    CellActor *v0;
+    Sprite *v0;
 
     param0->unk_38->unk_34 = param0->unk_34;
     param0->unk_34->unk_38 = param0->unk_38;
 
-    CellActor_SetDrawFlag(param0->unk_04, 0);
+    Sprite_SetDrawFlag(param0->unk_04, FALSE);
     ov5_021D6EF0(param0);
 
     v0 = param0->unk_04;
@@ -1633,11 +1620,8 @@ static void ov5_021D6FD8(UnkStruct_ov5_021D6FA8 *param0)
 
 static void ov5_021D6FF0(UnkStruct_ov5_021D6FA8 *param0, UnkFuncPtr_ov5_021D6FF0 param1)
 {
-    UnkStruct_ov5_021D6FA8 *v0;
-    UnkStruct_ov5_021D6FA8 *v1;
-
-    v0 = param0->unk_34;
-    v1 = v0->unk_34;
+    UnkStruct_ov5_021D6FA8 *v0 = param0->unk_34;
+    UnkStruct_ov5_021D6FA8 *v1 = v0->unk_34;
 
     while (v0 != param0) {
         param1(v0);
@@ -1654,7 +1638,7 @@ static void ov5_021D700C(UnkStruct_ov5_021DB4B8 *param0)
 
 static VecFx32 ov5_021D7010(UnkStruct_ov5_021D6FA8 *param0)
 {
-    const VecFx32 *v0 = CellActor_GetPosition(param0->unk_04);
+    const VecFx32 *v0 = Sprite_GetPosition(param0->unk_04);
     return *v0;
 }
 
@@ -1672,7 +1656,7 @@ static void ov5_021D7028(fx32 *param0, fx32 *param1, UnkStruct_ov5_021DB4B8 *par
     v6 = (v0.z - param2->unk_B8C.z);
     v8 = FX_Div(FX32_CONST(4), FX32_CONST(3));
 
-    sub_0201E34C(Camera_GetFOV(param2->unk_00->fieldSystem->camera), Camera_GetDistance(param2->unk_00->fieldSystem->camera), v8, &v3, &v4);
+    CalcLinearFov(Camera_GetFOV(param2->unk_00->fieldSystem->camera), Camera_GetDistance(param2->unk_00->fieldSystem->camera), v8, &v3, &v4);
     v3 = FX_Div(v3, 256 * FX32_ONE);
 
     if (v6 <= 0) {
@@ -1849,7 +1833,7 @@ static int ov5_021D7244(UnkStruct_ov5_021D7210 *param0)
     return v1;
 }
 
-static void ov5_021D7308(UnkStruct_ov5_021D7308 *param0, UnkStruct_ov5_021D7480 *param1, UnkStruct_ov5_021D57D8 *param2, int param3, int param4, GXRgb param5, int param6, u32 param7)
+static void ov5_021D7308(UnkStruct_ov5_021D7308 *param0, UnkStruct_ov5_021D7480 *param1, FogManager *param2, int param3, int param4, GXRgb param5, int param6, u32 param7)
 {
     param1->unk_00 = param2;
 
@@ -1884,21 +1868,21 @@ static int ov5_021D735C(UnkStruct_ov5_021D7308 *param0, UnkStruct_ov5_021D7480 *
     return v1;
 }
 
-static void ov5_021D7384(UnkStruct_ov5_021D57D8 *param0, int param1, int param2, GXRgb param3)
+static void ov5_021D7384(FogManager *param0, int param1, int param2, GXRgb param3)
 {
-    ov5_021D57FC(param0, 0xffffffff, 1, GX_FOGBLEND_COLOR_ALPHA, param1, param2);
-    ov5_021D5834(param0, 0xffffffff, param3, 31);
+    FogManager_ApplyParameters(param0, FOG_PARAMETER_ALL, 1, GX_FOGBLEND_COLOR_ALPHA, param1, param2);
+    FogManager_ApplyColor(param0, FOG_PARAMETER_ALL, param3, 31);
 }
 
-static void ov5_021D73B0(UnkStruct_ov5_021D7308 *param0, UnkStruct_ov5_021D57D8 *param1, int param2, int param3, GXRgb param4, int param5)
+static void ov5_021D73B0(UnkStruct_ov5_021D7308 *param0, FogManager *param1, int param2, int param3, GXRgb param4, int param5)
 {
     int v0;
     int v1;
     GXRgb v2;
 
-    v0 = ov5_021D57F0(param1);
-    v1 = ov5_021D57F4(param1);
-    v2 = ov5_021D57F8(param1);
+    v0 = FogManager_GetSlope(param1);
+    v1 = FogManager_GetOffset(param1);
+    v2 = FogManager_GetColor(param1);
 
     param0->unk_00 = param1;
 
@@ -1911,9 +1895,7 @@ static void ov5_021D73B0(UnkStruct_ov5_021D7308 *param0, UnkStruct_ov5_021D57D8 
 
 static BOOL ov5_021D7434(UnkStruct_ov5_021D7308 *param0)
 {
-    BOOL v0;
-
-    v0 = ov5_021D650C(&param0->unk_04);
+    BOOL v0 = ov5_021D650C(&param0->unk_04);
 
     ov5_021D650C(&param0->unk_18);
     ov5_021D650C(&param0->unk_2C);
@@ -1932,7 +1914,7 @@ static void ov5_021D7480(UnkStruct_ov5_021D7480 *param0)
         param0->unk_04[v0] = 0;
     }
 
-    ov5_021D585C(param0->unk_00, param0->unk_04);
+    FogManager_ApplyDensityTable(param0->unk_00, param0->unk_04);
 }
 
 static void ov5_021D749C(UnkStruct_ov5_021D7480 *param0, int param1, BOOL param2)
@@ -1950,12 +1932,10 @@ static void ov5_021D749C(UnkStruct_ov5_021D7480 *param0, int param1, BOOL param2
 
 static int ov5_021D74B8(UnkStruct_ov5_021D7480 *param0)
 {
-    int v0;
-
-    v0 = ov5_021D74F4(param0);
+    int v0 = ov5_021D74F4(param0);
 
     if (param0->unk_28 == 0) {
-        ov5_021D585C(param0->unk_00, param0->unk_04);
+        FogManager_ApplyDensityTable(param0->unk_00, param0->unk_04);
     }
 
     return v0;
@@ -1972,7 +1952,7 @@ static void ov5_021D74D4(UnkStruct_ov5_021D7480 *param0)
     param0->unk_2E = 1;
 
     ov5_021D7534(param0);
-    ov5_021D585C(param0->unk_00, param0->unk_04);
+    FogManager_ApplyDensityTable(param0->unk_00, param0->unk_04);
 }
 
 static int ov5_021D74F4(UnkStruct_ov5_021D7480 *param0)
@@ -2119,7 +2099,7 @@ static void ov5_021D7658(SysTask *param0, void *param1)
     switch (v0->unk_BA2) {
     case 0:
         ov5_021D7210(&v2->unk_00, v0, 1, 8, 4, 0, -1, 1, 1, ov5_021D78A4);
-        ov5_021D7308(&v2->unk_4C, &v2->unk_1C, v0->unk_00->fieldSystem->unk_48, 3, 0x6F6F + 0x300, GX_RGB(26, 26, 26), 1, v0->unk_BA4);
+        ov5_021D7308(&v2->unk_4C, &v2->unk_1C, v0->unk_00->fieldSystem->fogMan, 3, 0x6F6F + 0x300, GX_RGB(26, 26, 26), 1, v0->unk_BA4);
 
         v2->unk_B4[0] = 0;
 
@@ -2143,7 +2123,7 @@ static void ov5_021D7658(SysTask *param0, void *param1)
         ov5_021D7210(&v2->unk_00, v0, 4, 0, 4, 0, -1, 1, 1, ov5_021D78A4);
 
         if (v0->unk_BA4 != 0) {
-            v2->unk_1C.unk_00 = v0->unk_00->fieldSystem->unk_48;
+            v2->unk_1C.unk_00 = v0->unk_00->fieldSystem->fogMan;
             ov5_021D7384(v2->unk_1C.unk_00, 3, 0x6F6F + 0x300, GX_RGB(26, 26, 26));
 
             ov5_021D74D4(&v2->unk_1C);
@@ -2193,7 +2173,7 @@ static void ov5_021D7658(SysTask *param0, void *param1)
         break;
     case 5:
         if (v0->unk_BA4 != 0) {
-            ov5_021D57FC(v2->unk_1C.unk_00, 1, 0, 0, 0, 0);
+            FogManager_ApplyParameters(v2->unk_1C.unk_00, FOG_PARAMETER_ENABLED, FALSE, GX_FOGBLEND_COLOR_ALPHA, GX_FOGSLOPE_0x8000, 0);
         }
 
         {
@@ -2235,7 +2215,7 @@ static void ov5_021D78A4(UnkStruct_ov5_021DB4B8 *param0, int param1)
         v3[0] = 0;
         v4 = v6 % 3;
 
-        SpriteActor_SetAnimFrame(v1->unk_04, v4);
+        Sprite_SetAnimFrame(v1->unk_04, v4);
 
         v2 = (v6 % 20);
         v3[2] = 10 * (v4 + 1) + v2;
@@ -2284,7 +2264,7 @@ static void ov5_021D7960(UnkStruct_ov5_021D6FA8 *param0)
             } else {
                 v2[3] = 1;
                 v2[0] = 4;
-                SpriteActor_SetAnimFrame(v1->unk_04, 3);
+                Sprite_SetAnimFrame(v1->unk_04, 3);
             }
         }
 
@@ -2315,7 +2295,7 @@ static void ov5_021D79F0(SysTask *param0, void *param1)
         ov5_021D7210(&v3->unk_00, v0, 1, 24, 1, 14, -5, 1, 0, ov5_021D7C40);
         v3->unk_B4[1] = 0;
 
-        ov5_021D7308(&v3->unk_4C, &v3->unk_1C, v0->unk_00->fieldSystem->unk_48, 3, 0x6F6F + 0x300, GX_RGB(26, 26, 26), 1, v0->unk_BA4);
+        ov5_021D7308(&v3->unk_4C, &v3->unk_1C, v0->unk_00->fieldSystem->fogMan, 3, 0x6F6F + 0x300, GX_RGB(26, 26, 26), 1, v0->unk_BA4);
         v3->unk_B4[0] = 16;
 
         v0->unk_BA2 = 1;
@@ -2340,7 +2320,7 @@ static void ov5_021D79F0(SysTask *param0, void *param1)
         v3->unk_B4[2] = 0;
 
         if (v0->unk_BA4 != 0) {
-            v3->unk_1C.unk_00 = v0->unk_00->fieldSystem->unk_48;
+            v3->unk_1C.unk_00 = v0->unk_00->fieldSystem->fogMan;
             ov5_021D7384(v3->unk_1C.unk_00, 3, 0x6F6F + 0x300, GX_RGB(26, 26, 26));
             ov5_021D74D4(&v3->unk_1C);
         }
@@ -2389,7 +2369,7 @@ static void ov5_021D79F0(SysTask *param0, void *param1)
         break;
     case 5:
         if (v0->unk_BA4 != 0) {
-            ov5_021D57FC(v3->unk_1C.unk_00, 1, 0, 0, 0, 0);
+            FogManager_ApplyParameters(v3->unk_1C.unk_00, FOG_PARAMETER_ENABLED, FALSE, GX_FOGBLEND_COLOR_ALPHA, GX_FOGSLOPE_0x8000, 0);
         }
 
         {
@@ -2434,7 +2414,7 @@ static void ov5_021D7C40(UnkStruct_ov5_021DB4B8 *param0, int param1)
         v4 = (s32 *)v2->unk_08;
         v5 = MTRNG_Next() % 4;
 
-        SpriteActor_SetAnimFrame(v2->unk_04, v5);
+        Sprite_SetAnimFrame(v2->unk_04, v5);
 
         v4[4] = 10;
         v4[5] = 0;
@@ -2552,7 +2532,7 @@ static void ov5_021D7E54(SysTask *param0, void *param1)
     switch (v0->unk_BA2) {
     case 0:
         ov5_021D7210(&v2->unk_00, v0, 1, 30, 6, 3, -5, 2, 1, ov5_021D8098);
-        ov5_021D7308(&v2->unk_4C, &v2->unk_1C, v0->unk_00->fieldSystem->unk_48, 3, 0x6F6F + -0x200, GX_RGB(24, 24, 24), 2, v0->unk_BA4);
+        ov5_021D7308(&v2->unk_4C, &v2->unk_1C, v0->unk_00->fieldSystem->fogMan, 3, 0x6F6F + -0x200, GX_RGB(24, 24, 24), 2, v0->unk_BA4);
 
         v2->unk_B4[0] = 8;
         v2->unk_B4[1] = 0;
@@ -2575,7 +2555,7 @@ static void ov5_021D7E54(SysTask *param0, void *param1)
         ov5_021D7210(&v2->unk_00, v0, 6, 3, 6, 3, -5, 2, 1, ov5_021D8098);
 
         if (v0->unk_BA4 != 0) {
-            v2->unk_1C.unk_00 = v0->unk_00->fieldSystem->unk_48;
+            v2->unk_1C.unk_00 = v0->unk_00->fieldSystem->fogMan;
             ov5_021D7384(v2->unk_1C.unk_00, 3, 0x6F6F + -0x200, GX_RGB(24, 24, 24));
             ov5_021D74D4(&v2->unk_1C);
         }
@@ -2622,7 +2602,7 @@ static void ov5_021D7E54(SysTask *param0, void *param1)
         break;
     case 5:
         if (v0->unk_BA4 != 0) {
-            ov5_021D57FC(v2->unk_1C.unk_00, 1, 0, 0, 0, 0);
+            FogManager_ApplyParameters(v2->unk_1C.unk_00, FOG_PARAMETER_ENABLED, FALSE, GX_FOGBLEND_COLOR_ALPHA, GX_FOGSLOPE_0x8000, 0);
         }
 
         {
@@ -2675,7 +2655,7 @@ static void ov5_021D8098(UnkStruct_ov5_021DB4B8 *param0, int param1)
         v4[1] = 4 + (MTRNG_Next() % (46 - 4));
 
         v7 = (v4[1] - 4) / (((46 - 4) / 3) + 1);
-        SpriteActor_SetAnimFrame(v1->unk_04, v7);
+        Sprite_SetAnimFrame(v1->unk_04, v7);
 
         v4[4] = -1 * (v7 + 1);
         v4[2] = v6[v2] * (v7 + 1);
@@ -2740,7 +2720,7 @@ static void ov5_021D823C(SysTask *param0, void *param1)
     switch (v0->unk_BA2) {
     case 0:
         ov5_021D7210(&v2->unk_00, v0, 1, 30, 6, 3, -5, 2, 1, ov5_021D8098);
-        ov5_021D7308(&v2->unk_4C, &v2->unk_1C, v0->unk_00->fieldSystem->unk_48, 3, 0x6F6F, GX_RGB(24, 24, 24), 2, v0->unk_BA4);
+        ov5_021D7308(&v2->unk_4C, &v2->unk_1C, v0->unk_00->fieldSystem->fogMan, 3, 0x6F6F, GX_RGB(24, 24, 24), 2, v0->unk_BA4);
 
         v2->unk_B4[0] = 8;
         v2->unk_B4[1] = 0;
@@ -2768,7 +2748,7 @@ static void ov5_021D823C(SysTask *param0, void *param1)
         ov5_021D7210(&v2->unk_00, v0, 6, 3, 6, 3, -5, 2, 1, ov5_021D8098);
 
         if (v0->unk_BA4 != 0) {
-            v2->unk_1C.unk_00 = v0->unk_00->fieldSystem->unk_48;
+            v2->unk_1C.unk_00 = v0->unk_00->fieldSystem->fogMan;
             ov5_021D7384(v2->unk_1C.unk_00, 3, 0x6F6F, GX_RGB(24, 24, 24));
 
             ov5_021D74D4(&v2->unk_1C);
@@ -2823,7 +2803,7 @@ static void ov5_021D823C(SysTask *param0, void *param1)
         break;
     case 5:
         if (v0->unk_BA4 != 0) {
-            ov5_021D57FC(v2->unk_1C.unk_00, 1, 0, 0, 0, 0);
+            FogManager_ApplyParameters(v2->unk_1C.unk_00, FOG_PARAMETER_ENABLED, FALSE, GX_FOGBLEND_COLOR_ALPHA, GX_FOGSLOPE_0x8000, 0);
         }
 
         {
@@ -2856,7 +2836,7 @@ static void ov5_021D84D4(SysTask *param0, void *param1)
 
     switch (v0->unk_BA2) {
     case 0:
-        ov5_021D7308(&v2->unk_30, &v2->unk_00, v0->unk_00->fieldSystem->unk_48, 3, 0x6F6F + 0x200, GX_RGB(26, 26, 26), 2, v0->unk_BA4);
+        ov5_021D7308(&v2->unk_30, &v2->unk_00, v0->unk_00->fieldSystem->fogMan, 3, 0x6F6F + 0x200, GX_RGB(26, 26, 26), 2, v0->unk_BA4);
         v2->unk_98[0] = 16;
 
         v0->unk_BA2 = 1;
@@ -2874,7 +2854,7 @@ static void ov5_021D84D4(SysTask *param0, void *param1)
         break;
     case 2:
         if (v0->unk_BA4 != 0) {
-            v2->unk_00.unk_00 = v0->unk_00->fieldSystem->unk_48;
+            v2->unk_00.unk_00 = v0->unk_00->fieldSystem->fogMan;
             ov5_021D7384(v2->unk_00.unk_00, 3, 0x6F6F + 0x200, GX_RGB(26, 26, 26));
             ov5_021D74D4(&v2->unk_00);
         }
@@ -2908,7 +2888,7 @@ static void ov5_021D84D4(SysTask *param0, void *param1)
         break;
     case 5:
         if (v0->unk_BA4 != 0) {
-            ov5_021D57FC(v2->unk_00.unk_00, 1, 0, 0, 0, 0);
+            FogManager_ApplyParameters(v2->unk_00.unk_00, FOG_PARAMETER_ENABLED, FALSE, GX_FOGBLEND_COLOR_ALPHA, GX_FOGSLOPE_0x8000, 0);
         }
 
         {
@@ -2932,7 +2912,7 @@ static void ov5_021D8638(SysTask *param0, void *param1)
 
     switch (v0->unk_BA2) {
     case 0:
-        ov5_021D7308(&v2->unk_30, &v2->unk_00, v0->unk_00->fieldSystem->unk_48, 3, 0x6F6F + -0x9E0, GX_RGB(26, 26, 26), 2, v0->unk_BA4);
+        ov5_021D7308(&v2->unk_30, &v2->unk_00, v0->unk_00->fieldSystem->fogMan, 3, 0x6F6F + -0x9E0, GX_RGB(26, 26, 26), 2, v0->unk_BA4);
         v2->unk_98[0] = 16;
         v0->unk_BA2 = 1;
         break;
@@ -2949,7 +2929,7 @@ static void ov5_021D8638(SysTask *param0, void *param1)
         break;
     case 2:
         if (v0->unk_BA4 != 0) {
-            v2->unk_00.unk_00 = v0->unk_00->fieldSystem->unk_48;
+            v2->unk_00.unk_00 = v0->unk_00->fieldSystem->fogMan;
             ov5_021D7384(v2->unk_00.unk_00, 3, 0x6F6F + -0x9E0, GX_RGB(26, 26, 26));
             ov5_021D74D4(&v2->unk_00);
         }
@@ -2983,7 +2963,7 @@ static void ov5_021D8638(SysTask *param0, void *param1)
         break;
     case 5:
         if (v0->unk_BA4 != 0) {
-            ov5_021D57FC(v2->unk_00.unk_00, 1, 0, 0, 0, 0);
+            FogManager_ApplyParameters(v2->unk_00.unk_00, FOG_PARAMETER_ENABLED, FALSE, GX_FOGBLEND_COLOR_ALPHA, GX_FOGSLOPE_0x8000, 0);
         }
 
         {
@@ -3007,7 +2987,7 @@ static void ov5_021D879C(SysTask *param0, void *param1)
 
     switch (v0->unk_BA2) {
     case 0:
-        ov5_021D7308(&v1->unk_44, &v1->unk_14, v0->unk_00->fieldSystem->unk_48, 5, 0x6F6F + 0xAA0, GX_RGB(31, 31, 31), 2, v0->unk_BA4);
+        ov5_021D7308(&v1->unk_44, &v1->unk_14, v0->unk_00->fieldSystem->fogMan, 5, 0x6F6F + 0xAA0, GX_RGB(31, 31, 31), 2, v0->unk_BA4);
         ov5_021D64FC(&v1->unk_00, 0, 16, 30);
         ov5_021D64E4(0, 16);
         G2_SetBG2Priority(3);
@@ -3026,7 +3006,7 @@ static void ov5_021D879C(SysTask *param0, void *param1)
         break;
     case 2:
         if (v0->unk_BA4 != 0) {
-            v1->unk_14.unk_00 = v0->unk_00->fieldSystem->unk_48;
+            v1->unk_14.unk_00 = v0->unk_00->fieldSystem->fogMan;
             ov5_021D7384(v1->unk_14.unk_00, 5, 0x6F6F + 0xAA0, GX_RGB(31, 31, 31));
             ov5_021D74D4(&v1->unk_14);
         }
@@ -3063,7 +3043,7 @@ static void ov5_021D879C(SysTask *param0, void *param1)
         break;
     case 5:
         if (v0->unk_BA4 != 0) {
-            ov5_021D57FC(v1->unk_14.unk_00, 1, 0, 0, 0, 0);
+            FogManager_ApplyParameters(v1->unk_14.unk_00, FOG_PARAMETER_ENABLED, FALSE, GX_FOGBLEND_COLOR_ALPHA, GX_FOGSLOPE_0x8000, 0);
         }
 
         {
@@ -3090,7 +3070,7 @@ static void ov5_021D8948(SysTask *param0, void *param1)
     switch (v0->unk_BA2) {
     case 0:
         ov5_021D7210(&v2->unk_00, v0, 1, 15, 8, 1, -2, 4, 2, ov5_021D8B88);
-        ov5_021D7308(&v2->unk_4C, &v2->unk_1C, v0->unk_00->fieldSystem->unk_48, 3, 28399, GX_RGB(26, 20, 5), 1, v0->unk_BA4);
+        ov5_021D7308(&v2->unk_4C, &v2->unk_1C, v0->unk_00->fieldSystem->fogMan, 3, 28399, GX_RGB(26, 20, 5), 1, v0->unk_BA4);
         v2->unk_B4[0] = 0;
         v2->unk_B4[1] = 0;
         v0->unk_BA2 = 1;
@@ -3112,7 +3092,7 @@ static void ov5_021D8948(SysTask *param0, void *param1)
         ov5_021D7210(&v2->unk_00, v0, 8, 1, 8, 1, -2, 4, 2, ov5_021D8B88);
 
         if (v0->unk_BA4 != 0) {
-            v2->unk_1C.unk_00 = v0->unk_00->fieldSystem->unk_48;
+            v2->unk_1C.unk_00 = v0->unk_00->fieldSystem->fogMan;
             ov5_021D7384(v2->unk_1C.unk_00, 3, 28399, GX_RGB(26, 20, 5));
             ov5_021D74D4(&v2->unk_1C);
         }
@@ -3159,7 +3139,7 @@ static void ov5_021D8948(SysTask *param0, void *param1)
         break;
     case 5:
         if (v0->unk_BA4 != 0) {
-            ov5_021D57FC(v2->unk_1C.unk_00, 1, 0, 0, 0, 0);
+            FogManager_ApplyParameters(v2->unk_1C.unk_00, FOG_PARAMETER_ENABLED, FALSE, GX_FOGBLEND_COLOR_ALPHA, GX_FOGSLOPE_0x8000, 0);
         }
 
         {
@@ -3220,7 +3200,7 @@ static void ov5_021D8B88(UnkStruct_ov5_021DB4B8 *param0, int param1)
             v5[2] += v5[2] / 2;
         }
 
-        SpriteActor_SetAnimFrame(v1->unk_04, v6);
+        Sprite_SetAnimFrame(v1->unk_04, v6);
 
         {
             VecFx32 v9;
@@ -3280,7 +3260,7 @@ static void ov5_021D8D08(SysTask *param0, void *param1)
     switch (v0->unk_BA2) {
     case 0:
         ov5_021D7210(&v5->unk_00, v0, 1, 15, 8, 1, -2, 4, 2, ov5_021D8B88);
-        ov5_021D7308(&v5->unk_4C, &v5->unk_1C, v0->unk_00->fieldSystem->unk_48, 3, 28399, GX_RGB(26, 20, 5), 1, v0->unk_BA4);
+        ov5_021D7308(&v5->unk_4C, &v5->unk_1C, v0->unk_00->fieldSystem->fogMan, 3, 28399, GX_RGB(26, 20, 5), 1, v0->unk_BA4);
         v5->unk_B4[0] = 0;
         v5->unk_B4[1] = 0;
         v5->unk_B4[2] = 0;
@@ -3305,7 +3285,7 @@ static void ov5_021D8D08(SysTask *param0, void *param1)
         ov5_021D7210(&v5->unk_00, v0, 8, 1, 8, 1, -2, 4, 2, ov5_021D8B88);
 
         if (v0->unk_BA4 != 0) {
-            v5->unk_1C.unk_00 = v0->unk_00->fieldSystem->unk_48;
+            v5->unk_1C.unk_00 = v0->unk_00->fieldSystem->fogMan;
             ov5_021D7384(v5->unk_1C.unk_00, 3, 28399, GX_RGB(26, 20, 5));
             ov5_021D74D4(&v5->unk_1C);
         }
@@ -3366,7 +3346,7 @@ static void ov5_021D8D08(SysTask *param0, void *param1)
         break;
     case 5:
         if (v0->unk_BA4 != 0) {
-            ov5_021D57FC(v5->unk_1C.unk_00, 1, 0, 0, 0, 0);
+            FogManager_ApplyParameters(v5->unk_1C.unk_00, FOG_PARAMETER_ENABLED, FALSE, GX_FOGBLEND_COLOR_ALPHA, GX_FOGSLOPE_0x8000, 0);
         }
 
         {
@@ -3403,7 +3383,7 @@ static void ov5_021D8FF8(SysTask *param0, void *param1)
     switch (v0->unk_BA2) {
     case 0:
         ov5_021D7210(&v5->unk_00, v0, 1, 30, 10, 1, -4, 2, 3, ov5_021D92C4);
-        ov5_021D7308(&v5->unk_4C, &v5->unk_1C, v0->unk_00->fieldSystem->unk_48, 3, 0x6F6F + -0x400, GX_RGB(24, 24, 24), 1, v0->unk_BA4);
+        ov5_021D7308(&v5->unk_4C, &v5->unk_1C, v0->unk_00->fieldSystem->fogMan, 3, 0x6F6F + -0x400, GX_RGB(24, 24, 24), 1, v0->unk_BA4);
         v5->unk_B4[0] = 16;
         v5->unk_B4[1] = 0;
         v5->unk_B4[2] = 0;
@@ -3427,7 +3407,7 @@ static void ov5_021D8FF8(SysTask *param0, void *param1)
         ov5_021D7210(&v5->unk_00, v0, 10, 1, 10, 1, -4, 2, 3, ov5_021D92C4);
 
         if (v0->unk_BA4 != 0) {
-            v5->unk_1C.unk_00 = v0->unk_00->fieldSystem->unk_48;
+            v5->unk_1C.unk_00 = v0->unk_00->fieldSystem->fogMan;
             ov5_021D7384(v5->unk_1C.unk_00, 3, 0x6F6F + -0x400, GX_RGB(24, 24, 24));
             ov5_021D74D4(&v5->unk_1C);
         }
@@ -3487,7 +3467,7 @@ static void ov5_021D8FF8(SysTask *param0, void *param1)
         break;
     case 5:
         if (v0->unk_BA4 != 0) {
-            ov5_021D57FC(v5->unk_1C.unk_00, 1, 0, 0, 0, 0);
+            FogManager_ApplyParameters(v5->unk_1C.unk_00, FOG_PARAMETER_ENABLED, FALSE, GX_FOGBLEND_COLOR_ALPHA, GX_FOGSLOPE_0x8000, 0);
         }
 
         {
@@ -3538,7 +3518,7 @@ static void ov5_021D92C4(UnkStruct_ov5_021DB4B8 *param0, int param1)
         v4[1] = 18 + (MTRNG_Next() % (24 - 18));
         v5 = MTRNG_Next() % 4;
 
-        SpriteActor_SetAnimFrame(v1->unk_04, v5);
+        Sprite_SetAnimFrame(v1->unk_04, v5);
 
         v4[4] = Unk_ov5_021F8CDC[v2] * ((v5) + 1);
         v4[2] = Unk_ov5_021F8CEC[v2] * ((v5) + 1);
@@ -3609,7 +3589,7 @@ static void ov5_021D9464(SysTask *param0, void *param1)
     switch (v0->unk_BA2) {
     case 0:
         ov5_021D7210(&v2->unk_00, v0, 2, 16, 20, 2, -2, 4, 2, ov5_021D9690);
-        ov5_021D7308(&v2->unk_4C, &v2->unk_1C, v0->unk_00->fieldSystem->unk_48, 3, 0x6F6F + 0x200, GX_RGB(26, 26, 26), 1, v0->unk_BA4);
+        ov5_021D7308(&v2->unk_4C, &v2->unk_1C, v0->unk_00->fieldSystem->fogMan, 3, 0x6F6F + 0x200, GX_RGB(26, 26, 26), 1, v0->unk_BA4);
         v2->unk_B4[0] = 0;
         v0->unk_BA2 = 1;
         break;
@@ -3630,7 +3610,7 @@ static void ov5_021D9464(SysTask *param0, void *param1)
         ov5_021D7210(&v2->unk_00, v0, 20, 2, 20, 2, -2, 4, 2, ov5_021D9690);
 
         if (v0->unk_BA4 != 0) {
-            v2->unk_1C.unk_00 = v0->unk_00->fieldSystem->unk_48;
+            v2->unk_1C.unk_00 = v0->unk_00->fieldSystem->fogMan;
             ov5_021D7384(v2->unk_1C.unk_00, 3, 0x6F6F + 0x200, GX_RGB(26, 26, 26));
             ov5_021D74D4(&v2->unk_1C);
         }
@@ -3672,7 +3652,7 @@ static void ov5_021D9464(SysTask *param0, void *param1)
         break;
     case 5:
         if (v0->unk_BA4 != 0) {
-            ov5_021D57FC(v2->unk_1C.unk_00, 1, 0, 0, 0, 0);
+            FogManager_ApplyParameters(v2->unk_1C.unk_00, FOG_PARAMETER_ENABLED, FALSE, GX_FOGBLEND_COLOR_ALPHA, GX_FOGSLOPE_0x8000, 0);
         }
 
         {
@@ -3758,7 +3738,7 @@ static void ov5_021D9690(UnkStruct_ov5_021DB4B8 *param0, int param1)
             v5 = MTRNG_Next() % 4;
         }
 
-        SpriteActor_SetAnimFrame(v1->unk_04, v5);
+        Sprite_SetAnimFrame(v1->unk_04, v5);
     }
 }
 
@@ -3789,9 +3769,7 @@ static void ov5_021D97E8(SysTask *param0, void *param1)
 {
     UnkStruct_ov5_021DB4B8 *v0 = (UnkStruct_ov5_021DB4B8 *)param1;
     int v1;
-    s32 *v2;
-
-    v2 = (s32 *)v0->unk_B98;
+    s32 *v2 = (s32 *)v0->unk_B98;
 
     switch (v0->unk_BA2) {
     case 0:
@@ -3891,7 +3869,7 @@ static void ov5_021D97E8(SysTask *param0, void *param1)
 static void ov5_021D9984(UnkStruct_ov5_021DB4B8 *param0, UnkStruct_ov5_021D9984 *param1)
 {
     ov5_021D7210(&param1->unk_00, param0, 1, 15, 10, 0, -3, 2, 1, ov5_021DA0A8);
-    ov5_021D7308(&param1->unk_4C, &param1->unk_1C, param0->unk_00->fieldSystem->unk_48, 3, 0x6F6F, GX_RGB(26, 26, 26), 1, param0->unk_BA4);
+    ov5_021D7308(&param1->unk_4C, &param1->unk_1C, param0->unk_00->fieldSystem->fogMan, 3, 0x6F6F, GX_RGB(26, 26, 26), 1, param0->unk_BA4);
 
     param1->unk_B4[0] = 0;
     param1->unk_B4[1] = 0;
@@ -3925,7 +3903,7 @@ static void ov5_021D9A58(UnkStruct_ov5_021DB4B8 *param0, UnkStruct_ov5_021D9984 
     ov5_021D7210(&param1->unk_00, param0, 10, 0, 10, 0, -3, 2, 1, ov5_021DA0A8);
 
     if (param0->unk_BA4 != 0) {
-        param1->unk_1C.unk_00 = param0->unk_00->fieldSystem->unk_48;
+        param1->unk_1C.unk_00 = param0->unk_00->fieldSystem->fogMan;
         ov5_021D7384(param1->unk_1C.unk_00, 3, 0x6F6F, GX_RGB(26, 26, 26));
         ov5_021D74D4(&param1->unk_1C);
     }
@@ -3988,7 +3966,7 @@ static BOOL ov5_021D9B68(UnkStruct_ov5_021DB4B8 *param0, UnkStruct_ov5_021D9984 
 static void ov5_021D9BC0(UnkStruct_ov5_021DB4B8 *param0, UnkStruct_ov5_021D9984 *param1)
 {
     if (param0->unk_BA4 != 0) {
-        ov5_021D57FC(param1->unk_1C.unk_00, 1, 0, 0, 0, 0);
+        FogManager_ApplyParameters(param1->unk_1C.unk_00, FOG_PARAMETER_ENABLED, FALSE, GX_FOGBLEND_COLOR_ALPHA, GX_FOGSLOPE_0x8000, 0);
     }
 
     {
@@ -4018,8 +3996,8 @@ static void ov5_021D9C20(SysTask *param0, void *param1, u32 param2, u32 param3, 
     switch (v0->unk_BA2) {
     case 0:
         if (v0->unk_BA4 != 0) {
-            ov5_021D7384(v0->unk_00->fieldSystem->unk_48, 5, 28591, (GX_RGB(0, 0, 0)));
-            ov5_021D585C(v0->unk_00->fieldSystem->unk_48, Unk_ov5_021F8E14);
+            ov5_021D7384(v0->unk_00->fieldSystem->fogMan, 5, 28591, (GX_RGB(0, 0, 0)));
+            FogManager_ApplyDensityTable(v0->unk_00->fieldSystem->fogMan, Unk_ov5_021F8E14);
             ov5_021D64E4(param2, 16 - param2);
 
             GXLayers_EngineAToggleLayers(GX_PLANEMASK_BG2, 1);
@@ -4035,8 +4013,8 @@ static void ov5_021D9C20(SysTask *param0, void *param1, u32 param2, u32 param3, 
         break;
     case 2:
         if (v0->unk_BA4 != 0) {
-            ov5_021D7384(v0->unk_00->fieldSystem->unk_48, 5, 28591, (GX_RGB(0, 0, 0)));
-            ov5_021D585C(v0->unk_00->fieldSystem->unk_48, Unk_ov5_021F8E14);
+            ov5_021D7384(v0->unk_00->fieldSystem->fogMan, 5, 28591, (GX_RGB(0, 0, 0)));
+            FogManager_ApplyDensityTable(v0->unk_00->fieldSystem->fogMan, Unk_ov5_021F8E14);
             ov5_021D64E4(param2, 16 - param2);
             GXLayers_EngineAToggleLayers(GX_PLANEMASK_BG2, 1);
             v2->unk_98[0] = param4;
@@ -4079,7 +4057,7 @@ static void ov5_021D9C20(SysTask *param0, void *param1, u32 param2, u32 param3, 
         break;
     case 5:
         if (v0->unk_BA4 != 0) {
-            ov5_021D57FC(v0->unk_00->fieldSystem->unk_48, 1, 0, 0, 0, 0);
+            FogManager_ApplyParameters(v0->unk_00->fieldSystem->fogMan, FOG_PARAMETER_ENABLED, FALSE, GX_FOGBLEND_COLOR_ALPHA, GX_FOGSLOPE_0x8000, 0);
         }
 
         {
@@ -4099,7 +4077,7 @@ static void ov5_021D9DFC(UnkStruct_ov5_021DB4B8 *param0, UnkStruct_ov5_021D84D4 
 
     switch (param0->unk_BA2) {
     case 0:
-        ov5_021D7308(&param1->unk_30, &param1->unk_00, param0->unk_00->fieldSystem->unk_48, param2, param3, param4, param5, param0->unk_BA4);
+        ov5_021D7308(&param1->unk_30, &param1->unk_00, param0->unk_00->fieldSystem->fogMan, param2, param3, param4, param5, param0->unk_BA4);
         param0->unk_BA2 = 1;
         break;
     case 1:
@@ -4111,7 +4089,7 @@ static void ov5_021D9DFC(UnkStruct_ov5_021DB4B8 *param0, UnkStruct_ov5_021D84D4 
         break;
     case 2:
         if (param0->unk_BA4 != 0) {
-            param1->unk_00.unk_00 = param0->unk_00->fieldSystem->unk_48;
+            param1->unk_00.unk_00 = param0->unk_00->fieldSystem->fogMan;
             ov5_021D7384(param1->unk_00.unk_00, param2, param3, param4);
             ov5_021D74D4(&param1->unk_00);
         }
@@ -4140,7 +4118,7 @@ static void ov5_021D9DFC(UnkStruct_ov5_021DB4B8 *param0, UnkStruct_ov5_021D84D4 
         break;
     case 5:
         if (param0->unk_BA4 != 0) {
-            ov5_021D57FC(param1->unk_00.unk_00, 1, 0, 0, 0, 0);
+            FogManager_ApplyParameters(param1->unk_00.unk_00, FOG_PARAMETER_ENABLED, FALSE, GX_FOGBLEND_COLOR_ALPHA, GX_FOGSLOPE_0x8000, 0);
         }
 
         {
@@ -4156,9 +4134,7 @@ static void ov5_021D9DFC(UnkStruct_ov5_021DB4B8 *param0, UnkStruct_ov5_021D84D4 
 static void ov5_021D9F0C(SysTask *param0, void *param1)
 {
     UnkStruct_ov5_021DB4B8 *v0 = (UnkStruct_ov5_021DB4B8 *)param1;
-    UnkStruct_ov5_021D9984 *v1;
-
-    v1 = (UnkStruct_ov5_021D9984 *)v0->unk_B98;
+    UnkStruct_ov5_021D9984 *v1 = (UnkStruct_ov5_021D9984 *)v0->unk_B98;
 
     switch (v0->unk_BA2) {
     case 0:
@@ -4208,9 +4184,7 @@ static void ov5_021D9F0C(SysTask *param0, void *param1)
 static void ov5_021D9FF8(SysTask *param0, void *param1)
 {
     UnkStruct_ov5_021DB4B8 *v0 = (UnkStruct_ov5_021DB4B8 *)param1;
-    UnkStruct_ov5_021D9984 *v1;
-
-    v1 = (UnkStruct_ov5_021D9984 *)v0->unk_B98;
+    UnkStruct_ov5_021D9984 *v1 = (UnkStruct_ov5_021D9984 *)v0->unk_B98;
 
     switch (v0->unk_BA2) {
     case 0:
@@ -4276,7 +4250,7 @@ static void ov5_021DA0A8(UnkStruct_ov5_021DB4B8 *param0, int param1)
         v3[0] = 0;
         v6 = v8 % 3;
 
-        SpriteActor_SetAnimFrame(v1->unk_04, v6);
+        Sprite_SetAnimFrame(v1->unk_04, v6);
 
         v3[4] = -24 * (v6 + 1);
         v3[2] = 24 * (v6 + 1);
@@ -4319,7 +4293,7 @@ static void ov5_021DA1A8(UnkStruct_ov5_021D6FA8 *param0)
             } else {
                 v2[3] = 1;
                 v2[0] = 4;
-                SpriteActor_SetAnimFrame(v1->unk_04, 3);
+                Sprite_SetAnimFrame(v1->unk_04, 3);
             }
         }
 
@@ -4358,7 +4332,7 @@ static void ov5_021DA244(SysTask *param0, void *param1)
         v7->unk_B4[4] = 0;
         v7->unk_B4[5] = 0;
 
-        ov5_021D7308(&v7->unk_4C, &v7->unk_1C, v0->unk_00->fieldSystem->unk_48, 3 + 0, 0x6F6F + -0x40, GX_RGB(20, 20, 14), 1, v0->unk_BA4);
+        ov5_021D7308(&v7->unk_4C, &v7->unk_1C, v0->unk_00->fieldSystem->fogMan, 3 + 0, 0x6F6F + -0x40, GX_RGB(20, 20, 14), 1, v0->unk_BA4);
 
         v7->unk_B4[0] = 0;
         v0->unk_BA2 = 1;
@@ -4387,7 +4361,7 @@ static void ov5_021DA244(SysTask *param0, void *param1)
         v7->unk_B4[5] = 0;
 
         if (v0->unk_BA4 != 0) {
-            v7->unk_1C.unk_00 = v0->unk_00->fieldSystem->unk_48;
+            v7->unk_1C.unk_00 = v0->unk_00->fieldSystem->fogMan;
             ov5_021D7384(v7->unk_1C.unk_00, 3, 0x6F6F + -0x40, GX_RGB(20, 20, 14));
             ov5_021D74D4(&v7->unk_1C);
         }
@@ -4437,7 +4411,7 @@ static void ov5_021DA244(SysTask *param0, void *param1)
         break;
     case 5:
         if (v0->unk_BA4 != 0) {
-            ov5_021D57FC(v7->unk_1C.unk_00, 1, 0, 0, 0, 0);
+            FogManager_ApplyParameters(v7->unk_1C.unk_00, FOG_PARAMETER_ENABLED, FALSE, GX_FOGBLEND_COLOR_ALPHA, GX_FOGSLOPE_0x8000, 0);
         }
 
         {
@@ -4512,7 +4486,7 @@ static void ov5_021DA5A0(UnkStruct_ov5_021DB4B8 *param0, int param1)
         v5 = (s32 *)v2->unk_08;
         v4 = MTRNG_Next() % 4;
 
-        SpriteActor_SetAnimFrame(v2->unk_04, v4);
+        Sprite_SetAnimFrame(v2->unk_04, v4);
 
         v5[4] = 10;
         v5[5] = 0;
@@ -4622,11 +4596,11 @@ static void ov5_021DA748(SysTask *param0, void *param1)
                 if ((MTRNG_Next() % 3) != 0) {
                     v1[2] = 36;
 
-                    Sound_PlayEffect(1597);
+                    Sound_PlayEffect(SEQ_SE_DP_T_KAMI2_sseq);
                 } else {
                     v1[2] = 200;
 
-                    Sound_PlayEffect(1596);
+                    Sound_PlayEffect(SEQ_SE_DP_T_KAMI_sseq);
                 }
                 break;
             case 1:
@@ -4754,7 +4728,7 @@ static void ov5_021DA9DC(UnkStruct_ov5_021DB4B8 *param0, int param1)
         v2 = (s32 *)v1->unk_08;
         v4 = MTRNG_Next() % 0xe;
 
-        SpriteActor_SetAnimFrame(v1->unk_04, v4);
+        Sprite_SetAnimFrame(v1->unk_04, v4);
 
         v3 = v4 / 4;
         v3++;
@@ -4948,7 +4922,7 @@ static void ov5_021DAD38(SysTask *param0, void *param1)
 
     switch (v0->unk_BA2) {
     case 0:
-        ov5_021D7308(&v1->unk_44, &v1->unk_14, v0->unk_00->fieldSystem->unk_48, 7, 30287, (GX_RGB(0, 0, 0)), 1, v0->unk_BA4);
+        ov5_021D7308(&v1->unk_44, &v1->unk_14, v0->unk_00->fieldSystem->fogMan, 7, 30287, (GX_RGB(0, 0, 0)), 1, v0->unk_BA4);
         ov5_021D64FC(&v1->unk_00, 0, 9, 30);
         ov5_021D64E4(0, 16);
         GXLayers_EngineAToggleLayers(GX_PLANEMASK_BG2, 1);
@@ -4966,7 +4940,7 @@ static void ov5_021DAD38(SysTask *param0, void *param1)
         break;
     case 2:
         if (v0->unk_BA4 != 0) {
-            v1->unk_14.unk_00 = v0->unk_00->fieldSystem->unk_48;
+            v1->unk_14.unk_00 = v0->unk_00->fieldSystem->fogMan;
             ov5_021D7384(v1->unk_14.unk_00, 7, 30287, (GX_RGB(0, 0, 0)));
             ov5_021D74D4(&v1->unk_14);
         }
@@ -5002,7 +4976,7 @@ static void ov5_021DAD38(SysTask *param0, void *param1)
         break;
     case 5:
         if (v0->unk_BA4 != 0) {
-            ov5_021D57FC(v1->unk_14.unk_00, 1, 0, 0, 0, 0);
+            FogManager_ApplyParameters(v1->unk_14.unk_00, FOG_PARAMETER_ENABLED, FALSE, GX_FOGBLEND_COLOR_ALPHA, GX_FOGSLOPE_0x8000, 0);
         }
 
         {
@@ -5026,7 +5000,7 @@ static void ov5_021DAEC0(SysTask *param0, void *param1)
 
     switch (v0->unk_BA2) {
     case 0:
-        ov5_021D7308(&v1->unk_44, &v1->unk_14, v0->unk_00->fieldSystem->unk_48, 6, 30037, (GX_RGB(31, 31, 31)), 1, v0->unk_BA4);
+        ov5_021D7308(&v1->unk_44, &v1->unk_14, v0->unk_00->fieldSystem->fogMan, 6, 30037, (GX_RGB(31, 31, 31)), 1, v0->unk_BA4);
         ov5_021D64FC(&v1->unk_00, 0, 9, 30);
         ov5_021D64E4(0, 16);
         GXLayers_EngineAToggleLayers(GX_PLANEMASK_BG2, 1);
@@ -5044,7 +5018,7 @@ static void ov5_021DAEC0(SysTask *param0, void *param1)
         break;
     case 2:
         if (v0->unk_BA4 != 0) {
-            v1->unk_14.unk_00 = v0->unk_00->fieldSystem->unk_48;
+            v1->unk_14.unk_00 = v0->unk_00->fieldSystem->fogMan;
             ov5_021D7384(v1->unk_14.unk_00, 6, 30037, (GX_RGB(31, 31, 31)));
             ov5_021D74D4(&v1->unk_14);
         }
@@ -5079,7 +5053,7 @@ static void ov5_021DAEC0(SysTask *param0, void *param1)
         break;
     case 5:
         if (v0->unk_BA4 != 0) {
-            ov5_021D57FC(v1->unk_14.unk_00, 1, 0, 0, 0, 0);
+            FogManager_ApplyParameters(v1->unk_14.unk_00, FOG_PARAMETER_ENABLED, FALSE, GX_FOGBLEND_COLOR_ALPHA, GX_FOGSLOPE_0x8000, 0);
         }
 
         {
@@ -5158,7 +5132,7 @@ static void ov5_021DB144(SysTask *param0, void *param1)
         ov5_021D64FC(&v1->unk_00, 0, 7, 8);
         ov5_021D64E4(0, 16);
         GXLayers_EngineAToggleLayers(GX_PLANEMASK_BG2, 1);
-        ov5_021D7308(&v1->unk_44, &v1->unk_14, v0->unk_00->fieldSystem->unk_48, 3, 0x6F6F + -1600, (GX_RGB(31, 31, 31)), 1, v0->unk_BA4);
+        ov5_021D7308(&v1->unk_44, &v1->unk_14, v0->unk_00->fieldSystem->fogMan, 3, 0x6F6F + -1600, (GX_RGB(31, 31, 31)), 1, v0->unk_BA4);
 
         v1->unk_AC = 0;
         v1->unk_B0 = 0;
@@ -5179,7 +5153,7 @@ static void ov5_021DB144(SysTask *param0, void *param1)
         ov5_021D64E4(7, 16 - 7);
 
         if (v0->unk_BA4 != 0) {
-            v1->unk_14.unk_00 = v0->unk_00->fieldSystem->unk_48;
+            v1->unk_14.unk_00 = v0->unk_00->fieldSystem->fogMan;
             ov5_021D7384(v1->unk_14.unk_00, 3, 0x6F6F + -1600, (GX_RGB(31, 31, 31)));
             ov5_021D74D4(&v1->unk_14);
         }
@@ -5214,7 +5188,7 @@ static void ov5_021DB144(SysTask *param0, void *param1)
         break;
     case 5:
         if (v0->unk_BA4 != 0) {
-            ov5_021D57FC(v1->unk_14.unk_00, 1, 0, 0, 0, 0);
+            FogManager_ApplyParameters(v1->unk_14.unk_00, FOG_PARAMETER_ENABLED, FALSE, GX_FOGBLEND_COLOR_ALPHA, GX_FOGSLOPE_0x8000, 0);
         }
 
         {
@@ -5248,8 +5222,8 @@ static void ov5_021DB144(SysTask *param0, void *param1)
 
         v5 = Unk_ov5_02201D38[v1->unk_B4 / 8];
 
-        sub_0201C63C(v0->unk_00->fieldSystem->unk_08, 2, 0, (v1->unk_AC >> FX32_SHIFT) + v5);
-        sub_0201C63C(v0->unk_00->fieldSystem->unk_08, 2, 3, (v1->unk_B0 >> FX32_SHIFT));
+        Bg_ScheduleScroll(v0->unk_00->fieldSystem->bgConfig, 2, 0, (v1->unk_AC >> FX32_SHIFT) + v5);
+        Bg_ScheduleScroll(v0->unk_00->fieldSystem->bgConfig, 2, 3, (v1->unk_B0 >> FX32_SHIFT));
     }
 }
 
@@ -5266,9 +5240,7 @@ static void ov5_021DB3C4(SysTask *param0, void *param1)
 static void ov5_021DB3E0(SysTask *param0, void *param1)
 {
     UnkStruct_ov5_021DB4B8 *v0 = (UnkStruct_ov5_021DB4B8 *)param1;
-    UnkStruct_ov5_021D84D4 *v1;
-
-    v1 = (UnkStruct_ov5_021D84D4 *)v0->unk_B98;
+    UnkStruct_ov5_021D84D4 *v1 = (UnkStruct_ov5_021D84D4 *)v0->unk_B98;
 
     ov5_021D9DFC(v0, v1, 3, 26095, (GX_RGB(2, 2, 6)), 0, 0);
 }
@@ -5276,9 +5248,7 @@ static void ov5_021DB3E0(SysTask *param0, void *param1)
 static void ov5_021DB40C(SysTask *param0, void *param1)
 {
     UnkStruct_ov5_021DB4B8 *v0 = (UnkStruct_ov5_021DB4B8 *)param1;
-    UnkStruct_ov5_021D84D4 *v1;
-
-    v1 = (UnkStruct_ov5_021D84D4 *)v0->unk_B98;
+    UnkStruct_ov5_021D84D4 *v1 = (UnkStruct_ov5_021D84D4 *)v0->unk_B98;
 
     ov5_021D9DFC(v0, v1, 2, 26415, (GX_RGB(13, 25, 30)), 0, 0);
 }
@@ -5286,9 +5256,7 @@ static void ov5_021DB40C(SysTask *param0, void *param1)
 static void ov5_021DB438(SysTask *param0, void *param1)
 {
     UnkStruct_ov5_021DB4B8 *v0 = (UnkStruct_ov5_021DB4B8 *)param1;
-    UnkStruct_ov5_021D84D4 *v1;
-
-    v1 = (UnkStruct_ov5_021D84D4 *)v0->unk_B98;
+    UnkStruct_ov5_021D84D4 *v1 = (UnkStruct_ov5_021D84D4 *)v0->unk_B98;
 
     ov5_021D9DFC(v0, v1, 2, 26415, (GX_RGB(20, 0, 0)), 0, 0);
 }
@@ -5296,9 +5264,7 @@ static void ov5_021DB438(SysTask *param0, void *param1)
 static void ov5_021DB460(SysTask *param0, void *param1)
 {
     UnkStruct_ov5_021DB4B8 *v0 = (UnkStruct_ov5_021DB4B8 *)param1;
-    UnkStruct_ov5_021D84D4 *v1;
-
-    v1 = (UnkStruct_ov5_021D84D4 *)v0->unk_B98;
+    UnkStruct_ov5_021D84D4 *v1 = (UnkStruct_ov5_021D84D4 *)v0->unk_B98;
 
     ov5_021D9DFC(v0, v1, 2, 26415, (GX_RGB(0, 0, 20)), 0, 0);
 }
@@ -5306,9 +5272,7 @@ static void ov5_021DB460(SysTask *param0, void *param1)
 static void ov5_021DB48C(SysTask *param0, void *param1)
 {
     UnkStruct_ov5_021DB4B8 *v0 = (UnkStruct_ov5_021DB4B8 *)param1;
-    UnkStruct_ov5_021D84D4 *v1;
-
-    v1 = (UnkStruct_ov5_021D84D4 *)v0->unk_B98;
+    UnkStruct_ov5_021D84D4 *v1 = (UnkStruct_ov5_021D84D4 *)v0->unk_B98;
 
     ov5_021D9DFC(v0, v1, 1, 19311, (GX_RGB(1, 1, 1)), 0, 0);
 }
@@ -5324,7 +5288,7 @@ static void ov5_021DB4B8(UnkStruct_ov5_021DB4B8 *param0, int param1)
 
 static void ov5_021DB4E4(UnkStruct_ov5_021DB4B8 *param0)
 {
-    sub_020057A4(param0->unk_BA0, 0);
+    Sound_StopEffect(param0->unk_BA0, 0);
     param0->unk_B9C = 0;
 }
 
@@ -5333,11 +5297,8 @@ static void ov5_021DB500(UnkStruct_ov5_021DB614 *param0)
     int v0;
     int v1;
     int v2;
-    u16 *v3;
-    u16 *v4;
-
-    v3 = BufferManager_GetWriteBuffer(param0->bufferManagers[0]);
-    v4 = BufferManager_GetWriteBuffer(param0->bufferManagers[1]);
+    u16 *v3 = BufferManager_GetWriteBuffer(param0->bufferManagers[0]);
+    u16 *v4 = BufferManager_GetWriteBuffer(param0->bufferManagers[1]);
 
     for (v0 = 0; v0 < 192; v0++) {
         if (v0 <= param0->unk_02) {
@@ -5397,8 +5358,8 @@ static void ov5_021DB614(UnkStruct_ov5_021DB614 *param0, HBlankSystem *param1)
 
     memset(param0, 0, sizeof(UnkStruct_ov5_021DB614));
 
-    param0->bufferManagers[0] = BufferManager_New(4, param0->unk_2C[0], param0->unk_2C[1]);
-    param0->bufferManagers[1] = BufferManager_New(4, param0->unk_2C[2], param0->unk_2C[3]);
+    param0->bufferManagers[0] = BufferManager_New(HEAP_ID_FIELD1, param0->unk_2C[0], param0->unk_2C[1]);
+    param0->bufferManagers[1] = BufferManager_New(HEAP_ID_FIELD1, param0->unk_2C[2], param0->unk_2C[3]);
 
     for (v0 = 0; v0 < 192; v0++) {
         param0->unk_2C[2][v0] = 255;

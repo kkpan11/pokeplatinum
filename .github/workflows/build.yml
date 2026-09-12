@@ -3,77 +3,70 @@ name: build
 on:
   push:
     branches: [ main ]
+    paths-ignore:
+      - '**.md'
   pull_request:
+    paths-ignore:
+      - '**.md'
 
 env:
   LM_LICENSE_FILE: "${{ github.workspace }}/tools/cw/license.dat"
-  CALCROM_DISCORD_WEBHOOK_AVATAR_URL: "https://i.imgur.com/38BQHdd.png"
-  CALCROM_DISCORD_WEBHOOK_USERNAME: "OK"
-  CALCROM_WEBHOOK_URL: "${{ secrets.WEBHOOKURL }}"
+  BUILD: /var/tmp/pokeplatinum
 
 jobs:
   build:
-    runs-on: ubuntu-22.04
-
+    permissions:
+      contents: write
+    runs-on: ubuntu-24.04
     steps:
       - name: Install Software
         run: |
-          sudo mkdir -pm755 /etc/apt/keyrings
-          sudo wget -O /etc/apt/keyrings/winehq-archive.key https://dl.winehq.org/wine-builds/winehq.key
-          sudo wget -NP /etc/apt/sources.list.d/ https://dl.winehq.org/wine-builds/ubuntu/dists/$(lsb_release -cs)/winehq-$(lsb_release -cs).sources
-          sudo dpkg --add-architecture i386
           sudo apt-get update -y
-          sudo apt-get install -y --install-recommends python3-pip ninja-build winehq-stable binutils-arm-none-eabi
-          pip install --user meson pyelftools
+          sudo apt-get install -y --no-install-recommends bison flex g++ gcc-arm-none-eabi git make ninja-build pkg-config python3 wget xz-utils libpng-dev
 
       - name: Checkout Repo
-        uses: actions/checkout@v2
+        uses: actions/checkout@v6
+
+      - name: Install Metroskrew
+        run: sudo make skrew
 
       - name: Configure Repo
-        run: ./config.sh /var/tmp/pokeplatinum
+        run: make configure
 
       - name: Build Repo
-        run: meson test -C /var/tmp/pokeplatinum
+        run: make check
 
-      - name: Webhook
-        if: ${{ github.event_name == 'push' }}
-        env:
-          arm9name: /var/tmp/pokeplatinum/
-        run: |
-          .github/calcrom/webhook.sh "$CALCROM_WEBHOOK_URL"
-        continue-on-error: true
-
-      - name: Post error archive
-        if: failure()
-        continue-on-error: true
-        run: tar czf failure.tar.gz /var/tmp/pokeplatinum
-
-      - name: Post error upload
-        if: failure()
-        uses: actions/upload-artifact@v2
-        with:
-          name: pokeplatinum-failure-${{ github.run_id }}
-          path: failure.tar.gz
-          retention-days: 1
-      
       - name: Checkout xMAP
         if: ${{ github.event_name == 'push' }}
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           path: 'xmap'
           ref: 'xmap'
-      
+
       - name: Move xMAP
         if: ${{ github.event_name == 'push' }}
         run: |
           mkdir -p xmap
-          cp /var/tmp/pokeplatinum/*.xMAP xmap/platinumus.xMAP
+          cp "$BUILD"/*.xMAP xmap/platinumus.xMAP
           echo "XMAP_COMMIT_MSG=$( git log --format=%s ${GITHUB_SHA} )" >> $GITHUB_ENV
-      
+
       - name: Update xMAP
         if: ${{ github.event_name == 'push' }}
-        uses: EndBug/add-and-commit@v9
+        uses: EndBug/add-and-commit@v10
         with:
           cwd: "./xmap"
           add: "*.xMAP"
           message: ${{ env.XMAP_COMMIT_MSG }}
+
+      - name: Post error archive
+        if: failure()
+        continue-on-error: true
+        run: tar czf failure.tar.gz "$BUILD"
+
+      - name: Post error upload
+        if: failure()
+        uses: actions/upload-artifact@v7
+        with:
+          name: pokeplatinum-failure-${{ github.run_id }}
+          path: failure.tar.gz
+          retention-days: 1

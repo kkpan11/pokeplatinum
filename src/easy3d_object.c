@@ -3,27 +3,26 @@
 #include <nitro.h>
 #include <string.h>
 
-#include "struct_decls/struct_02006C24_decl.h"
-
 #include "easy3d.h"
+#include "graphics.h"
 #include "heap.h"
+#include "narc.h"
 #include "sys_task.h"
 #include "sys_task_manager.h"
-#include "unk_02006E3C.h"
 
 static void Easy3DModel_BindTexture(SysTask *task, void *param);
 static void Easy3DModel_LoadInternal(Easy3DModel *model);
 static void Easy3DAnim_LoadInternal(Easy3DAnim *anim, const Easy3DModel *model, void *data, NNSFndAllocator *allocator);
 
-void Easy3DModel_Load(Easy3DModel *model, u32 narcIndex, u32 memberIndex, u32 heapID)
+void Easy3DModel_Load(Easy3DModel *model, enum NarcID narcID, u32 memberIndex, enum HeapID heapID)
 {
-    model->data = sub_02006FE8(narcIndex, memberIndex, FALSE, heapID, 0);
+    model->data = LoadMemberFromNARC(narcID, memberIndex, FALSE, heapID, 0);
     Easy3DModel_LoadInternal(model);
 }
 
 void Easy3DModel_LoadFrom(Easy3DModel *model, NARC *narc, u32 memberIndex, u32 heapID)
 {
-    model->data = sub_0200723C(narc, memberIndex, FALSE, heapID, 0);
+    model->data = LoadMemberFromOpenNARC(narc, memberIndex, FALSE, heapID, 0);
     Easy3DModel_LoadInternal(model);
 }
 
@@ -52,15 +51,15 @@ void Easy3DModel_Release(Easy3DModel *model)
     }
 
     if (model->data) {
-        Heap_FreeToHeap(model->data);
+        Heap_Free(model->data);
     }
 
     memset(model, 0, sizeof(Easy3DModel));
 }
 
-void Easy3DAnim_LoadFrom(Easy3DAnim *anim, const Easy3DModel *model, NARC *narc, u32 memberIndex, u32 heapID, NNSFndAllocator *allocator)
+void Easy3DAnim_LoadFrom(Easy3DAnim *anim, const Easy3DModel *model, NARC *narc, u32 memberIndex, enum HeapID heapID, NNSFndAllocator *allocator)
 {
-    void *data = sub_0200723C(narc, memberIndex, FALSE, heapID, 0);
+    void *data = LoadMemberFromOpenNARC(narc, memberIndex, FALSE, heapID, 0);
 
     Easy3DAnim_LoadInternal(anim, model, data, allocator);
     anim->dataBorrowed = FALSE;
@@ -78,7 +77,7 @@ void Easy3DAnim_Release(Easy3DAnim *anim, NNSFndAllocator *allocator)
         NNS_G3dFreeAnmObj(allocator, anim->animObj);
 
         if (anim->dataBorrowed == FALSE) {
-            Heap_FreeToHeap(anim->data);
+            Heap_Free(anim->data);
         }
     }
 
@@ -189,12 +188,12 @@ void Easy3DObject_DrawRotated(Easy3DObject *obj, const MtxFx33 *rotation)
     }
 }
 
-void Easy3DObject_SetVisibility(Easy3DObject *obj, BOOL visible)
+void Easy3DObject_SetVisible(Easy3DObject *obj, BOOL visible)
 {
     obj->visible = visible;
 }
 
-BOOL Easy3DObject_GetVisibility(const Easy3DObject *obj)
+BOOL Easy3DObject_IsVisible(const Easy3DObject *obj)
 {
     return obj->visible;
 }

@@ -1,54 +1,44 @@
-    .include "macros/scrcmd.inc"
+#include "macros/scrcmd.inc"
+#include "res/text/bank/route_228.h"
 
-    .data
 
-    ScriptEntry _007B
-    ScriptEntry _0092
-    ScriptEntry _0012
-    ScriptEntry _0047
-    .short 0xFD13
+    ScriptEntry Route228_ArrowSignpostRt226
+    ScriptEntry Route228_ArrowSignpostRt229
+    ScriptEntry Route228_OnTransition
+    ScriptEntry Route228_OnLoad
+    ScriptEntryEnd
 
-_0012:
-    CallIfNe 0x406B, 0x122, _003F
-    ScrCmd_32B 0x4001
-    GoToIfEq 0x4001, 0, _0067
-    GoToIfEq 0x4001, 1, _0071
+Route228_OnTransition:
+    CallIfNe VAR_ROCK_PEAK_RUINS_STATE, RUINS_STATE_CAUGHT_REGI, Route228_ResetRockPeakRuinsState
+    CheckPartyHasFatefulEncounterRegigigas VAR_MAP_LOCAL_0x01
+    GoToIfEq VAR_MAP_LOCAL_0x01, FALSE, Route228_RemoveWarpRockPeakRuinsWithRegirock
+    GoToIfEq VAR_MAP_LOCAL_0x01, TRUE, Route228_RemoveWarpRockPeakRuinsWithoutRegirock
     End
 
-_003F:
-    SetVar 0x406B, 0
+Route228_ResetRockPeakRuinsState:
+    SetVar VAR_ROCK_PEAK_RUINS_STATE, 0
     Return
 
-_0047:
-    ScrCmd_32B 0x4001
-    GoToIfEq 0x4001, 0, _0067
-    GoToIfEq 0x4001, 1, _0071
+Route228_OnLoad:
+    CheckPartyHasFatefulEncounterRegigigas VAR_MAP_LOCAL_0x01
+    GoToIfEq VAR_MAP_LOCAL_0x01, FALSE, Route228_RemoveWarpRockPeakRuinsWithRegirock
+    GoToIfEq VAR_MAP_LOCAL_0x01, TRUE, Route228_RemoveWarpRockPeakRuinsWithoutRegirock
     End
 
-_0067:
-    ScrCmd_18A 5, 0x30F, 0x153
+Route228_RemoveWarpRockPeakRuinsWithRegirock:
+    SetWarpEventPos 5, 783, 339
     End
 
-_0071:
-    ScrCmd_18A 4, 0x30F, 0x153
+Route228_RemoveWarpRockPeakRuinsWithoutRegirock:
+    SetWarpEventPos 4, 783, 339
     End
 
-_007B:
-    ScrCmd_036 0, 1, 0, 0x800C
-    ScrCmd_038 3
-    ScrCmd_039
-    ScrCmd_03B 0x800C
-    CallCommonScript 0x7D0
+Route228_ArrowSignpostRt226:
+    ShowArrowSign Route228_Text_SignRt226
     End
 
-_0092:
-    ScrCmd_036 1, 1, 0, 0x800C
-    ScrCmd_038 3
-    ScrCmd_039
-    ScrCmd_03B 0x800C
-    CallCommonScript 0x7D0
+Route228_ArrowSignpostRt229:
+    ShowArrowSign Route228_Text_SignRt229
     End
 
-    .byte 0
-    .byte 0
-    .byte 0
+    .balign 4, 0

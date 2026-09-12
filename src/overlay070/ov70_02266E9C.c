@@ -7,7 +7,6 @@
 #include "overlay063/ov63_0222BE18.h"
 #include "overlay066/ov66_0222DDF0.h"
 #include "overlay066/struct_ov66_0222DFF8_decl.h"
-#include "overlay066/struct_ov66_0222E71C_decl.h"
 #include "overlay066/struct_ov66_02231428.h"
 #include "overlay070/ov70_0225C9B4.h"
 #include "overlay070/ov70_0225D9A4.h"
@@ -17,15 +16,15 @@
 #include "overlay070/struct_ov70_0225DEE8_decl.h"
 #include "overlay070/struct_ov70_022630A4_decl.h"
 #include "overlay070/struct_ov70_02263344_decl.h"
-#include "overlay084/struct_ov84_02240FA8.h"
 
 #include "enums.h"
-#include "strbuf.h"
-#include "unk_02005474.h"
-#include "unk_0201D15C.h"
+#include "list_menu.h"
+#include "math_util.h"
+#include "sound_playback.h"
+#include "string_gf.h"
 
 typedef struct {
-    UnkStruct_ov84_02240FA8 unk_00;
+    ListMenuTemplate unk_00;
     u32 unk_20;
 } UnkStruct_ov70_02268E44;
 
@@ -70,16 +69,16 @@ typedef struct {
     u16 unk_02;
 } UnkStruct_ov70_0226DD5C;
 
-static u32 ov70_02268A3C(const UnkStruct_ov66_0222E71C *param0);
-static Strbuf *ov70_02268AAC(UnkStruct_ov70_0225DEE8 *param0, u32 param1, u32 param2);
-static Strbuf *ov70_02268AF8(UnkStruct_ov70_0225DEE8 *param0, u32 param1, u32 param2);
+static u32 ov70_02268A3C(const WiFiPlazaProfile *param0);
+static String *ov70_02268AAC(UnkStruct_ov70_0225DEE8 *param0, u32 param1, u32 param2);
+static String *ov70_02268AF8(UnkStruct_ov70_0225DEE8 *param0, u32 param1, u32 param2);
 static BOOL ov70_02268B50(UnkStruct_ov70_02268BA0 *param0, UnkStruct_ov66_0222DFF8 *param1, u32 param2);
 static void ov70_02268BA0(UnkStruct_ov70_02268BA0 *param0);
 static void ov70_02268BA4(UnkStruct_ov70_02268BA0 *param0, u8 param1, u8 param2, UnkStruct_ov70_02263344 *param3, u8 param4);
 static void ov70_02268BBC(UnkStruct_ov70_02268BA0 *param0, UnkStruct_ov70_02263344 *param1);
 static void ov70_02268BD8(UnkStruct_ov70_02268BA0 *param0, UnkStruct_ov70_02263344 *param1, UnkStruct_ov70_0225DEE8 *param2);
-static void ov70_02268BF4(UnkStruct_ov70_02268BA0 *param0, UnkStruct_ov66_0222DFF8 *param1, UnkStruct_ov70_0225DEE8 *param2, u32 param3, const UnkStruct_ov66_0222E71C *param4, const UnkStruct_ov66_0222E71C *param5);
-static void ov70_02268C44(UnkStruct_ov70_0225DEE8 *param0, u32 param1, u32 param2, const UnkStruct_ov66_0222E71C *param3);
+static void ov70_02268BF4(UnkStruct_ov70_02268BA0 *param0, UnkStruct_ov66_0222DFF8 *param1, UnkStruct_ov70_0225DEE8 *param2, u32 param3, const WiFiPlazaProfile *param4, const WiFiPlazaProfile *param5);
+static void ov70_02268C44(UnkStruct_ov70_0225DEE8 *param0, u32 param1, u32 param2, const WiFiPlazaProfile *param3);
 static BOOL ov70_02268CC8(UnkStruct_ov70_02268BA0 *param0, UnkStruct_ov66_0222DFF8 *param1, UnkStruct_ov70_0225DEE8 *param2);
 static void ov70_02268D38(UnkStruct_ov70_02268BA0 *param0, UnkStruct_ov66_0222DFF8 *param1, UnkStruct_ov70_0225DEE8 *param2, u32 param3, BOOL param4);
 static void ov70_02268D70(UnkStruct_ov70_02268BA0 *param0, UnkStruct_ov70_0225DEE8 *param1);
@@ -87,7 +86,7 @@ static void ov70_02268DB8(UnkStruct_ov70_02268BA0 *param0);
 static void ov70_02268DC4(UnkStruct_ov70_02268BA0 *param0);
 static void ov70_02268DCC(UnkStruct_ov70_02268BA0 *param0, UnkStruct_ov70_0225DEE8 *param1);
 static void ov70_02268E08(UnkStruct_ov70_02268BA0 *param0);
-static void ov70_02268E20(UnkStruct_ov70_02268BA0 *param0, const UnkStruct_ov66_0222E71C *param1);
+static void ov70_02268E20(UnkStruct_ov70_02268BA0 *param0, const WiFiPlazaProfile *param1);
 static void ov70_02268E44(UnkStruct_ov70_02268E44 *param0, UnkStruct_ov70_0225DEE8 *param1, u32 param2, u32 param3, u32 param4);
 static void ov70_02268EEC(UnkStruct_ov70_02268E44 *param0, UnkStruct_ov70_0225DEE8 *param1, u32 param2, u32 param3, u32 param4, u32 param5);
 static void ov70_02268FB8(UnkStruct_ov70_02268E44 *param0, UnkStruct_ov70_0225DEE8 *param1);
@@ -100,7 +99,7 @@ static void ov70_02269144(UnkStruct_ov70_02269114 *param0, UnkStruct_ov66_0222DF
 static BOOL ov70_02269178(const UnkStruct_ov70_02269114 *param0);
 static u16 ov70_02269188(const UnkStruct_ov70_02269114 *param0);
 
-static const UnkStruct_ov84_02240FA8 Unk_ov70_0226DCBC = {
+static const ListMenuTemplate Unk_ov70_0226DCBC = {
     NULL,
     NULL,
     NULL,
@@ -487,9 +486,9 @@ BOOL ov70_02266E9C(UnkStruct_ov70_02263344 *param0, UnkStruct_ov70_0225DEE8 *par
     UnkStruct_ov70_022630A4 *v2;
     u32 v3;
     u32 v4;
-    Strbuf *v5;
-    const UnkStruct_ov66_0222E71C *v6;
-    const UnkStruct_ov66_0222E71C *v7;
+    String *v5;
+    const WiFiPlazaProfile *v6;
+    const WiFiPlazaProfile *v7;
 
     v1 = ov70_0225DEE8(param1);
     v2 = ov70_0225DF10(param1);
@@ -568,7 +567,7 @@ BOOL ov70_02266E9C(UnkStruct_ov70_02263344 *param0, UnkStruct_ov70_0225DEE8 *par
             ov70_0225D030(v8, 0);
             ov70_0225D060(v8, v12);
             ov70_02262EEC(v2, v11, 0);
-            Sound_PlayEffect(1508);
+            Sound_PlayEffect(SEQ_SE_DP_BUTTON9_sseq);
             ov66_0222E3E4(v1, 9);
 
             if (v13 == 1) {
@@ -823,7 +822,7 @@ BOOL ov70_02266E9C(UnkStruct_ov70_02263344 *param0, UnkStruct_ov70_0225DEE8 *par
         }
         break;
     case 17:
-        Sound_PlayEffect(1448);
+        Sound_PlayEffect(SEQ_SE_PL_EFF03_4_sseq);
         ov70_02262E88(param0, 18);
         break;
     case 18:
@@ -1104,9 +1103,9 @@ BOOL ov70_02267A44(UnkStruct_ov70_02263344 *param0, UnkStruct_ov70_0225DEE8 *par
     UnkStruct_ov66_0222DFF8 *v1;
     u32 v2;
     u32 v3;
-    Strbuf *v4;
-    const UnkStruct_ov66_0222E71C *v5;
-    const UnkStruct_ov66_0222E71C *v6;
+    String *v4;
+    const WiFiPlazaProfile *v5;
+    const WiFiPlazaProfile *v6;
 
     v1 = ov70_0225DEE8(param1);
     v0 = ov70_02262E80(param0);
@@ -1152,7 +1151,7 @@ BOOL ov70_02267A44(UnkStruct_ov70_02263344 *param0, UnkStruct_ov70_0225DEE8 *par
             v7 = ov66_0222EE1C(v1);
             v8 = ov70_02268B50(v0, v1, v7);
 
-            Sound_PlayEffect(1508);
+            Sound_PlayEffect(SEQ_SE_DP_BUTTON9_sseq);
             ov66_0222E3E4(v1, 9);
 
             if (v8 == 1) {
@@ -1329,7 +1328,7 @@ BOOL ov70_02267A44(UnkStruct_ov70_02263344 *param0, UnkStruct_ov70_0225DEE8 *par
         ov70_02268BA4(v0, 128, 13, param0, 30);
         break;
     case 13:
-        Sound_PlayEffect(1448);
+        Sound_PlayEffect(SEQ_SE_PL_EFF03_4_sseq);
         ov70_0225E234(param1, v0->unk_03, 0);
 
         v4 = ov70_02268AAC(param1, v0->unk_03, 514);
@@ -1570,7 +1569,7 @@ BOOL ov70_02267A44(UnkStruct_ov70_02263344 *param0, UnkStruct_ov70_0225DEE8 *par
 BOOL ov70_02268390(UnkStruct_ov70_02263344 *param0, UnkStruct_ov70_0225DEE8 *param1, u32 param2)
 {
     UnkStruct_ov70_02268390 *v0;
-    Strbuf *v1;
+    String *v1;
     UnkStruct_ov66_0222DFF8 *v2;
 
     v0 = ov70_02262E80(param0);
@@ -1580,7 +1579,7 @@ BOOL ov70_02268390(UnkStruct_ov70_02263344 *param0, UnkStruct_ov70_0225DEE8 *par
     case 0:
         v0 = ov70_02262E3C(param0, sizeof(UnkStruct_ov70_02268390));
 
-        Sound_PlayEffect(1500);
+        Sound_PlayEffect(SE_CONFIRM_sseq_3);
 
         if (ov66_0222E12C(v2) == 1) {
             ov70_02262E88(param0, 2);
@@ -1657,7 +1656,7 @@ BOOL ov70_02268390(UnkStruct_ov70_02263344 *param0, UnkStruct_ov70_0225DEE8 *par
             v4 = 1;
             break;
         case 0xfffffffe:
-            Sound_PlayEffect(1500);
+            Sound_PlayEffect(SE_CONFIRM_sseq_3);
         case 7:
             ov70_02262E88(param0, 22);
             v4 = 1;
@@ -1702,7 +1701,7 @@ BOOL ov70_02268390(UnkStruct_ov70_02263344 *param0, UnkStruct_ov70_0225DEE8 *par
             v6 = 1;
             break;
         case 0xfffffffe:
-            Sound_PlayEffect(1500);
+            Sound_PlayEffect(SE_CONFIRM_sseq_3);
         case 3:
             ov70_02262E88(param0, 4);
             v6 = 1;
@@ -1780,7 +1779,7 @@ BOOL ov70_02268390(UnkStruct_ov70_02263344 *param0, UnkStruct_ov70_0225DEE8 *par
             v8 = 1;
             break;
         case 0xfffffffe:
-            Sound_PlayEffect(1500);
+            Sound_PlayEffect(SE_CONFIRM_sseq_3);
         case 3:
             ov70_02262E88(param0, 4);
             v8 = 1;
@@ -1853,14 +1852,14 @@ BOOL ov70_0226889C(UnkStruct_ov70_02263344 *param0, UnkStruct_ov70_0225DEE8 *par
 {
     UnkStruct_ov70_02268390 *v0;
     UnkStruct_ov66_0222DFF8 *v1;
-    Strbuf *v2;
+    String *v2;
 
     v0 = ov70_02262E80(param0);
     v1 = ov70_0225DEE8(param1);
 
     switch (ov70_02262E84(param0)) {
     case 0:
-        Sound_PlayEffect(1500);
+        Sound_PlayEffect(SE_CONFIRM_sseq_3);
 
         if (ov66_0222E12C(v1) == 0) {
             if (ov66_0222E170(v1) == 1) {
@@ -1947,7 +1946,7 @@ BOOL ov70_0226889C(UnkStruct_ov70_02263344 *param0, UnkStruct_ov70_0225DEE8 *par
     return 0;
 }
 
-static u32 ov70_02268A3C(const UnkStruct_ov66_0222E71C *param0)
+static u32 ov70_02268A3C(const WiFiPlazaProfile *param0)
 {
     UnkStruct_ov66_02231428 v0;
 
@@ -1984,11 +1983,11 @@ static u32 ov70_02268A3C(const UnkStruct_ov66_0222E71C *param0)
         return 2;
     }
 
-    GF_ASSERT(0);
+    GF_ASSERT(FALSE);
     return 1;
 }
 
-static Strbuf *ov70_02268AAC(UnkStruct_ov70_0225DEE8 *param0, u32 param1, u32 param2)
+static String *ov70_02268AAC(UnkStruct_ov70_0225DEE8 *param0, u32 param1, u32 param2)
 {
     BOOL v0;
     UnkStruct_ov66_0222DFF8 *v1;
@@ -2009,7 +2008,7 @@ static Strbuf *ov70_02268AAC(UnkStruct_ov70_0225DEE8 *param0, u32 param1, u32 pa
     return ov70_0225E20C(param0, 3, param2);
 }
 
-static Strbuf *ov70_02268AF8(UnkStruct_ov70_0225DEE8 *param0, u32 param1, u32 param2)
+static String *ov70_02268AF8(UnkStruct_ov70_0225DEE8 *param0, u32 param1, u32 param2)
 {
     BOOL v0, v1;
     UnkStruct_ov66_0222DFF8 *v2;
@@ -2040,8 +2039,8 @@ static BOOL ov70_02268B50(UnkStruct_ov70_02268BA0 *param0, UnkStruct_ov66_0222DF
     param0->unk_0A = 1;
 
     {
-        const UnkStruct_ov66_0222E71C *v0;
-        const UnkStruct_ov66_0222E71C *v1;
+        const WiFiPlazaProfile *v0;
+        const WiFiPlazaProfile *v1;
 
         v0 = ov66_0222E3BC(param1);
         v1 = ov66_0222E374(param1, param0->unk_03);
@@ -2086,7 +2085,7 @@ static void ov70_02268BD8(UnkStruct_ov70_02268BA0 *param0, UnkStruct_ov70_022633
     }
 }
 
-static void ov70_02268BF4(UnkStruct_ov70_02268BA0 *param0, UnkStruct_ov66_0222DFF8 *param1, UnkStruct_ov70_0225DEE8 *param2, u32 param3, const UnkStruct_ov66_0222E71C *param4, const UnkStruct_ov66_0222E71C *param5)
+static void ov70_02268BF4(UnkStruct_ov70_02268BA0 *param0, UnkStruct_ov66_0222DFF8 *param1, UnkStruct_ov70_0225DEE8 *param2, u32 param3, const WiFiPlazaProfile *param4, const WiFiPlazaProfile *param5)
 {
     u32 v0;
     u32 v1, v2;
@@ -2104,16 +2103,16 @@ static void ov70_02268BF4(UnkStruct_ov70_02268BA0 *param0, UnkStruct_ov66_0222DF
     ov70_02268C44(param2, 0, param3, param4);
     ov70_02268C44(param2, 1, param3, param5);
 
-    v1 = ov66_0222E80C(param4);
-    v2 = ov66_0222E80C(param5);
+    v1 = WiFiPlazaProfile_GetNormalizedLanguage(param4);
+    v2 = WiFiPlazaProfile_GetNormalizedLanguage(param5);
     v0 = v3[v1][v2];
 
     ov70_0225DF8C(param2, ov70_0225E20C(param2, 3, v0));
 }
 
-static void ov70_02268C44(UnkStruct_ov70_0225DEE8 *param0, u32 param1, u32 param2, const UnkStruct_ov66_0222E71C *param3)
+static void ov70_02268C44(UnkStruct_ov70_0225DEE8 *param0, u32 param1, u32 param2, const WiFiPlazaProfile *param3)
 {
-    switch (ov66_0222E80C(param3)) {
+    switch (WiFiPlazaProfile_GetNormalizedLanguage(param3)) {
     case 1:
         ov70_0225E2AC(param0, param1, param2);
         break;
@@ -2141,17 +2140,17 @@ static void ov70_02268C44(UnkStruct_ov70_0225DEE8 *param0, u32 param1, u32 param
 static BOOL ov70_02268CC8(UnkStruct_ov70_02268BA0 *param0, UnkStruct_ov66_0222DFF8 *param1, UnkStruct_ov70_0225DEE8 *param2)
 {
     u32 v0;
-    const UnkStruct_ov66_0222E71C *v1;
-    const UnkStruct_ov66_0222E71C *v2;
+    const WiFiPlazaProfile *v1;
+    const WiFiPlazaProfile *v2;
 
     v1 = ov66_0222E3BC(param1);
     v2 = ov66_0222E374(param1, param0->unk_03);
 
-    if (ov66_0222E824(v1) == 0) {
+    if (WiFiPlazaProfile_IsLanguageValid(v1) == 0) {
         return 0;
     }
 
-    if (ov66_0222E824(v2) == 0) {
+    if (WiFiPlazaProfile_IsLanguageValid(v2) == 0) {
         return 0;
     }
 
@@ -2178,8 +2177,8 @@ static BOOL ov70_02268CC8(UnkStruct_ov70_02268BA0 *param0, UnkStruct_ov66_0222DF
 static void ov70_02268D38(UnkStruct_ov70_02268BA0 *param0, UnkStruct_ov66_0222DFF8 *param1, UnkStruct_ov70_0225DEE8 *param2, u32 param3, BOOL param4)
 {
     u32 v0;
-    const UnkStruct_ov66_0222E71C *v1;
-    const UnkStruct_ov66_0222E71C *v2;
+    const WiFiPlazaProfile *v1;
+    const WiFiPlazaProfile *v2;
 
     v1 = ov66_0222E3BC(param1);
     v2 = ov66_0222E374(param1, param0->unk_03);
@@ -2196,7 +2195,7 @@ static void ov70_02268D38(UnkStruct_ov70_02268BA0 *param0, UnkStruct_ov66_0222DF
 static void ov70_02268D70(UnkStruct_ov70_02268BA0 *param0, UnkStruct_ov70_0225DEE8 *param1)
 {
     UnkStruct_ov66_0222DFF8 *v0;
-    Strbuf *v1;
+    String *v1;
 
     v0 = ov70_0225DEE8(param1);
 
@@ -2225,7 +2224,7 @@ static void ov70_02268DC4(UnkStruct_ov70_02268BA0 *param0)
 
 static void ov70_02268DCC(UnkStruct_ov70_02268BA0 *param0, UnkStruct_ov70_0225DEE8 *param1)
 {
-    Strbuf *v0;
+    String *v0;
 
     if (param0->unk_0D == 1) {
         if (param0->unk_0E == 450) {
@@ -2245,11 +2244,9 @@ static void ov70_02268E08(UnkStruct_ov70_02268BA0 *param0)
     }
 }
 
-static void ov70_02268E20(UnkStruct_ov70_02268BA0 *param0, const UnkStruct_ov66_0222E71C *param1)
+static void ov70_02268E20(UnkStruct_ov70_02268BA0 *param0, const WiFiPlazaProfile *param1)
 {
-    u32 v0;
-
-    v0 = ov66_0222E7A0(param1);
+    u32 v0 = ov66_0222E7A0(param1);
 
     param0->unk_44 = 1;
     param0->unk_46 = v0;
@@ -2259,7 +2256,7 @@ static void ov70_02268E20(UnkStruct_ov70_02268BA0 *param0, const UnkStruct_ov66_
 static void ov70_02268E44(UnkStruct_ov70_02268E44 *param0, UnkStruct_ov70_0225DEE8 *param1, u32 param2, u32 param3, u32 param4)
 {
     int v0;
-    const Strbuf *v1;
+    const String *v1;
 
     ov70_0225E00C(param1, param2);
     param0->unk_20 = param2;
@@ -2279,13 +2276,13 @@ static void ov70_02268E44(UnkStruct_ov70_02268E44 *param0, UnkStruct_ov70_0225DE
     }
 
     param0->unk_00 = Unk_ov70_0226DCBC;
-    param0->unk_00.unk_10 = param0->unk_20;
+    param0->unk_00.count = param0->unk_20;
 
-    if (param0->unk_00.unk_12 > param0->unk_20) {
-        param0->unk_00.unk_12 = param0->unk_20;
+    if (param0->unk_00.maxDisplay > param0->unk_20) {
+        param0->unk_00.maxDisplay = param0->unk_20;
     }
 
-    param0->unk_00.unk_00 = ov70_0225E054(param1);
+    param0->unk_00.choices = ov70_0225E054(param1);
 }
 
 static void ov70_02268EEC(UnkStruct_ov70_02268E44 *param0, UnkStruct_ov70_0225DEE8 *param1, u32 param2, u32 param3, u32 param4, u32 param5)
@@ -2293,7 +2290,7 @@ static void ov70_02268EEC(UnkStruct_ov70_02268E44 *param0, UnkStruct_ov70_0225DE
     int v0;
     u32 v1;
     u32 v2;
-    const Strbuf *v3;
+    const String *v3;
     BOOL v4;
 
     ov70_0225E020(param1, param3, param2);
@@ -2322,19 +2319,19 @@ static void ov70_02268EEC(UnkStruct_ov70_02268E44 *param0, UnkStruct_ov70_0225DE
     }
 
     param0->unk_00 = Unk_ov70_0226DCBC;
-    param0->unk_00.unk_10 = param0->unk_20;
+    param0->unk_00.count = param0->unk_20;
 
-    if (param0->unk_00.unk_12 > param0->unk_20) {
-        param0->unk_00.unk_12 = param0->unk_20;
+    if (param0->unk_00.maxDisplay > param0->unk_20) {
+        param0->unk_00.maxDisplay = param0->unk_20;
     }
 
-    param0->unk_00.unk_00 = ov70_0225E054(param1);
+    param0->unk_00.choices = ov70_0225E054(param1);
 }
 
 static void ov70_02268FB8(UnkStruct_ov70_02268E44 *param0, UnkStruct_ov70_0225DEE8 *param1)
 {
     int v0;
-    Strbuf *v1;
+    String *v1;
     static const u8 v2[8] = {
         31,
         32,
@@ -2355,15 +2352,15 @@ static void ov70_02268FB8(UnkStruct_ov70_02268E44 *param0, UnkStruct_ov70_0225DE
     }
 
     param0->unk_00 = Unk_ov70_0226DCBC;
-    param0->unk_00.unk_10 = param0->unk_20;
-    param0->unk_00.unk_12 = param0->unk_20;
-    param0->unk_00.unk_00 = ov70_0225E054(param1);
+    param0->unk_00.count = param0->unk_20;
+    param0->unk_00.maxDisplay = param0->unk_20;
+    param0->unk_00.choices = ov70_0225E054(param1);
 }
 
 static void ov70_02269018(UnkStruct_ov70_02268E44 *param0, UnkStruct_ov70_0225DEE8 *param1)
 {
     int v0;
-    Strbuf *v1;
+    String *v1;
 
     ov70_0225E00C(param1, 4);
     param0->unk_20 = 4;
@@ -2379,15 +2376,15 @@ static void ov70_02269018(UnkStruct_ov70_02268E44 *param0, UnkStruct_ov70_0225DE
     ov70_0225E044(param1, v1, 4 - 1);
 
     param0->unk_00 = Unk_ov70_0226DCBC;
-    param0->unk_00.unk_10 = param0->unk_20;
-    param0->unk_00.unk_12 = param0->unk_20;
-    param0->unk_00.unk_00 = ov70_0225E054(param1);
+    param0->unk_00.count = param0->unk_20;
+    param0->unk_00.maxDisplay = param0->unk_20;
+    param0->unk_00.choices = ov70_0225E054(param1);
 }
 
 static void ov70_02269090(UnkStruct_ov70_02268E44 *param0, UnkStruct_ov70_0225DEE8 *param1)
 {
     int v0;
-    Strbuf *v1;
+    String *v1;
 
     ov70_0225E00C(param1, 4);
     param0->unk_20 = 4;
@@ -2403,9 +2400,9 @@ static void ov70_02269090(UnkStruct_ov70_02268E44 *param0, UnkStruct_ov70_0225DE
     ov70_0225E044(param1, v1, 4 - 1);
 
     param0->unk_00 = Unk_ov70_0226DCBC;
-    param0->unk_00.unk_10 = param0->unk_20;
-    param0->unk_00.unk_12 = param0->unk_20;
-    param0->unk_00.unk_00 = ov70_0225E054(param1);
+    param0->unk_00.count = param0->unk_20;
+    param0->unk_00.maxDisplay = param0->unk_20;
+    param0->unk_00.choices = ov70_0225E054(param1);
 }
 
 static void ov70_02269108(UnkStruct_ov70_02268E44 *param0, UnkStruct_ov70_0225DEE8 *param1)

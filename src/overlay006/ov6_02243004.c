@@ -6,7 +6,8 @@
 #include "field/field_system.h"
 #include "overlay005/struct_ov5_021D1BEC_decl.h"
 #include "overlay006/ov6_0223E140.h"
-#include "overlay115/camera_angle.h"
+
+#include "camera.h"
 
 static UnkStruct_ov5_021D1BEC *Unk_ov6_02249940;
 
@@ -57,7 +58,7 @@ BOOL ov6_02243004(FieldSystem *fieldSystem, int param1)
         Unk_ov6_02249940 = ov6_0223EA74(fieldSystem, 2);
         break;
     default:
-        GF_ASSERT(0);
+        GF_ASSERT(FALSE);
     }
 
     return 0;

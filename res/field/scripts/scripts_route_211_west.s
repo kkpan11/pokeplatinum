@@ -1,36 +1,22 @@
-    .include "macros/scrcmd.inc"
+#include "macros/scrcmd.inc"
+#include "res/text/bank/route_211_west.h"
 
-    .data
 
-    ScriptEntry _000E
-    ScriptEntry _0021
-    ScriptEntry _0038
-    .short 0xFD13
+    ScriptEntry Route211West_Dummy1
+    ScriptEntry Route211West_ArrowSignpostMtCoronet
+    ScriptEntry Route211West_ArrowSignpostEternaCity
+    ScriptEntryEnd
 
-_000E:
-    PlayFanfare SEQ_SE_CONFIRM
-    LockAll
-    FacePlayer
-    Message 0
-    WaitABXPadPress
-    CloseMessage
-    ReleaseAll
+Route211West_Dummy1:
+    NPCMessage Route211West_Text_Dummy0
     End
 
-_0021:
-    ScrCmd_036 1, 1, 0, 0x800C
-    ScrCmd_038 3
-    ScrCmd_039
-    ScrCmd_03B 0x800C
-    CallCommonScript 0x7D0
+Route211West_ArrowSignpostMtCoronet:
+    ShowArrowSign Route211West_Text_SignMtCoronet
     End
 
-_0038:
-    ScrCmd_036 2, 1, 0, 0x800C
-    ScrCmd_038 3
-    ScrCmd_039
-    ScrCmd_03B 0x800C
-    CallCommonScript 0x7D0
+Route211West_ArrowSignpostEternaCity:
+    ShowArrowSign Route211West_Text_SignEternaCity
     End
 
-    .byte 0
+    .balign 4, 0

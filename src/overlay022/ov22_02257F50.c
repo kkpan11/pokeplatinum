@@ -18,10 +18,10 @@
 #include "overlay022/struct_ov22_022599A0.h"
 
 #include "heap.h"
+#include "math_util.h"
+#include "sys_task_extensions.h"
 #include "sys_task_manager.h"
 #include "touch_screen.h"
-#include "unk_0200679C.h"
-#include "unk_0201D15C.h"
 
 typedef struct {
     UnkStruct_ov22_02259560 *unk_00;
@@ -190,7 +190,7 @@ void ov22_022580A4(UnkStruct_ov22_02257F50 *param0, int param1, int param2)
         v0.unk_1C = 0;
         break;
     default:
-        GF_ASSERT(0);
+        GF_ASSERT(FALSE);
         break;
     }
 
@@ -335,7 +335,7 @@ BOOL ov22_02258304(UnkStruct_ov22_02257F50 *param0, int param1, int param2)
     v0.rect.left = (8 + 2);
     v0.rect.right = (8 + 2) + (112 - (2 * 2));
 
-    return sub_02022830(&v0, param1, param2);
+    return TouchScreen_IsTouchInHitTable(&v0, param1, param2);
 }
 
 UnkStruct_ov22_02259560 *ov22_02258320(UnkStruct_ov22_02257F50 *param0, int *param1, int *param2, NNSG2dCharacterData **param3)
@@ -367,7 +367,7 @@ void ov22_02258354(UnkStruct_ov22_02257F50 *param0, int param1)
     UnkStruct_ov22_022599A0 v0;
 
     v0.unk_00 = param0->unk_44.unk_10;
-    v0.unk_04 = 25;
+    v0.narcID = NARC_INDEX_GRAPHIC__IMAGECLIP;
     v0.unk_08 = (param1) * 2 + 129;
     v0.unk_0C = 133;
     v0.unk_10 = (param1) * 2 + 129 + 1;
@@ -377,7 +377,7 @@ void ov22_02258354(UnkStruct_ov22_02257F50 *param0, int param1)
     v0.unk_20 = 1;
     v0.unk_24 = 2;
     v0.unk_28 = 0;
-    v0.unk_2C = 14;
+    v0.heapID = HEAP_ID_14;
 
     ov22_022597BC(&param0->unk_44.unk_18, &v0);
 
@@ -390,7 +390,7 @@ void ov22_022583A0(UnkStruct_ov22_02257F50 *param0, int param1, int param2, int 
     int v1, v2;
 
     v0.unk_00 = param0->unk_44.unk_10;
-    v0.unk_04 = 25;
+    v0.narcID = NARC_INDEX_GRAPHIC__IMAGECLIP;
     v0.unk_08 = (param1) * 2 + 129;
     v0.unk_0C = 133;
     v0.unk_10 = (param1) * 2 + 129 + 1;
@@ -400,7 +400,7 @@ void ov22_022583A0(UnkStruct_ov22_02257F50 *param0, int param1, int param2, int 
     v0.unk_20 = 1;
     v0.unk_24 = 2;
     v0.unk_28 = 0;
-    v0.unk_2C = 14;
+    v0.heapID = HEAP_ID_14;
 
     if (param2 & 1) {
         v1 = 112;
@@ -442,9 +442,7 @@ int ov22_02258424(UnkStruct_ov22_02257F50 *param0, int param1)
 
 void ov22_0225844C(UnkStruct_ov22_02257F50 *param0, int param1, int param2, int param3, int param4)
 {
-    UnkStruct_ov22_02259560 *v0;
-
-    v0 = ov22_02258584(param0, param1, param2);
+    UnkStruct_ov22_02259560 *v0 = ov22_02258584(param0, param1, param2);
     ov22_022596EC(v0, param3, param4);
 }
 
@@ -471,9 +469,7 @@ static void ov22_02258470(UnkStruct_ov22_02257F50 *param0, UnkStruct_ov22_022584
 
 static void ov22_022584AC(UnkStruct_ov22_02259560 *param0, int param1)
 {
-    UnkStruct_ov22_02259560 *v0;
-
-    v0 = param0->unk_08;
+    UnkStruct_ov22_02259560 *v0 = param0->unk_08;
 
     while (v0 != (param0)) {
         if ((v0->unk_04 == 0) || (v0->unk_04 == 1) || (v0->unk_04 == 2)) {
@@ -486,17 +482,13 @@ static void ov22_022584AC(UnkStruct_ov22_02259560 *param0, int param1)
 
 static void ov22_022584D0(UnkStruct_ov22_02257F50 *param0, int param1, int param2, int param3)
 {
-    UnkStruct_ov22_02259560 *v0;
-
-    v0 = ov22_02258584(param0, param1, param2);
+    UnkStruct_ov22_02259560 *v0 = ov22_02258584(param0, param1, param2);
     ov22_022584AC(v0, param3);
 }
 
 static void ov22_022584E0(UnkStruct_ov22_02257F50 *param0, int param1)
 {
-    UnkStruct_ov22_02259560 *v0;
-
-    v0 = ov22_0225855C(param0);
+    UnkStruct_ov22_02259560 *v0 = ov22_0225855C(param0);
     ov22_022584AC(v0, param1);
 }
 
@@ -504,7 +496,7 @@ static void ov22_022584F0(UnkStruct_ov22_02257F50_sub1_sub1 *param0, int param1)
 {
     int v0;
 
-    param0->unk_00 = Heap_AllocFromHeap(14, sizeof(UnkStruct_ov22_02259560) * param1);
+    param0->unk_00 = Heap_Alloc(HEAP_ID_14, sizeof(UnkStruct_ov22_02259560) * param1);
     param0->unk_04 = param1;
     param0->unk_08 = 0;
 
@@ -518,7 +510,7 @@ static void ov22_022584F0(UnkStruct_ov22_02257F50_sub1_sub1 *param0, int param1)
 
 static void ov22_02258534(UnkStruct_ov22_02257F50_sub1_sub1 *param0)
 {
-    Heap_FreeToHeap(param0->unk_00);
+    Heap_Free(param0->unk_00);
     param0->unk_00 = NULL;
     memset(param0, 0, sizeof(UnkStruct_ov22_02257F50_sub1_sub1));
 }
@@ -606,11 +598,8 @@ static void ov22_02258610(int param0, int *param1, int *param2)
 
 static void ov22_0225864C(UnkStruct_ov22_02257F50 *param0, int param1, int param2, int param3, int param4)
 {
-    SysTask *v0;
-    UnkStruct_ov22_022586C4 *v1;
-
-    v0 = SysTask_StartAndAllocateParam(ov22_022586C4, sizeof(UnkStruct_ov22_022586C4), 0, 13);
-    v1 = SysTask_GetParam(v0);
+    SysTask *v0 = SysTask_StartAndAllocateParam(ov22_022586C4, sizeof(UnkStruct_ov22_022586C4), 0, 13);
+    UnkStruct_ov22_022586C4 *v1 = SysTask_GetParam(v0);
 
     v1->unk_00 = param0;
     v1->unk_04 = param1;
@@ -621,7 +610,7 @@ static void ov22_0225864C(UnkStruct_ov22_02257F50 *param0, int param1, int param
     v1->unk_20 = ov22_022585A8(param0, param1, param2);
     v1->unk_24 = ov22_022585A8(param0, param3, param4);
     v1->unk_2C = v1->unk_20 + v1->unk_24;
-    v1->unk_28 = Heap_AllocFromHeap(13, sizeof(UnkStruct_ov22_0225886C) * v1->unk_2C);
+    v1->unk_28 = Heap_Alloc(HEAP_ID_13, sizeof(UnkStruct_ov22_0225886C) * v1->unk_2C);
 
     GF_ASSERT(v1->unk_28);
 
@@ -695,12 +684,12 @@ static void ov22_022586C4(SysTask *param0, void *param1)
 
         v0->unk_00->unk_00.unk_3C = 0;
 
-        Heap_FreeToHeap(v0->unk_28);
+        Heap_Free(v0->unk_28);
         SysTask_FinishAndFreeParam(param0);
 
         return;
     default:
-        GF_ASSERT(0);
+        GF_ASSERT(FALSE);
         break;
     }
 
@@ -709,9 +698,7 @@ static void ov22_022586C4(SysTask *param0, void *param1)
 
 static void ov22_0225882C(UnkStruct_ov22_02259560 *param0, UnkStruct_ov22_0225886C *param1, int param2)
 {
-    UnkStruct_ov22_0225886C *v0;
-
-    v0 = ov22_02258844(param1, param2);
+    UnkStruct_ov22_0225886C *v0 = ov22_02258844(param1, param2);
 
     v0->unk_00 = param0;
     v0->unk_04 = 3;

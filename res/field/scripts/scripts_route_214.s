@@ -1,54 +1,46 @@
-    .include "macros/scrcmd.inc"
+#include "macros/scrcmd.inc"
+#include "res/text/bank/route_214.h"
 
-    .data
 
-    ScriptEntry _00A2
-    ScriptEntry _00B9
-    ScriptEntry _0075
-    ScriptEntry _0012
-    .short 0xFD13
+    ScriptEntry Route214_ArrowSignpostVeilstoneCity
+    ScriptEntry Route214_ArrowSignpostLakeValor
+    ScriptEntry Route214_OnTransition
+    ScriptEntry Route214_OnLoad
+    ScriptEntryEnd
 
-_0012:
-    ScrCmd_284 0x4000
-    GoToIfGe 0x4000, 26, _003F
-    GoToIfGe 0x4000, 10, _0051
-    GoToIfLt 0x4000, 10, _0063
+Route214_OnLoad:
+    GetUnownFormsSeenCount VAR_MAP_LOCAL_0x00
+    GoToIfGe VAR_MAP_LOCAL_0x00, 26, Route214_RemoveWarpsManiacCaveShortAndLong
+    GoToIfGe VAR_MAP_LOCAL_0x00, 10, Route214_RemoveWarpsManiacCaveShortAndTunnel
+    GoToIfLt VAR_MAP_LOCAL_0x00, 10, Route214_RemoveWarpsManiacCaveLongAndTunnel
     End
 
-_003F:
-    ScrCmd_18A 2, 0x2C6, 0x29E
-    ScrCmd_18A 3, 0x2C6, 0x29E
+Route214_RemoveWarpsManiacCaveShortAndLong:
+    SetWarpEventPos 2, 710, 670
+    SetWarpEventPos 3, 710, 670
     End
 
-_0051:
-    ScrCmd_18A 2, 0x2C6, 0x29E
-    ScrCmd_18A 4, 0x2C6, 0x29E
+Route214_RemoveWarpsManiacCaveShortAndTunnel:
+    SetWarpEventPos 2, 710, 670
+    SetWarpEventPos 4, 710, 670
     End
 
-_0063:
-    ScrCmd_18A 3, 0x2C6, 0x29E
-    ScrCmd_18A 4, 0x2C6, 0x29E
+Route214_RemoveWarpsManiacCaveLongAndTunnel:
+    SetWarpEventPos 3, 710, 670
+    SetWarpEventPos 4, 710, 670
     End
 
-_0075:
-    ScrCmd_284 0x4000
-    GoToIfGe 0x4000, 26, _003F
-    GoToIfGe 0x4000, 10, _0051
-    GoToIfLt 0x4000, 10, _0063
+Route214_OnTransition:
+    GetUnownFormsSeenCount VAR_MAP_LOCAL_0x00
+    GoToIfGe VAR_MAP_LOCAL_0x00, 26, Route214_RemoveWarpsManiacCaveShortAndLong
+    GoToIfGe VAR_MAP_LOCAL_0x00, 10, Route214_RemoveWarpsManiacCaveShortAndTunnel
+    GoToIfLt VAR_MAP_LOCAL_0x00, 10, Route214_RemoveWarpsManiacCaveLongAndTunnel
     End
 
-_00A2:
-    ScrCmd_036 0, 1, 0, 0x800C
-    ScrCmd_038 3
-    ScrCmd_039
-    ScrCmd_03B 0x800C
-    CallCommonScript 0x7D0
+Route214_ArrowSignpostVeilstoneCity:
+    ShowArrowSign Route214_Text_SignVeilstoneCity
     End
 
-_00B9:
-    ScrCmd_036 1, 1, 0, 0x800C
-    ScrCmd_038 3
-    ScrCmd_039
-    ScrCmd_03B 0x800C
-    CallCommonScript 0x7D0
+Route214_ArrowSignpostLakeValor:
+    ShowArrowSign Route214_Text_SignLakeValor
     End

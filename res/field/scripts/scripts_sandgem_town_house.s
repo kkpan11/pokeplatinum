@@ -1,27 +1,15 @@
-    .include "macros/scrcmd.inc"
+#include "macros/scrcmd.inc"
+#include "res/text/bank/sandgem_town_house.h"
 
-    .data
 
-    ScriptEntry _000A
-    ScriptEntry _001D
-    .short 0xFD13
+    ScriptEntry SandgemTownHouse_BreederM
+    ScriptEntry SandgemTownHouse_BreederF
+    ScriptEntryEnd
 
-_000A:
-    PlayFanfare SEQ_SE_CONFIRM
-    LockAll
-    FacePlayer
-    Message 0
-    WaitABXPadPress
-    CloseMessage
-    ReleaseAll
+SandgemTownHouse_BreederM:
+    NPCMessage SandgemTownHouse_Text_GrowStrongerFromBattling
     End
 
-_001D:
-    PlayFanfare SEQ_SE_CONFIRM
-    LockAll
-    FacePlayer
-    Message 1
-    WaitABXPadPress
-    CloseMessage
-    ReleaseAll
+SandgemTownHouse_BreederF:
+    NPCMessage SandgemTownHouse_Text_GoodTrainerTakesCare
     End

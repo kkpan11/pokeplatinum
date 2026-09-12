@@ -1,100 +1,98 @@
-    .include "macros/scrcmd.inc"
+#include "macros/scrcmd.inc"
+#include "res/text/bank/hearthome_city_northwest_house.h"
 
-    .data
 
-    ScriptEntry _0006
-    .short 0xFD13
+    ScriptEntry HearthomeCityNorthwestHouse_Bebe
+    ScriptEntryEnd
 
-_0006:
-    PlayFanfare SEQ_SE_CONFIRM
+HearthomeCityNorthwestHouse_Bebe:
+    PlaySE SE_CONFIRM_sseq_3
     LockAll
     FacePlayer
-    GoToIfSet 0x131, _0105
-    GoToIfSet 0x97E, _0033
-    SetFlag 0x97E
-    Message 0
-    GoTo _003E
+    GoToIfSet FLAG_RECEIVED_HEARTHOME_CITY_NORTHWEST_HOUSE_EEVEE, HearthomeCityNorthwestHouse_AlreadyReceivedEevee
+    GoToIfSet FLAG_MET_BEBE, HearthomeCityNorthwestHouse_SoDoYouWantEevee
+    SetFlag FLAG_MET_BEBE
+    Message HearthomeCityNorthwestHouse_Text_MyNamesBebeDoYouWantEevee
+    GoTo HearthomeCityNorthwestHouse_AcceptEeveeYesNoMenu
     End
 
-_0033:
-    Message 1
-    GoTo _003E
+HearthomeCityNorthwestHouse_SoDoYouWantEevee:
+    Message HearthomeCityNorthwestHouse_Text_SoDoYouWantEevee
+    GoTo HearthomeCityNorthwestHouse_AcceptEeveeYesNoMenu
     End
 
-_003E:
-    ScrCmd_03E 0x800C
-    GoToIfEq 0x800C, 0, _0057
-    GoTo _00FA
+HearthomeCityNorthwestHouse_AcceptEeveeYesNoMenu:
+    ShowYesNoMenu VAR_RESULT
+    GoToIfEq VAR_RESULT, MENU_YES, HearthomeCityNorthwestHouse_AcceptEevee
+    GoTo HearthomeCityNorthwestHouse_DeclineEevee
     End
 
-_0057:
-    ScrCmd_177 0x800C
-    GoToIfEq 0x800C, 6, _00EF
-    Message 2
-    ScrCmd_04E 0x486
-    ScrCmd_0CD 0
-    Message 3
-    ScrCmd_04F
-    ScrCmd_096 133, 20, 0, 0x800C
-    SetFlag 0x131
-    Message 4
-    ScrCmd_03E 0x800C
-    GoToIfEq 0x800C, 0, _00A8
-    GoToIfEq 0x800C, 1, _00E9
+HearthomeCityNorthwestHouse_AcceptEevee:
+    GetPartyCount VAR_RESULT
+    GoToIfEq VAR_RESULT, 6, HearthomeCityNorthwestHouse_PartyIsFull
+    Message HearthomeCityNorthwestHouse_Text_PleaseBeGoodToIt
+    PlayFanfare SEQ_FANFA4_sseq
+    BufferPlayerName 0
+    Message HearthomeCityNorthwestHouse_Text_PlayerAcceptedTheEevee
+    WaitFanfare
+    GivePokemon SPECIES_EEVEE, 20, ITEM_NONE, VAR_RESULT
+    SetFlag FLAG_RECEIVED_HEARTHOME_CITY_NORTHWEST_HOUSE_EEVEE
+    Message HearthomeCityNorthwestHouse_Text_WouldYouLikeToNicknameEevee
+    ShowYesNoMenu VAR_RESULT
+    GoToIfEq VAR_RESULT, MENU_YES, HearthomeCityNorthwestHouse_GiveNickname
+    GoToIfEq VAR_RESULT, MENU_NO, HearthomeCityNorthwestHouse_DontGiveNickname
     End
 
-_00A8:
+HearthomeCityNorthwestHouse_GiveNickname:
     CloseMessage
-    ScrCmd_177 0x4000
-    SubVar 0x4000, 1
-    FadeScreen 6, 1, 0, 0
+    GetPartyCount VAR_MAP_LOCAL_0x00
+    SubVar VAR_MAP_LOCAL_0x00, 1
+    FadeScreenOut
     WaitFadeScreen
-    ScrCmd_0BB 0x4000, 0x800C
-    CallIfNe 0x800C, 1, _00E3
-    FadeScreen 6, 1, 1, 0
+    OpenPokemonNamingScreen VAR_MAP_LOCAL_0x00, VAR_RESULT
+    CallIfNe VAR_RESULT, 1, HearthomeCityNorthwestHouse_IncrementRecordPokemonNicknamed
+    FadeScreenIn
     WaitFadeScreen
     ReleaseAll
     End
 
-_00E3:
-    ScrCmd_1E5 49
+HearthomeCityNorthwestHouse_IncrementRecordPokemonNicknamed:
+    IncrementGameRecord RECORD_POKEMON_NICKNAMED
     Return
 
-_00E9:
+HearthomeCityNorthwestHouse_DontGiveNickname:
     CloseMessage
     ReleaseAll
     End
 
-_00EF:
-    Message 5
-    WaitABXPadPress
+HearthomeCityNorthwestHouse_PartyIsFull:
+    Message HearthomeCityNorthwestHouse_Text_YouCantTakeAnyMorePokemon
+    WaitButton
     CloseMessage
     ReleaseAll
     End
 
-_00FA:
-    Message 6
-    WaitABXPadPress
+HearthomeCityNorthwestHouse_DeclineEevee:
+    Message HearthomeCityNorthwestHouse_Text_GuessIllRaiseItMyself
+    WaitButton
     CloseMessage
     ReleaseAll
     End
 
-_0105:
-    ScrCmd_22D 2, 0x800C
-    GoToIfEq 0x800C, 1, _0122
-    Message 7
-    WaitABXPadPress
+HearthomeCityNorthwestHouse_AlreadyReceivedEevee:
+    GetNationalDexEnabled VAR_RESULT
+    GoToIfEq VAR_RESULT, TRUE, HearthomeCityNorthwestHouse_NowThatsANationalDex
+    Message HearthomeCityNorthwestHouse_Text_BillDevelopedStorageSystem
+    WaitButton
     CloseMessage
     ReleaseAll
     End
 
-_0122:
-    Message 8
-    WaitABXPadPress
+HearthomeCityNorthwestHouse_NowThatsANationalDex:
+    Message HearthomeCityNorthwestHouse_Text_NowThatsANationalDex
+    WaitButton
     CloseMessage
     ReleaseAll
     End
 
-    .byte 0
-    .byte 0
-    .byte 0
+    .balign 4, 0

@@ -3,31 +3,24 @@
 #include <nitro.h>
 #include <string.h>
 
-#include "struct_decls/struct_02018340_decl.h"
-#include "struct_defs/struct_0205AA50.h"
-#include "struct_defs/struct_02099F80.h"
+#include "constants/graphics.h"
 
-#include "overlay061/struct_ov61_0222C884.h"
-#include "overlay084/struct_ov84_0223BA5C.h"
-#include "overlay097/struct_ov97_0222DB78.h"
-
-#include "core_sys.h"
+#include "bg_window.h"
+#include "brightness_controller.h"
+#include "font.h"
 #include "gx_layers.h"
 #include "heap.h"
 #include "message.h"
-#include "strbuf.h"
+#include "render_window.h"
+#include "screen_fade.h"
+#include "string_gf.h"
 #include "string_template.h"
-#include "unk_02002B7C.h"
-#include "unk_0200A9DC.h"
-#include "unk_0200DA60.h"
-#include "unk_0200F174.h"
-#include "unk_02017728.h"
-#include "unk_02018340.h"
-#include "unk_0201D670.h"
+#include "system.h"
+#include "text.h"
 
-void sub_02039834(int param0, int param1, int param2);
+#include "res/text/bank/network_errors.h"
 
-static const UnkStruct_02099F80 Unk_020E5EFC = {
+static const GXBanks Unk_020E5EFC = {
     GX_VRAM_BG_256_AB,
     GX_VRAM_BGEXTPLTT_NONE,
     GX_VRAM_SUB_BG_NONE,
@@ -40,30 +33,29 @@ static const UnkStruct_02099F80 Unk_020E5EFC = {
     GX_VRAM_TEXPLTT_NONE
 };
 
-static const UnkStruct_ov84_0223BA5C Unk_020E5ED0 = {
+static const GraphicsModes Unk_020E5ED0 = {
     GX_DISPMODE_GRAPHICS,
     GX_BGMODE_0,
     GX_BGMODE_0,
     GX_BG0_AS_2D
 };
 
-static const UnkStruct_ov97_0222DB78 Unk_020E5EE0 = {
-    0x0,
-    0x0,
-    0x800,
-    0x0,
-    0x1,
-    GX_BG_COLORMODE_16,
-    GX_BG_SCRBASE_0x0000,
-    GX_BG_CHARBASE_0x18000,
-    GX_BG_EXTPLTT_01,
-    0x1,
-    0x0,
-    0x0,
-    0x0
+static const BgTemplate Unk_020E5EE0 = {
+    .x = 0x0,
+    .y = 0x0,
+    .bufferSize = 0x800,
+    .baseTile = 0x0,
+    .screenSize = BG_SCREEN_SIZE_256x256,
+    .colorMode = GX_BG_COLORMODE_16,
+    .screenBase = GX_BG_SCRBASE_0x0000,
+    .charBase = GX_BG_CHARBASE_0x18000,
+    .bgExtPltt = GX_BG_EXTPLTT_01,
+    .priority = 0x1,
+    .areaOver = 0x0,
+    .mosaic = FALSE,
 };
 
-static const UnkStruct_ov61_0222C884 Unk_020E5EC8 = {
+static const WindowTemplate Unk_020E5EC8 = {
     0x0,
     0x3,
     0x3,
@@ -79,49 +71,49 @@ static void sub_02039814(void)
     MI_WaitDma(GX_DEFAULT_DMAID);
 }
 
-void sub_02039834(int param0, int param1, int param2)
+void NetworkError_DisplayNetworkError(enum HeapID heapID, int networkErrorId, int errorCode)
 {
-    BGL *v0;
+    BgConfig *v0;
     Window v1;
     MessageLoader *v2;
-    Strbuf *v3;
-    Strbuf *v4;
+    String *v3;
+    String *v4;
     StringTemplate *v5;
-    int v6;
+    int networkErrorMessageId;
 
-    switch (param1) {
+    switch (networkErrorId) {
     case 0:
     default:
-        v6 = 1;
+        networkErrorMessageId = NetworkError_Text_Generic;
         break;
     case 1:
-        v6 = 2;
+        networkErrorMessageId = pl_msg_00000214_00002;
         break;
     case 2:
-        v6 = 3;
+        networkErrorMessageId = pl_msg_00000214_00003;
         break;
     case 3:
-        v6 = 4;
+        networkErrorMessageId = NetworkError_Text_GTSUnreachable;
         break;
     case 4:
-        v6 = 5;
+        networkErrorMessageId = pl_msg_00000214_00005;
         break;
     case 5:
-        v6 = 6;
+        networkErrorMessageId = pl_msg_00000214_00006;
         break;
     case 6:
-        v6 = 7;
+        networkErrorMessageId = pl_msg_00000214_00007;
         break;
     }
 
-    sub_0200F344(0, 0x0);
-    sub_0200F344(1, 0x0);
+    SetScreenColorBrightness(DS_SCREEN_MAIN, COLOR_BLACK);
+    SetScreenColorBrightness(DS_SCREEN_SUB, COLOR_BLACK);
 
     (void)OS_DisableIrqMask(OS_IE_V_BLANK);
     OS_SetIrqFunction(OS_IE_V_BLANK, sub_02039814);
     (void)OS_EnableIrqMask(OS_IE_V_BLANK);
 
-    SetMainCallback(NULL, NULL);
+    SetVBlankCallback(NULL, NULL);
     SetHBlankCallback(NULL, NULL);
     GXLayers_DisableEngineALayers();
     GXLayers_DisableEngineBLayers();
@@ -130,7 +122,7 @@ void sub_02039834(int param0, int param1, int param2)
     GXS_SetVisiblePlane(0);
 
     SetAutorepeat(4, 8);
-    gCoreSys.unk_65 = 0;
+    gSystem.whichScreenIs3D = DS_SCREEN_MAIN;
     GXLayers_SwapDisplay();
 
     G2_BlendNone();
@@ -139,41 +131,41 @@ void sub_02039834(int param0, int param1, int param2)
     GXS_SetVisibleWnd(GX_WNDMASK_NONE);
 
     GXLayers_SetBanks(&Unk_020E5EFC);
-    v0 = sub_02018340(param0);
+    v0 = BgConfig_New(heapID);
 
-    sub_02018368(&Unk_020E5ED0);
-    sub_020183C4(v0, 0, &Unk_020E5EE0, 0);
-    sub_02019EBC(v0, 0);
-    sub_0200DAA4(v0, 0, (512 - 9), 2, 0, param0);
-    sub_02002E7C(0, 1 * (2 * 16), param0);
-    sub_02019690(0, 32, 0, param0);
-    sub_0201975C(0, 0x6c21);
-    sub_0201975C(4, 0x6c21);
+    SetAllGraphicsModes(&Unk_020E5ED0);
+    Bg_InitFromTemplate(v0, BG_LAYER_MAIN_0, &Unk_020E5EE0, 0);
+    Bg_ClearTilemap(v0, BG_LAYER_MAIN_0);
+    LoadStandardWindowGraphics(v0, BG_LAYER_MAIN_0, 512 - 9, 2, 0, heapID);
+    Font_LoadTextPalette(PAL_LOAD_MAIN_BG, PLTT_OFFSET(1), heapID);
+    Bg_ClearTilesRange(BG_LAYER_MAIN_0, 32, 0, heapID);
+    Bg_MaskPalette(BG_LAYER_MAIN_0, 0x6c21);
+    Bg_MaskPalette(BG_LAYER_SUB_0, 0x6c21);
 
-    v2 = MessageLoader_Init(1, 26, 214, param0);
-    v3 = Strbuf_Init(0x180, param0);
-    v4 = Strbuf_Init(0x180, param0);
-    sub_0201D710();
-    v5 = StringTemplate_Default(param0);
+    v2 = MessageLoader_Init(MSG_LOADER_LOAD_ON_DEMAND, NARC_INDEX_MSGDATA__PL_MSG, TEXT_BANK_NETWORK_ERRORS, heapID);
+    v3 = String_Init(0x180, heapID);
+    v4 = String_Init(0x180, heapID);
+    Text_ResetAllPrinters();
+    v5 = StringTemplate_Default(heapID);
 
-    sub_0201A8D4(v0, &v1, &Unk_020E5EC8);
-    BGL_WindowColor(&v1, 15, 0, 0, 26 * 8, 18 * 8);
-    Window_Show(&v1, 0, (512 - 9), 2);
+    Window_AddFromTemplate(v0, &v1, &Unk_020E5EC8);
+    Window_FillRectWithColor(&v1, 15, 0, 0, 26 * 8, 18 * 8);
+    Window_DrawStandardFrame(&v1, 0, 512 - 9, 2);
 
-    StringTemplate_SetNumber(v5, 0, param2, 5, 2, 1);
-    MessageLoader_GetStrbuf(v2, v6, v4);
+    StringTemplate_SetNumber(v5, 0, errorCode, 5, 2, 1);
+    MessageLoader_GetString(v2, networkErrorMessageId, v4);
     StringTemplate_Format(v5, v3, v4);
 
-    PrintStringSimple(&v1, 0, v3, 0, 0, 0, NULL);
-    Strbuf_Free(v3);
+    Text_AddPrinterWithParams(&v1, FONT_SYSTEM, v3, 0, 0, TEXT_SPEED_INSTANT, NULL);
+    String_Free(v3);
 
     GXLayers_TurnBothDispOn();
-    sub_0200F338(0);
-    sub_0200F338(1);
-    sub_0200AB4C(0, (GX_BLEND_PLANEMASK_BG0 | GX_BLEND_PLANEMASK_BG1 | GX_BLEND_PLANEMASK_BG2 | GX_BLEND_PLANEMASK_BG3 | GX_BLEND_PLANEMASK_OBJ | GX_BLEND_PLANEMASK_BD), 3);
+    ResetScreenMasterBrightness(DS_SCREEN_MAIN);
+    ResetScreenMasterBrightness(DS_SCREEN_SUB);
+    BrightnessController_SetScreenBrightness(0, GX_BLEND_PLANEMASK_BG0 | GX_BLEND_PLANEMASK_BG1 | GX_BLEND_PLANEMASK_BG2 | GX_BLEND_PLANEMASK_BG3 | GX_BLEND_PLANEMASK_OBJ | GX_BLEND_PLANEMASK_BD, BRIGHTNESS_BOTH_SCREENS);
 
-    BGL_DeleteWindow(&v1);
+    Window_Remove(&v1);
     MessageLoader_Free(v2);
     StringTemplate_Free(v5);
-    Heap_FreeToHeap(v0);
+    Heap_Free(v0);
 }

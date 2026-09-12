@@ -10,7 +10,7 @@
 #include "enums.h"
 #include "savedata.h"
 
-void ov66_022324F0(u32 param0, SaveData *param1, u32 param2, const UnkStruct_ov66_022324F0 *param3, void *param4);
+void ov66_022324F0(u32 heapID, SaveData *saveData, u32 param2, const UnkStruct_ov66_022324F0 *param3, void *param4);
 void ov66_02232598(void);
 UnkEnum_ov66_0223287C ov66_022325D8(void);
 PPW_LOBBY_ERROR ov66_022326DC(void);
@@ -71,7 +71,7 @@ void ov66_022333E4(s32 param0);
 UnkEnum_ov66_02233434 ov66_02233434(void);
 s32 ov66_02233454(UnkEnum_ov66_02233454 param0);
 u16 *ov66_02233538(UnkEnum_ov66_02233538 param0);
-BOOL ov66_022335C0(UnkEnum_ov66_022335C0 param0, u32 param1);
+BOOL ov66_022335C0(UnkEnum_ov66_022335C0 param0, u32 language);
 void ov66_0223361C(void);
 
 #endif // POKEPLATINUM_OV66_022324F0_H

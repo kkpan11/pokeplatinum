@@ -1,55 +1,33 @@
-    .include "macros/scrcmd.inc"
+#include "macros/scrcmd.inc"
+#include "res/text/bank/hearthome_city_west_gate_to_amity_square.h"
 
-    .data
 
-    ScriptEntry _0031
-    ScriptEntry _0044
-    ScriptEntry _0057
-    ScriptEntry _0012
-    .short 0xFD13
+    ScriptEntry HearthomeCityEastGateToAmitySquare_Receptionist
+    ScriptEntry HearthomeCityEastGateToAmitySquare_Beauty
+    ScriptEntry HearthomeCityEastGateToAmitySquare_Pikachu
+    ScriptEntry HearthomeCityEastGateToAmitySquare_OnTransition
+    ScriptEntryEnd
 
-_0012:
-    ScrCmd_238 13, 0x4000
-    GoToIfEq 0x4000, 0, _002B
-    ClearFlag 0x219
+HearthomeCityEastGateToAmitySquare_OnTransition:
+    CheckTVInterviewEligible TV_PROGRAM_SEGMENT_AMITY_SQUARE_WATCH, VAR_MAP_LOCAL_0x00
+    GoToIfEq VAR_MAP_LOCAL_0x00, 0, HearthomeCityEastGateToAmitySquare_HideReporter
+    ClearFlag FLAG_HIDE_HEARTHOME_CITY_GATE_TO_AMITY_SQUARE_REPORTER
     End
 
-_002B:
-    SetFlag 0x219
+HearthomeCityEastGateToAmitySquare_HideReporter:
+    SetFlag FLAG_HIDE_HEARTHOME_CITY_GATE_TO_AMITY_SQUARE_REPORTER
     End
 
-_0031:
-    PlayFanfare SEQ_SE_CONFIRM
-    LockAll
-    FacePlayer
-    Message 0
-    WaitABXPadPress
-    CloseMessage
-    ReleaseAll
+HearthomeCityEastGateToAmitySquare_Receptionist:
+    NPCMessage HearthomeCityWestGateToAmitySquare_Text_GoForAStrollWithCutePokemon
     End
 
-_0044:
-    PlayFanfare SEQ_SE_CONFIRM
-    LockAll
-    FacePlayer
-    Message 1
-    WaitABXPadPress
-    CloseMessage
-    ReleaseAll
+HearthomeCityEastGateToAmitySquare_Beauty:
+    NPCMessage HearthomeCityWestGateToAmitySquare_Text_MyPikachuSeemsDelighted
     End
 
-_0057:
-    PlayFanfare SEQ_SE_CONFIRM
-    LockAll
-    FacePlayer
-    ScrCmd_04B 0x5DC
-    ScrCmd_04C 25, 0
-    Message 2
-    ScrCmd_04D
-    WaitABXPadPress
-    CloseMessage
-    ReleaseAll
+HearthomeCityEastGateToAmitySquare_Pikachu:
+    PokemonCryAndMessage SPECIES_PIKACHU, HearthomeCityWestGateToAmitySquare_Text_PikachuCryPikappi
     End
 
-    .byte 0
-    .byte 0
+    .balign 4, 0

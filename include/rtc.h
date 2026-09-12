@@ -3,18 +3,21 @@
 
 #include <nitro/rtc.h>
 
-enum TimeOfDay {
-    TOD_MORNING = 0,
-    TOD_DAY = 1,
-    TOD_TWILIGHT = 2,
-    TOD_NIGHT = 3,
-    TOD_LATE_NIGHT = 4,
-};
+#include "constants/rtc.h"
+
+static inline BOOL IsLeapYear(u32 year)
+{
+    if (((year % 4 == 0) && (year % 100 != 0)) || (year % 400 == 0)) {
+        return TRUE;
+    } else {
+        return FALSE;
+    }
+}
 
 void InitRTC(void);
 void UpdateRTC(void);
 void GetCurrentDateTime(RTCDate *date, RTCTime *time);
-void GetCurrentTime(RTCTime *time);
+void RTC_GetCurrentTime(RTCTime *time);
 void GetCurrentDate(RTCDate *date);
 int GetSecondsSinceMidnight(void);
 s64 GetTimestamp(void);

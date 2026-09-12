@@ -1,54 +1,43 @@
 #include <nitro.h>
 #include <string.h>
 
-#include "struct_decls/struct_02001AF4_decl.h"
-#include "struct_decls/struct_02018340_decl.h"
-#include "struct_defs/struct_0203CC84.h"
-#include "struct_defs/struct_0205AA50.h"
-#include "struct_defs/struct_02099F80.h"
-
-#include "overlay061/struct_ov61_0222C884.h"
-#include "overlay084/struct_ov84_0223BA5C.h"
-#include "overlay097/struct_ov97_0222DB78.h"
-
-#include "core_sys.h"
+#include "bg_window.h"
+#include "font.h"
 #include "gx_layers.h"
 #include "heap.h"
+#include "main.h"
+#include "menu.h"
 #include "message.h"
 #include "overlay_manager.h"
+#include "render_window.h"
 #include "savedata.h"
-#include "strbuf.h"
-#include "unk_02000C88.h"
-#include "unk_02001AF4.h"
-#include "unk_02002B7C.h"
-#include "unk_020041CC.h"
-#include "unk_02005474.h"
-#include "unk_0200DA60.h"
-#include "unk_0200F174.h"
-#include "unk_02017728.h"
-#include "unk_02018340.h"
-#include "unk_0201D670.h"
+#include "screen_fade.h"
+#include "sound.h"
+#include "sound_playback.h"
+#include "string_gf.h"
+#include "system.h"
+#include "text.h"
 
-FS_EXTERN_OVERLAY(overlay77);
+FS_EXTERN_OVERLAY(game_opening);
 
 typedef struct {
-    int unk_00;
+    enum HeapID heapID;
     int unk_04;
     int unk_08;
     int unk_0C;
-    Strbuf *unk_10;
-    BGL *unk_14;
+    String *unk_10;
+    BgConfig *unk_14;
     MessageLoader *unk_18;
     Window unk_1C;
-    UIControlData *unk_2C;
-    SaveData *unk_30;
+    Menu *unk_2C;
+    SaveData *saveData;
     void *unk_34;
 } UnkStruct_02099DFC;
 
-void sub_02000EC4(FSOverlayID param0, const OverlayManagerTemplate *param1);
-int sub_02099DFC(OverlayManager *param0, int *param1);
-int sub_02099E38(OverlayManager *param0, int *param1);
-int sub_02099F54(OverlayManager *param0, int *param1);
+void EnqueueApplication(FSOverlayID param0, const ApplicationManagerTemplate *param1);
+int sub_02099DFC(ApplicationManager *appMan, int *param1);
+int sub_02099E38(ApplicationManager *appMan, int *param1);
+int sub_02099F54(ApplicationManager *appMan, int *param1);
 static void sub_02099F74(void *param0);
 static void sub_02099F80(UnkStruct_02099DFC *param0);
 static void sub_0209A044(UnkStruct_02099DFC *param0);
@@ -57,16 +46,16 @@ static void sub_0209A0E0(UnkStruct_02099DFC *param0);
 static BOOL sub_0209A0F4(UnkStruct_02099DFC *param0);
 static BOOL sub_0209A200(UnkStruct_02099DFC *param0, u32 param1, int param2, int param3);
 
-extern const OverlayManagerTemplate Unk_ov77_021D742C;
+extern const ApplicationManagerTemplate gTitleScreenAppTemplate;
 
-const OverlayManagerTemplate Unk_020F8A48 = {
+const ApplicationManagerTemplate Unk_020F8A48 = {
     sub_02099DFC,
     sub_02099E38,
     sub_02099F54,
     0xFFFFFFFF
 };
 
-static const UnkStruct_ov61_0222C884 Unk_020F89E4 = {
+static const WindowTemplate Unk_020F89E4 = {
     0x0,
     0x2,
     0x13,
@@ -76,7 +65,7 @@ static const UnkStruct_ov61_0222C884 Unk_020F89E4 = {
     0x16D
 };
 
-static const UnkStruct_ov61_0222C884 Unk_020F89EC = {
+static const WindowTemplate Unk_020F89EC = {
     0x0,
     0x19,
     0xD,
@@ -86,36 +75,35 @@ static const UnkStruct_ov61_0222C884 Unk_020F89EC = {
     0x155
 };
 
-int sub_02099DFC(OverlayManager *param0, int *param1)
+int sub_02099DFC(ApplicationManager *appMan, int *param1)
 {
     UnkStruct_02099DFC *v0;
-    int v1 = 88;
 
-    Heap_Create(3, v1, 0x20000);
+    Heap_Create(HEAP_ID_APPLICATION, HEAP_ID_88, 0x20000);
 
-    v0 = OverlayManager_NewData(param0, sizeof(UnkStruct_02099DFC), v1);
+    v0 = ApplicationManager_NewData(appMan, sizeof(UnkStruct_02099DFC), HEAP_ID_88);
     memset(v0, 0, sizeof(UnkStruct_02099DFC));
 
-    v0->unk_00 = v1;
+    v0->heapID = HEAP_ID_88;
     v0->unk_04 = 0;
-    v0->unk_30 = ((UnkStruct_0203CC84 *)OverlayManager_Args(param0))->unk_08;
+    v0->saveData = ((ApplicationArgs *)ApplicationManager_Args(appMan))->saveData;
 
     return 1;
 }
 
-int sub_02099E38(OverlayManager *param0, int *param1)
+int sub_02099E38(ApplicationManager *appMan, int *param1)
 {
-    UnkStruct_02099DFC *v0 = OverlayManager_Data(param0);
+    UnkStruct_02099DFC *v0 = ApplicationManager_Data(appMan);
     int v1 = 0;
 
     switch (*param1) {
     case 0:
-        sub_020055D0(1173, 0);
-        sub_020053CC(0);
-        sub_02004234(0);
-        sub_0200F344(0, 0x0);
-        sub_0200F344(1, 0x0);
-        SetMainCallback(NULL, NULL);
+        Sound_StopBGM(SEQ_TITLE01_sseq, 0);
+        Sound_ConfigureBGMChannelsAndReverb(SOUND_CHANNEL_CONFIG_DEFAULT);
+        Sound_SetScene(SOUND_SCENE_NONE);
+        SetScreenColorBrightness(DS_SCREEN_MAIN, COLOR_BLACK);
+        SetScreenColorBrightness(DS_SCREEN_SUB, COLOR_BLACK);
+        SetVBlankCallback(NULL, NULL);
         SetHBlankCallback(NULL, NULL);
         GXLayers_DisableEngineALayers();
         GXLayers_DisableEngineBLayers();
@@ -126,27 +114,27 @@ int sub_02099E38(OverlayManager *param0, int *param1)
         SetAutorepeat(4, 8);
         sub_02099F80(v0);
         sub_0209A098(v0);
-        SetMainCallback(sub_02099F74, (void *)v0);
+        SetVBlankCallback(sub_02099F74, (void *)v0);
         GXLayers_TurnBothDispOn();
-        sub_0200F174(0, 1, 1, 0, 6, 1, v0->unk_00);
+        StartScreenFade(FADE_BOTH_SCREENS, FADE_TYPE_BRIGHTNESS_IN, FADE_TYPE_BRIGHTNESS_IN, COLOR_BLACK, 6, 1, v0->heapID);
         *param1 = 1;
         break;
     case 1:
-        if (ScreenWipe_Done() == TRUE) {
+        if (IsScreenFadeDone() == TRUE) {
             *param1 = 2;
         }
         break;
     case 2:
         if (sub_0209A0F4(v0) == TRUE) {
-            sub_0200F174(0, 0, 0, 0, 6, 1, v0->unk_00);
+            StartScreenFade(FADE_BOTH_SCREENS, FADE_TYPE_BRIGHTNESS_OUT, FADE_TYPE_BRIGHTNESS_OUT, COLOR_BLACK, 6, 1, v0->heapID);
             *param1 = 3;
         }
         break;
     case 3:
-        if (ScreenWipe_Done() == TRUE) {
+        if (IsScreenFadeDone() == TRUE) {
             sub_0209A0E0(v0);
             sub_0209A044(v0);
-            SetMainCallback(NULL, NULL);
+            SetVBlankCallback(NULL, NULL);
             v1 = 1;
         }
         break;
@@ -155,13 +143,13 @@ int sub_02099E38(OverlayManager *param0, int *param1)
     return v1;
 }
 
-int sub_02099F54(OverlayManager *param0, int *param1)
+int sub_02099F54(ApplicationManager *appMan, int *param1)
 {
-    UnkStruct_02099DFC *v0 = OverlayManager_Data(param0);
-    int v1 = v0->unk_00;
+    UnkStruct_02099DFC *v0 = ApplicationManager_Data(appMan);
+    int heapID = v0->heapID;
 
-    OverlayManager_FreeData(param0);
-    Heap_Destroy(v1);
+    ApplicationManager_FreeData(appMan);
+    Heap_Destroy(heapID);
     OS_ResetSystem(0);
 
     return 1;
@@ -170,13 +158,13 @@ int sub_02099F54(OverlayManager *param0, int *param1)
 static void sub_02099F74(void *param0)
 {
     UnkStruct_02099DFC *v0 = param0;
-    sub_0201C2B8(v0->unk_14);
+    Bg_RunScheduledUpdates(v0->unk_14);
 }
 
 static void sub_02099F80(UnkStruct_02099DFC *param0)
 {
     {
-        UnkStruct_02099F80 v0 = {
+        GXBanks v0 = {
             GX_VRAM_BG_256_AB,
             GX_VRAM_BGEXTPLTT_NONE,
             GX_VRAM_SUB_BG_NONE,
@@ -191,71 +179,70 @@ static void sub_02099F80(UnkStruct_02099DFC *param0)
         GXLayers_SetBanks(&v0);
     }
     {
-        param0->unk_14 = sub_02018340(param0->unk_00);
+        param0->unk_14 = BgConfig_New(param0->heapID);
     }
     {
-        UnkStruct_ov84_0223BA5C v1 = {
+        GraphicsModes v1 = {
             GX_DISPMODE_GRAPHICS,
             GX_BGMODE_0,
             GX_BGMODE_0,
             GX_BG0_AS_2D
         };
-        sub_02018368(&v1);
+        SetAllGraphicsModes(&v1);
     }
     {
-        UnkStruct_ov97_0222DB78 v2 = {
-            0x0,
-            0x0,
-            0x800,
-            0x0,
-            0x1,
-            GX_BG_COLORMODE_16,
-            GX_BG_SCRBASE_0x0000,
-            GX_BG_CHARBASE_0x18000,
-            GX_BG_EXTPLTT_01,
-            0x1,
-            0x0,
-            0x0,
-            0x0
+        BgTemplate v2 = {
+            .x = 0x0,
+            .y = 0x0,
+            .bufferSize = 0x800,
+            .baseTile = 0x0,
+            .screenSize = BG_SCREEN_SIZE_256x256,
+            .colorMode = GX_BG_COLORMODE_16,
+            .screenBase = GX_BG_SCRBASE_0x0000,
+            .charBase = GX_BG_CHARBASE_0x18000,
+            .bgExtPltt = GX_BG_EXTPLTT_01,
+            .priority = 0x1,
+            .areaOver = 0x0,
+            .mosaic = FALSE,
         };
-        sub_020183C4(param0->unk_14, 0, &v2, 0);
-        sub_02019EBC(param0->unk_14, 0);
+        Bg_InitFromTemplate(param0->unk_14, BG_LAYER_MAIN_0, &v2, 0);
+        Bg_ClearTilemap(param0->unk_14, BG_LAYER_MAIN_0);
     }
 
-    sub_0200DD0C(param0->unk_14, 0, (512 - (18 + 12)), 2, 0, param0->unk_00);
-    sub_0200DAA4(param0->unk_14, 0, 512 - (18 + 12) - 9, 3, 0, param0->unk_00);
-    sub_02002E7C(0, 1 * (2 * 16), param0->unk_00);
-    sub_02019690(0, 32, 0, param0->unk_00);
-    sub_0201975C(0, 0x6c21);
-    sub_0201975C(4, 0x6c21);
+    LoadMessageBoxGraphics(param0->unk_14, BG_LAYER_MAIN_0, 512 - (18 + 12), 2, 0, param0->heapID);
+    LoadStandardWindowGraphics(param0->unk_14, BG_LAYER_MAIN_0, 512 - (18 + 12) - 9, 3, 0, param0->heapID);
+    Font_LoadTextPalette(PAL_LOAD_MAIN_BG, PLTT_OFFSET(1), param0->heapID);
+    Bg_ClearTilesRange(BG_LAYER_MAIN_0, 32, 0, param0->heapID);
+    Bg_MaskPalette(BG_LAYER_MAIN_0, 0x6c21);
+    Bg_MaskPalette(BG_LAYER_SUB_0, 0x6c21);
 }
 
 static void sub_0209A044(UnkStruct_02099DFC *param0)
 {
-    sub_02019120(0, 0);
-    sub_02019120(1, 0);
-    sub_02019120(2, 0);
-    sub_02019120(3, 0);
-    sub_02019120(4, 0);
-    sub_02019120(5, 0);
-    sub_02019120(6, 0);
-    sub_02019120(7, 0);
-    sub_02019044(param0->unk_14, 0);
-    Heap_FreeToHeap(param0->unk_14);
+    Bg_ToggleLayer(BG_LAYER_MAIN_0, 0);
+    Bg_ToggleLayer(BG_LAYER_MAIN_1, 0);
+    Bg_ToggleLayer(BG_LAYER_MAIN_2, 0);
+    Bg_ToggleLayer(BG_LAYER_MAIN_3, 0);
+    Bg_ToggleLayer(BG_LAYER_SUB_0, 0);
+    Bg_ToggleLayer(BG_LAYER_SUB_1, 0);
+    Bg_ToggleLayer(BG_LAYER_SUB_2, 0);
+    Bg_ToggleLayer(BG_LAYER_SUB_3, 0);
+    Bg_FreeTilemapBuffer(param0->unk_14, BG_LAYER_MAIN_0);
+    Heap_Free(param0->unk_14);
 }
 
 static void sub_0209A098(UnkStruct_02099DFC *param0)
 {
-    param0->unk_18 = MessageLoader_Init(1, 26, 4, param0->unk_00);
-    sub_0201D710();
+    param0->unk_18 = MessageLoader_Init(MSG_LOADER_LOAD_ON_DEMAND, NARC_INDEX_MSGDATA__PL_MSG, TEXT_BANK_UNK_0004, param0->heapID);
+    Text_ResetAllPrinters();
     param0->unk_08 = 0;
-    sub_0201A8D4(param0->unk_14, &param0->unk_1C, &Unk_020F89E4);
-    BGL_WindowColor(&param0->unk_1C, 15, 0, 0, 27 * 8, 4 * 8);
+    Window_AddFromTemplate(param0->unk_14, &param0->unk_1C, &Unk_020F89E4);
+    Window_FillRectWithColor(&param0->unk_1C, 15, 0, 0, 27 * 8, 4 * 8);
 }
 
 static void sub_0209A0E0(UnkStruct_02099DFC *param0)
 {
-    BGL_DeleteWindow(&param0->unk_1C);
+    Window_Remove(&param0->unk_1C);
     MessageLoader_Free(param0->unk_18);
 }
 
@@ -266,12 +253,12 @@ static BOOL sub_0209A0F4(UnkStruct_02099DFC *param0)
     switch (param0->unk_04) {
     case 0:
         if (sub_0209A200(param0, 0, 1, 4) == TRUE) {
-            param0->unk_2C = sub_02002054(param0->unk_14, &Unk_020F89EC, 512 - (18 + 12) - 9, 3, 1, param0->unk_00);
+            param0->unk_2C = Menu_MakeYesNoChoiceWithCursorAt(param0->unk_14, &Unk_020F89EC, 512 - (18 + 12) - 9, 3, 1, param0->heapID);
             param0->unk_04 = 1;
         }
         break;
     case 1: {
-        u32 v1 = sub_02002114(param0->unk_2C, param0->unk_00);
+        u32 v1 = Menu_ProcessInputAndHandleExit(param0->unk_2C, param0->heapID);
 
         switch (v1) {
         case 0:
@@ -284,12 +271,12 @@ static BOOL sub_0209A0F4(UnkStruct_02099DFC *param0)
     } break;
     case 2:
         if (sub_0209A200(param0, 1, 1, 4) == TRUE) {
-            param0->unk_2C = sub_02002054(param0->unk_14, &Unk_020F89EC, (512 - (18 + 12)) - 9, 3, 1, param0->unk_00);
+            param0->unk_2C = Menu_MakeYesNoChoiceWithCursorAt(param0->unk_14, &Unk_020F89EC, (512 - (18 + 12)) - 9, 3, 1, param0->heapID);
             param0->unk_04 = 3;
         }
         break;
     case 3: {
-        u32 v2 = sub_02002114(param0->unk_2C, param0->unk_00);
+        u32 v2 = Menu_ProcessInputAndHandleExit(param0->unk_2C, param0->heapID);
 
         switch (v2) {
         case 0:
@@ -302,17 +289,17 @@ static BOOL sub_0209A0F4(UnkStruct_02099DFC *param0)
     } break;
     case 4:
         if (sub_0209A200(param0, 2, 1, 0) == TRUE) {
-            param0->unk_34 = sub_0200E7FC(&param0->unk_1C, 512 - (18 + 12));
+            param0->unk_34 = Window_AddWaitDial(&param0->unk_1C, 512 - (18 + 12));
             param0->unk_04 = 5;
         }
         break;
     case 5:
-        SaveData_Erase(param0->unk_30);
-        DeleteWaitDial(param0->unk_34);
+        SaveData_Erase(param0->saveData);
+        DestroyWaitDial(param0->unk_34);
         param0->unk_04 = 6;
         break;
     case 6:
-        sub_02019EBC(param0->unk_14, 0);
+        Bg_ClearTilemap(param0->unk_14, BG_LAYER_MAIN_0);
         v0 = 1;
         break;
     }
@@ -326,28 +313,28 @@ static BOOL sub_0209A200(UnkStruct_02099DFC *param0, u32 param1, int param2, int
 
     switch (param0->unk_08) {
     case 0:
-        BGL_WindowColor(&param0->unk_1C, 15, 0, 0, 27 * 8, 4 * 8);
-        sub_0200E060(&param0->unk_1C, 0, 512 - (18 + 12), 2);
+        Window_FillRectWithColor(&param0->unk_1C, 15, 0, 0, 27 * 8, 4 * 8);
+        Window_DrawMessageBoxWithScrollCursor(&param0->unk_1C, 0, 512 - (18 + 12), 2);
 
-        param0->unk_10 = Strbuf_Init(0x400, param0->unk_00);
-        MessageLoader_GetStrbuf(param0->unk_18, param1, param0->unk_10);
-        param0->unk_0C = PrintStringSimple(&param0->unk_1C, 1, param0->unk_10, 0, 0, param3, NULL);
+        param0->unk_10 = String_Init(0x400, param0->heapID);
+        MessageLoader_GetString(param0->unk_18, param1, param0->unk_10);
+        param0->unk_0C = Text_AddPrinterWithParams(&param0->unk_1C, FONT_MESSAGE, param0->unk_10, 0, 0, param3, NULL);
 
         if (param3 == 0) {
-            Strbuf_Free(param0->unk_10);
+            String_Free(param0->unk_10);
             param0->unk_08++;
         }
 
         param0->unk_08++;
         break;
     case 1:
-        if (!(Message_Printing(param0->unk_0C))) {
-            Strbuf_Free(param0->unk_10);
+        if (!(Text_IsPrinterActive(param0->unk_0C))) {
+            String_Free(param0->unk_10);
             param0->unk_08++;
         }
         break;
     case 2:
-        if ((param2 != 0) || (gCoreSys.pressedKeys & 1)) {
+        if ((param2 != 0) || (gSystem.pressedKeys & 1)) {
             param0->unk_08 = 0;
             v0 = 1;
         }

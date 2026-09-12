@@ -1,92 +1,91 @@
-    .include "macros/scrcmd.inc"
+#include "macros/scrcmd.inc"
+#include "res/text/bank/hearthome_city_gym_entrance_room.h"
+#include "res/field/events/events_hearthome_city_gym_entrance_room.h"
 
-    .data
 
-    ScriptEntry _000E
-    ScriptEntry _0078
-    ScriptEntry _00B6
-    .short 0xFD13
+    ScriptEntry HearthomeGym_GymGuide
+    ScriptEntry HearthomeGym_GymStatue
+    ScriptEntry HearthomeGym_OnFrame_FirstVisit
+    ScriptEntryEnd
 
-_000E:
-    PlayFanfare SEQ_SE_CONFIRM
+HearthomeGym_GymGuide:
+    PlaySE SE_CONFIRM_sseq_3
     LockAll
     FacePlayer
-    ScrCmd_15B 4, 0x800C
-    GoToIfEq 0x800C, 1, _006A
-    Message 1
-    ScrCmd_03E 0x800C
-    GoToIfEq 0x800C, 0, _004C
-    GoToIfEq 0x800C, 1, _0057
+    GoToIfBadgeAcquired BADGE_ID_RELIC, HearthomeGym_GymGuideAfterBadge
+    Message HearthomeGym_Text_GymGuideHearLongSpielAgain
+    ShowYesNoMenu VAR_RESULT
+    GoToIfEq VAR_RESULT, MENU_YES, HearthomeGym_GymGuideExplanation
+    GoToIfEq VAR_RESULT, MENU_NO, HearthomeGym_GymGuideEncouragement
     End
 
-_004C:
-    Message 2
-    GoTo _0062
+HearthomeGym_GymGuideExplanation:
+    Message HearthomeGym_Text_GymGuideExplanation
+    GoTo HearthomeGym_GymGuideEnd
     End
 
-_0057:
-    Message 3
-    GoTo _0062
+HearthomeGym_GymGuideEncouragement:
+    Message HearthomeGym_Text_GymGuideGoGetEm
+    GoTo HearthomeGym_GymGuideEnd
     End
 
-_0062:
-    WaitABXPadPress
+HearthomeGym_GymGuideEnd:
+    WaitButton
     CloseMessage
     ReleaseAll
     End
 
-_006A:
-    ScrCmd_0CD 0
-    Message 4
-    GoTo _0062
+HearthomeGym_GymGuideAfterBadge:
+    BufferPlayerName 0
+    Message HearthomeGym_Text_GymGuideAfterBadge
+    GoTo HearthomeGym_GymGuideEnd
     End
 
-_0078:
-    PlayFanfare SEQ_SE_CONFIRM
+HearthomeGym_GymStatue:
+    PlaySE SE_CONFIRM_sseq_3
     LockAll
-    ScrCmd_15B 4, 0x800C
-    GoToIfEq 0x800C, 1, _00A2
-    ScrCmd_0CE 0
-    ScrCmd_0CE 1
-    Message 5
-    WaitABXPadPress
+    GoToIfBadgeAcquired BADGE_ID_RELIC, HearthomeGym_GymStatueAfterBadge
+    BufferRivalName 0
+    BufferRivalName 1
+    Message HearthomeGym_Text_GymStatueBeforeBadge
+    WaitButton
     CloseMessage
     ReleaseAll
     End
 
-_00A2:
-    ScrCmd_0CE 0
-    ScrCmd_0CD 1
-    ScrCmd_0CE 2
-    Message 6
-    WaitABXPadPress
+HearthomeGym_GymStatueAfterBadge:
+    BufferRivalName 0
+    BufferPlayerName 1
+    BufferRivalName 2
+    Message HearthomeGym_Text_GymStatueAfterBadge
+    WaitButton
     CloseMessage
     ReleaseAll
     End
 
-_00B6:
+HearthomeGym_OnFrame_FirstVisit:
     LockAll
-    ApplyMovement 0, _00DC
+    ApplyMovement LOCALID_GYM_GUIDE, HearthomeGym_Movement_GymGuideMoveToPlayer
     WaitMovement
-    Message 0
+    Message HearthomeGym_Text_GymGuideInitialVisit
     CloseMessage
-    ApplyMovement 0, _00F0
+    ApplyMovement LOCALID_GYM_GUIDE, HearthomeGym_Movement_GymGuideReturnToPosition
     WaitMovement
-    SetVar 0x40D1, 1
+    SetVar VAR_HAS_ENTERED_HEARTHOME_GYM_BEFORE, TRUE
     ReleaseAll
     End
 
     .balign 4, 0
-_00DC:
-    MoveAction_04B
-    MoveAction_03F
-    MoveAction_00E
-    MoveAction_00D
+HearthomeGym_Movement_GymGuideMoveToPlayer:
+    EmoteExclamationMark
+    Delay8
+    WalkNormalWest
+    WalkNormalSouth
     EndMovement
 
     .balign 4, 0
-_00F0:
-    MoveAction_00C
-    MoveAction_00F
-    MoveAction_021
+HearthomeGym_Movement_GymGuideReturnToPosition:
+    WalkNormalNorth
+    WalkNormalEast
+    WalkOnSpotNormalSouth
     EndMovement

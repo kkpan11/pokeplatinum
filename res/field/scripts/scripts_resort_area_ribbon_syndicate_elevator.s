@@ -1,104 +1,106 @@
-    .include "macros/scrcmd.inc"
+#include "macros/scrcmd.inc"
+#include "res/text/bank/resort_area_ribbon_syndicate_elevator.h"
+#include "res/text/bank/menu_entries.h"
+#include "res/field/events/events_resort_area_ribbon_syndicate_elevator.h"
 
-    .data
 
-    ScriptEntry _0006
-    .short 0xFD13
+    ScriptEntry ResortAreaRibbonSyndicateElevator_Receptionist
+    ScriptEntryEnd
 
-_0006:
-    PlayFanfare SEQ_SE_CONFIRM
+ResortAreaRibbonSyndicateElevator_Receptionist:
+    PlaySE SE_CONFIRM_sseq_3
     LockAll
     FacePlayer
-    ScrCmd_11C 0x40CE
-    SetVar 0x8008, 0x40CE
-    GoToIfEq 0x8008, 0, _0034
-    GoToIfEq 0x8008, 1, _003E
+    GetFloorsAbove VAR_ELEVATOR_FLOORS_ABOVE
+    SetVar VAR_0x8008, VAR_ELEVATOR_FLOORS_ABOVE
+    GoToIfEq VAR_0x8008, 0, ResortAreaRibbonSyndicateElevator_CurrentFloor2
+    GoToIfEq VAR_0x8008, 1, ResortAreaRibbonSyndicateElevator_CurrentFloor1
     End
 
-_0034:
-    ScrCmd_347 0, 2
-    GoTo _0048
+ResortAreaRibbonSyndicateElevator_CurrentFloor2:
+    BufferFloorNumber 0, 2
+    GoTo ResortAreaRibbonSyndicateElevator_SelectFloor
 
-_003E:
-    ScrCmd_347 0, 1
-    GoTo _0048
+ResortAreaRibbonSyndicateElevator_CurrentFloor1:
+    BufferFloorNumber 0, 1
+    GoTo ResortAreaRibbonSyndicateElevator_SelectFloor
 
-_0048:
-    ScrCmd_11D 20, 1, 0x40CE, 0x40CE
-    Message 0
-    ScrCmd_040 1, 1, 0, 1, 0x800C
-    ScrCmd_042 117, 0
-    ScrCmd_042 116, 1
-    ScrCmd_042 124, 2
-    ScrCmd_043
-    SetVar 0x8008, 0x800C
-    GoToIfEq 0x8008, 0, _008F
-    GoToIfEq 0x8008, 1, _00CA
-    GoTo _0152
+ResortAreaRibbonSyndicateElevator_SelectFloor:
+    ShowCurrentFloor 20, 1, VAR_ELEVATOR_FLOORS_ABOVE
+    Message ResortAreaRibbonSyndicateElevator_Text_Hello
+    InitGlobalTextMenu 1, 1, 0, VAR_RESULT
+    AddMenuEntryImm MenuEntries_Text_2F, 0
+    AddMenuEntryImm MenuEntries_Text_1F, 1
+    AddMenuEntryImm MenuEntries_Text_ElevatorExit, 2
+    ShowMenu
+    SetVar VAR_0x8008, VAR_RESULT
+    GoToIfEq VAR_0x8008, 0, ResortAreaRibbonSyndicateElevator_SelectFloor2
+    GoToIfEq VAR_0x8008, 1, ResortAreaRibbonSyndicateElevator_SelectFloor1
+    GoTo ResortAreaRibbonSyndicateElevator_SameFloorMessage
 
-_008F:
-    WaitTime 1, 0x800C
-    ScrCmd_11C 0x40CE
-    ScrCmd_11B 0x1CE, 0, 18, 2, 1
-    GoToIfEq 0x40CE, 0, _0164
-    SetVar 0x8004, 0
-    Call _0105
-    SetVar 0x40CE, 0
-    GoTo _0147
+ResortAreaRibbonSyndicateElevator_SelectFloor2:
+    WaitTime 1, VAR_RESULT
+    GetFloorsAbove VAR_ELEVATOR_FLOORS_ABOVE
+    SetSpecialLocation MAP_HEADER_RESORT_AREA_RIBBON_SYNDICATE_2F, 0, 18, 2, DIR_SOUTH
+    GoToIfEq VAR_ELEVATOR_FLOORS_ABOVE, 0, ResortAreaRibbonSyndicateElevator_SelectCurrentFloor
+    SetVar VAR_0x8004, ELEVATOR_DIR_UP
+    Call ResortAreaRibbonSyndicateElevator_ElevatorAnimation
+    SetVar VAR_ELEVATOR_FLOORS_ABOVE, 0
+    GoTo ResortAreaRibbonSyndicateElevator_HereWeAreMessage
 
-_00CA:
-    WaitTime 1, 0x800C
-    ScrCmd_11C 0x40CE
-    ScrCmd_11B 0x1CD, 1, 18, 2, 1
-    GoToIfEq 0x40CE, 1, _0164
-    SetVar 0x8004, 1
-    Call _0105
-    SetVar 0x40CE, 1
-    GoTo _0147
+ResortAreaRibbonSyndicateElevator_SelectFloor1:
+    WaitTime 1, VAR_RESULT
+    GetFloorsAbove VAR_ELEVATOR_FLOORS_ABOVE
+    SetSpecialLocation MAP_HEADER_RESORT_AREA_RIBBON_SYNDICATE_1F, 1, 18, 2, DIR_SOUTH
+    GoToIfEq VAR_ELEVATOR_FLOORS_ABOVE, 1, ResortAreaRibbonSyndicateElevator_SelectCurrentFloor
+    SetVar VAR_0x8004, ELEVATOR_DIR_DOWN
+    Call ResortAreaRibbonSyndicateElevator_ElevatorAnimation
+    SetVar VAR_ELEVATOR_FLOORS_ABOVE, 1
+    GoTo ResortAreaRibbonSyndicateElevator_HereWeAreMessage
 
-_0105:
-    SetVar 0x40CE, -1
-    CallIfEq 0x8004, 1, _013D
-    CallIfEq 0x8004, 0, _0142
+ResortAreaRibbonSyndicateElevator_ElevatorAnimation:
+    SetVar VAR_ELEVATOR_FLOORS_ABOVE, -1
+    CallIfEq VAR_0x8004, ELEVATOR_DIR_DOWN, ResortAreaRibbonSyndicateElevator_GoingDownMessage
+    CallIfEq VAR_0x8004, ELEVATOR_DIR_UP, ResortAreaRibbonSyndicateElevator_GoingUpMessage
     CloseMessage
-    ApplyMovement 0, _017C
+    ApplyMovement LOCALID_RECEPTIONIST, ResortAreaRibbonSyndicateElevator_Movement_ReceptionistWalkOnSpotSouth
     WaitMovement
-    ScrCmd_04B 0x5DC
-    ScrCmd_23C 0x8004, 4
+    WaitSE SE_CONFIRM_sseq_3
+    PlayElevatorAnimation VAR_0x8004, 4
     Return
 
-_013D:
-    Message 2
+ResortAreaRibbonSyndicateElevator_GoingDownMessage:
+    Message ResortAreaRibbonSyndicateElevator_Text_GoingDown
     Return
 
-_0142:
-    Message 1
+ResortAreaRibbonSyndicateElevator_GoingUpMessage:
+    Message ResortAreaRibbonSyndicateElevator_Text_GoingUp
     Return
 
-_0147:
-    Message 4
-    WaitABXPadPress
+ResortAreaRibbonSyndicateElevator_HereWeAreMessage:
+    Message ResortAreaRibbonSyndicateElevator_Text_HereWeAre
+    WaitButton
     CloseMessage
     ReleaseAll
     End
 
-_0152:
-    SetVar 0x40CE, -1
-    WaitTime 1, 0x800C
+ResortAreaRibbonSyndicateElevator_SameFloorMessage:
+    SetVar VAR_ELEVATOR_FLOORS_ABOVE, -1
+    WaitTime 1, VAR_RESULT
     CloseMessage
     ReleaseAll
     End
 
-_0164:
-    SetVar 0x40CE, -1
-    WaitTime 1, 0x800C
-    Message 3
-    WaitABXPadPress
+ResortAreaRibbonSyndicateElevator_SelectCurrentFloor:
+    SetVar VAR_ELEVATOR_FLOORS_ABOVE, -1
+    WaitTime 1, VAR_RESULT
+    Message ResortAreaRibbonSyndicateElevator_Text_SameFloor
+    WaitButton
     CloseMessage
     ReleaseAll
     End
 
     .balign 4, 0
-_017C:
-    MoveAction_021
+ResortAreaRibbonSyndicateElevator_Movement_ReceptionistWalkOnSpotSouth:
+    WalkOnSpotNormalSouth
     EndMovement

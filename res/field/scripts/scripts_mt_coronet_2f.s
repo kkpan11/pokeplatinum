@@ -1,170 +1,157 @@
-    .include "macros/scrcmd.inc"
+#include "macros/scrcmd.inc"
+#include "res/text/bank/mt_coronet_2f.h"
+#include "res/field/events/events_mt_coronet_2f.h"
 
-    .data
 
-    ScriptEntry _0012
-    ScriptEntry _0036
-    ScriptEntry _01A0
-    ScriptEntry _0023
-    .short 0xFD13
+    ScriptEntry MtCoronet2F_CavePainting
+    ScriptEntry MtCoronet2F_CoordEvent_Looker
+    ScriptEntry MtCoronet2F_Looker
+    ScriptEntry MtCoronet2F_CavePaintingShards
+    ScriptEntryEnd
 
-_0012:
-    PlayFanfare SEQ_SE_CONFIRM
+MtCoronet2F_CavePainting:
+    EventMessage MtCoronet2F_Text_CavePaintingFromAncientTime
+    End
+
+MtCoronet2F_CavePaintingShards:
+    NPCMessage MtCoronet2F_Text_ShardsAreAllThatRemain
+    End
+
+MtCoronet2F_CoordEvent_Looker:
     LockAll
-    Message 6
-    WaitABXPadPress
-    CloseMessage
+    GetPlayerMapPos VAR_0x8004, VAR_0x8005
+    SetVar VAR_MT_CORONET_2F_STATE, 2
+    SetObjectEventPos LOCALID_LOOKER, 20, 25
+    SetObjectEventMovementType LOCALID_LOOKER, MOVEMENT_TYPE_LOOK_WEST
+    SetObjectEventDir LOCALID_LOOKER, DIR_WEST
+    ClearFlag FLAG_HIDE_MT_CORONET_2F_LOOKER
+    AddObject LOCALID_LOOKER
+    ApplyMovement LOCALID_LOOKER, MtCoronet2F_Movement_LookerNoticePlayer
+    WaitMovement
+    Common_SetLookerBGM
+    CallIfEq VAR_0x8005, 24, MtCoronet2F_LookerWalkToPlayerZ24
+    CallIfEq VAR_0x8005, 25, MtCoronet2F_LookerWalkToPlayerZ25
+    CallIfEq VAR_0x8005, 26, MtCoronet2F_LookerWalkToPlayerZ26
+    Message MtCoronet2F_Text_ObserveThatHole
+    ApplyMovement LOCALID_LOOKER, MtCoronet2F_Movement_LookerWalkOnSpotSouth
+    WaitMovement
+    Message MtCoronet2F_Text_AreYouEnoughToAdvance
+    ApplyMovement LOCALID_LOOKER, MtCoronet2F_Movement_LookerWalkOnSpotWest
+    WaitMovement
+    Message MtCoronet2F_Text_YouAreFarSuperiorToMe
+    SetVar VAR_0x8004, ITEM_BLACK_FLUTE
+    SetVar VAR_0x8005, 1
+    GoToIfCannotFitItem VAR_0x8004, VAR_0x8005, VAR_RESULT, MtCoronet2F_BagIsFull
+    Common_GiveItemQuantity
+    Call MtCoronet2F_YouMustStopTeamGalactic
+    Common_FadeToDefaultMusic4
     ReleaseAll
     End
 
-_0023:
-    PlayFanfare SEQ_SE_CONFIRM
-    LockAll
-    FacePlayer
-    Message 7
-    WaitABXPadPress
-    CloseMessage
-    ReleaseAll
-    End
-
-_0036:
-    LockAll
-    ScrCmd_069 0x8004, 0x8005
-    SetVar 0x40A9, 2
-    ScrCmd_186 5, 20, 25
-    ScrCmd_188 5, 16
-    ScrCmd_189 5, 2
-    ClearFlag 0x29F
-    ScrCmd_064 5
-    ApplyMovement 5, _0148
-    WaitMovement
-    CallCommonScript 0x807
-    CallIfEq 0x8005, 24, _0109
-    CallIfEq 0x8005, 25, _011D
-    CallIfEq 0x8005, 26, _0131
-    Message 0
-    ApplyMovement 5, _0184
-    WaitMovement
-    Message 1
-    ApplyMovement 5, _018C
-    WaitMovement
-    Message 2
-    SetVar 0x8004, 68
-    SetVar 0x8005, 1
-    ScrCmd_07D 0x8004, 0x8005, 0x800C
-    GoToIfEq 0x800C, 0, _00F2
-    CallCommonScript 0x7FC
-    Call _00E5
-    CallCommonScript 0x808
-    ReleaseAll
-    End
-
-_00E5:
-    SetFlag 0x160
-    Message 3
-    WaitABXPadPress
+MtCoronet2F_YouMustStopTeamGalactic:
+    SetFlag FLAG_RECEIVED_MT_CORONET_2F_BLACK_FLUTE
+    Message MtCoronet2F_Text_YouMustStopTeamGalactic
+    WaitButton
     CloseMessage
     Return
 
-_00F2:
-    Call _0100
-    CallCommonScript 0x808
+MtCoronet2F_BagIsFull:
+    Call MtCoronet2F_YourBagItIsFull
+    Common_FadeToDefaultMusic4
     ReleaseAll
     End
 
-_0100:
-    Message 4
-    WaitABXPadPress
+MtCoronet2F_YourBagItIsFull:
+    Message MtCoronet2F_Text_YourBagItIsFull
+    WaitButton
     CloseMessage
     Return
 
-_0109:
-    ApplyMovement 5, _015C
-    ApplyMovement 0xFF, _0194
+MtCoronet2F_LookerWalkToPlayerZ24:
+    ApplyMovement LOCALID_LOOKER, MtCoronet2F_Movement_LookerWalkToPlayerZ24
+    ApplyMovement LOCALID_PLAYER, MtCoronet2F_Movement_PlayerFaceLooker
     WaitMovement
     Return
 
-_011D:
-    ApplyMovement 5, _016C
-    ApplyMovement 0xFF, _0194
+MtCoronet2F_LookerWalkToPlayerZ25:
+    ApplyMovement LOCALID_LOOKER, MtCoronet2F_Movement_LookerWalkToPlayerZ25
+    ApplyMovement LOCALID_PLAYER, MtCoronet2F_Movement_PlayerFaceLooker
     WaitMovement
     Return
 
-_0131:
-    ApplyMovement 5, _0174
-    ApplyMovement 0xFF, _0194
+MtCoronet2F_LookerWalkToPlayerZ26:
+    ApplyMovement LOCALID_LOOKER, MtCoronet2F_Movement_LookerWalkToPlayerZ26
+    ApplyMovement LOCALID_PLAYER, MtCoronet2F_Movement_PlayerFaceLooker
     WaitMovement
     Return
 
     .balign 4, 0
-_0148:
-    MoveAction_012 4
-    MoveAction_03F
-    MoveAction_04B
-    MoveAction_03F
+MtCoronet2F_Movement_LookerNoticePlayer:
+    WalkFastWest 4
+    Delay8
+    EmoteExclamationMark
+    Delay8
     EndMovement
 
     .balign 4, 0
-_015C:
-    MoveAction_012 4
-    MoveAction_010
-    MoveAction_026
+MtCoronet2F_Movement_LookerWalkToPlayerZ24:
+    WalkFastWest 4
+    WalkFastNorth
+    WalkOnSpotFastWest
     EndMovement
 
     .balign 4, 0
-_016C:
-    MoveAction_012 4
+MtCoronet2F_Movement_LookerWalkToPlayerZ25:
+    WalkFastWest 4
     EndMovement
 
     .balign 4, 0
-_0174:
-    MoveAction_012 4
-    MoveAction_011
-    MoveAction_026
+MtCoronet2F_Movement_LookerWalkToPlayerZ26:
+    WalkFastWest 4
+    WalkFastSouth
+    WalkOnSpotFastWest
     EndMovement
 
     .balign 4, 0
-_0184:
-    MoveAction_021
+MtCoronet2F_Movement_LookerWalkOnSpotSouth:
+    WalkOnSpotNormalSouth
     EndMovement
 
     .balign 4, 0
-_018C:
-    MoveAction_022
+MtCoronet2F_Movement_LookerWalkOnSpotWest:
+    WalkOnSpotNormalWest
     EndMovement
 
     .balign 4, 0
-_0194:
-    MoveAction_03F 4
-    MoveAction_023
+MtCoronet2F_Movement_PlayerFaceLooker:
+    Delay8 4
+    WalkOnSpotNormalEast
     EndMovement
 
-_01A0:
-    PlayFanfare SEQ_SE_CONFIRM
+MtCoronet2F_Looker:
+    PlaySE SE_CONFIRM_sseq_3
     LockAll
     FacePlayer
-    GoToIfUnset 0x160, _01BE
-    Message 3
-    WaitABXPadPress
+    GoToIfUnset FLAG_RECEIVED_MT_CORONET_2F_BLACK_FLUTE, MtCoronet2F_TryAgainGiveBlackFlute
+    Message MtCoronet2F_Text_YouMustStopTeamGalactic
+    WaitButton
     CloseMessage
     ReleaseAll
     End
 
-_01BE:
-    Message 5
-    SetVar 0x8004, 68
-    SetVar 0x8005, 1
-    ScrCmd_07D 0x8004, 0x8005, 0x800C
-    GoToIfEq 0x800C, 0, _01F0
-    CallCommonScript 0x7FC
-    Call _00E5
+MtCoronet2F_TryAgainGiveBlackFlute:
+    Message MtCoronet2F_Text_AllICanDoIsGiveThis
+    SetVar VAR_0x8004, ITEM_BLACK_FLUTE
+    SetVar VAR_0x8005, 1
+    GoToIfCannotFitItem VAR_0x8004, VAR_0x8005, VAR_RESULT, MtCoronet2F_BagIsFullAgain
+    Common_GiveItemQuantity
+    Call MtCoronet2F_YouMustStopTeamGalactic
     ReleaseAll
     End
 
-_01F0:
-    Call _0100
+MtCoronet2F_BagIsFullAgain:
+    Call MtCoronet2F_YourBagItIsFull
     ReleaseAll
     End
 
-    .byte 0
-    .byte 0
+    .balign 4, 0

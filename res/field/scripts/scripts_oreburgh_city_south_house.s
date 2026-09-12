@@ -1,20 +1,12 @@
-    .include "macros/scrcmd.inc"
+#include "macros/scrcmd.inc"
+#include "res/text/bank/oreburgh_city_south_house.h"
 
-    .data
 
-    ScriptEntry _0006
-    .short 0xFD13
+    ScriptEntry OreburghCitySouthHouse_Worker
+    ScriptEntryEnd
 
-_0006:
-    PlayFanfare SEQ_SE_CONFIRM
-    LockAll
-    FacePlayer
-    Message 0
-    WaitABXPadPress
-    CloseMessage
-    ReleaseAll
+OreburghCitySouthHouse_Worker:
+    NPCMessage OreburghCitySouthHouse_Text_ItsAlwaysGoodToLearn
     End
 
-    .byte 0
-    .byte 0
-    .byte 0
+    .balign 4, 0

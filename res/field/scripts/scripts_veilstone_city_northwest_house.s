@@ -1,43 +1,22 @@
-    .include "macros/scrcmd.inc"
+#include "macros/scrcmd.inc"
+#include "res/text/bank/veilstone_city_northwest_house.h"
 
-    .data
 
-    ScriptEntry _000E
-    ScriptEntry _0021
-    ScriptEntry _0034
-    .short 0xFD13
+    ScriptEntry VeilstoneCityNorthwestHouse_AceTrainerF
+    ScriptEntry VeilstoneCityNorthwestHouse_OldWoman
+    ScriptEntry VeilstoneCityNorthwestHouse_Buneary
+    ScriptEntryEnd
 
-_000E:
-    PlayFanfare SEQ_SE_CONFIRM
-    LockAll
-    FacePlayer
-    Message 0
-    WaitABXPadPress
-    CloseMessage
-    ReleaseAll
+VeilstoneCityNorthwestHouse_AceTrainerF:
+    NPCMessage VeilstoneCityNorthwestHouse_Text_MtCoronetPartedSinnoh
     End
 
-_0021:
-    PlayFanfare SEQ_SE_CONFIRM
-    LockAll
-    FacePlayer
-    Message 1
-    WaitABXPadPress
-    CloseMessage
-    ReleaseAll
+VeilstoneCityNorthwestHouse_OldWoman:
+    NPCMessage VeilstoneCityNorthwestHouse_Text_PokemonAppearInManyGuises
     End
 
-_0034:
-    PlayFanfare SEQ_SE_CONFIRM
-    LockAll
-    FacePlayer
-    ScrCmd_04B 0x5DC
-    ScrCmd_04C 0x1AB, 0
-    Message 2
-    ScrCmd_04D
-    WaitABXPadPress
-    CloseMessage
-    ReleaseAll
+VeilstoneCityNorthwestHouse_Buneary:
+    PokemonCryAndMessage SPECIES_BUNEARY, VeilstoneCityNorthwestHouse_Text_BunearyCry
     End
 
-    .byte 0
+    .balign 4, 0

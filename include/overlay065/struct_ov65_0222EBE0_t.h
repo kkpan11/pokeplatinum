@@ -1,15 +1,8 @@
 #ifndef POKEPLATINUM_STRUCT_OV65_0222EBE0_T_H
 #define POKEPLATINUM_STRUCT_OV65_0222EBE0_T_H
 
-#include "struct_decls/struct_0200112C_decl.h"
-#include "struct_decls/struct_02001AF4_decl.h"
-#include "struct_decls/struct_02009714_decl.h"
 #include "struct_decls/struct_02012744_decl.h"
-#include "struct_decls/struct_02013A04_decl.h"
-#include "struct_decls/struct_02018340_decl.h"
-#include "struct_decls/struct_0202B370_decl.h"
-#include "struct_defs/struct_0200C738.h"
-#include "struct_defs/struct_0205AA50.h"
+#include "struct_decls/wi_fi_list.h"
 #include "struct_defs/struct_0207DFAC.h"
 
 #include "overlay061/struct_ov61_0222C3B0.h"
@@ -18,40 +11,46 @@
 #include "overlay065/struct_ov65_02235130.h"
 #include "overlay065/struct_ov65_022354D8.h"
 
-#include "cell_actor.h"
+#include "bg_window.h"
+#include "list_menu.h"
+#include "menu.h"
 #include "message.h"
 #include "overlay_manager.h"
 #include "savedata.h"
-#include "strbuf.h"
+#include "sprite.h"
+#include "sprite_resource.h"
+#include "sprite_util.h"
+#include "string_gf.h"
+#include "string_list.h"
 #include "trainer_info.h"
 
 struct UnkStruct_ov65_0222EBE0_t {
-    UnkStruct_0202B370 *unk_00;
+    WiFiList *unk_00;
     UnkStruct_0207DFAC *unk_04;
     int unk_08;
     u8 unk_0C[32];
     u8 unk_2C[32];
     int unk_4C[32];
     int unk_CC[32];
-    ResourceMetadata *unk_14C;
-    BmpList *unk_150;
-    ResourceMetadata *unk_154;
-    BmpList *unk_158;
-    BGL *unk_15C;
-    SaveData *unk_160;
+    StringList *unk_14C;
+    ListMenu *unk_150;
+    StringList *unk_154;
+    ListMenu *unk_158;
+    BgConfig *unk_15C;
+    SaveData *saveData;
     StringTemplate *unk_164;
     MessageLoader *unk_168;
     MessageLoader *unk_16C;
-    Strbuf *unk_170;
-    Strbuf *unk_174;
-    Strbuf *unk_178;
-    Strbuf *unk_17C;
+    String *unk_170;
+    String *unk_174;
+    String *unk_178;
+    String *unk_17C;
     int unk_180;
-    UIControlData *unk_184;
+    Menu *unk_184;
     void *unk_188;
-    CellActorCollection *unk_18C;
-    UnkStruct_0200C738 unk_190;
-    UnkStruct_02009714 *unk_31C[4];
+    SpriteList *unk_18C;
+    G2dRenderer unk_190;
+    SpriteResourceCollection *unk_31C[4];
     UnkStruct_02012744 *unk_32C;
     Window unk_330;
     Window unk_340;
@@ -72,7 +71,7 @@ struct UnkStruct_ov65_0222EBE0_t {
     u8 unk_3C4;
     u8 unk_3C5;
     BOOL unk_3C8;
-    OverlayManager *unk_3CC;
+    ApplicationManager *appMan;
     int unk_3D0;
     u16 unk_3D4;
     u16 unk_3D6[3];

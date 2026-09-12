@@ -1,69 +1,68 @@
-    .include "macros/scrcmd.inc"
+#include "macros/scrcmd.inc"
+#include "res/text/bank/flower_shop.h"
 
-    .data
 
-    ScriptEntry _000E
-    ScriptEntry _006E
-    ScriptEntry _00A9
-    .short 0xFD13
+    ScriptEntry FlowerShop_PokemonBreederF
+    ScriptEntry FlowerShop_Lass
+    ScriptEntry FlowerShop_Beauty
+    ScriptEntryEnd
 
-_000E:
-    PlayFanfare SEQ_SE_CONFIRM
+FlowerShop_PokemonBreederF:
+    PlaySE SE_CONFIRM_sseq_3
     LockAll
     FacePlayer
-    GoToIfSet 0xAAA, _0059
-    Message 0
-    ScrCmd_1B7 0x8004, 5
-    AddVar 0x8004, 149
-    SetVar 0x8005, 1
-    ScrCmd_07D 0x8004, 0x8005, 0x800C
-    GoToIfEq 0x800C, 0, _0064
-    SetFlag 0xAAA
-    CallCommonScript 0x7E0
+    GoToIfSet FLAG_DAILY_RECEIVED_FLOWER_SHOP_BERRY, FlowerShop_PlantBerryInSoil
+    Message FlowerShop_Text_BerryWillGrowIntoPlant
+    GetRandom VAR_0x8004, 5
+    AddVar VAR_0x8004, ITEM_CHERI_BERRY /* Cheri, Chesto, Pecha, Rawst or Aspear */
+    SetVar VAR_0x8005, 1
+    GoToIfCannotFitItem VAR_0x8004, VAR_0x8005, VAR_RESULT, FlowerShop_BagIsFull
+    SetFlag FLAG_DAILY_RECEIVED_FLOWER_SHOP_BERRY
+    Common_GiveItemQuantityNoLineFeed
     CloseMessage
     ReleaseAll
     End
 
-_0059:
-    Message 1
-    WaitABXPadPress
+FlowerShop_PlantBerryInSoil:
+    Message FlowerShop_Text_PlantBerryInSoil
+    WaitButton
     CloseMessage
     ReleaseAll
     End
 
-_0064:
-    CallCommonScript 0x7E1
+FlowerShop_BagIsFull:
+    Common_MessageBagIsFull
     CloseMessage
     ReleaseAll
     End
 
-_006E:
-    PlayFanfare SEQ_SE_CONFIRM
+FlowerShop_Lass:
+    PlaySE SE_CONFIRM_sseq_3
     LockAll
     FacePlayer
-    GoToIfSet 128, _009E
-    Message 2
-    SetVar 0x8004, 0x1C0
-    SetVar 0x8005, 1
-    SetFlag 128
-    CallCommonScript 0x7E0
+    GoToIfSet FLAG_RECEIVED_FLOWER_SHOP_SPRAYDUCK, FlowerShop_UseSprayduckToWaterSoil
+    Message FlowerShop_Text_WaterBerriesUsingSprayduck
+    SetVar VAR_0x8004, ITEM_SPRAYDUCK
+    SetVar VAR_0x8005, 1
+    SetFlag FLAG_RECEIVED_FLOWER_SHOP_SPRAYDUCK
+    Common_GiveItemQuantityNoLineFeed
     CloseMessage
     ReleaseAll
     End
 
-_009E:
-    Message 3
-    WaitABXPadPress
+FlowerShop_UseSprayduckToWaterSoil:
+    Message FlowerShop_Text_UseSprayduckToWaterSoil
+    WaitButton
     CloseMessage
     ReleaseAll
     End
 
-_00A9:
-    PlayFanfare SEQ_SE_CONFIRM
+FlowerShop_Beauty:
+    PlaySE SE_CONFIRM_sseq_3
     LockAll
     FacePlayer
-    ScrCmd_257
+    ShowAccessoryShop
     ReleaseAll
     End
 
-    .byte 0
+    .balign 4, 0

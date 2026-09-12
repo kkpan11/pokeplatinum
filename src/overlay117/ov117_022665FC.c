@@ -3,7 +3,7 @@
 #include <nitro.h>
 #include <string.h>
 
-#include "struct_defs/struct_02039A58.h"
+#include "struct_defs/comm_cmd_table.h"
 
 #include "overlay117/ov117_02260668.h"
 #include "overlay117/struct_ov117_02261280.h"
@@ -19,10 +19,10 @@ static int ov117_02266610(void);
 static int ov117_02266614(void);
 
 static const CommCmdTable Unk_ov117_02266FE4[] = {
-    { NULL, sub_0203294C, NULL },
+    { NULL, CommPacketSizeOf_Nothing, NULL },
     { ov117_02266660, ov117_02266614, NULL },
     { ov117_02266618, ov117_02266610, NULL },
-    { ov117_0226663C, sub_0203294C, NULL }
+    { ov117_0226663C, CommPacketSizeOf_Nothing, NULL }
 };
 
 void ov117_022665FC(void *param0)

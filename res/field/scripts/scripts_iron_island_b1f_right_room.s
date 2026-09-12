@@ -1,18 +1,16 @@
-    .include "macros/scrcmd.inc"
+#include "macros/scrcmd.inc"
 
-    .data
 
-    ScriptEntry _000A
-    ScriptEntry _000E
-    .short 0xFD13
+    ScriptEntry IronIslandB1FRightRoom_OnTransition
+    ScriptEntry IronIslandB1FRightRoom_CoordEvent_PlatformLift
+    ScriptEntryEnd
 
-_000A:
-    ScrCmd_25B
+IronIslandB1FRightRoom_OnTransition:
+    InitPersistedMapFeaturesForPlatformLift
     End
 
-_000E:
-    ScrCmd_25C
+IronIslandB1FRightRoom_CoordEvent_PlatformLift:
+    TriggerPlatformLift
     End
 
-    .byte 0
-    .byte 0
+    .balign 4, 0

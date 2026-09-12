@@ -1,5 +1,5 @@
-personal_files += files('data.json')
-giratina_origin_personal = files('forms/origin/data.json')
+species_data_files += files('data.json', 'sprite_data.json')
+species_data_files += files('forms/origin/data.json')
 
 poke_icon_files += files('icon.png')
 giratina_origin_icon = files('forms/origin/icon.png')
@@ -17,3 +17,5 @@ otherpoke_index += {
     '246': files('forms/origin/normal.pal'),
     '247': files('forms/origin/shiny.pal'),
 }
+
+pokefoot_files += files('footprint.png')

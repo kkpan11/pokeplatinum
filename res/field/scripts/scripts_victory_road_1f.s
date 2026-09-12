@@ -1,39 +1,38 @@
-    .include "macros/scrcmd.inc"
+#include "macros/scrcmd.inc"
+#include "res/text/bank/victory_road_1f.h"
 
-    .data
 
-    ScriptEntry _000A
-    ScriptEntry _0031
-    .short 0xFD13
+    ScriptEntry VictoryRoad_OnTransition
+    ScriptEntry VictoryRoad_Collector
+    ScriptEntryEnd
 
-_000A:
-    SetFlag 0x9CA
-    GoToIfUnset 0x964, _002F
-    ScrCmd_22D 2, 0x4000
-    GoToIfEq 0x4000, 0, _002F
-    SetFlag 0x27E
-_002F:
+VictoryRoad_OnTransition:
+    SetFlag FLAG_FIRST_ARRIVAL_VICTORY_ROAD
+    GoToIfUnset FLAG_GAME_COMPLETED, VictoryRoad_DontHideCollector
+    GetNationalDexEnabled VAR_MAP_LOCAL_0x00
+    GoToIfEq VAR_MAP_LOCAL_0x00, FALSE, VictoryRoad_DontHideCollector
+    SetFlag FLAG_HIDE_VICTORY_ROAD_1F_COLLECTOR
+VictoryRoad_DontHideCollector:
     End
 
-_0031:
-    PlayFanfare SEQ_SE_CONFIRM
+VictoryRoad_Collector:
+    PlaySE SE_CONFIRM_sseq_3
     LockAll
     FacePlayer
-    GoToIfSet 0x964, _004F
-    Message 0
-    GoTo _005A
+    GoToIfSet FLAG_GAME_COMPLETED, VictoryRoad1F_YoullMeetManyPokemon
+    Message VictoryRoad1F_Text_AimForPokemonLeague
+    GoTo VictoryRoad1F_CollectorEnd
     End
 
-_004F:
-    Message 1
-    GoTo _005A
+VictoryRoad1F_YoullMeetManyPokemon:
+    Message VictoryRoad1F_Text_YoullMeetManyPokemon
+    GoTo VictoryRoad1F_CollectorEnd
     End
 
-_005A:
-    WaitABXPadPress
+VictoryRoad1F_CollectorEnd:
+    WaitButton
     CloseMessage
     ReleaseAll
     End
 
-    .byte 0
-    .byte 0
+    .balign 4, 0

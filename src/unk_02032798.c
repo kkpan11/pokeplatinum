@@ -3,17 +3,17 @@
 #include <nitro.h>
 #include <string.h>
 
-#include "struct_defs/struct_02039A58.h"
+#include "struct_defs/comm_cmd_table.h"
 
 #include "functypes/funcptr_02032868.h"
 #include "functypes/funcptr_0203290C.h"
 #include "functypes/funcptr_020F8E60.h"
 
+#include "comm_manager.h"
 #include "communication_information.h"
 #include "communication_system.h"
 #include "heap.h"
 #include "unk_020363E8.h"
-#include "unk_020366A0.h"
 
 typedef struct {
     const CommCmdTable *cmdTable;
@@ -29,28 +29,28 @@ static void sub_020329C4(int param0, int param1, void *param2, void *param3);
 static int sub_02032954(void);
 
 static const CommCmdTable Unk_020E5D64[] = {
-    { NULL, sub_0203294C, NULL },
-    { NULL, sub_0203294C, NULL },
-    { sub_0203619C, sub_0203294C, NULL },
+    { NULL, CommPacketSizeOf_Nothing, NULL },
+    { NULL, CommPacketSizeOf_Nothing, NULL },
+    { sub_0203619C, CommPacketSizeOf_Nothing, NULL },
     { CommInfo_RecvPlayerData, CommPlayerInfo_Size, NULL },
     { CommInfo_RecvPlayerDataArray, CommPlayerInfo_Size, NULL },
-    { CommunicatitonInformaion_FinishReading, sub_0203294C, NULL },
-    { sub_02037A78, sub_02037B54, NULL },
-    { sub_02037AD8, sub_02037B54, NULL },
+    { CommInfo_FinishReading, CommPacketSizeOf_Nothing, NULL },
+    { CommManager_ValidateConfirmationMessage, CommManager_ConfirmationMessage_sizeof, NULL },
+    { CommManager_ValidateConfirmationResponseMessage, CommManager_ConfirmationMessage_sizeof, NULL },
     { NULL, NULL, NULL },
     { NULL, NULL, NULL },
     { sub_02036008, CommPacketSizeOf_NetId, NULL },
     { sub_02036030, CommPacketSizeOf_NetId, NULL },
     { sub_02036058, CommPacketSizeOf_NetId, NULL },
-    { sub_02032958, sub_0203294C, NULL },
-    { sub_0203299C, sub_0203294C, NULL },
-    { sub_020329C4, sub_0203294C, NULL },
+    { sub_02032958, CommPacketSizeOf_Nothing, NULL },
+    { sub_0203299C, CommPacketSizeOf_Nothing, NULL },
+    { sub_020329C4, CommPacketSizeOf_Nothing, NULL },
     { CommCmd_16, CommPacketSizeOf_NetId, NULL },
     { CommCmd_17, CommPacketSizeOf_NetId, NULL },
     { CommCmd_18, sub_02032954, NULL },
     { sub_02036574, sub_02036590, NULL },
     { sub_02036670, CommTool_TempDataSize, NULL },
-    { sub_02038240, sub_0203294C, NULL }
+    { CommManager_DisconnectWifi, CommPacketSizeOf_Nothing, NULL }
 };
 
 static CommCmdManager *sCommCmdManager = NULL;
@@ -60,7 +60,7 @@ void CommCmd_Init(const CommCmdTable *cmdTable, int param1, void *param2)
     int v0;
 
     if (!sCommCmdManager) {
-        sCommCmdManager = Heap_AllocFromHeap(15, sizeof(CommCmdManager));
+        sCommCmdManager = Heap_Alloc(HEAP_ID_COMMUNICATION, sizeof(CommCmdManager));
     }
 
     sCommCmdManager->cmdTable = cmdTable;
@@ -77,7 +77,7 @@ void CommCmd_Init(const CommCmdTable *cmdTable, int param1, void *param2)
 void sub_020327E0(void)
 {
     if (sCommCmdManager) {
-        Heap_FreeToHeap(sCommCmdManager);
+        Heap_Free(sCommCmdManager);
         sCommCmdManager = NULL;
     }
 }
@@ -124,7 +124,7 @@ int CommCmd_PacketSizeOf(int cmd)
         }
 
         if (cmd > (sCommCmdManager->unk_04 + 22)) {
-            GF_ASSERT(0);
+            GF_ASSERT(FALSE);
             sub_020363BC();
             return v0;
         }
@@ -163,12 +163,12 @@ void *sub_0203290C(int cmd, int netId, int param2)
     return NULL;
 }
 
-int sub_02032944(void)
+int CommPacketSizeOf_Variable(void)
 {
-    return 0xffff;
+    return PACKET_SIZE_VARIABLE;
 }
 
-int sub_0203294C(void)
+int CommPacketSizeOf_Nothing(void)
 {
     return 0;
 }

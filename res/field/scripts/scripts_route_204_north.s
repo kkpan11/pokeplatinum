@@ -1,56 +1,44 @@
-    .include "macros/scrcmd.inc"
+#include "macros/scrcmd.inc"
+#include "res/text/bank/route_204_north.h"
 
-    .data
 
-    ScriptEntry _000E
-    ScriptEntry _0021
-    ScriptEntry _007B
-    .short 0xFD13
+    ScriptEntry Route204North_Youngster
+    ScriptEntry Route204North_AceTrainerF
+    ScriptEntry Route204North_ArrowSignpostFloaromaTown
+    ScriptEntryEnd
 
-_000E:
-    PlayFanfare SEQ_SE_CONFIRM
+Route204North_Youngster:
+    NPCMessage Route204North_Text_RaisingDifferentPokemon
+    End
+
+Route204North_AceTrainerF:
+    PlaySE SE_CONFIRM_sseq_3
     LockAll
     FacePlayer
-    Message 0
-    WaitABXPadPress
+    GoToIfSet FLAG_RECEIVED_ROUTE_204_NORTH_TM78, Route204North_CaptivateOppositeGender
+    Message Route204North_Text_HaveThisTM
+    SetVar VAR_0x8004, ITEM_TM78
+    SetVar VAR_0x8005, 1
+    GoToIfCannotFitItem VAR_0x8004, VAR_0x8005, VAR_RESULT, Route204North_BagIsFull
+    Common_GiveItemQuantity
+    SetFlag FLAG_RECEIVED_ROUTE_204_NORTH_TM78
+    GoTo Route204North_CaptivateOppositeGender
+
+Route204North_CaptivateOppositeGender:
+    Message Route204North_Text_CaptivateOppositeGender
+    WaitButton
     CloseMessage
     ReleaseAll
     End
 
-_0021:
-    PlayFanfare SEQ_SE_CONFIRM
-    LockAll
-    FacePlayer
-    GoToIfSet 197, _0066
-    Message 1
-    SetVar 0x8004, 0x195
-    SetVar 0x8005, 1
-    ScrCmd_07D 0x8004, 0x8005, 0x800C
-    GoToIfEq 0x800C, 0, _0071
-    CallCommonScript 0x7FC
-    SetFlag 197
-    GoTo _0066
-
-_0066:
-    Message 2
-    WaitABXPadPress
+Route204North_BagIsFull:
+    Common_MessageBagIsFull
     CloseMessage
     ReleaseAll
     End
 
-_0071:
-    CallCommonScript 0x7E1
-    CloseMessage
-    ReleaseAll
+Route204North_ArrowSignpostFloaromaTown:
+    ShowArrowSign Route204North_Text_SignFloaromaTown
     End
 
-_007B:
-    ScrCmd_036 3, 1, 0, 0x800C
-    ScrCmd_038 3
-    ScrCmd_039
-    ScrCmd_03B 0x800C
-    CallCommonScript 0x7D0
-    End
-
-    .byte 0
-    .byte 0
+    .balign 4, 0

@@ -14,8 +14,8 @@
 #include "overlay070/struct_ov70_0225DEE8_decl.h"
 #include "overlay070/struct_ov70_02263344_decl.h"
 
-#include "strbuf.h"
-#include "unk_02005474.h"
+#include "sound_playback.h"
+#include "string_gf.h"
 
 typedef struct {
     u32 unk_00;
@@ -28,7 +28,7 @@ BOOL ov70_0226CC74(UnkStruct_ov70_02263344 *param0, UnkStruct_ov70_0225DEE8 *par
     UnkStruct_ov70_0225CA20 *v2;
     UnkStruct_ov70_0225CC54 *v3;
     UnkStruct_ov70_0225CC54 *v4;
-    Strbuf *v5;
+    String *v5;
 
     v0 = ov70_02262E80(param0);
     v1 = ov70_0225DEE8(param1);
@@ -39,7 +39,7 @@ BOOL ov70_0226CC74(UnkStruct_ov70_02263344 *param0, UnkStruct_ov70_0225DEE8 *par
     switch (ov70_02262E84(param0)) {
     case 0:
         v0 = ov70_02262E3C(param0, sizeof(UnkStruct_ov70_0226CC74));
-        Sound_PlayEffect(1500);
+        Sound_PlayEffect(SE_CONFIRM_sseq_3);
 
         {
             u32 v6;
@@ -127,7 +127,7 @@ BOOL ov70_0226CC74(UnkStruct_ov70_02263344 *param0, UnkStruct_ov70_0225DEE8 *par
         }
         break;
     default:
-        GF_ASSERT(0);
+        GF_ASSERT(FALSE);
         break;
     }
 

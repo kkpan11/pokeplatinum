@@ -13,17 +13,15 @@ typedef struct UnkStruct_ov63_0222BCE8_t {
     UnkUnion_ov63_0222BDAC *unk_04;
 } UnkStruct_ov63_0222BCE8;
 
-UnkStruct_ov63_0222BCE8 *ov63_0222BCE8(u16 param0, u16 param1, u32 param2)
+UnkStruct_ov63_0222BCE8 *ov63_0222BCE8(u16 param0, u16 param1, enum HeapID heapID)
 {
-    UnkStruct_ov63_0222BCE8 *v0;
-
-    v0 = Heap_AllocFromHeap(param2, sizeof(UnkStruct_ov63_0222BCE8));
+    UnkStruct_ov63_0222BCE8 *v0 = Heap_Alloc(heapID, sizeof(UnkStruct_ov63_0222BCE8));
     GF_ASSERT(v0);
 
     v0->unk_00 = param0;
     v0->unk_02 = param1;
 
-    v0->unk_04 = Heap_AllocFromHeap(param2, sizeof(UnkUnion_ov63_0222BDAC) * (v0->unk_00 * v0->unk_02));
+    v0->unk_04 = Heap_Alloc(heapID, sizeof(UnkUnion_ov63_0222BDAC) * (v0->unk_00 * v0->unk_02));
     GF_ASSERT(v0->unk_04);
     memset(v0->unk_04, 0, sizeof(UnkUnion_ov63_0222BDAC) * (v0->unk_00 * v0->unk_02));
 
@@ -33,8 +31,8 @@ UnkStruct_ov63_0222BCE8 *ov63_0222BCE8(u16 param0, u16 param1, u32 param2)
 void ov63_0222BD30(UnkStruct_ov63_0222BCE8 *param0)
 {
     GF_ASSERT(param0);
-    Heap_FreeToHeap(param0->unk_04);
-    Heap_FreeToHeap(param0);
+    Heap_Free(param0->unk_04);
+    Heap_Free(param0);
 }
 
 u16 ov63_0222BD48(const UnkStruct_ov63_0222BCE8 *param0)

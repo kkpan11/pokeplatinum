@@ -1,41 +1,62 @@
-#ifndef POKEPLATINUM_UNK_0203A6DC_H
-#define POKEPLATINUM_UNK_0203A6DC_H
+#ifndef POKEPLATINUM_FIELD_OVERWORLD_STATE_H
+#define POKEPLATINUM_FIELD_OVERWORLD_STATE_H
 
-#include "struct_decls/struct_0203A790_decl.h"
-#include "struct_decls/struct_0203A79C_decl.h"
-#include "struct_defs/struct_02049FA8.h"
-#include "struct_defs/struct_020556C4.h"
-#include "struct_defs/struct_0205EC34.h"
+#include "struct_defs/player_data.h"
 
 #include "field/field_system_decl.h"
 
+#include "location.h"
+#include "map_object.h"
+#include "overworld_map_history.h"
 #include "savedata.h"
+
+typedef struct FieldOverworldState {
+    Location player;
+    Location entrance;
+    Location previous;
+    Location special;
+    Location exit;
+    u16 bgm;
+    u16 weather;
+    u16 blackOutWarpId;
+    u8 cameraType;
+    OverworldMapHistory mapHistory;
+    PlayerData playerData;
+    u16 poisonSteps;
+    u16 safariSteps;
+    u16 safariBalls;
+    u8 padding_9A[6];
+} FieldOverworldState;
+
+typedef struct FieldOverworldSave {
+    MapObjectSave unk_00[64];
+} FieldOverworldSave;
 
 int FieldOverworldState_Size(void);
 int FieldOverworldSave_Size(void);
-void FieldOverworldSave_Init(FieldOverworldSave *param0);
-void FieldOverworldState_Init(FieldOverworldState *param0);
-Location *sub_0203A720(FieldOverworldState *param0);
-Location *FieldOverworldState_GetEntranceLocation(FieldOverworldState *param0);
-Location *FieldOverworldState_GetPrevLocation(FieldOverworldState *param0);
-Location *sub_0203A72C(FieldOverworldState *param0);
-Location *sub_0203A730(FieldOverworldState *param0);
-void sub_0203A734(FieldOverworldState *param0, Location *param1);
-u16 *sub_0203A748(FieldOverworldState *param0);
-u16 FieldOverworldState_GetWeather(const FieldOverworldState *param0);
-void FieldOverworldState_SetWeather(FieldOverworldState *param0, u16 param1);
-u16 FieldOverworldState_GetWarpId(const FieldOverworldState *param0);
-void FieldOverworldState_SetWarpId(FieldOverworldState *param0, u16 param1);
-UnkStruct_020556C4 *sub_0203A76C(FieldOverworldState *param0);
-int FieldOverworldState_GetCameraType(const FieldOverworldState *param0);
-void FieldOverworldState_SetCameraType(FieldOverworldState *param0, int param1);
-PlayerData *FieldOverworldState_GetPlayerData(FieldOverworldState *param0);
-u16 *sub_0203A784(FieldOverworldState *param0);
-u16 *sub_0203A788(FieldOverworldState *param0);
-u16 *sub_0203A78C(FieldOverworldState *param0);
-FieldOverworldState *SaveData_GetFieldOverworldState(SaveData *param0);
-FieldOverworldSave *SaveData_GetFieldOverworldSave(SaveData *param0);
+void FieldOverworldSave_Init(FieldOverworldSave *fieldSave);
+void FieldOverworldState_Init(FieldOverworldState *fieldState);
+Location *FieldOverworldState_GetPlayerLocation(FieldOverworldState *fieldState);
+Location *FieldOverworldState_GetEntranceLocation(FieldOverworldState *fieldState);
+Location *FieldOverworldState_GetPrevLocation(FieldOverworldState *fieldState);
+Location *FieldOverworldState_GetExitLocation(FieldOverworldState *fieldState);
+Location *FieldOverworldState_GetSpecialLocation(FieldOverworldState *fieldState);
+void FieldOverworldState_SetSpecialLocation(FieldOverworldState *fieldState, Location *location);
+u16 *FieldOverworldState_GetSpecialBGM(FieldOverworldState *fieldState);
+u16 FieldOverworldState_GetWeather(const FieldOverworldState *fieldState);
+void FieldOverworldState_SetWeather(FieldOverworldState *fieldState, u16 weather);
+u16 FieldOverworldState_GetBlackOutWarpId(const FieldOverworldState *fieldState);
+void FieldOverworldState_SetBlackOutWarpId(FieldOverworldState *fieldState, u16 warpId);
+OverworldMapHistory *FieldOverworldState_GetMapHistory(FieldOverworldState *fieldState);
+int FieldOverworldState_GetCameraType(const FieldOverworldState *fieldState);
+void FieldOverworldState_SetCameraType(FieldOverworldState *fieldState, int type);
+PlayerData *FieldOverworldState_GetPlayerData(FieldOverworldState *fieldState);
+u16 *FieldOverworldState_GetSafariBallCount(FieldOverworldState *fieldState);
+u16 *FieldOverworldState_GetSafariStepCount(FieldOverworldState *fieldState);
+u16 *FieldOverworldState_GetPoisonStepCount(FieldOverworldState *fieldState);
+FieldOverworldState *SaveData_GetFieldOverworldState(SaveData *saveData);
+FieldOverworldSave *SaveData_GetFieldOverworldSave(SaveData *saveData);
 void FieldSystem_SaveObjects(FieldSystem *fieldSystem);
 void FieldSystem_LoadObjects(FieldSystem *fieldSystem);
 
-#endif // POKEPLATINUM_UNK_0203A6DC_H
+#endif // POKEPLATINUM_FIELD_OVERWORLD_STATE_H

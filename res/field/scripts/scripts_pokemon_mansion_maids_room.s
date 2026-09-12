@@ -1,83 +1,74 @@
-    .include "macros/scrcmd.inc"
+#include "macros/scrcmd.inc"
+#include "res/text/bank/pokemon_mansion_maids_room.h"
 
-    .data
 
-    ScriptEntry _000E
-    ScriptEntry _0068
-    ScriptEntry _007B
-    .short 0xFD13
+    ScriptEntry PokemonMansionMaidsRoom_MaidMiddle
+    ScriptEntry PokemonMansionMaidsRoom_MaidEast
+    ScriptEntry PokemonMansionMaidsRoom_Bed
+    ScriptEntryEnd
 
-_000E:
-    PlayFanfare SEQ_SE_CONFIRM
+PokemonMansionMaidsRoom_MaidMiddle:
+    PlaySE SE_CONFIRM_sseq_3
     LockAll
     FacePlayer
-    GoToIfSet 0x139, _005D
-    Message 0
-    SetVar 0x8004, 218
-    SetVar 0x8005, 1
-    ScrCmd_07D 0x8004, 0x8005, 0x800C
-    GoToIfEq 0x800C, 0, _0053
-    SetFlag 0x139
-    CallCommonScript 0x7E0
+    GoToIfSet FLAG_RECEIVED_POKEMON_MANSION_MAIDS_ROOM_SOOTHE_BELL, PokemonMansionMaidsRoom_TrainerThatPokemonLove
+    Message PokemonMansionMaidsRoom_Text_PutThisOnPokemon
+    SetVar VAR_0x8004, ITEM_SOOTHE_BELL
+    SetVar VAR_0x8005, 1
+    GoToIfCannotFitItem VAR_0x8004, VAR_0x8005, VAR_RESULT, PokemonMansionMaidsRoom_BagIsFull
+    SetFlag FLAG_RECEIVED_POKEMON_MANSION_MAIDS_ROOM_SOOTHE_BELL
+    Common_GiveItemQuantityNoLineFeed
     CloseMessage
     ReleaseAll
     End
 
-_0053:
-    CallCommonScript 0x7E1
+PokemonMansionMaidsRoom_BagIsFull:
+    Common_MessageBagIsFull
     CloseMessage
     ReleaseAll
     End
 
-_005D:
-    Message 1
-    WaitABXPadPress
+PokemonMansionMaidsRoom_TrainerThatPokemonLove:
+    Message PokemonMansionMaidsRoom_Text_TrainerThatPokemonLove
+    WaitButton
     CloseMessage
     ReleaseAll
     End
 
-_0068:
-    PlayFanfare SEQ_SE_CONFIRM
+PokemonMansionMaidsRoom_MaidEast:
+    NPCMessage PokemonMansionMaidsRoom_Text_ImNotLoafing
+    End
+
+PokemonMansionMaidsRoom_Bed:
+    PlaySE SE_CONFIRM_sseq_3
     LockAll
-    FacePlayer
-    Message 2
-    WaitABXPadPress
-    CloseMessage
-    ReleaseAll
+    Message PokemonMansionMaidsRoom_Text_WantToRest
+    ShowYesNoMenu VAR_RESULT
+    GoToIfEq VAR_RESULT, MENU_YES, PokemonMansionMaidsRoom_Rest
+    GoTo PokemonMansionMaidsRoom_BedEnd
     End
 
-_007B:
-    PlayFanfare SEQ_SE_CONFIRM
-    LockAll
-    Message 3
-    ScrCmd_03E 0x800C
-    GoToIfEq 0x800C, 0, _009D
-    GoTo _00D3
-    End
-
-_009D:
-    ScrCmd_0CD 0
-    Message 4
+PokemonMansionMaidsRoom_Rest:
+    BufferPlayerName 0
+    Message PokemonMansionMaidsRoom_Text_PlayerFellAsleep
     CloseMessage
-    FadeScreen 6, 1, 0, 0
+    FadeScreenOut
     WaitFadeScreen
-    ScrCmd_04E 0x48E
-    ScrCmd_04F
-    ScrCmd_14E
-    FadeScreen 6, 1, 1, 0
+    PlayFanfare SEQ_ASA_sseq
+    WaitFanfare
+    HealParty
+    FadeScreenIn
     WaitFadeScreen
-    ScrCmd_0CD 0
-    Message 5
-    WaitABXPadPress
+    BufferPlayerName 0
+    Message PokemonMansionMaidsRoom_Text_PokemonFullyHealed
+    WaitButton
     CloseMessage
     ReleaseAll
     End
 
-_00D3:
+PokemonMansionMaidsRoom_BedEnd:
     CloseMessage
     ReleaseAll
     End
 
-    .byte 0
-    .byte 0
-    .byte 0
+    .balign 4, 0

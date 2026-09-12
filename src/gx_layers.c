@@ -4,14 +4,14 @@
 #include <nnsys.h>
 #include <string.h>
 
-#include "struct_defs/struct_02099F80.h"
+#include "constants/graphics.h"
 
-#include "core_sys.h"
+#include "system.h"
 
 static int sEngineALayers;
 static int sEngineBLayers;
 
-void GXLayers_SetBanks(const UnkStruct_02099F80 *banks)
+void GXLayers_SetBanks(const GXBanks *banks)
 {
     GX_ResetBankForBG();
     GX_ResetBankForBGExtPltt();
@@ -98,7 +98,7 @@ void GXLayers_TurnBothDispOn(void)
 
 void GXLayers_SwapDisplay(void)
 {
-    if (gCoreSys.unk_65 == 0) {
+    if (gSystem.whichScreenIs3D == DS_SCREEN_MAIN) {
         GX_SetDispSelect(GX_DISP_SELECT_MAIN_SUB);
     } else {
         GX_SetDispSelect(GX_DISP_SELECT_SUB_MAIN);

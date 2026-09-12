@@ -6,30 +6,28 @@
 #include "constants/heap.h"
 #include "constants/items.h"
 #include "constants/savedata/save_table.h"
-#include "consts/items.h"
+#include "generated/items.h"
 
-#include "struct_decls/struct_0207CB08_decl.h"
-
+#include "bag_context.h"
 #include "heap.h"
 #include "item.h"
 #include "savedata.h"
-#include "unk_0207CB08.h"
 
 #define BAG_SLOT_INVALID ((u32)(-1))
 
 #define BAG_MAX_QUANTITY_ITEM 999
 #define BAG_MAX_QUANTITY_TMHM 99
 
-static u32 Bag_GetPocketForItem(Bag *bag, u16 item, BagItem **outPocket, u32 *outMax, enum HeapId heapID);
+static u32 Bag_GetPocketForItem(Bag *bag, u16 item, BagItem **outPocket, u32 *outMax, enum HeapID heapID);
 
 int Bag_SaveSize(void)
 {
     return sizeof(Bag);
 }
 
-Bag *Bag_New(enum HeapId heapID)
+Bag *Bag_New(enum HeapID heapID)
 {
-    Bag *bag = Heap_AllocFromHeap(heapID, sizeof(Bag));
+    Bag *bag = Heap_Alloc(heapID, sizeof(Bag));
     Bag_Init(bag);
 
     return bag;
@@ -55,7 +53,7 @@ void Bag_RegisterItem(Bag *bag, u32 item)
     bag->registeredItem = item;
 }
 
-static u32 Bag_GetPocketForItem(Bag *bag, u16 item, BagItem **outPocket, u32 *outMax, enum HeapId heapID)
+static u32 Bag_GetPocketForItem(Bag *bag, u16 item, BagItem **outPocket, u32 *outMax, enum HeapID heapID)
 {
     u32 pocket = Item_LoadParam(item, ITEM_PARAM_FIELD_POCKET, heapID);
 
@@ -121,7 +119,7 @@ static BagItem *Pocket_FindSlotToAddItem(BagItem *pocket, u32 pocketSize, u16 it
     return slot == BAG_SLOT_INVALID ? NULL : &pocket[slot];
 }
 
-static BagItem *Bag_FindSlotToAddItem(Bag *bag, u16 item, u16 count, enum HeapId heapID)
+static BagItem *Bag_FindSlotToAddItem(Bag *bag, u16 item, u16 count, enum HeapID heapID)
 {
     BagItem *pocketItems;
     u32 pocketSize;
@@ -134,12 +132,12 @@ static BagItem *Bag_FindSlotToAddItem(Bag *bag, u16 item, u16 count, enum HeapId
     return Pocket_FindSlotToAddItem(pocketItems, pocketSize, item, count, BAG_MAX_QUANTITY_ITEM);
 }
 
-BOOL Bag_CanFitItem(Bag *bag, u16 item, u16 count, enum HeapId heapID)
+BOOL Bag_CanFitItem(Bag *bag, u16 item, u16 count, enum HeapID heapID)
 {
     return Bag_FindSlotToAddItem(bag, item, count, heapID) != NULL;
 }
 
-BOOL Bag_TryAddItem(Bag *bag, u16 item, u16 count, enum HeapId heapID)
+BOOL Bag_TryAddItem(Bag *bag, u16 item, u16 count, enum HeapID heapID)
 {
     BagItem *slot = Bag_FindSlotToAddItem(bag, item, count, heapID);
     if (slot == NULL) {
@@ -169,7 +167,7 @@ static BagItem *Pocket_FindSlotWithItemQuantity(BagItem *pocket, u32 pocketSize,
     return NULL;
 }
 
-static BagItem *Bag_FindSlotWithItemQuantity(Bag *bag, u16 item, u16 count, enum HeapId heapID)
+static BagItem *Bag_FindSlotWithItemQuantity(Bag *bag, u16 item, u16 count, enum HeapID heapID)
 {
     BagItem *pocket;
     u32 pocketSize;
@@ -178,7 +176,7 @@ static BagItem *Bag_FindSlotWithItemQuantity(Bag *bag, u16 item, u16 count, enum
     return Pocket_FindSlotWithItemQuantity(pocket, pocketSize, item, count);
 }
 
-BOOL Bag_TryRemoveItem(Bag *bag, u16 item, u16 count, enum HeapId heapID)
+BOOL Bag_TryRemoveItem(Bag *bag, u16 item, u16 count, enum HeapID heapID)
 {
     BagItem *slot = Bag_FindSlotWithItemQuantity(bag, item, count, heapID);
     if (slot == NULL) {
@@ -198,7 +196,7 @@ BOOL Bag_TryRemoveItem(Bag *bag, u16 item, u16 count, enum HeapId heapID)
     return TRUE;
 }
 
-BOOL Pocket_TryRemoveItem(BagItem *pocket, u32 pocketSize, u16 item, u16 count, enum HeapId heapID)
+BOOL Pocket_TryRemoveItem(BagItem *pocket, u32 pocketSize, u16 item, u16 count, enum HeapID heapID)
 {
     BagItem *slot = Pocket_FindSlotWithItemQuantity(pocket, pocketSize, item, count);
     if (slot == NULL) {
@@ -216,7 +214,7 @@ BOOL Pocket_TryRemoveItem(BagItem *pocket, u32 pocketSize, u16 item, u16 count, 
     return TRUE;
 }
 
-BOOL Bag_CanRemoveItem(Bag *bag, u16 item, u16 count, enum HeapId heapID)
+BOOL Bag_CanRemoveItem(Bag *bag, u16 item, u16 count, enum HeapID heapID)
 {
     return Bag_FindSlotWithItemQuantity(bag, item, count, heapID) != NULL;
 }
@@ -272,7 +270,7 @@ BOOL Bag_HasItemsInPocket(Bag *bag, u32 pocketID)
     return FALSE;
 }
 
-u16 Bag_GetItemQuantity(Bag *bag, u16 item, enum HeapId heapID)
+u16 Bag_GetItemQuantity(Bag *bag, u16 item, enum HeapID heapID)
 {
     BagItem *slot = Bag_FindSlotWithItemQuantity(bag, item, 1, heapID);
     if (slot == NULL) {
@@ -282,7 +280,7 @@ u16 Bag_GetItemQuantity(Bag *bag, u16 item, enum HeapId heapID)
     return slot->quantity;
 }
 
-u16 Pocket_GetItemQuantity(BagItem *pocket, u32 pocketSize, u16 item, enum HeapId heapID)
+u16 Pocket_GetItemQuantity(BagItem *pocket, u32 pocketSize, u16 item, enum HeapID heapID)
 {
     BagItem *slot = Pocket_FindSlotWithItemQuantity(pocket, pocketSize, item, 1);
     if (slot == NULL) {
@@ -321,43 +319,43 @@ void Pocket_Sort(BagItem *pocket, const u32 size)
     }
 }
 
-void *sub_0207D824(Bag *bag, const u8 *pockets, enum HeapId heapID)
+void *BagContext_CreateWithPockets(Bag *bag, const u8 *pockets, enum HeapID heapID)
 {
-    UnkStruct_0207CB08 *v0;
+    BagContext *bagContext;
     int i;
 
-    v0 = sub_0207CB08(heapID);
+    bagContext = BagContext_New(heapID);
 
-    for (i = 0; pockets[i] != 0xff; i++) {
+    for (i = 0; pockets[i] != POCKET_LIST_END; i++) {
         switch (pockets[i]) {
         case POCKET_KEY_ITEMS:
-            sub_0207CB48(v0, bag->keyItems, POCKET_KEY_ITEMS, i);
+            BagContext_InitPocket(bagContext, bag->keyItems, POCKET_KEY_ITEMS, i);
             break;
         case POCKET_ITEMS:
-            sub_0207CB48(v0, bag->items, POCKET_ITEMS, i);
+            BagContext_InitPocket(bagContext, bag->items, POCKET_ITEMS, i);
             break;
         case POCKET_BERRIES:
-            sub_0207CB48(v0, bag->berries, POCKET_BERRIES, i);
+            BagContext_InitPocket(bagContext, bag->berries, POCKET_BERRIES, i);
             break;
         case POCKET_MEDICINE:
-            sub_0207CB48(v0, bag->medicine, POCKET_MEDICINE, i);
+            BagContext_InitPocket(bagContext, bag->medicine, POCKET_MEDICINE, i);
             break;
         case POCKET_BALLS:
-            sub_0207CB48(v0, bag->pokeballs, POCKET_BALLS, i);
+            BagContext_InitPocket(bagContext, bag->pokeballs, POCKET_BALLS, i);
             break;
         case POCKET_BATTLE_ITEMS:
-            sub_0207CB48(v0, bag->battleItems, POCKET_BATTLE_ITEMS, i);
+            BagContext_InitPocket(bagContext, bag->battleItems, POCKET_BATTLE_ITEMS, i);
             break;
         case POCKET_MAIL:
-            sub_0207CB48(v0, bag->mail, POCKET_MAIL, i);
+            BagContext_InitPocket(bagContext, bag->mail, POCKET_MAIL, i);
             break;
         case POCKET_TMHMS:
-            sub_0207CB48(v0, bag->tmHms, POCKET_TMHMS, i);
+            BagContext_InitPocket(bagContext, bag->tmHms, POCKET_TMHMS, i);
             break;
         }
     }
 
-    return v0;
+    return bagContext;
 }
 
 BagItem *Bag_GetItemSlot(Bag *bag, u16 pocketID, u16 slot)
@@ -408,83 +406,78 @@ Bag *SaveData_GetBag(SaveData *saveData)
     return SaveData_SaveTable(saveData, SAVE_TABLE_ENTRY_BAG);
 }
 
-UnkStruct_0207D99C *sub_0207D99C(u32 param0)
+BagCursor *BagCursor_New(enum HeapID heapID)
 {
-    UnkStruct_0207D99C *v0;
-
-    v0 = Heap_AllocFromHeap(param0, sizeof(UnkStruct_0207D99C));
-    MI_CpuClear16(v0, sizeof(UnkStruct_0207D99C));
-
-    return v0;
+    BagCursor *cursor = Heap_Alloc(heapID, sizeof(BagCursor));
+    MI_CpuClear16(cursor, sizeof(BagCursor));
+    return cursor;
 }
 
-void sub_0207D9B4(UnkStruct_0207D99C *param0, u32 param1, u8 *param2, u8 *param3)
+void BagCursor_GetFieldPocketPosition(BagCursor *cursor, u32 pocket, u8 *outIndex, u8 *outScroll)
 {
-    *param2 = param0->unk_00.unk_08[param1];
-    *param3 = param0->unk_00.unk_00[param1];
+    *outIndex = cursor->field.index[pocket];
+    *outScroll = cursor->field.scroll[pocket];
 }
 
-u16 sub_0207D9C4(UnkStruct_0207D99C *param0)
+u16 BagCursor_GetFieldPocket(BagCursor *cursor)
 {
-    return param0->unk_00.unk_10;
+    return cursor->field.pocket;
 }
 
-void sub_0207D9C8(UnkStruct_0207D99C *param0, u32 param1, u8 param2, u8 param3)
+void BagCursor_SetFieldPocketPosition(BagCursor *cursor, u32 pocket, u8 index, u8 scroll)
 {
-    param0->unk_00.unk_08[param1] = param2;
-    param0->unk_00.unk_00[param1] = param3;
+    cursor->field.index[pocket] = index;
+    cursor->field.scroll[pocket] = scroll;
 }
 
-void sub_0207D9D4(UnkStruct_0207D99C *param0, u16 param1)
+void BagCursor_SetFieldPocket(BagCursor *cursor, u16 pocket)
 {
-    param0->unk_00.unk_10 = param1;
+    cursor->field.pocket = pocket;
 }
 
-void sub_0207D9D8(UnkStruct_0207D99C *param0, u32 param1, u8 *param2, u8 *param3)
+void BagCursor_GetBattleCategoryPosition(BagCursor *cursor, u32 category, u8 *outIndex, u8 *outScroll)
 {
-    *param2 = param0->unk_14.unk_05[param1];
-    *param3 = param0->unk_14.unk_00[param1];
+    *outIndex = cursor->battle.index[category];
+    *outScroll = cursor->battle.scroll[category];
 }
 
-u16 sub_0207D9E4(UnkStruct_0207D99C *param0)
+u16 BagCursor_GetLastUsedBattleItem(BagCursor *cursor)
 {
-    return param0->unk_14.unk_0A;
+    return cursor->battle.lastUsedItemID;
 }
 
-u16 sub_0207D9E8(UnkStruct_0207D99C *param0)
+u16 BagCursor_GetLastUsedBattleItemCategory(BagCursor *cursor)
 {
-    return param0->unk_14.unk_0C;
+    return cursor->battle.lastUsedCategory;
 }
 
-u16 sub_0207D9EC(UnkStruct_0207D99C *param0)
+u16 BagCursor_GetBattleCurrentCategory(BagCursor *cursor)
 {
-    return param0->unk_14.unk_0E;
+    return cursor->battle.currentCategory;
 }
 
-void sub_0207D9F0(UnkStruct_0207D99C *param0, u32 param1, u8 param2, u8 param3)
+void BagCursor_SetBattleCategoryPosition(BagCursor *cursor, u32 category, u8 index, u8 scroll)
 {
-    param0->unk_14.unk_05[param1] = param2;
-    param0->unk_14.unk_00[param1] = param3;
+    cursor->battle.index[category] = index;
+    cursor->battle.scroll[category] = scroll;
 }
 
-void sub_0207D9F8(UnkStruct_0207D99C *param0)
+void BagCursor_ResetBattle(BagCursor *cursor)
 {
-    u32 v0;
-
-    for (v0 = 0; v0 < 5; v0++) {
-        sub_0207D9F0(param0, v0, 0, 0);
+    for (u32 i = 0; i < ITEM_BATTLE_CATEGORY_MAX + 1; i++) {
+        BagCursor_SetBattleCategoryPosition(cursor, i, 0, 0);
     }
 
-    sub_0207DA24(param0, 0);
+    BagCursor_SetBattleCurrentCategory(cursor, ITEM_BATTLE_CATEGORY_RECOVER_HP);
 }
 
-void Bag_SetLastItemUsed(UnkStruct_0207D99C *param0, u16 param1, u16 param2)
+void Bag_SetLastBattleItemUsed(BagCursor *cursor, u16 itemID, u16 category)
 {
-    param0->unk_14.unk_0A = param1;
-    param0->unk_14.unk_0C = param2;
+    cursor->battle.lastUsedItemID = itemID;
+    cursor->battle.lastUsedCategory = category;
 }
 
-void sub_0207DA24(UnkStruct_0207D99C *param0, u16 param1)
+void BagCursor_SetBattleCurrentCategory(BagCursor *cursor, u16 category)
 {
-    param0->unk_14.unk_0E = param1;
+    cursor->battle.currentCategory = category;
 }

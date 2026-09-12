@@ -1,234 +1,230 @@
-    .include "macros/scrcmd.inc"
+#include "macros/scrcmd.inc"
+#include "res/text/bank/underground_npcs.h"
+#include "constants/map_object.h"
+#include "res/field/events/events_underground.h"
 
-    .data
 
-    ScriptEntry _001A
-    ScriptEntry _00BE
-    ScriptEntry _00E7
-    ScriptEntry _018F
-    ScriptEntry _0225
-    ScriptEntry _0289
-    .short 0xFD13
+    ScriptEntry Underground_OnTransition
+    ScriptEntry Underground_OnResume
+    ScriptEntry Underground_TrapsVendor_Unused
+    ScriptEntry Underground_GoodsVendor_Unused
+    ScriptEntry Underground_TreasuresVendor_Unused // see UndergroundVendors_StartShopMenuTask for the actual code that handles these
+    ScriptEntry Underground_OnFrame_RoarkIntro
+    ScriptEntryEnd
 
-_001A:
-    ScrCmd_14F
-    ScrCmd_186 1, 72, 104
-    ScrCmd_186 2, 0x1A8, 87
-    ScrCmd_186 3, 200, 185
-    ScrCmd_186 4, 0x14F, 0x108
-    ScrCmd_186 8, 175, 0x117
-    ScrCmd_186 9, 0x1A8, 0x1B7
-    ScrCmd_186 10, 87, 0x1C8
-    ScrCmd_186 11, 0x137, 0x166
-    ScrCmd_186 0, 232, 87
-    ScrCmd_186 5, 0x148, 151
-    ScrCmd_186 6, 232, 215
-    ScrCmd_186 7, 232, 0x12A
-    ScrCmd_186 12, 0x117, 0x148
-    ScrCmd_186 13, 0x117, 0x1C8
-    ScrCmd_186 14, 183, 0x188
-    ScrCmd_186 15, 0x117, 245
-    ScrCmd_186 17, 40, 0x1D7
-    ScrCmd_186 18, 0x1D7, 72
-    ScrCmd_186 19, 0x1D7, 0x1D7
-    ScrCmd_186 20, 40, 72
+Underground_OnTransition:
+    Dummy14F
+    SetObjectEventPos LOCALID_GOODS_VENDOR_1, 72, 104
+    SetObjectEventPos LOCALID_GOODS_VENDOR_2, 424, 87
+    SetObjectEventPos LOCALID_GOODS_VENDOR_3, 200, 185
+    SetObjectEventPos LOCALID_GOODS_VENDOR_4, 335, 264
+    SetObjectEventPos LOCALID_GOODS_VENDOR_5, 175, 279
+    SetObjectEventPos LOCALID_GOODS_VENDOR_6, 424, 439
+    SetObjectEventPos LOCALID_GOODS_VENDOR_7, 87, 456
+    SetObjectEventPos LOCALID_GOODS_VENDOR_8, 311, 358
+    SetObjectEventPos LOCALID_TRAPS_VENDOR_1, 232, 87
+    SetObjectEventPos LOCALID_TRAPS_VENDOR_2, 328, 151
+    SetObjectEventPos LOCALID_TRAPS_VENDOR_3, 232, 215
+    SetObjectEventPos LOCALID_TRAPS_VENDOR_4, 232, 298
+    SetObjectEventPos LOCALID_TRAPS_VENDOR_5, 279, 328
+    SetObjectEventPos LOCALID_TRAPS_VENDOR_6, 279, 456
+    SetObjectEventPos LOCALID_TRAPS_VENDOR_7, 183, 392
+    SetObjectEventPos LOCALID_TRAPS_VENDOR_8, 279, 245
+    SetObjectEventPos LOCALID_TREASURES_VENDOR_1, 40, 471
+    SetObjectEventPos LOCALID_TREASURES_VENDOR_2, 471, 72
+    SetObjectEventPos LOCALID_TREASURES_VENDOR_3, 471, 471
+    SetObjectEventPos LOCALID_TREASURES_VENDOR_4, 40, 72
     End
 
-_00BE:
-    GoToIfEq 0x40D0, 0, _00CD
+Underground_OnResume:
+    GoToIfEq VAR_HAS_SEEN_UNDERGROUND_ROARK_INTRO, 0, Underground_PutRoarkNextToPlayer
     End
 
-_00CD:
-    ScrCmd_069 0x4000, 0x4001
-    AddVar 0x4000, 1
-    ScrCmd_187 16, 0x4000, 1, 0x4001, 1
+Underground_PutRoarkNextToPlayer:
+    GetPlayerMapPos VAR_MAP_LOCAL_0x00, VAR_MAP_LOCAL_0x01
+    AddVar VAR_MAP_LOCAL_0x00, 1
+    SetPosition LOCALID_ROARK, VAR_MAP_LOCAL_0x00, 1, VAR_MAP_LOCAL_0x01, DIR_SOUTH
     End
 
-_00E7:
-    ScrCmd_19F 0
-    GoTo _00F3
+Underground_TrapsVendor_Unused:
+    UndergroundNPCMessage UndergroundNPCs_Text_IllTradeYouSomething
+    GoTo Underground_TrapsVendorShopMenu_Unused
     End
 
-_00F3:
-    ScrCmd_19E 1, 0x800C
-    SetVar 0x8004, 0x800C
-    SetVar 0x8008, 0x800C
-    GoToIfEq 0x8008, -5, _0141
-    GoToIfEq 0x8008, -4, _014D
-    GoToIfEq 0x8008, -3, _0159
-    GoToIfEq 0x8008, -1, _0165
-    GoTo _017F
+Underground_TrapsVendorShopMenu_Unused:
+    Dummy19E 1, VAR_RESULT
+    SetVar VAR_0x8004, VAR_RESULT
+    SetVar VAR_0x8008, VAR_RESULT
+    GoToIfEq VAR_0x8008, -5, Underground_TrapsVendorSphereTooSmall_Unused
+    GoToIfEq VAR_0x8008, -4, Underground_TrapsVendorNoRoom_Unused
+    GoToIfEq VAR_0x8008, -3, Underground_TrapsVendorWrongSphere_Unused
+    GoToIfEq VAR_0x8008, -1, Underground_VendorSeeYou_Unused
+    GoTo Underground_TrapsVendorWaitABPress_Unused
     End
 
-_0141:
-    ScrCmd_19F 5
-    GoTo _0171
+Underground_TrapsVendorSphereTooSmall_Unused:
+    UndergroundNPCMessage UndergroundNPCs_Text_SphereTooSmall
+    GoTo Underground_TrapsVendorNeedAnythingElse_Unused
     End
 
-_014D:
-    ScrCmd_19F 3
-    GoTo _0171
+Underground_TrapsVendorNoRoom_Unused:
+    UndergroundNPCMessage UndergroundNPCs_Text_YouDontHaveRoom
+    GoTo Underground_TrapsVendorNeedAnythingElse_Unused
     End
 
-_0159:
-    ScrCmd_19F 4
-    GoTo _0171
+Underground_TrapsVendorWrongSphere_Unused:
+    UndergroundNPCMessage UndergroundNPCs_Text_WrongKindOfSphere
+    GoTo Underground_TrapsVendorNeedAnythingElse_Unused
     End
 
-_0165:
-    ScrCmd_19F 9
-    GoTo _0189
+Underground_VendorSeeYou_Unused:
+    UndergroundNPCMessage UndergroundNPCs_Text_BeSeeingYouThen
+    GoTo Underground_VendorClose_Unused
     End
 
-_0171:
+Underground_TrapsVendorNeedAnythingElse_Unused:
     WaitABPress
-    ScrCmd_19F 8
-    GoTo _00F3
+    UndergroundNPCMessage UndergroundNPCs_Text_DoYouNeedAnythingElse
+    GoTo Underground_TrapsVendorShopMenu_Unused
     End
 
-_017F:
+Underground_TrapsVendorWaitABPress_Unused:
     WaitABPress
-    GoTo _0171
+    GoTo Underground_TrapsVendorNeedAnythingElse_Unused
     End
 
-_0189:
+Underground_VendorClose_Unused:
     WaitABPress
-    ScrCmd_1A0
+    CloseUndergroundNPCMessage
     End
 
-_018F:
-    ScrCmd_19F 0
-    GoTo _019B
+Underground_GoodsVendor_Unused:
+    UndergroundNPCMessage UndergroundNPCs_Text_IllTradeYouSomething
+    GoTo Underground_GoodsVendorShopMenu_Unused
     End
 
-_019B:
-    ScrCmd_19E 0, 0x800C
-    SetVar 0x8004, 0x800C
-    SetVar 0x8008, 0x800C
-    GoToIfEq 0x8008, -5, _0201
-    GoToIfEq 0x8008, -4, _01E9
-    GoToIfEq 0x8008, -3, _01F5
-    GoToIfEq 0x8008, -1, _0165
-    GoTo _020D
+Underground_GoodsVendorShopMenu_Unused:
+    Dummy19E 0, VAR_RESULT
+    SetVar VAR_0x8004, VAR_RESULT
+    SetVar VAR_0x8008, VAR_RESULT
+    GoToIfEq VAR_0x8008, -5, Underground_GoodsVendorSphereTooSmall_Unused
+    GoToIfEq VAR_0x8008, -4, Underground_GoodsVendorNoRoom_Unused
+    GoToIfEq VAR_0x8008, -3, Underground_GoodsVendorWrongSphere_Unused
+    GoToIfEq VAR_0x8008, -1, Underground_VendorSeeYou_Unused
+    GoTo Underground_GoodsVendorWaitABPress_Unused
     End
 
-_01E9:
-    ScrCmd_19F 3
-    GoTo _0217
+Underground_GoodsVendorNoRoom_Unused:
+    UndergroundNPCMessage UndergroundNPCs_Text_YouDontHaveRoom
+    GoTo Underground_GoodsVendorNeedAnythingElse_Unused
     End
 
-_01F5:
-    ScrCmd_19F 4
-    GoTo _0217
+Underground_GoodsVendorWrongSphere_Unused:
+    UndergroundNPCMessage UndergroundNPCs_Text_WrongKindOfSphere
+    GoTo Underground_GoodsVendorNeedAnythingElse_Unused
     End
 
-_0201:
-    ScrCmd_19F 5
-    GoTo _0217
+Underground_GoodsVendorSphereTooSmall_Unused:
+    UndergroundNPCMessage UndergroundNPCs_Text_SphereTooSmall
+    GoTo Underground_GoodsVendorNeedAnythingElse_Unused
     End
 
-_020D:
+Underground_GoodsVendorWaitABPress_Unused:
     WaitABPress
-    GoTo _0217
+    GoTo Underground_GoodsVendorNeedAnythingElse_Unused
     End
 
-_0217:
+Underground_GoodsVendorNeedAnythingElse_Unused:
     WaitABPress
-    ScrCmd_19F 8
-    GoTo _019B
+    UndergroundNPCMessage UndergroundNPCs_Text_DoYouNeedAnythingElse
+    GoTo Underground_GoodsVendorShopMenu_Unused
     End
 
-_0225:
-    ScrCmd_19F 27
-    GoTo _0231
+Underground_TreasuresVendor_Unused:
+    UndergroundNPCMessage UndergroundNPCs_Text_IllTradeSpheresForTreasures
+    GoTo Underground_TreasuresVendorShopMenu_Unused
     End
 
-_0231:
-    ScrCmd_19E 2, 0x800C
-    SetVar 0x8004, 0x800C
-    SetVar 0x8008, 0x800C
-    GoToIfEq 0x8008, -4, _0265
-    GoToIfEq 0x8008, -1, _0165
-    GoTo _0271
+Underground_TreasuresVendorShopMenu_Unused:
+    Dummy19E 2, VAR_RESULT
+    SetVar VAR_0x8004, VAR_RESULT
+    SetVar VAR_0x8008, VAR_RESULT
+    GoToIfEq VAR_0x8008, -4, Underground_TreasuresVendorNoRoom_Unused
+    GoToIfEq VAR_0x8008, -1, Underground_VendorSeeYou_Unused
+    GoTo Underground_TreasuresVendorWaitABPress_Unused
     End
 
-_0265:
-    ScrCmd_19F 3
-    GoTo _027B
+Underground_TreasuresVendorNoRoom_Unused:
+    UndergroundNPCMessage UndergroundNPCs_Text_YouDontHaveRoom
+    GoTo Underground_TreasuresVendorNeedAnythingElse_Unused
     End
 
-_0271:
+Underground_TreasuresVendorWaitABPress_Unused:
     WaitABPress
-    GoTo _027B
+    GoTo Underground_TreasuresVendorNeedAnythingElse_Unused
     End
 
-_027B:
+Underground_TreasuresVendorNeedAnythingElse_Unused:
     WaitABPress
-    ScrCmd_19F 8
-    GoTo _0231
+    UndergroundNPCMessage UndergroundNPCs_Text_DoYouNeedAnythingElse
+    GoTo Underground_TreasuresVendorShopMenu_Unused
     End
 
-_0289:
-    ApplyMovement 16, _02D4
+Underground_OnFrame_RoarkIntro:
+    ApplyMovement LOCALID_ROARK, Underground_Movement_RoarkNoticePlayer
     WaitMovement
-    ScrCmd_152 3
-    ScrCmd_19F 91
+    SetCommPlayerDir DIR_EAST
+    UndergroundNPCMessage UndergroundNPCs_Text_RoarkIntro
     WaitABPress
-    ScrCmd_1A0
-    ApplyMovement 16, _02E4
+    CloseUndergroundNPCMessage
+    ApplyMovement LOCALID_ROARK, Underground_Movement_RoarkFaceForward
     WaitMovement
-    PlayFanfare SEQ_SE_DP_PYUU2
-    ApplyMovement 16, _02F0
+    PlaySE SEQ_SE_DP_PYUU2_sseq
+    ApplyMovement LOCALID_ROARK, Underground_Movement_RoarkExitUnderground
     WaitMovement
-    ScrCmd_065 16
-    SetVar 0x40D0, 1
-    SetFlag 0x992
+    RemoveObject LOCALID_ROARK
+    SetVar VAR_HAS_SEEN_UNDERGROUND_ROARK_INTRO, 1
+    SetFlag FLAG_HAS_SEEN_UNDERGROUND_ROARK_INTRO
     End
-
-    .byte 0
-    .byte 63
-    .byte 0
-    .byte 1
-    .byte 0
-    .byte 35
-    .byte 0
-    .byte 1
-    .byte 0
-    .byte 254
-    .byte 0
-    .byte 0
-    .byte 0
 
     .balign 4, 0
-_02D4:
-    MoveAction_022
-    MoveAction_04B
-    MoveAction_03F
+Underground_Movement_Unused:
+    Delay8
+    WalkOnSpotNormalEast
     EndMovement
 
     .balign 4, 0
-_02E4:
-    MoveAction_021
-    MoveAction_03F 2
+Underground_Movement_RoarkNoticePlayer:
+    WalkOnSpotNormalWest
+    EmoteExclamationMark
+    Delay8
     EndMovement
 
     .balign 4, 0
-_02F0:
-    MoveAction_003
-    MoveAction_03D
-    MoveAction_000
-    MoveAction_03D
-    MoveAction_002
-    MoveAction_03D
-    MoveAction_001
-    MoveAction_03D
-    MoveAction_003
-    MoveAction_03C
-    MoveAction_000
-    MoveAction_03C
-    MoveAction_002
-    MoveAction_03C
-    MoveAction_001
-    MoveAction_043
-    MoveAction_03F 2
+Underground_Movement_RoarkFaceForward:
+    WalkOnSpotNormalSouth
+    Delay8 2
     EndMovement
+
+    .balign 4, 0
+Underground_Movement_RoarkExitUnderground:
+    FaceEast
+    Delay2
+    FaceNorth
+    Delay2
+    FaceWest
+    Delay2
+    FaceSouth
+    Delay2
+    FaceEast
+    Delay1
+    FaceNorth
+    Delay1
+    FaceWest
+    Delay1
+    FaceSouth
+    WarpOut
+    Delay8 2
+    EndMovement
+
+    .balign 4, 0

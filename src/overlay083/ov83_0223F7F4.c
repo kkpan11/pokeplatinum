@@ -3,9 +3,6 @@
 #include <nitro.h>
 #include <string.h>
 
-#include "struct_decls/struct_berry_data_decl.h"
-#include "struct_defs/struct_0202A93C.h"
-
 #include "overlay083/struct_ov83_0223DB4C_sub1.h"
 #include "overlay083/struct_ov83_0223F820.h"
 #include "overlay083/struct_ov83_0223F88C.h"
@@ -20,11 +17,11 @@
 #include "overlay083/struct_ov83_022401AC.h"
 
 #include "berry_data.h"
-#include "core_sys.h"
 #include "heap.h"
+#include "int_distance.h"
+#include "math_util.h"
 #include "poffin.h"
-#include "unk_0201D15C.h"
-#include "unk_0201E3BC.h"
+#include "system.h"
 
 s32 ov83_0223F7F4(int param0, int param1, int param2, int param3, int param4, int param5)
 {
@@ -38,7 +35,7 @@ s32 ov83_0223F7F4(int param0, int param1, int param2, int param3, int param4, in
     param2 -= param4;
     param3 -= param5;
 
-    v3 = sub_0201D4CC(param2, param3, param0, param1, 0);
+    v3 = ApproximateArcLength(param2, param3, param0, param1, 0);
     v3 = ((v3) * 160);
 
     return v3;
@@ -58,9 +55,9 @@ void ov83_0223F83C(UnkStruct_ov83_0223F820 *param0)
 {
     s32 v0;
 
-    if (gCoreSys.touchHeld) {
-        param0->unk_00 = gCoreSys.touchX;
-        param0->unk_04 = gCoreSys.touchY;
+    if (gSystem.touchHeld) {
+        param0->unk_00 = gSystem.touchX;
+        param0->unk_04 = gSystem.touchY;
 
         if (param0->unk_14 == 0) {
             param0->unk_08 = param0->unk_00;
@@ -71,7 +68,7 @@ void ov83_0223F83C(UnkStruct_ov83_0223F820 *param0)
     param0->unk_10 = ov83_0223F7F4(param0->unk_00, param0->unk_04, param0->unk_08, param0->unk_0C, 128, 96);
     param0->unk_08 = param0->unk_00;
     param0->unk_0C = param0->unk_04;
-    param0->unk_14 = gCoreSys.touchHeld;
+    param0->unk_14 = gSystem.touchHeld;
 }
 
 void ov83_0223F88C(UnkStruct_ov83_0223F88C *param0, UnkStruct_ov83_0223F820 *param1)
@@ -105,9 +102,7 @@ static u32 ov83_0223F8AC(UnkStruct_ov83_0223F8AC *param0, int param1, int param2
     fx32 v0;
     u32 v1;
     u32 v2;
-    u32 v3;
-
-    v3 = sub_0201E3BC(
+    u32 v3 = CalcDistance2D(
         param1, param2, 128, 96);
 
     if (param0->unk_0C >= 0) {
@@ -196,7 +191,7 @@ u16 ov83_0223F900(UnkStruct_ov83_0223F8AC *param0, const UnkStruct_ov83_0223FE50
     }
 
     v5 = param0->unk_08;
-    param0->unk_08 += sub_0201D580(68, ((param0->unk_0C) / 160));
+    param0->unk_08 += CalcRadialAngle(68, ((param0->unk_0C) / 160));
 
     if (((param3 == 0) && (param0->unk_0C >= 0)) || ((param3 == 1) && (param0->unk_0C < 0))) {
         if (param3 == 0) {
@@ -305,9 +300,7 @@ fx32 ov83_0223FB68(u16 param0, int param1)
 {
     fx32 v0;
     fx32 v1;
-    s32 v2;
-
-    v2 = param0 - 910;
+    s32 v2 = param0 - 910;
 
     if (v2 < 0) {
         v2 = 0;
@@ -475,7 +468,7 @@ void ov83_0223FCE8(UnkStruct_ov83_0223FDB0_sub1 *param0, const UnkStruct_ov83_02
 
     for (v3 = 1; v3 < param2; v3++) {
         v4 = param1->unk_130[v3];
-        v0 = sub_0201E3BC(v1->unk_00[0], v1->unk_04[0], v1->unk_00[v4], v1->unk_04[v4]);
+        v0 = CalcDistance2D(v1->unk_00[0], v1->unk_04[0], v1->unk_00[v4], v1->unk_04[v4]);
 
         if (v0 > 32) {
             param0->unk_04 = 0;
@@ -507,9 +500,7 @@ void ov83_0223FDB0(UnkStruct_ov83_0223FDB0 *param0)
 BOOL ov83_0223FDD8(UnkStruct_ov83_0223FDB0 *param0, const UnkStruct_ov83_0223FE50 *param1, u32 param2)
 {
     s32 v0;
-    BOOL v1;
-
-    v1 = ov83_0223FC58(&param0->unk_4C, &param0->unk_1C);
+    BOOL v1 = ov83_0223FC58(&param0->unk_4C, &param0->unk_1C);
 
     if (v1 == 1) {
         return 1;
@@ -656,9 +647,7 @@ static const u8 Unk_ov83_02240598[4] = {
 
 static int ov83_0223FFA8(u32 param0, u32 param1)
 {
-    int v0;
-
-    v0 = ((param0 / 6) * Unk_ov83_02240598[param1 - 1]) / 10;
+    int v0 = ((param0 / 6) * Unk_ov83_02240598[param1 - 1]) / 10;
 
     if (v0 > 9999) {
         v0 = 9999;
@@ -713,7 +702,7 @@ void ov83_0223FFD4(UnkStruct_ov83_0223FDB0 *param0, Poffin *param1, const UnkStr
 
         v5 += BerryData_GetAttribute(v0, 10);
 
-        Heap_FreeToHeap(v0);
+        Heap_Free(v0);
     }
 
     if ((v9 >= 2) && (param3 > 1)) {
@@ -783,7 +772,7 @@ void ov83_0223FFD4(UnkStruct_ov83_0223FDB0 *param0, Poffin *param1, const UnkStr
         v16[v1] = v6[v1];
     }
 
-    param0->unk_04 = sub_0202A9E4(param1, v16, v7, v10);
+    param0->unk_04 = Poffin_MakePoffin(param1, v16, v7, v10);
     param0->unk_08 = Poffin_CalcLevel(param1);
 }
 

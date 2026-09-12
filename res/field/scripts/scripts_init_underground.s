@@ -1,17 +1,13 @@
-    .include "macros/scrcmd.inc"
+#include "macros/scrcmd.inc"
 
-    .data
 
-    .byte 2
-    .short 1, 0
-    .byte 3
-    .short 2, 0
-    .byte 1
-    ScriptEntry _0010
-    .byte 0
+    InitScriptEntry_OnTransition 1
+    InitScriptEntry_OnResume 2
+    InitScriptEntry_OnFrameTable InitScriptFrameTable
+    InitScriptEntryEnd
 
-_0010:
-    .short 0x40D0, 0, 6
-    .short 0
+InitScriptFrameTable:
+    InitScriptGoToIfEqual VAR_HAS_SEEN_UNDERGROUND_ROARK_INTRO, 0, 6
+    InitScriptFrameTableEnd
 
-    .balign 4, 0
+    InitScriptEnd

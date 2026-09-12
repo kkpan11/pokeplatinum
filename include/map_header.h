@@ -1,9 +1,15 @@
-#ifndef POKEPLATINUM_UNK_0203A024_H
-#define POKEPLATINUM_UNK_0203A024_H
+#ifndef POKEPLATINUM_MAP_HEADER_H
+#define POKEPLATINUM_MAP_HEADER_H
 
-typedef struct {
-    u8 unk_00;
-    u8 unk_01;
+#include "generated/battle_backgrounds.h"
+#include "generated/evolution_methods.h"
+#include "generated/map_headers.h"
+
+#define ENCOUNTERS_NONE 0xFFFF
+
+typedef struct MapHeader {
+    u8 areaDataArchiveID;
+    u8 preloadedMapObjectsArchiveID;
     u16 mapMatrixID;
     u16 scriptsArchiveID;
     u16 initScriptsArchiveID;
@@ -24,40 +30,40 @@ typedef struct {
     u16 isFlyAllowed : 1;
 } MapHeader;
 
-u32 MapHeader_IDBoundsCheck(u32 param0);
-const u16 sub_0203A038(u32 param0);
-const u16 sub_0203A04C(u32 param0);
-const u16 MapHeader_GetMapMatrixID(u32 param0);
-u32 MapHeader_GetMsgArchiveID(u32 param0);
-u32 MapHeader_GetScriptsArchiveID(u32 param0);
-u32 MapHeader_GetInitScriptsArchiveID(u32 param0);
-u16 MapHeader_GetDayMusicID(u32 param0);
-u16 MapHeader_GetNightMusicID(u32 param0);
-BOOL MapHeader_HasWildEncounters(u32 param0);
-u32 MapHeader_GetWildEncountersArchiveID(u32 param0);
-u32 MapHeader_GetEventsArchiveID(u32 param0);
-u32 MapHeader_GetMapLabelTextID(u32 param0);
-u8 MapHeader_GetMapLabelWindowID(u32 param0);
-u32 MapHeader_GetWeatherType(u32 param0);
-u32 MapHeader_GetCameraType(u32 param0);
-u32 MapHeader_GetBattleBG(u32 param0);
-BOOL MapHeader_IsEscapeRopeAllowed(u32 param0);
-BOOL MapHeader_IsFlyAllowed(u32 param0);
-BOOL MapHeader_IsBikeAllowed(u32 param0);
-u32 MapHeader_GetMapType(u32 headerID);
-BOOL MapHeader_IsTeleportAllowed(u32 param0);
-BOOL MapHeader_IsOnMainMatrix(u32 param0);
-BOOL MapHeader_IsPokemonCenter(u32 param0);
-BOOL MapHeader_IsCave(u32 param0);
-BOOL sub_0203A288(u32 param0);
-BOOL MapHeader_IsOutdoors(u32 param0);
-BOOL sub_0203A2C8(u32 param0);
-BOOL MapHeader_IsUnionRoom(const u32 param0);
-BOOL MapHeader_HasFeebasTiles(const u32 param0);
-BOOL MapHeader_IsTrophyGarden(const u32 param0);
-BOOL MapHeader_IsAmitySquare(const u32 param0);
-BOOL MapHeader_IsAzureFluteAllowed(const u32 param0);
-BOOL MapHeader_IsPokemonCenter2F(const u32 param0);
-u32 MapHeader_GetMapEvolutionMethod(u32 param0);
+enum MapHeaderID MapHeader_IDBoundsCheck(enum MapHeaderID mapHeaderID);
+u16 MapHeader_GetAreaDataArchiveID(enum MapHeaderID mapHeaderID);
+u16 MapHeader_GetPreloadedMapObjectsArchiveID(enum MapHeaderID mapHeaderID);
+u16 MapHeader_GetMapMatrixID(enum MapHeaderID mapHeaderID);
+u32 MapHeader_GetMsgArchiveID(enum MapHeaderID mapHeaderID);
+u32 MapHeader_GetScriptsArchiveID(enum MapHeaderID mapHeaderID);
+u32 MapHeader_GetInitScriptsArchiveID(enum MapHeaderID mapHeaderID);
+u16 MapHeader_GetDayMusicID(enum MapHeaderID mapHeaderID);
+u16 MapHeader_GetNightMusicID(enum MapHeaderID mapHeaderID);
+BOOL MapHeader_HasWildEncounters(enum MapHeaderID mapHeaderID);
+u32 MapHeader_GetWildEncountersArchiveID(enum MapHeaderID mapHeaderID);
+u32 MapHeader_GetEventsArchiveID(enum MapHeaderID mapHeaderID);
+u32 MapHeader_GetMapLabelTextID(enum MapHeaderID mapHeaderID);
+u8 MapHeader_GetMapLabelWindowID(enum MapHeaderID mapHeaderID);
+u32 MapHeader_GetWeatherType(enum MapHeaderID mapHeaderID);
+u32 MapHeader_GetCameraType(enum MapHeaderID mapHeaderID);
+enum BattleBackground MapHeader_GetBattleBG(enum MapHeaderID mapHeaderID);
+BOOL MapHeader_IsEscapeRopeAllowed(enum MapHeaderID mapHeaderID);
+BOOL MapHeader_IsFlyAllowed(enum MapHeaderID mapHeaderID);
+BOOL MapHeader_IsBikeAllowed(enum MapHeaderID mapHeaderID);
+u32 MapHeader_GetMapType(enum MapHeaderID mapHeaderID);
+BOOL MapHeader_IsTeleportAllowed(enum MapHeaderID mapHeaderID);
+BOOL MapHeader_IsOnMainMatrix(enum MapHeaderID mapHeaderID);
+BOOL MapHeader_IsPokemonCenter(enum MapHeaderID mapHeaderID);
+BOOL MapHeader_IsCave(enum MapHeaderID mapHeaderID);
+BOOL MapHeader_IsBuilding(enum MapHeaderID mapHeaderID);
+BOOL MapHeader_IsOutdoors(enum MapHeaderID mapHeaderID);
+BOOL MapHeader_IsPokemonCenter2(enum MapHeaderID mapHeaderID);
+BOOL MapHeader_IsUnionRoom(const enum MapHeaderID mapHeaderID);
+BOOL MapHeader_HasFeebasTiles(const enum MapHeaderID mapHeaderID);
+BOOL MapHeader_IsTrophyGarden(const enum MapHeaderID mapHeaderID);
+BOOL MapHeader_IsAmitySquare(const enum MapHeaderID mapHeaderID);
+BOOL MapHeader_IsAzureFluteAllowed(const enum MapHeaderID mapHeaderID);
+BOOL MapHeader_IsPokemonCenter2F(const enum MapHeaderID mapHeaderID);
+enum EvolutionMethod MapHeader_GetMapEvolutionMethod(enum MapHeaderID mapHeaderID);
 
-#endif // POKEPLATINUM_UNK_0203A024_H
+#endif // POKEPLATINUM_MAP_HEADER_H

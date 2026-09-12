@@ -1,164 +1,155 @@
-    .include "macros/scrcmd.inc"
+#include "macros/scrcmd.inc"
+#include "res/text/bank/canalave_library_1f.h"
+#include "res/field/events/events_canalave_library_1f.h"
 
-    .data
 
-    ScriptEntry _0016
-    ScriptEntry _003F
-    ScriptEntry _0080
-    ScriptEntry _0091
-    ScriptEntry _00A2
-    .short 0xFD13
+    ScriptEntry CanalaveLibrary1F_Receptionist
+    ScriptEntry CanalaveLibrary1F_Lass
+    ScriptEntry CanalaveLibrary1F_Bookshelves
+    ScriptEntry CanalaveLibrary1F_Shelves
+    ScriptEntry CanalaveLibrary1F_Lucian
+    ScriptEntryEnd
 
-_0016:
-    PlayFanfare SEQ_SE_CONFIRM
+CanalaveLibrary1F_Receptionist:
+    PlaySE SE_CONFIRM_sseq_3
     LockAll
     FacePlayer
-    GoToIfSet 168, _0034
-    Message 0
-    WaitABXPadPress
+    GoToIfSet FLAG_LAKE_VALOR_EXPLODED, CanalaveLibrary1F_ThatWasntMeScreaming
+    Message CanalaveLibrary1F_Text_PleaseKeepQuiet
+    WaitButton
     CloseMessage
     ReleaseAll
     End
 
-_0034:
-    Message 1
-    WaitABXPadPress
+CanalaveLibrary1F_ThatWasntMeScreaming:
+    Message CanalaveLibrary1F_Text_ThatWasntMeScreaming
+    WaitButton
     CloseMessage
     ReleaseAll
     End
 
-_003F:
-    PlayFanfare SEQ_SE_CONFIRM
+CanalaveLibrary1F_Lass:
+    PlaySE SE_CONFIRM_sseq_3
     LockAll
-    GoToIfSet 168, _0068
-    Message 2
+    GoToIfSet FLAG_LAKE_VALOR_EXPLODED, CanalaveLibrary1F_ImAllAgitated
+    Message CanalaveLibrary1F_Text_Ellipsis
     FacePlayer
-    Message 3
+    Message CanalaveLibrary1F_Text_DontDisturbMe
     CloseMessage
-    ApplyMovement 1, _0078
+    ApplyMovement LOCALID_LASS, CanalaveLibrary1F_Movement_LassFaceNorth
     WaitMovement
     ReleaseAll
     End
 
-_0068:
+CanalaveLibrary1F_ImAllAgitated:
     FacePlayer
-    Message 4
-    WaitABXPadPress
+    Message CanalaveLibrary1F_Text_ImAllAgitated
+    WaitButton
     CloseMessage
     ReleaseAll
     End
 
     .balign 4, 0
-_0078:
-    MoveAction_000
+CanalaveLibrary1F_Movement_LassFaceNorth:
+    FaceNorth
     EndMovement
 
-_0080:
-    PlayFanfare SEQ_SE_CONFIRM
-    LockAll
-    Message 5
-    WaitABXPadPress
-    CloseMessage
-    ReleaseAll
+CanalaveLibrary1F_Bookshelves:
+    EventMessage CanalaveLibrary1F_Text_BookshelvesAreCrammed
     End
 
-_0091:
-    PlayFanfare SEQ_SE_CONFIRM
-    LockAll
-    Message 6
-    WaitABXPadPress
-    CloseMessage
-    ReleaseAll
+CanalaveLibrary1F_Shelves:
+    EventMessage CanalaveLibrary1F_Text_ShelvesLinedWithBooks
     End
 
-_00A2:
-    PlayFanfare SEQ_SE_CONFIRM
+CanalaveLibrary1F_Lucian:
+    PlaySE SE_CONFIRM_sseq_3
     LockAll
     FacePlayer
-    Message 7
-    ScrCmd_1B7 0x8000, 5
-    CallIfEq 0x8000, 0, _00FC
-    CallIfEq 0x8000, 1, _0101
-    CallIfEq 0x8000, 2, _0106
-    CallIfEq 0x8000, 3, _010B
-    CallIfEq 0x8000, 4, _0110
-    GoTo _0115
+    Message CanalaveLibrary1F_Text_BooksAreWonderful
+    GetRandom VAR_0x8000, 5
+    CallIfEq VAR_0x8000, 0, CanalaveLibrary1F_LettersWrittenLongAgo
+    CallIfEq VAR_0x8000, 1, CanalaveLibrary1F_AnalyticalTomeOnHumankind
+    CallIfEq VAR_0x8000, 2, CanalaveLibrary1F_ObservationsWildPokemon
+    CallIfEq VAR_0x8000, 3, CanalaveLibrary1F_ScieneFictionEssays
+    CallIfEq VAR_0x8000, 4, CanalaveLibrary1F_BookOfPhilosophy
+    GoTo CanalaveLibrary1F_SeeAtPokemonLeague
     End
 
-_00FC:
-    Message 9
+CanalaveLibrary1F_LettersWrittenLongAgo:
+    Message CanalaveLibrary1F_Text_LettersWrittenLongAgo
     Return
 
-_0101:
-    Message 10
+CanalaveLibrary1F_AnalyticalTomeOnHumankind:
+    Message CanalaveLibrary1F_Text_AnalyticalTomeOnHumankind
     Return
 
-_0106:
-    Message 11
+CanalaveLibrary1F_ObservationsWildPokemon:
+    Message CanalaveLibrary1F_Text_ObservationsWildPokemon
     Return
 
-_010B:
-    Message 12
+CanalaveLibrary1F_ScieneFictionEssays:
+    Message CanalaveLibrary1F_Text_ScieneFictionEssays
     Return
 
-_0110:
-    Message 13
+CanalaveLibrary1F_BookOfPhilosophy:
+    Message CanalaveLibrary1F_Text_BookOfPhilosophy
     Return
 
-_0115:
-    Message 8
+CanalaveLibrary1F_SeeAtPokemonLeague:
+    Message CanalaveLibrary1F_Text_SeeAtPokemonLeague
     CloseMessage
-    ScrCmd_1BD 0x8000
-    CallIfEq 0x8000, 0, _0155
-    CallIfEq 0x8000, 2, _0169
-    CallIfEq 0x8000, 3, _0175
-    PlayFanfare SEQ_SE_DP_KAIDAN2
-    ScrCmd_065 2
-    ScrCmd_04B 0x603
+    GetPlayerDir VAR_0x8000
+    CallIfEq VAR_0x8000, DIR_NORTH, CanalaveLibrary1F_LucianLeaveNorth
+    CallIfEq VAR_0x8000, DIR_WEST, CanalaveLibrary1F_LucianLeaveWest
+    CallIfEq VAR_0x8000, DIR_EAST, CanalaveLibrary1F_LucianLeaveEast
+    PlaySE SEQ_SE_DP_KAIDAN2_sseq
+    RemoveObject LOCALID_LUCIAN
+    WaitSE SEQ_SE_DP_KAIDAN2_sseq
     ReleaseAll
     End
 
-_0155:
-    ApplyMovement 2, _018C
-    ApplyMovement 0xFF, _01B0
+CanalaveLibrary1F_LucianLeaveNorth:
+    ApplyMovement LOCALID_LUCIAN, CanalaveLibrary1F_Movement_LucianNorthWest
+    ApplyMovement LOCALID_PLAYER, CanalaveLibrary1F_Movement_PlayerWatchLucianNorth
     WaitMovement
     Return
 
-_0169:
-    ApplyMovement 2, _018C
+CanalaveLibrary1F_LucianLeaveWest:
+    ApplyMovement LOCALID_LUCIAN, CanalaveLibrary1F_Movement_LucianNorthWest
     WaitMovement
     Return
 
-_0175:
-    ApplyMovement 2, _019C
-    ApplyMovement 0xFF, _01BC
+CanalaveLibrary1F_LucianLeaveEast:
+    ApplyMovement LOCALID_LUCIAN, CanalaveLibrary1F_Movement_LucianLeaveEast
+    ApplyMovement LOCALID_PLAYER, CanalaveLibrary1F_Movement_PlayerWatchLucianEast
     WaitMovement
     Return
 
     .balign 4, 0
-_018C:
-    MoveAction_00E 5
-    MoveAction_00D 6
-    MoveAction_03E
+CanalaveLibrary1F_Movement_LucianNorthWest:
+    WalkNormalWest 5
+    WalkNormalSouth 6
+    Delay4
     EndMovement
 
     .balign 4, 0
-_019C:
-    MoveAction_00D
-    MoveAction_00E 5
-    MoveAction_00D 5
-    MoveAction_03E
+CanalaveLibrary1F_Movement_LucianLeaveEast:
+    WalkNormalSouth
+    WalkNormalWest 5
+    WalkNormalSouth 5
+    Delay4
     EndMovement
 
     .balign 4, 0
-_01B0:
-    MoveAction_03F
-    MoveAction_022
+CanalaveLibrary1F_Movement_PlayerWatchLucianNorth:
+    Delay8
+    WalkOnSpotNormalWest
     EndMovement
 
     .balign 4, 0
-_01BC:
-    MoveAction_03F 2
-    MoveAction_03E
-    MoveAction_022
+CanalaveLibrary1F_Movement_PlayerWatchLucianEast:
+    Delay8 2
+    Delay4
+    WalkOnSpotNormalWest
     EndMovement

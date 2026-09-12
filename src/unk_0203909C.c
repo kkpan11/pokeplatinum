@@ -4,21 +4,21 @@
 #include <nitro.h>
 #include <string.h>
 
-#include "struct_decls/struct_0202B370_decl.h"
+#include "struct_decls/wi_fi_list.h"
 
+#include "comm_manager.h"
 #include "communication_information.h"
 #include "communication_system.h"
 #include "savedata.h"
-#include "strbuf.h"
+#include "string_gf.h"
 #include "trainer_info.h"
-#include "unk_0202ACE0.h"
-#include "unk_020366A0.h"
+#include "wifi_list.h"
 
-int sub_0203909C(SaveData *param0, DWCFriendData *param1, int *param2)
+int sub_0203909C(SaveData *saveData, DWCFriendData *param1, int *param2)
 {
     int v0;
-    DWCUserData *v1 = sub_0202AD28(sub_0202B370(param0));
-    DWCFriendData *v2 = sub_0202AED8(sub_0202B370(param0), 0);
+    DWCUserData *v1 = WiFiList_GetUserData(SaveData_GetWiFiList(saveData));
+    DWCFriendData *v2 = sub_0202AED8(SaveData_GetWiFiList(saveData), 0);
 
     *param2 = -1;
 
@@ -41,11 +41,11 @@ int sub_0203909C(SaveData *param0, DWCFriendData *param1, int *param2)
     return 2;
 }
 
-int sub_02039140(SaveData *param0, u64 param1, int *param2)
+int sub_02039140(SaveData *saveData, u64 param1, int *param2)
 {
     int v0;
-    DWCUserData *v1 = sub_0202AD28(sub_0202B370(param0));
-    DWCFriendData *v2 = sub_0202AED8(sub_0202B370(param0), 0);
+    DWCUserData *v1 = WiFiList_GetUserData(SaveData_GetWiFiList(saveData));
+    DWCFriendData *v2 = sub_0202AED8(SaveData_GetWiFiList(saveData), 0);
     DWCFriendData v3;
 
     if (!DWC_CheckFriendKey(v1, param1)) {
@@ -72,10 +72,10 @@ int sub_02039140(SaveData *param0, u64 param1, int *param2)
     return 2;
 }
 
-BOOL sub_020391DC(SaveData *param0, int *param1, int param2)
+BOOL sub_020391DC(SaveData *saveData, int *param1, enum HeapID heapID)
 {
     int v0, v1 = 0, v2;
-    DWCFriendData *v3 = sub_0202AED8(sub_0202B370(param0), 0);
+    DWCFriendData *v3 = sub_0202AED8(SaveData_GetWiFiList(saveData), 0);
     DWCFriendData *v4;
 
     for (v0 = 0; v0 < CommSys_ConnectedCount(); v0++) {
@@ -89,19 +89,19 @@ BOOL sub_020391DC(SaveData *param0, int *param1, int param2)
             continue;
         }
 
-        param1[v0] = sub_0203909C(param0, v4, &v2);
+        param1[v0] = sub_0203909C(saveData, v4, &v2);
 
         GF_ASSERT(param1[v0] != 3);
 
         if (param1[v0] == 0) {
-            sub_02039298(param0, v0, v2, param2, 2);
-            CommInfo_SavePlayerRecord(param0);
+            sub_02039298(saveData, v0, v2, heapID, 2);
+            CommInfo_SavePlayerRecord(saveData);
         } else if (param1[v0] == 1) {
-            if (!sub_020389B8()) {
-                sub_02039298(param0, v0, v2, param2, 1);
+            if (!CommManager_IsConnectedToWifi()) {
+                sub_02039298(saveData, v0, v2, heapID, 1);
                 MI_CpuCopy8(v4, &v3[v2], sizeof(DWCFriendData));
 
-                CommInfo_SavePlayerRecord(param0);
+                CommInfo_SavePlayerRecord(saveData);
             }
         } else if (param1[v0] == 2) {
             v1 = 1;
@@ -111,13 +111,13 @@ BOOL sub_020391DC(SaveData *param0, int *param1, int param2)
     return v1;
 }
 
-void sub_02039298(SaveData *param0, int param1, int param2, int param3, int param4)
+void sub_02039298(SaveData *saveData, int param1, int param2, enum HeapID heapID, int param4)
 {
-    UnkStruct_0202B370 *v0 = sub_0202B370(param0);
+    WiFiList *v0 = SaveData_GetWiFiList(saveData);
     DWCFriendData *v1 = sub_0202AED8(v0, param2);
     TrainerInfo *v2 = CommInfo_TrainerInfo(param1);
     DWCFriendData *v3;
-    Strbuf *v4;
+    String *v4;
 
     if (param4 != 2) {
         v3 = CommInfo_DWCFriendData(param1);
@@ -125,9 +125,9 @@ void sub_02039298(SaveData *param0, int param1, int param2, int param3, int para
     }
 
     if (param4 == 0) {
-        v4 = TrainerInfo_NameNewStrbuf(v2, param3);
+        v4 = TrainerInfo_NameNewString(v2, heapID);
         sub_0202AF0C(v0, param2, v4);
-        Strbuf_Free(v4);
+        String_Free(v4);
         sub_0202AE2C(v0, param2, 8, TrainerInfo_Gender(v2));
         sub_0202AE2C(v0, param2, 0, TrainerInfo_ID(v2));
     } else if (param4 == 1) {
@@ -137,20 +137,20 @@ void sub_02039298(SaveData *param0, int param1, int param2, int param3, int para
         }
     }
 
-    v4 = Strbuf_Init(120, param3);
+    v4 = String_Init(120, heapID);
 
-    Strbuf_CopyChars(v4, sub_02032F54(param1));
+    String_CopyChars(v4, sub_02032F54(param1));
     sub_0202AF50(v0, param2, v4);
-    Strbuf_Free(v4);
+    String_Free(v4);
     sub_0202AE2C(v0, param2, 7, TrainerInfo_Appearance(v2));
-    CommInfo_SavePlayerRecord(param0);
+    CommInfo_SavePlayerRecord(saveData);
 }
 
-int sub_02039390(SaveData *param0, int param1)
+int sub_02039390(SaveData *saveData, int param1)
 {
     int v0, v1;
     DWCFriendData *v2 = CommInfo_DWCFriendData(param1);
-    UnkStruct_0202B370 *v3 = sub_0202B370(param0);
+    WiFiList *v3 = SaveData_GetWiFiList(saveData);
 
     for (v0 = 0; v0 < 32; v0++) {
         if (DWC_IsEqualFriendData(v2, sub_0202AED8(v3, v0))) {

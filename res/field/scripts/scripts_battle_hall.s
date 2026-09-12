@@ -1,997 +1,922 @@
-    .include "macros/scrcmd.inc"
+#include "macros/scrcmd.inc"
+#include "res/text/bank/battle_hall.h"
+#include "res/text/bank/menu_entries.h"
+#include "res/field/events/events_battle_hall.h"
+#include "constants/battle_frontier.h"
+#include "constants/battle_hall_functions.h"
 
-    .data
 
-    ScriptEntry _026D
-    ScriptEntry _08B4
-    ScriptEntry _08ED
-    ScriptEntry _08FC
-    ScriptEntry _0970
-    ScriptEntry _0289
-    ScriptEntry _0998
-    ScriptEntry _09AB
-    ScriptEntry _09BE
-    ScriptEntry _09D1
-    ScriptEntry _09F0
-    ScriptEntry _0A03
-    ScriptEntry _0A16
-    ScriptEntry _0A29
-    ScriptEntry _0A3C
-    ScriptEntry _01A6
-    ScriptEntry _0A4F
-    ScriptEntry _0AEE
-    ScriptEntry _0C01
-    ScriptEntry _0D14
-    ScriptEntry _00A6
-    ScriptEntry _005A
-    .short 0xFD13
+    ScriptEntry BattleHall_SingleAttendant
+    ScriptEntry BattleHall_OnFrame_ResumeChallenge
+    ScriptEntry BattleHall_OnFrame_DidntSaveBeforeQuit
+    ScriptEntry BattleHall_OnFrame_ChallengeEndedCompletedRound
+    ScriptEntry BattleHall_OnFrame_ChallengeEnded
+    ScriptEntry BattleHall_MultiAttendant
+    ScriptEntry BattleHall_Hiker
+    ScriptEntry BattleHall_SnowpointNPC
+    ScriptEntry BattleHall_Twin
+    ScriptEntry BattleHall_Pachirisu
+    ScriptEntry BattleHall_ExpertM
+    ScriptEntry BattleHall_Idol
+    ScriptEntry BattleHall_PokefanF
+    ScriptEntry BattleHall_Maid
+    ScriptEntry BattleHall_BugCatcher
+    ScriptEntry BattleHall_OnTransition
+    ScriptEntry BattleHall_RecordKeeper
+    ScriptEntry BattleHall_SerenaWinston
+    ScriptEntry BattleHall_WinstonSerena
+    ScriptEntry BattleHall_MajorNPC
+    ScriptEntry BattleHall_OnLoad
+    ScriptEntry BattleHall_OnResume
+    ScriptEntryEnd
 
-_005A:
-    ScrCmd_325 0x4000
-    CallIfGe 0x4000, 11, _0090
-    CallIfGe 0x4000, 101, _007A
+BattleHall_OnResume:
+    GetNumSpeciesWithBattleHallRecords VAR_MAP_LOCAL_0x00
+    CallIfGe VAR_MAP_LOCAL_0x00, 11, BattleHall_SerenaWinstonMoveCloser
+    CallIfGe VAR_MAP_LOCAL_0x00, 101, BattleHall_SerenaWinstonMoveEvenCloser
     End
 
-_007A:
-    ScrCmd_186 12, 8, 11
-    ScrCmd_187 12, 8, 0, 11, 2
+BattleHall_SerenaWinstonMoveEvenCloser:
+    SetObjectEventPos LOCALID_SERENA_WINSTON, 8, 11
+    SetPosition LOCALID_SERENA_WINSTON, 8, 0, 11, DIR_WEST
     Return
 
-_0090:
-    ScrCmd_186 12, 13, 11
-    ScrCmd_187 12, 13, 0, 11, 2
+BattleHall_SerenaWinstonMoveCloser:
+    SetObjectEventPos LOCALID_SERENA_WINSTON, 13, 11
+    SetPosition LOCALID_SERENA_WINSTON, 13, 0, 11, DIR_WEST
     Return
 
-_00A6:
-    GoToIfEq 0x40BA, 1, _00B5
+BattleHall_OnLoad:
+    GoToIfEq VAR_BATTLE_HALL_LOBBY_LOAD_ACTION, 1, BattleHall_UpdateConditionalNPCs
     End
 
-_00B5:
-    Call _015D
-    ScrCmd_1B7 0x4007, 100
-    CallIfUnset 0x2CB, _00DB
-    GoToIfLt 0x4007, 30, _00E5
+BattleHall_UpdateConditionalNPCs:
+    Call BattleHall_UpdateReporter
+    GetRandom VAR_MAP_LOCAL_0x07, 100
+    CallIfUnset FLAG_HIDE_BATTLE_HALL_MAJOR_NPC, BattleHall_HideMajorNPC
+    GoToIfLt VAR_MAP_LOCAL_0x07, 30, BattleHall_TryPickMajorNPC
     End
 
-_00DB:
-    ScrCmd_065 13
-    SetFlag 0x2CB
+BattleHall_HideMajorNPC:
+    RemoveObject LOCALID_MAJOR_NPC
+    SetFlag FLAG_HIDE_BATTLE_HALL_MAJOR_NPC
     Return
 
-_00E5:
-    GoToIfUnset 0xAC4, _00F2
+BattleHall_TryPickMajorNPC:
+    GoToIfUnset FLAG_DAILY_SET_BATTLE_HALL_MAJOR_NPC, BattleHall_PickMajorNPC
     End
 
-_00F2:
-    SetFlag 0xAC4
-    ScrCmd_326 0x4008
-    GoToIfGe 0x4008, 0x2710, _0123
-    GoToIfGe 0x4008, 0x3E8, _0131
-    GoToIfGe 0x4008, 0x1F4, _013F
+BattleHall_PickMajorNPC:
+    SetFlag FLAG_DAILY_SET_BATTLE_HALL_MAJOR_NPC
+    GetBattleHallTotalSinglesRecord VAR_MAP_LOCAL_0x08
+    GoToIfGe VAR_MAP_LOCAL_0x08, 10000, BattleHall_PickMajorNPCAfter10000Record
+    GoToIfGe VAR_MAP_LOCAL_0x08, 1000, BattleHall_PickMajorNPCAfter1000Record
+    GoToIfGe VAR_MAP_LOCAL_0x08, 500, BattleHall_PickMajorNPCAfter500Record
     End
 
-_0123:
-    ScrCmd_1B7 0x4063, 4
-    GoTo _014D
+BattleHall_PickMajorNPCAfter10000Record:
+    GetRandom VAR_BATTLE_HALL_MAJOR_NPC, 4
+    GoTo BattleHall_ShowMajorNPC
     End
 
-_0131:
-    ScrCmd_1B7 0x4063, 2
-    GoTo _014D
+BattleHall_PickMajorNPCAfter1000Record:
+    GetRandom VAR_BATTLE_HALL_MAJOR_NPC, 2
+    GoTo BattleHall_ShowMajorNPC
     End
 
-_013F:
-    SetVar 0x4063, 0
-    GoTo _014D
+BattleHall_PickMajorNPCAfter500Record:
+    SetVar VAR_BATTLE_HALL_MAJOR_NPC, 0
+    GoTo BattleHall_ShowMajorNPC
     End
 
-_014D:
-    ClearFlag 0x2CB
-    Call _01DF
-    ScrCmd_064 13
+BattleHall_ShowMajorNPC:
+    ClearFlag FLAG_HIDE_BATTLE_HALL_MAJOR_NPC
+    Call BattleHall_UpdateMajorNPC_GFX
+    AddObject LOCALID_MAJOR_NPC
     End
 
-_015D:
-    CallIfUnset 0x2C1, _019C
-    ScrCmd_238 14, 0x4000
-    GoToIfEq 0x4000, 0, _0196
-    ScrCmd_32A 0x4000
-    GoToIfEq 0x4000, 0, _0196
-    ClearFlag 0x2C1
-    ScrCmd_064 10
+BattleHall_UpdateReporter:
+    CallIfUnset FLAG_HIDE_BATTLE_HALL_REPORTER, BattleHall_RemoveReporter
+    CheckTVInterviewEligible TV_PROGRAM_SEGMENT_BATTLE_FRONTIER_FRONTLINE_NEWS_SINGLE, VAR_MAP_LOCAL_0x00
+    GoToIfEq VAR_MAP_LOCAL_0x00, FALSE, BattleHall_HideReporter
+    CheckIfBattleHallStreakIs50 VAR_MAP_LOCAL_0x00
+    GoToIfEq VAR_MAP_LOCAL_0x00, FALSE, BattleHall_HideReporter
+    ClearFlag FLAG_HIDE_BATTLE_HALL_REPORTER
+    AddObject LOCALID_REPORTER
     Return
 
-_0196:
-    SetFlag 0x2C1
+BattleHall_HideReporter:
+    SetFlag FLAG_HIDE_BATTLE_HALL_REPORTER
     Return
 
-_019C:
-    ScrCmd_065 10
-    SetFlag 0x2C1
+BattleHall_RemoveReporter:
+    RemoveObject LOCALID_REPORTER
+    SetFlag FLAG_HIDE_BATTLE_HALL_REPORTER
     Return
 
-_01A6:
-    ScrCmd_14D 0x4000
-    CallIfEq 0x4000, 0, _025D
-    CallIfEq 0x4000, 1, _0265
-    Call _01DF
-    ScrCmd_238 14, 0x4000
-    CallIfEq 0x4000, 0, _0196
+BattleHall_OnTransition:
+    GetPlayerGender VAR_MAP_LOCAL_0x00
+    CallIfEq VAR_MAP_LOCAL_0x00, GENDER_MALE, BattleHall_SetSerenaAsFan
+    CallIfEq VAR_MAP_LOCAL_0x00, GENDER_FEMALE, BattleHall_SetWinstonAsFan
+    Call BattleHall_UpdateMajorNPC_GFX
+    CheckTVInterviewEligible TV_PROGRAM_SEGMENT_BATTLE_FRONTIER_FRONTLINE_NEWS_SINGLE, VAR_MAP_LOCAL_0x00
+    CallIfEq VAR_MAP_LOCAL_0x00, 0, BattleHall_HideReporter
     End
 
-_01DF:
-    CallIfEq 0x4063, 0, _0215
-    CallIfEq 0x4063, 1, _0245
-    CallIfEq 0x4063, 2, _024D
-    CallIfEq 0x4063, 3, _0255
+BattleHall_UpdateMajorNPC_GFX:
+    CallIfEq VAR_BATTLE_HALL_MAJOR_NPC, 0, BattleHall_SetCounterpartAsMajorNPC
+    CallIfEq VAR_BATTLE_HALL_MAJOR_NPC, 1, BattleHall_SetMomAsMajorNPC
+    CallIfEq VAR_BATTLE_HALL_MAJOR_NPC, 2, BattleHall_SetOakAsMajorNPC
+    CallIfEq VAR_BATTLE_HALL_MAJOR_NPC, 3, BattleHall_SetJasmineAsMajorNPC
     Return
 
-_0215:
-    ScrCmd_14D 0x4009
-    GoToIfEq 0x4009, 0, _0235
-    GoToIfEq 0x4009, 1, _023D
+BattleHall_SetCounterpartAsMajorNPC:
+    GetPlayerGender VAR_MAP_LOCAL_0x09
+    GoToIfEq VAR_MAP_LOCAL_0x09, GENDER_MALE, BattleHall_SetDawnAsMajorNPC
+    GoToIfEq VAR_MAP_LOCAL_0x09, GENDER_FEMALE, BattleHall_SetLucasAsMajorNPC
     Return
 
-_0235:
-    SetVar 0x4021, 97
+BattleHall_SetDawnAsMajorNPC:
+    SetVar VAR_OBJ_GFX_ID_1, OBJ_EVENT_GFX_PLAYER_F
     Return
 
-_023D:
-    SetVar 0x4021, 0
+BattleHall_SetLucasAsMajorNPC:
+    SetVar VAR_OBJ_GFX_ID_1, OBJ_EVENT_GFX_PLAYER_M
     Return
 
-_0245:
-    SetVar 0x4021, 140
+BattleHall_SetMomAsMajorNPC:
+    SetVar VAR_OBJ_GFX_ID_1, OBJ_EVENT_GFX_MOM
     Return
 
-_024D:
-    SetVar 0x4021, 166
+BattleHall_SetOakAsMajorNPC:
+    SetVar VAR_OBJ_GFX_ID_1, OBJ_EVENT_GFX_PROF_OAK
     Return
 
-_0255:
-    SetVar 0x4021, 167
+BattleHall_SetJasmineAsMajorNPC:
+    SetVar VAR_OBJ_GFX_ID_1, OBJ_EVENT_GFX_JASMINE
     Return
 
-_025D:
-    SetVar 0x4023, 7
+BattleHall_SetSerenaAsFan:
+    SetVar VAR_OBJ_GFX_ID_3, OBJ_EVENT_GFX_BATTLE_GIRL
     Return
 
-_0265:
-    SetVar 0x4023, 4
+BattleHall_SetWinstonAsFan:
+    SetVar VAR_OBJ_GFX_ID_3, OBJ_EVENT_GFX_YOUNGSTER
     Return
 
-_026D:
-    PlayFanfare SEQ_SE_CONFIRM
+BattleHall_SingleAttendant:
+    PlaySE SE_CONFIRM_sseq_3
     LockAll
     FacePlayer
-    SetVar 0x4003, 0
-    SetVar 0x4004, 0
-    GoTo _02A5
+    SetVar VAR_MAP_LOCAL_0x03, 0
+    SetVar VAR_MAP_LOCAL_0x04, 0
+    GoTo BattleHall_WelcomeToChallenge
     End
 
-_0289:
-    PlayFanfare SEQ_SE_CONFIRM
+BattleHall_MultiAttendant:
+    PlaySE SE_CONFIRM_sseq_3
     LockAll
     FacePlayer
-    SetVar 0x4003, 0
-    SetVar 0x4004, 1
-    GoTo _02A5
+    SetVar VAR_MAP_LOCAL_0x03, 0
+    SetVar VAR_MAP_LOCAL_0x04, 1
+    GoTo BattleHall_WelcomeToChallenge
     End
 
-_02A5:
-    ScrCmd_313 0
-    CallIfEq 0x4004, 0, _0874
-    CallIfEq 0x4004, 1, _0879
-    GoTo _02CB
+BattleHall_WelcomeToChallenge:
+    RecordHeapMemory
+    CallIfEq VAR_MAP_LOCAL_0x04, 0, BattleHall_WelcomeToSingleDoubleChallenge
+    CallIfEq VAR_MAP_LOCAL_0x04, 1, BattleHall_WelcomeToMultiChallenge
+    GoTo BattleHall_SelectChallenge
     End
 
-_02CB:
-    CallIfEq 0x4004, 0, _087E
-    CallIfEq 0x4004, 1, _0896
-    ScrCmd_042 19, 2
-    ScrCmd_042 20, 3
-    ScrCmd_043
-    GoToIfEq 0x800C, 0, _0366
-    GoToIfEq 0x800C, 1, _0389
-    GoToIfEq 0x800C, 2, _032B
-    GoToIfEq 0x800C, 4, _03AC
-    GoTo _034D
+BattleHall_SelectChallenge:
+    CallIfEq VAR_MAP_LOCAL_0x04, 0, BattleHall_InitMenuSingleDoubleChallenge
+    CallIfEq VAR_MAP_LOCAL_0x04, 1, BattleHall_InitMenuMultiChallenge
+    AddMenuEntryImm BattleHall_Text_Info, 2
+    AddMenuEntryImm BattleHall_Text_Cancel, 3
+    ShowMenu
+    GoToIfEq VAR_RESULT, 0, BattleHall_TryTakeSingleChallenge
+    GoToIfEq VAR_RESULT, 1, BattleHall_TryTakeDoubleChallenge
+    GoToIfEq VAR_RESULT, 2, BattleHall_ExplainChallenge
+    GoToIfEq VAR_RESULT, 4, BattleHall_TryTakeMultiChallenge
+    GoTo BattleHall_EndChallenge
     End
 
-_032B:
-    CallIfEq 0x4004, 0, _08AA
-    CallIfEq 0x4004, 1, _08AF
-    GoTo _02CB
+BattleHall_ExplainChallenge:
+    CallIfEq VAR_MAP_LOCAL_0x04, 0, BattleHall_ExplainSingleDoubleChallenge
+    CallIfEq VAR_MAP_LOCAL_0x04, 1, BattleHall_ExplainMultiChallenge
+    GoTo BattleHall_SelectChallenge
     End
 
-_034D:
-    GoTo _0355
+BattleHall_EndChallenge:
+    GoTo BattleHall_HopeToSeeYouAgain
     End
 
-_0355:
-    SetVar 0x40BA, 0
-    Message 6
-    WaitABXPadPress
+BattleHall_HopeToSeeYouAgain:
+    SetVar VAR_BATTLE_HALL_LOBBY_LOAD_ACTION, 0
+    Message BattleHall_Text_HopeToSeeYouAgain
+    WaitButton
     CloseMessage
     ReleaseAll
     End
 
-_0366:
-    SetVar 0x40BB, 0
-    ScrCmd_2CC 0, 1, 0x800C
-    GoToIfEq 0x800C, 0, _03CF
-    GoTo _03F5
+BattleHall_TryTakeSingleChallenge:
+    SetVar VAR_BATTLE_HALL_CHALLENGE_TYPE, FRONTIER_CHALLENGE_SINGLE
+    CallBattleHallLobbyFunction BH_LOBBY_FUNC_CHECK_PARTY_ELIGIBLE, 1, VAR_RESULT
+    GoToIfEq VAR_RESULT, 0, BattleHall_PrintEligbilityRuleOnePokemon
+    GoTo BattleHall_SelectPokemon
     End
 
-_0389:
-    SetVar 0x40BB, 1
-    ScrCmd_2CC 0, 2, 0x800C
-    GoToIfEq 0x800C, 0, _03E2
-    GoTo _03F5
+BattleHall_TryTakeDoubleChallenge:
+    SetVar VAR_BATTLE_HALL_CHALLENGE_TYPE, FRONTIER_CHALLENGE_DOUBLE
+    CallBattleHallLobbyFunction BH_LOBBY_FUNC_CHECK_PARTY_ELIGIBLE, 2, VAR_RESULT
+    GoToIfEq VAR_RESULT, 0, BattleHall_PrintEligbilityRulesForTwoPokemon
+    GoTo BattleHall_SelectPokemon
     End
 
-_03AC:
-    SetVar 0x40BB, 2
-    ScrCmd_2CC 0, 1, 0x800C
-    GoToIfEq 0x800C, 0, _03CF
-    GoTo _03F5
+BattleHall_TryTakeMultiChallenge:
+    SetVar VAR_BATTLE_HALL_CHALLENGE_TYPE, FRONTIER_CHALLENGE_MULTI
+    CallBattleHallLobbyFunction BH_LOBBY_FUNC_CHECK_PARTY_ELIGIBLE, 1, VAR_RESULT
+    GoToIfEq VAR_RESULT, 0, BattleHall_PrintEligbilityRuleOnePokemon
+    GoTo BattleHall_SelectPokemon
     End
 
-_03CF:
-    Message 35
-    ScrCmd_1FF 37, 1, 0, 0
-    GoTo _034D
+BattleHall_PrintEligbilityRuleOnePokemon:
+    Message BattleHall_Text_NeedOneLvl30Pokemon
+    MessageSeenBanlistSpecies BattleHall_Text_Banlist, 1
+    GoTo BattleHall_EndChallenge
     End
 
-_03E2:
-    Message 36
-    ScrCmd_1FF 37, 2, 0, 0
-    GoTo _034D
+BattleHall_PrintEligbilityRulesForTwoPokemon:
+    Message BattleHall_Text_NeedTwoLvl30Pokemon
+    MessageSeenBanlistSpecies BattleHall_Text_Banlist, 2
+    GoTo BattleHall_EndChallenge
     End
 
-_03F5:
-    Message 33
+BattleHall_SelectPokemon:
+    Message BattleHall_Text_ChoosePokemonToEnter
     CloseMessage
-    FadeScreen 6, 1, 0, 0
+    FadeScreenOut
     WaitFadeScreen
-    ScrCmd_2CC 4, 0x40BB, 0x800C
-    ScrCmd_2D0 0x4002, 0x4005
-    ScrCmd_0A1
-    FadeScreen 6, 1, 1, 0
+    CallBattleHallLobbyFunction BH_LOBBY_FUNC_SELECT_POKEMON, VAR_BATTLE_HALL_CHALLENGE_TYPE, VAR_RESULT
+    GetBattleHallSelectedSlots VAR_MAP_LOCAL_0x02, VAR_MAP_LOCAL_0x05
+    ReturnToField
+    FadeScreenIn
     WaitFadeScreen
-    GoToIfEq 0x4002, 0xFF, _034D
-    ScrCmd_31E 0x4002, 0x800C
-    GoToIfEq 0x800C, 0xFF, _07C8
-    ScrCmd_31E 0x4005, 0x800C
-    GoToIfEq 0x800C, 0xFF, _07C8
-    ScrCmd_198 0x4002, 0x4001
-    GoToIfEq 0x4001, 0, _034D
-    ScrCmd_2CC 1, 0x40BB, 0x800C
-    GoToIfEq 0x800C, 0, _04F4
-    ScrCmd_2CC 2, 0x40BB, 0x800C
-    ScrCmd_0DA 0, 0x800C, 0, 0
-    GoToIfEq 0x800C, 0x4001, _04F4
-    GoTo _04A2
+    GoToIfEq VAR_MAP_LOCAL_0x02, 0xFF, BattleHall_EndChallenge
+    TryRevertPokemonForm VAR_MAP_LOCAL_0x02, VAR_RESULT
+    GoToIfEq VAR_RESULT, 0xFF, BattleHall_ShowGriseousOrbErrorAndExit
+    TryRevertPokemonForm VAR_MAP_LOCAL_0x05, VAR_RESULT
+    GoToIfEq VAR_RESULT, 0xFF, BattleHall_ShowGriseousOrbErrorAndExit
+    GetPartyMonSpecies VAR_MAP_LOCAL_0x02, VAR_MAP_LOCAL_0x01
+    GoToIfEq VAR_MAP_LOCAL_0x01, 0, BattleHall_EndChallenge
+    CallBattleHallLobbyFunction BH_LOBBY_FUNC_CHECK_STREAK_ACTIVE, VAR_BATTLE_HALL_CHALLENGE_TYPE, VAR_RESULT
+    GoToIfEq VAR_RESULT, 0, BattleHall_TryStartSingleDoubleChallenge
+    CallBattleHallLobbyFunction BH_LOBBY_FUNC_GET_CURRENT_STREAK_SPECIES, VAR_BATTLE_HALL_CHALLENGE_TYPE, VAR_RESULT
+    BufferSpeciesNameFromVar 0, VAR_RESULT, 0, 0
+    GoToIfEq VAR_RESULT, VAR_MAP_LOCAL_0x01, BattleHall_TryStartSingleDoubleChallenge
+    GoTo BattleHall_AskDeleteOngoingStreak
     End
 
-_04A2:
-    ScrCmd_0DA 1, 0x4001, 0, 0
-    Message 34
-    ScrCmd_044 25, 13, 1, 1, 0x800C
-    ScrCmd_046 41, 0xFF, 0
-    ScrCmd_046 42, 0xFF, 1
-    ScrCmd_327 6
-    SetVar 0x8008, 0x800C
-    GoToIfEq 0x8008, 0, _04E4
-    GoTo _034D
+BattleHall_AskDeleteOngoingStreak:
+    BufferSpeciesNameFromVar 1, VAR_MAP_LOCAL_0x01, 0, 0
+    Message BattleHall_Text_DeleteOngoingStreak
+    InitGlobalTextListMenu 25, 13, 1, VAR_RESULT
+    AddListMenuEntry MenuEntries_Text_Yes, 0
+    AddListMenuEntry MenuEntries_Text_No, 1
+    ShowListMenuSetWidth 6
+    SetVar VAR_0x8008, VAR_RESULT
+    GoToIfEq VAR_0x8008, 0, BattleHall_DeleteOngoingStreak
+    GoTo BattleHall_EndChallenge
     End
 
-_04E4:
-    ScrCmd_2CC 3, 0x40BB, 0x800C
-    GoTo _04F4
+BattleHall_DeleteOngoingStreak:
+    CallBattleHallLobbyFunction BH_LOBBY_FUNC_DELETE_ACTIVE_STREAK, VAR_BATTLE_HALL_CHALLENGE_TYPE, VAR_RESULT
+    GoTo BattleHall_TryStartSingleDoubleChallenge
     End
 
-_04F4:
-    GoTo _04FC
+BattleHall_TryStartSingleDoubleChallenge:
+    GoTo BattleHall_HealAndSaveBeforeChallenge
     End
 
-_04FC:
-    CallIfEq 0x40BB, 0, _0673
-    CallIfEq 0x40BB, 1, _0673
-    SetVar 0x4000, 0
-    ScrCmd_14E
-    CallCommonScript 0x7D6
-    SetVar 0x800C, 0x4000
-    GoToIfEq 0x800C, 0, _034D
-    GoToIfEq 0x40BB, 2, _054A
-    GoTo _0690
+BattleHall_HealAndSaveBeforeChallenge:
+    CallIfEq VAR_BATTLE_HALL_CHALLENGE_TYPE, FRONTIER_CHALLENGE_SINGLE, BattleHall_SetChallengeInProgress
+    CallIfEq VAR_BATTLE_HALL_CHALLENGE_TYPE, FRONTIER_CHALLENGE_DOUBLE, BattleHall_SetChallengeInProgress
+    SetVar VAR_MAP_LOCAL_0x00, 0
+    HealParty
+    Common_SaveGame
+    SetVar VAR_RESULT, VAR_MAP_LOCAL_0x00
+    GoToIfEq VAR_RESULT, 0, BattleHall_EndChallenge
+    GoToIfEq VAR_BATTLE_HALL_CHALLENGE_TYPE, FRONTIER_CHALLENGE_MULTI, BattleHall_BecomeLeaderOrJoinGroup
+    GoTo BattleHall_WalkIntoCorridor
     End
 
-_054A:
-    Message 30
-    ScrCmd_040 30, 1, 0, 1, 0x800C
-    ScrCmd_33A 1
-    ScrCmd_042 13, 0
-    ScrCmd_042 14, 1
-    ScrCmd_042 5, 2
-    ScrCmd_043
-    SetVar 0x8008, 0x800C
-    GoToIfEq 0x8008, 0, _058E
-    GoToIfEq 0x8008, 1, _05E2
-    GoTo _034D
+BattleHall_BecomeLeaderOrJoinGroup:
+    Message BattleHall_Text_BecomeLeaderOrJoinGroup
+    InitGlobalTextMenu 30, 1, 0, VAR_RESULT
+    SetMenuXOriginToRight
+    AddMenuEntryImm MenuEntries_Text_JoinGroup, 0
+    AddMenuEntryImm MenuEntries_Text_BecomeLeader, 1
+    AddMenuEntryImm MenuEntries_Text_Exit, 2
+    ShowMenu
+    SetVar VAR_0x8008, VAR_RESULT
+    GoToIfEq VAR_0x8008, 0, BattleHall_LaunchWiFiToJoinGroup
+    GoToIfEq VAR_0x8008, 1, BattleHall_LaunchWiFiToBecomeLeader
+    GoTo BattleHall_EndChallenge
     End
 
-_058E:
-    Message 31
-    ScrCmd_03E 0x800C
-    GoToIfEq 0x800C, 1, _054A
+BattleHall_LaunchWiFiToJoinGroup:
+    Message BattleHall_Text_NeedToLaunchWiFiComm
+    ShowYesNoMenu VAR_RESULT
+    GoToIfEq VAR_RESULT, MENU_NO, BattleHall_BecomeLeaderOrJoinGroup
     CloseMessage
-    ScrCmd_0F2 30, 0, 0, 0x800C
-    GoToIfEq 0x800C, 1, _05D0
-    GoToIfEq 0x800C, 3, _05D8
-    GoTo _0636
+    StartBattleClient 30, 0, 0, VAR_RESULT
+    GoToIfEq VAR_RESULT, COMM_CLUB_RET_CANCEL, BattleHall_CancelJoiningGroup
+    GoToIfEq VAR_RESULT, COMM_CLUB_RET_ERROR, BattleHall_ErrorJoiningGroup
+    GoTo BattleHall_StartMultiChallenge
     End
 
-_05D0:
-    GoTo _054A
+BattleHall_CancelJoiningGroup:
+    GoTo BattleHall_BecomeLeaderOrJoinGroup
     End
 
-_05D8:
-    ScrCmd_150
-    GoTo _054A
+BattleHall_ErrorJoiningGroup:
+    EndCommunication
+    GoTo BattleHall_BecomeLeaderOrJoinGroup
     End
 
-_05E2:
-    Message 31
-    ScrCmd_03E 0x800C
-    GoToIfEq 0x800C, 1, _054A
+BattleHall_LaunchWiFiToBecomeLeader:
+    Message BattleHall_Text_NeedToLaunchWiFiComm
+    ShowYesNoMenu VAR_RESULT
+    GoToIfEq VAR_RESULT, MENU_NO, BattleHall_BecomeLeaderOrJoinGroup
     CloseMessage
-    ScrCmd_0F3 30, 0, 0, 0x800C
-    GoToIfEq 0x800C, 1, _0624
-    GoToIfEq 0x800C, 3, _062C
-    GoTo _0636
+    StartBattleServer 30, 0, 0, VAR_RESULT
+    GoToIfEq VAR_RESULT, COMM_CLUB_RET_CANCEL, BattleHall_CancelBecomingLeader
+    GoToIfEq VAR_RESULT, COMM_CLUB_RET_ERROR, BattleHall_ErrorBecomingLeader
+    GoTo BattleHall_StartMultiChallenge
     End
 
-_0624:
-    GoTo _054A
+BattleHall_CancelBecomingLeader:
+    GoTo BattleHall_BecomeLeaderOrJoinGroup
     End
 
-_062C:
-    ScrCmd_150
-    GoTo _054A
+BattleHall_ErrorBecomingLeader:
+    EndCommunication
+    GoTo BattleHall_BecomeLeaderOrJoinGroup
     End
 
-_0636:
-    ScrCmd_136
+BattleHall_StartMultiChallenge:
+    ClearReceivedTempDataAllPlayers
     ScrCmd_135 108
-    ScrCmd_2CF 0x4001, 0x800C
-    GoToIfEq 0x800C, 1, _067B
-    ScrCmd_136
+    CheckBattleHallPartnerUsesDifferentSpecies VAR_MAP_LOCAL_0x01, VAR_RESULT
+    GoToIfEq VAR_RESULT, TRUE, BattleHall_MultiChallengeMustUseSamePokemon
+    ClearReceivedTempDataAllPlayers
     ScrCmd_135 110
-    Message 32
-    CallIfEq 0x40BB, 2, _0673
-    Call _08DB
-    GoTo _0690
+    Message BattleHall_Text_MustSaveFirst
+    CallIfEq VAR_BATTLE_HALL_CHALLENGE_TYPE, FRONTIER_CHALLENGE_MULTI, BattleHall_SetChallengeInProgress
+    Call BattleHall_SaveGame
+    GoTo BattleHall_WalkIntoCorridor
     End
 
-_0673:
-    SetVar 0x40BA, 0xFF
+BattleHall_SetChallengeInProgress:
+    SetVar VAR_BATTLE_HALL_LOBBY_LOAD_ACTION, 0xFF
     Return
 
-_067B:
-    Call _068C
-    Message 57
-    GoTo _034D
+BattleHall_MultiChallengeMustUseSamePokemon:
+    Call BattleHall_EndCommunicationDifferentPokemon
+    Message BattleHall_Text_MultiChallengeMustUseSamePokemon
+    GoTo BattleHall_EndChallenge
     End
 
-_068C:
-    ScrCmd_150
+BattleHall_EndCommunicationDifferentPokemon:
+    EndCommunication
     Return
 
-_0690:
-    CallIfEq 0x40BB, 0, _0730
-    CallIfEq 0x40BB, 1, _074B
-    CallIfEq 0x40BB, 2, _0766
-    PlayFanfare SEQ_SE_DP_KAIDAN2
-    GoTo _06C3
+BattleHall_WalkIntoCorridor:
+    CallIfEq VAR_BATTLE_HALL_CHALLENGE_TYPE, FRONTIER_CHALLENGE_SINGLE, BattleHall_WalkToCorridorSingleChallenge
+    CallIfEq VAR_BATTLE_HALL_CHALLENGE_TYPE, FRONTIER_CHALLENGE_DOUBLE, BattleHall_WalkToCorridorDoubleChallenge
+    CallIfEq VAR_BATTLE_HALL_CHALLENGE_TYPE, FRONTIER_CHALLENGE_MULTI, BattleHall_WalkToCorridorMultiChallenge
+    PlaySE SEQ_SE_DP_KAIDAN2_sseq
+    GoTo BattleHall_StartChallenge
     End
 
-_06C3:
-    FadeScreen 6, 1, 0, 0
+BattleHall_StartChallenge:
+    FadeScreenOut
     WaitFadeScreen
-    CallIfEq 0x40BB, 0, _078C
-    CallIfEq 0x40BB, 1, _07A0
-    CallIfEq 0x40BB, 2, _07B4
-    ScrCmd_1E5 58
-    ScrCmd_1CD 39, 0, 0, 0, 0
-    ScrCmd_1F8
-    ScrCmd_2C4 9
-    CallIfEq 0x40BB, 2, _072C
-    ScrCmd_0A1
-    FadeScreen 6, 1, 1, 0
+    CallIfEq VAR_BATTLE_HALL_CHALLENGE_TYPE, FRONTIER_CHALLENGE_SINGLE, BattleHall_WalkBackInvisiblySingleChallenge
+    CallIfEq VAR_BATTLE_HALL_CHALLENGE_TYPE, FRONTIER_CHALLENGE_DOUBLE, BattleHall_WalkBackInvisiblyDoubleChallenge
+    CallIfEq VAR_BATTLE_HALL_CHALLENGE_TYPE, FRONTIER_CHALLENGE_MULTI, BattleHall_WalkBackInvisiblyMultiChallenge
+    IncrementGameRecord RECORD_TIMES_STARTED_BATTLE_FRONTIER_CHALLENGE
+    CreateJournalEvent LOCATION_EVENT_BATTLE_HALL
+    WaitForTransition
+    LaunchBattleFrontierScene FRONTIER_SCENE_HALL_CORRIDOR
+    CallIfEq VAR_BATTLE_HALL_CHALLENGE_TYPE, FRONTIER_CHALLENGE_MULTI, BattleHall_EndCommunication
+    ReturnToField
+    FadeScreenIn
     WaitFadeScreen
-    ScrCmd_313 1
+    AssertHeapMemory
     End
 
-_072C:
-    ScrCmd_150
+BattleHall_EndCommunication:
+    EndCommunication
     Return
 
-_0730:
-    Message 9
+BattleHall_WalkToCorridorSingleChallenge:
+    Message BattleHall_Text_ThisWayPlease
     WaitABPress
     CloseMessage
-    ApplyMovement 0xFF, _07D4
-    ApplyMovement 0x800D, _07FC
+    ApplyMovement LOCALID_PLAYER, BattleHall_Movement_PlayerWalkToCorridorSingleDoubleChallenge
+    ApplyMovement VAR_LAST_TALKED, BattleHall_Movement_AttendantWalkToCorridorSingleDoubleChallenge
     WaitMovement
     Return
 
-_074B:
-    Message 9
+BattleHall_WalkToCorridorDoubleChallenge:
+    Message BattleHall_Text_ThisWayPlease
     WaitABPress
     CloseMessage
-    ApplyMovement 0xFF, _07D4
-    ApplyMovement 0x800D, _07FC
+    ApplyMovement LOCALID_PLAYER, BattleHall_Movement_PlayerWalkToCorridorSingleDoubleChallenge
+    ApplyMovement VAR_LAST_TALKED, BattleHall_Movement_AttendantWalkToCorridorSingleDoubleChallenge
     WaitMovement
     Return
 
-_0766:
-    ScrCmd_02E 9
-    WaitTime 10, 0x800C
-    ScrCmd_136
+BattleHall_WalkToCorridorMultiChallenge:
+    MessageNoSkip BattleHall_Text_ThisWayPlease
+    WaitTime 10, VAR_RESULT
+    ClearReceivedTempDataAllPlayers
     ScrCmd_135 109
     CloseMessage
-    ApplyMovement 0xFF, _07E4
-    ApplyMovement 0x800D, _080C
+    ApplyMovement LOCALID_PLAYER, BattleHall_Movement_PlayerWalkToCorridorMultiChallenge
+    ApplyMovement VAR_LAST_TALKED, BattleHall_Movement_AttendantWalkToCorridorMultiChallenge
     WaitMovement
     Return
 
-_078C:
-    ApplyMovement 0xFF, _0824
-    ApplyMovement 0x800D, _0854
+BattleHall_WalkBackInvisiblySingleChallenge:
+    ApplyMovement LOCALID_PLAYER, BattleHall_Movement_PlayerWalkBackInvisiblySingleDoubleChallenge
+    ApplyMovement VAR_LAST_TALKED, BattleHall_Movement_AttendantWalkBackInvisiblySingleDoubleChallenge
     WaitMovement
     Return
 
-_07A0:
-    ApplyMovement 0xFF, _0824
-    ApplyMovement 0x800D, _0854
+BattleHall_WalkBackInvisiblyDoubleChallenge:
+    ApplyMovement LOCALID_PLAYER, BattleHall_Movement_PlayerWalkBackInvisiblySingleDoubleChallenge
+    ApplyMovement VAR_LAST_TALKED, BattleHall_Movement_AttendantWalkBackInvisiblySingleDoubleChallenge
     WaitMovement
     Return
 
-_07B4:
-    ApplyMovement 0xFF, _0838
-    ApplyMovement 0x800D, _0864
+BattleHall_WalkBackInvisiblyMultiChallenge:
+    ApplyMovement LOCALID_PLAYER, BattleHall_Movement_PlayerWalkBackInvisiblyMultiChallenge
+    ApplyMovement VAR_LAST_TALKED, BattleHall_Movement_AttendantWalkBackInvisiblyMultiChallenge
     WaitMovement
     Return
 
-_07C8:
-    SetVar 0x40BA, 0
-    CallCommonScript 0x809
+BattleHall_ShowGriseousOrbErrorAndExit:
+    SetVar VAR_BATTLE_HALL_LOBBY_LOAD_ACTION, 0
+    Common_GriseousOrbCouldNotBeRemoved
     End
 
     .balign 4, 0
-_07D4:
-    MoveAction_00E 4
-    MoveAction_00D 3
-    MoveAction_045
+BattleHall_Movement_PlayerWalkToCorridorSingleDoubleChallenge:
+    WalkNormalWest 4
+    WalkNormalSouth 3
+    SetInvisible
     EndMovement
 
     .balign 4, 0
-_07E4:
-    MoveAction_00E 2
-    MoveAction_00C
-    MoveAction_00E 2
-    MoveAction_00D 3
-    MoveAction_045
+BattleHall_Movement_PlayerWalkToCorridorMultiChallenge:
+    WalkNormalWest 2
+    WalkNormalNorth
+    WalkNormalWest 2
+    WalkNormalSouth 3
+    SetInvisible
     EndMovement
 
     .balign 4, 0
-_07FC:
-    MoveAction_00E 3
-    MoveAction_00D 3
-    MoveAction_045
+BattleHall_Movement_AttendantWalkToCorridorSingleDoubleChallenge:
+    WalkNormalWest 3
+    WalkNormalSouth 3
+    SetInvisible
     EndMovement
 
     .balign 4, 0
-_080C:
-    MoveAction_00E
-    MoveAction_00C
-    MoveAction_00E 2
-    MoveAction_00D 3
-    MoveAction_045
+BattleHall_Movement_AttendantWalkToCorridorMultiChallenge:
+    WalkNormalWest
+    WalkNormalNorth
+    WalkNormalWest 2
+    WalkNormalSouth 3
+    SetInvisible
     EndMovement
 
     .balign 4, 0
-_0824:
-    MoveAction_017 4
-    MoveAction_014 3
-    MoveAction_002
-    MoveAction_046
+BattleHall_Movement_PlayerWalkBackInvisiblySingleDoubleChallenge:
+    WalkFasterEast 4
+    WalkFasterNorth 3
+    FaceWest
+    SetVisible
     EndMovement
 
     .balign 4, 0
-_0838:
-    MoveAction_017 2
-    MoveAction_015
-    MoveAction_017 2
-    MoveAction_014 3
-    MoveAction_002
-    MoveAction_046
+BattleHall_Movement_PlayerWalkBackInvisiblyMultiChallenge:
+    WalkFasterEast 2
+    WalkFasterSouth
+    WalkFasterEast 2
+    WalkFasterNorth 3
+    FaceWest
+    SetVisible
     EndMovement
 
     .balign 4, 0
-_0854:
-    MoveAction_014 3
-    MoveAction_017 3
-    MoveAction_046
+BattleHall_Movement_AttendantWalkBackInvisiblySingleDoubleChallenge:
+    WalkFasterNorth 3
+    WalkFasterEast 3
+    SetVisible
     EndMovement
 
     .balign 4, 0
-_0864:
-    MoveAction_014 2
-    MoveAction_017 3
-    MoveAction_046
+BattleHall_Movement_AttendantWalkBackInvisiblyMultiChallenge:
+    WalkFasterNorth 2
+    WalkFasterEast 3
+    SetVisible
     EndMovement
 
-_0874:
-    Message 0
+BattleHall_WelcomeToSingleDoubleChallenge:
+    Message BattleHall_Text_WelcomeToSingleDoubleChallenge
     Return
 
-_0879:
-    Message 3
+BattleHall_WelcomeToMultiChallenge:
+    Message BattleHall_Text_WelcomeToMultiChallenge
     Return
 
-_087E:
-    ScrCmd_041 31, 9, 0, 1, 0x800C
-    ScrCmd_33A 1
-    ScrCmd_042 16, 0
-    ScrCmd_042 17, 1
-    Message 1
+BattleHall_InitMenuSingleDoubleChallenge:
+    InitLocalTextMenu 31, 9, 0, VAR_RESULT
+    SetMenuXOriginToRight
+    AddMenuEntryImm BattleHall_Text_SingleBattle, 0
+    AddMenuEntryImm BattleHall_Text_DoubleBattle, 1
+    Message BattleHall_Text_SelectChallenge
     Return
 
-_0896:
-    ScrCmd_041 31, 11, 0, 1, 0x800C
-    ScrCmd_33A 1
-    ScrCmd_042 18, 4
-    Message 4
+BattleHall_InitMenuMultiChallenge:
+    InitLocalTextMenu 31, 11, 0, VAR_RESULT
+    SetMenuXOriginToRight
+    AddMenuEntryImm BattleHall_Text_TakeChallenge, 4
+    Message BattleHall_Text_AcceptMultiChallenge
     Return
 
-_08AA:
-    Message 2
+BattleHall_ExplainSingleDoubleChallenge:
+    Message BattleHall_Text_ExplainSingleDoubleChallenge
     Return
 
-_08AF:
-    Message 5
+BattleHall_ExplainMultiChallenge:
+    Message BattleHall_Text_ExplainMultiChallenge
     Return
 
-_08B4:
-    ScrCmd_313 0
-    SetVar 0x4003, 1
-    SetVar 0x40BA, 0
-    Message 11
-    Call _0673
-    Call _08DB
-    GoTo _0690
+BattleHall_OnFrame_ResumeChallenge:
+    RecordHeapMemory
+    SetVar VAR_MAP_LOCAL_0x03, 1
+    SetVar VAR_BATTLE_HALL_LOBBY_LOAD_ACTION, 0
+    Message BattleHall_Text_MustSaveBeforeResuming
+    Call BattleHall_SetChallengeInProgress
+    Call BattleHall_SaveGame
+    GoTo BattleHall_WalkIntoCorridor
     End
 
-_08DB:
-    ScrCmd_18D
-    ScrCmd_12D 0x800C
-    ScrCmd_18E
-    PlayFanfare SEQ_SE_DP_SAVE
-    ScrCmd_04B 0x61B
+BattleHall_SaveGame:
+    ShowSavingIcon
+    TrySaveGame VAR_RESULT
+    HideSavingIcon
+    PlaySE SEQ_SE_DP_SAVE_sseq
+    WaitSE SEQ_SE_DP_SAVE_sseq
     Return
 
-_08ED:
-    Message 12
-    ScrCmd_2D1 0x40BB
-    GoTo _034D
+BattleHall_OnFrame_DidntSaveBeforeQuit:
+    Message BattleHall_Text_DidntSaveBeforeQuit
+    DeleteActiveBattleHallStreak VAR_BATTLE_HALL_CHALLENGE_TYPE
+    GoTo BattleHall_EndChallenge
     End
 
-_08FC:
-    CallIfEq 0x40BB, 0, _0938
-    CallIfEq 0x40BB, 1, _0938
-    CallIfEq 0x4051, 1, _093E
-    CallIfEq 0x4051, 3, _0955
-    GoTo _034D
+BattleHall_OnFrame_ChallengeEndedCompletedRound:
+    CallIfEq VAR_BATTLE_HALL_CHALLENGE_TYPE, FRONTIER_CHALLENGE_SINGLE, BattleHall_IncrementTrainerScoreRoundCompleted
+    CallIfEq VAR_BATTLE_HALL_CHALLENGE_TYPE, FRONTIER_CHALLENGE_DOUBLE, BattleHall_IncrementTrainerScoreRoundCompleted
+    CallIfEq VAR_BATTLE_HALL_PRINT_STATE, 1, BattleHall_EarnedSilverPrint
+    CallIfEq VAR_BATTLE_HALL_PRINT_STATE, 3, BattleHall_EarnedGoldPrint
+    GoTo BattleHall_EndChallenge
     End
 
-_0938:
-    ScrCmd_30A 40
+BattleHall_IncrementTrainerScoreRoundCompleted:
+    IncrementTrainerScore TRAINER_SCORE_EVENT_BATTLE_HALL_ROUND_COMPLETED
     Return
 
-_093E:
-    Message 13
-    ScrCmd_0CD 0
-    Message 15
-    ScrCmd_04E 0x486
-    ScrCmd_04F
-    SetVar 0x4051, 2
+BattleHall_EarnedSilverPrint:
+    Message BattleHall_Text_PrintForVictory
+    BufferPlayerName 0
+    Message BattleHall_Text_SilverPrintAdded
+    PlayFanfare SEQ_FANFA4_sseq
+    WaitFanfare
+    SetVar VAR_BATTLE_HALL_PRINT_STATE, 2
     Return
 
-_0955:
-    Message 13
-    ScrCmd_0CD 0
-    Message 14
-    ScrCmd_04E 0x486
-    ScrCmd_04F
-    SetVar 0x4051, 4
-    CallCommonScript 0x806
+BattleHall_EarnedGoldPrint:
+    Message BattleHall_Text_PrintForVictory
+    BufferPlayerName 0
+    Message BattleHall_Text_GoldPrintAdded
+    PlayFanfare SEQ_FANFA4_sseq
+    WaitFanfare
+    SetVar VAR_BATTLE_HALL_PRINT_STATE, 4
+    Common_CheckAllFrontierGoldPrintsObtained
     Return
 
-_0970:
-    GoTo _034D
+BattleHall_OnFrame_ChallengeEnded:
+    GoTo BattleHall_EndChallenge
+    End
 
-    .byte 2
-    .byte 0
-    .byte 12
-    .byte 0
-    .byte 2
-    .byte 0
-    .byte 63
-    .byte 0
-    .byte 1
-    .byte 0
-    .byte 12
-    .byte 0
-    .byte 1
-    .byte 0
-    .byte 254
-    .byte 0
-    .byte 0
-    .byte 0
-    .byte 12
-    .byte 0
-    .byte 2
-    .byte 0
-    .byte 63
-    .byte 0
-    .byte 1
-    .byte 0
-    .byte 12
-    .byte 0
-    .byte 1
-    .byte 0
-    .byte 254
-    .byte 0
-    .byte 0
-    .byte 0
+BattleHall_Movement_Unused:
+    WalkNormalNorth 2
+    Delay8
+    WalkNormalNorth
+    EndMovement
 
-_0998:
-    PlayFanfare SEQ_SE_CONFIRM
+BattleHall_Movement_Unused2:
+    WalkNormalNorth 2
+    Delay8
+    WalkNormalNorth
+    EndMovement
+
+BattleHall_Hiker:
+    NPCMessage BattleHall_Text_StartWithHardMatchups
+    End
+
+BattleHall_SnowpointNPC:
+    NPCMessage BattleHall_Text_TryForARecord
+    End
+
+BattleHall_Twin:
+    NPCMessage BattleHall_Text_PachirisusACutie
+    End
+
+BattleHall_Pachirisu:
+    PokemonCryAndMessage SPECIES_PACHIRISU, BattleHall_Text_PachirisuCry
+    End
+
+BattleHall_ExpertM:
+    NPCMessage BattleHall_Text_TryDifferentPokemon
+    End
+
+BattleHall_Idol:
+    NPCMessage BattleHall_Text_TrySameSpeciesDifferentMoves
+    End
+
+BattleHall_PokefanF:
+    NPCMessage BattleHall_Text_CroagunkHasTwoTypes
+    End
+
+BattleHall_Maid:
+    NPCMessage BattleHall_Text_MysteriousMaid
+    End
+
+BattleHall_BugCatcher:
+    NPCMessage BattleHall_Text_CompeteWithAFriend
+    End
+
+BattleHall_RecordKeeper:
+    PlaySE SE_CONFIRM_sseq_3
     LockAll
     FacePlayer
-    Message 59
-    WaitABXPadPress
+    GoToIfUnset FLAG_SPOKEN_TO_BATTLE_HALL_RECORD_KEEPER, BattleHall_RecordKeeperIntro
+    GetBattleHallRecordKeeperStats 1, 2, 3, 4, VAR_BATTLE_HALL_NEXT_TOTAL_RECORD_MILESTONE, VAR_RESULT
+    GoToIfEq VAR_RESULT, 0, BattleHall_RecordKeeperReplayIntro
+    GoToIfEq VAR_RESULT, 2, BattleHall_RecordKeeperNextMilestoneInfo
+    GoToIfEq VAR_RESULT, 3, BattleHall_RecordKeeperAllMilestonesMet
+    BufferPlayerName 0
+    Message BattleHall_Text_StreakRecordIsX
+    Message BattleHall_Text_BPRewardForStreak
+    PlayFanfare SEQ_PL_POINTGET3_sseq
+    Message BattleHall_Text_PlayerReceivedBP
+    WaitFanfare
+    GoTo BattleHall_RecordKeeperEnd
+    End
+
+BattleHall_RecordKeeperReplayIntro:
+    Message BattleHall_Text_RecordKeeperIntro
+    GoTo BattleHall_RecordKeeperEnd
+    End
+
+BattleHall_RecordKeeperNextMilestoneInfo:
+    BufferPlayerName 0
+    Message BattleHall_Text_RecordStandsAtX
+    Message BattleHall_Text_WillEarnBPForStreak
+    GoTo BattleHall_RecordKeeperEnd
+    End
+
+BattleHall_RecordKeeperAllMilestonesMet:
+    BufferPlayerName 0
+    Message BattleHall_Text_FantasticRecord
+    GoTo BattleHall_RecordKeeperEnd
+    End
+
+BattleHall_RecordKeeperIntro:
+    SetFlag FLAG_SPOKEN_TO_BATTLE_HALL_RECORD_KEEPER
+    Message BattleHall_Text_RecordKeeperIntro
+    GoTo BattleHall_RecordKeeperEnd
+    End
+
+BattleHall_RecordKeeperEnd:
+    WaitButton
     CloseMessage
     ReleaseAll
     End
 
-_09AB:
-    PlayFanfare SEQ_SE_CONFIRM
+BattleHall_SerenaWinston:
+    PlaySE SE_CONFIRM_sseq_3
     LockAll
     FacePlayer
-    Message 60
-    WaitABXPadPress
+    GetPlayerGender VAR_RESULT
+    GoToIfEq VAR_RESULT, GENDER_MALE, BattleHall_SerenaMessages
+    GoTo BattleHall_WinstonMessages
+    End
+
+BattleHall_WinstonMessages:
+    BufferPlayerName 0
+    GetNumSpeciesWithBattleHallRecords VAR_0x8005
+    GoToIfGe VAR_0x8005, 475, BattleHall_Winston475Species
+    GoToIfGe VAR_0x8005, 351, BattleHall_Winston351Species
+    GoToIfGe VAR_0x8005, 251, BattleHall_Winston251Species
+    GoToIfGe VAR_0x8005, 151, BattleHall_Winston151Species
+    GoToIfGe VAR_0x8005, 101, BattleHall_Winston101Species
+    GoToIfGe VAR_0x8005, 51, BattleHall_Winston51Species
+    GoToIfGe VAR_0x8005, 31, BattleHall_Winston31Species
+    GoToIfGe VAR_0x8005, 11, BattleHall_Winston11Species
+    GoToIfGe VAR_0x8005, 1, BattleHall_Winston1Species
+    Message BattleHall_Text_Winston0Species
+    GoTo BattleHall_WinstonEnd
+    End
+
+BattleHall_Winston475Species:
+    Message BattleHall_Text_Winston475Species
+    GoTo BattleHall_WinstonEnd
+    End
+
+BattleHall_Winston351Species:
+    Message BattleHall_Text_Winston351Species
+    GoTo BattleHall_WinstonEnd
+    End
+
+BattleHall_Winston251Species:
+    Message BattleHall_Text_Winston251Species
+    GoTo BattleHall_WinstonEnd
+    End
+
+BattleHall_Winston151Species:
+    Message BattleHall_Text_Winston151Species
+    GoTo BattleHall_WinstonEnd
+    End
+
+BattleHall_Winston101Species:
+    Message BattleHall_Text_Winston101Species
+    GoTo BattleHall_WinstonEnd
+    End
+
+BattleHall_Winston51Species:
+    Message BattleHall_Text_Winston51Species
+    GoTo BattleHall_WinstonEnd
+    End
+
+BattleHall_Winston31Species:
+    Message BattleHall_Text_Winston31Species
+    GoTo BattleHall_WinstonEnd
+    End
+
+BattleHall_Winston11Species:
+    Message BattleHall_Text_Winston11Species
+    GoTo BattleHall_WinstonEnd
+    End
+
+BattleHall_Winston1Species:
+    Message BattleHall_Text_Winston1Species
+    GoTo BattleHall_WinstonEnd
+    End
+
+BattleHall_WinstonEnd:
+    WaitButton
     CloseMessage
     ReleaseAll
     End
 
-_09BE:
-    PlayFanfare SEQ_SE_CONFIRM
+BattleHall_WinstonSerena:
+    PlaySE SE_CONFIRM_sseq_3
     LockAll
     FacePlayer
-    Message 61
-    WaitABXPadPress
+    GetPlayerGender VAR_RESULT
+    GoToIfEq VAR_RESULT, GENDER_FEMALE, BattleHall_WinstonMessages
+    GoTo BattleHall_SerenaMessages
+    End
+
+BattleHall_SerenaMessages:
+    BufferPlayerName 0
+    GetNumSpeciesWithBattleHallRecords VAR_0x8005
+    GoToIfGe VAR_0x8005, 475, BattleHall_Serena475Species
+    GoToIfGe VAR_0x8005, 351, BattleHall_Serena351Species
+    GoToIfGe VAR_0x8005, 251, BattleHall_Serena251Species
+    GoToIfGe VAR_0x8005, 151, BattleHall_Serena151Species
+    GoToIfGe VAR_0x8005, 101, BattleHall_Serena101Species
+    GoToIfGe VAR_0x8005, 51, BattleHall_Serena51Species
+    GoToIfGe VAR_0x8005, 31, BattleHall_Serena31Species
+    GoToIfGe VAR_0x8005, 11, BattleHall_Serena11Species
+    GoToIfGe VAR_0x8005, 1, BattleHall_Serena1Species
+    Message BattleHall_Text_Serena0Species
+    GoTo BattleHall_SerenaEnd
+    End
+
+BattleHall_Serena475Species:
+    Message BattleHall_Text_Serena475Species
+    GoTo BattleHall_SerenaEnd
+    End
+
+BattleHall_Serena351Species:
+    Message BattleHall_Text_Serena351Species
+    GoTo BattleHall_SerenaEnd
+    End
+
+BattleHall_Serena251Species:
+    Message BattleHall_Text_Serena251Species
+    GoTo BattleHall_SerenaEnd
+    End
+
+BattleHall_Serena151Species:
+    Message BattleHall_Text_Serena151Species
+    GoTo BattleHall_SerenaEnd
+    End
+
+BattleHall_Serena101Species:
+    Message BattleHall_Text_Serena101Species
+    GoTo BattleHall_SerenaEnd
+    End
+
+BattleHall_Serena51Species:
+    Message BattleHall_Text_Serena51Species
+    GoTo BattleHall_SerenaEnd
+    End
+
+BattleHall_Serena31Species:
+    Message BattleHall_Text_Serena31Species
+    GoTo BattleHall_SerenaEnd
+    End
+
+BattleHall_Serena11Species:
+    Message BattleHall_Text_Serena11Species
+    GoTo BattleHall_SerenaEnd
+    End
+
+BattleHall_Serena1Species:
+    Message BattleHall_Text_Serena1Species
+    GoTo BattleHall_SerenaEnd
+    End
+
+BattleHall_SerenaEnd:
+    WaitButton
     CloseMessage
     ReleaseAll
     End
 
-_09D1:
-    PlayFanfare SEQ_SE_CONFIRM
+BattleHall_MajorNPC:
+    PlaySE SE_CONFIRM_sseq_3
     LockAll
     FacePlayer
-    ScrCmd_04B 0x5DC
-    ScrCmd_04C 0x1A1, 0
-    Message 62
-    ScrCmd_04D
-    WaitABXPadPress
+    BufferPlayerName 0
+    SetVar VAR_MAP_LOCAL_0x01, VAR_OBJ_GFX_ID_1
+    GoToIfEq VAR_MAP_LOCAL_0x01, OBJ_EVENT_GFX_PLAYER_M, BattleHall_Lucas
+    GoToIfEq VAR_MAP_LOCAL_0x01, OBJ_EVENT_GFX_PLAYER_F, BattleHall_Dawn
+    GoToIfEq VAR_MAP_LOCAL_0x01, OBJ_EVENT_GFX_MOM, BattleHall_Mom
+    GoToIfEq VAR_MAP_LOCAL_0x01, OBJ_EVENT_GFX_PROF_OAK, BattleHall_Oak
+    GoToIfEq VAR_MAP_LOCAL_0x01, OBJ_EVENT_GFX_JASMINE, BattleHall_Jasmine
+    End
+
+BattleHall_Lucas:
+    Message BattleHall_Text_Lucas
+    GoTo BattleHall_MajorNPCEnd
+    End
+
+BattleHall_Dawn:
+    Message BattleHall_Text_Dawn
+    GoTo BattleHall_MajorNPCEnd
+    End
+
+BattleHall_Mom:
+    Message BattleHall_Text_Mom
+    GoTo BattleHall_MajorNPCEnd
+    End
+
+BattleHall_Oak:
+    Message BattleHall_Text_Oak
+    GoTo BattleHall_MajorNPCEnd
+    End
+
+BattleHall_Jasmine:
+    Message BattleHall_Text_Jasmine
+    GoTo BattleHall_MajorNPCEnd
+    End
+
+BattleHall_MajorNPCEnd:
+    WaitButton
     CloseMessage
     ReleaseAll
     End
 
-_09F0:
-    PlayFanfare SEQ_SE_CONFIRM
-    LockAll
-    FacePlayer
-    Message 63
-    WaitABXPadPress
-    CloseMessage
-    ReleaseAll
-    End
-
-_0A03:
-    PlayFanfare SEQ_SE_CONFIRM
-    LockAll
-    FacePlayer
-    Message 64
-    WaitABXPadPress
-    CloseMessage
-    ReleaseAll
-    End
-
-_0A16:
-    PlayFanfare SEQ_SE_CONFIRM
-    LockAll
-    FacePlayer
-    Message 65
-    WaitABXPadPress
-    CloseMessage
-    ReleaseAll
-    End
-
-_0A29:
-    PlayFanfare SEQ_SE_CONFIRM
-    LockAll
-    FacePlayer
-    Message 66
-    WaitABXPadPress
-    CloseMessage
-    ReleaseAll
-    End
-
-_0A3C:
-    PlayFanfare SEQ_SE_CONFIRM
-    LockAll
-    FacePlayer
-    Message 67
-    WaitABXPadPress
-    CloseMessage
-    ReleaseAll
-    End
-
-_0A4F:
-    PlayFanfare SEQ_SE_CONFIRM
-    LockAll
-    FacePlayer
-    GoToIfUnset 190, _0AD7
-    ScrCmd_324 1, 2, 3, 4, 0x4062, 0x800C
-    GoToIfEq 0x800C, 0, _0AAD
-    GoToIfEq 0x800C, 2, _0AB8
-    GoToIfEq 0x800C, 3, _0AC9
-    ScrCmd_0CD 0
-    Message 69
-    Message 70
-    ScrCmd_04E 0x4C5
-    Message 72
-    ScrCmd_04F
-    GoTo _0AE6
-    End
-
-_0AAD:
-    Message 68
-    GoTo _0AE6
-    End
-
-_0AB8:
-    ScrCmd_0CD 0
-    Message 73
-    Message 71
-    GoTo _0AE6
-    End
-
-_0AC9:
-    ScrCmd_0CD 0
-    Message 74
-    GoTo _0AE6
-    End
-
-_0AD7:
-    SetFlag 190
-    Message 68
-    GoTo _0AE6
-    End
-
-_0AE6:
-    WaitABXPadPress
-    CloseMessage
-    ReleaseAll
-    End
-
-_0AEE:
-    PlayFanfare SEQ_SE_CONFIRM
-    LockAll
-    FacePlayer
-    ScrCmd_14D 0x800C
-    GoToIfEq 0x800C, 0, _0C22
-    GoTo _0B0F
-    End
-
-_0B0F:
-    ScrCmd_0CD 0
-    ScrCmd_325 0x8005
-    GoToIfGe 0x8005, 0x1DB, _0B96
-    GoToIfGe 0x8005, 0x15F, _0BA1
-    GoToIfGe 0x8005, 251, _0BAC
-    GoToIfGe 0x8005, 151, _0BB7
-    GoToIfGe 0x8005, 101, _0BC2
-    GoToIfGe 0x8005, 51, _0BCD
-    GoToIfGe 0x8005, 31, _0BD8
-    GoToIfGe 0x8005, 11, _0BE3
-    GoToIfGe 0x8005, 1, _0BEE
-    Message 75
-    GoTo _0BF9
-    End
-
-_0B96:
-    Message 84
-    GoTo _0BF9
-    End
-
-_0BA1:
-    Message 83
-    GoTo _0BF9
-    End
-
-_0BAC:
-    Message 82
-    GoTo _0BF9
-    End
-
-_0BB7:
-    Message 81
-    GoTo _0BF9
-    End
-
-_0BC2:
-    Message 80
-    GoTo _0BF9
-    End
-
-_0BCD:
-    Message 79
-    GoTo _0BF9
-    End
-
-_0BD8:
-    Message 78
-    GoTo _0BF9
-    End
-
-_0BE3:
-    Message 77
-    GoTo _0BF9
-    End
-
-_0BEE:
-    Message 76
-    GoTo _0BF9
-    End
-
-_0BF9:
-    WaitABXPadPress
-    CloseMessage
-    ReleaseAll
-    End
-
-_0C01:
-    PlayFanfare SEQ_SE_CONFIRM
-    LockAll
-    FacePlayer
-    ScrCmd_14D 0x800C
-    GoToIfEq 0x800C, 1, _0B0F
-    GoTo _0C22
-    End
-
-_0C22:
-    ScrCmd_0CD 0
-    ScrCmd_325 0x8005
-    GoToIfGe 0x8005, 0x1DB, _0CA9
-    GoToIfGe 0x8005, 0x15F, _0CB4
-    GoToIfGe 0x8005, 251, _0CBF
-    GoToIfGe 0x8005, 151, _0CCA
-    GoToIfGe 0x8005, 101, _0CD5
-    GoToIfGe 0x8005, 51, _0CE0
-    GoToIfGe 0x8005, 31, _0CEB
-    GoToIfGe 0x8005, 11, _0CF6
-    GoToIfGe 0x8005, 1, _0D01
-    Message 85
-    GoTo _0D0C
-    End
-
-_0CA9:
-    Message 94
-    GoTo _0D0C
-    End
-
-_0CB4:
-    Message 93
-    GoTo _0D0C
-    End
-
-_0CBF:
-    Message 92
-    GoTo _0D0C
-    End
-
-_0CCA:
-    Message 91
-    GoTo _0D0C
-    End
-
-_0CD5:
-    Message 90
-    GoTo _0D0C
-    End
-
-_0CE0:
-    Message 89
-    GoTo _0D0C
-    End
-
-_0CEB:
-    Message 88
-    GoTo _0D0C
-    End
-
-_0CF6:
-    Message 87
-    GoTo _0D0C
-    End
-
-_0D01:
-    Message 86
-    GoTo _0D0C
-    End
-
-_0D0C:
-    WaitABXPadPress
-    CloseMessage
-    ReleaseAll
-    End
-
-_0D14:
-    PlayFanfare SEQ_SE_CONFIRM
-    LockAll
-    FacePlayer
-    ScrCmd_0CD 0
-    SetVar 0x4001, 0x4021
-    GoToIfEq 0x4001, 0, _0D68
-    GoToIfEq 0x4001, 97, _0D73
-    GoToIfEq 0x4001, 140, _0D7E
-    GoToIfEq 0x4001, 166, _0D89
-    GoToIfEq 0x4001, 167, _0D94
-    End
-
-_0D68:
-    Message 96
-    GoTo _0D9F
-    End
-
-_0D73:
-    Message 95
-    GoTo _0D9F
-    End
-
-_0D7E:
-    Message 97
-    GoTo _0D9F
-    End
-
-_0D89:
-    Message 98
-    GoTo _0D9F
-    End
-
-_0D94:
-    Message 99
-    GoTo _0D9F
-    End
-
-_0D9F:
-    WaitABXPadPress
-    CloseMessage
-    ReleaseAll
-    End
-
-    .byte 0
+    .balign 4, 0

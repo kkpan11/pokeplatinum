@@ -1,80 +1,68 @@
-    .include "macros/scrcmd.inc"
+#include "macros/scrcmd.inc"
+#include "res/text/bank/jubilife_tv_2f.h"
 
-    .data
 
-    ScriptEntry _0031
-    ScriptEntry _0044
-    ScriptEntry _00CC
-    ScriptEntry _0012
-    .short 0xFD13
+    ScriptEntry JubilifeTV2F_Idol
+    ScriptEntry JubilifeTV2F_GymGuide
+    ScriptEntry JubilifeTV2F_Roughneck
+    ScriptEntry JubilifeTV2F_OnTransition
+    ScriptEntryEnd
 
-_0012:
-    ScrCmd_238 9, 0x4000
-    GoToIfEq 0x4000, 0, _002B
-    ClearFlag 0x215
+JubilifeTV2F_OnTransition:
+    CheckTVInterviewEligible TV_PROGRAM_SEGMENT_RIGHT_ON_PHOTO_CORNER, VAR_MAP_LOCAL_0x00
+    GoToIfEq VAR_MAP_LOCAL_0x00, 0, JubilifeTV2F_SetFlagHideReporter
+    ClearFlag FLAG_HIDE_JUBILIFE_TV_2F_REPORTER
     End
 
-_002B:
-    SetFlag 0x215
+JubilifeTV2F_SetFlagHideReporter:
+    SetFlag FLAG_HIDE_JUBILIFE_TV_2F_REPORTER
     End
 
-_0031:
-    PlayFanfare SEQ_SE_CONFIRM
+JubilifeTV2F_Idol:
+    NPCMessage JubilifeTV2F_Text_WhatAccessoriesWillGoWell
+    End
+
+JubilifeTV2F_GymGuide:
+    PlaySE SE_CONFIRM_sseq_3
     LockAll
     FacePlayer
-    Message 0
-    WaitABXPadPress
+    GoToIfSet FLAG_RECEIVED_JUBILIFE_TV_2F_ACCESSORY_STARTER_MASK, JubilifeTV2F_IHopeYouCollectAccessories
+    GetPlayerStarterSpecies VAR_RESULT
+    CallIfEq VAR_RESULT, SPECIES_TURTWIG, JubilifeTV2F_SetAccessoryTurtwigMask
+    CallIfEq VAR_RESULT, SPECIES_CHIMCHAR, JubilifeTV2F_SetAccessoryChimcharMask
+    CallIfEq VAR_RESULT, SPECIES_PIPLUP, JubilifeTV2F_SetAccessoryPiplupMask
+    SetVar VAR_JUBILIFE_TV_2F_ACCESSORY_STARTER_MASK, VAR_0x8004
+    BufferAccessoryNameWithArticle 0, VAR_0x8004
+    Message JubilifeTV2F_Text_GiftForFutureStar
+    SetVar VAR_0x8005, 1
+    Common_GiveAccessoryWaitForConfirm
+    SetFlag FLAG_RECEIVED_JUBILIFE_TV_2F_ACCESSORY_STARTER_MASK
     CloseMessage
     ReleaseAll
     End
 
-_0044:
-    PlayFanfare SEQ_SE_CONFIRM
-    LockAll
-    FacePlayer
-    GoToIfSet 0x13D, _00A4
-    ScrCmd_0DE 0x800C
-    CallIfEq 0x800C, 0x183, _00B4
-    CallIfEq 0x800C, 0x186, _00BC
-    CallIfEq 0x800C, 0x189, _00C4
-    SetVar 0x410A, 0x8004
-    ScrCmd_343 0, 0x8004
-    Message 1
-    SetVar 0x8005, 1
-    CallCommonScript 0x7DF
-    SetFlag 0x13D
+JubilifeTV2F_IHopeYouCollectAccessories:
+    BufferAccessoryName 0, VAR_JUBILIFE_TV_2F_ACCESSORY_STARTER_MASK
+    Message JubilifeTV2F_Text_IHopeYouCollectAccessories
+    WaitButton
     CloseMessage
     ReleaseAll
     End
 
-_00A4:
-    ScrCmd_261 0, 0x410A
-    Message 2
-    WaitABXPadPress
-    CloseMessage
-    ReleaseAll
-    End
-
-_00B4:
-    SetVar 0x8004, 92
+JubilifeTV2F_SetAccessoryTurtwigMask:
+    SetVar VAR_0x8004, ACCESSORY_TURTWIG_MASK
     Return
 
-_00BC:
-    SetVar 0x8004, 93
+JubilifeTV2F_SetAccessoryChimcharMask:
+    SetVar VAR_0x8004, ACCESSORY_CHIMCHAR_MASK
     Return
 
-_00C4:
-    SetVar 0x8004, 94
+JubilifeTV2F_SetAccessoryPiplupMask:
+    SetVar VAR_0x8004, ACCESSORY_PIPLUP_MASK
     Return
 
-_00CC:
-    PlayFanfare SEQ_SE_CONFIRM
-    LockAll
-    FacePlayer
-    Message 3
-    WaitABXPadPress
-    CloseMessage
-    ReleaseAll
+JubilifeTV2F_Roughneck:
+    NPCMessage JubilifeTV2F_Text_FittingRoomAtTheBack
     End
 
-    .byte 0
+    .balign 4, 0

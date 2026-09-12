@@ -12,7 +12,7 @@ The first layer of abstraction is the Easy3D System (`easy3d.h`). Which provides
 - Drawing models with any transform
 - Setting up and releasing a 3D graphics state
 
-To elaborate on the last point: Before using any 3D graphics, a "3D Graphics State" must be initialized. The struct for this is currently called `GenericPointerData`. The Easy3D system provides an easy method to set up a simple gfx state via `Easy3D_Init` (With `Easy3D_Shutdown` as its counterpart), which works for most scenarios.
+To elaborate on the last point: Before using any 3D graphics, a "3D Graphics State" must be initialized. Such a state can be established using the `G3DPipeline_Init` function. However, the Easy3D system provides an easy method to set up a simple gfx state via `Easy3D_Init` (With `Easy3D_Shutdown` as its counterpart), which works for most scenarios.
 
 ### 2 - Easy3DObject
 The second layer of abstraction is `Easy3DObject` (`easy3d_object.h`). This API provides a streamlined interface for:
@@ -48,23 +48,23 @@ NNSFndAllocator allocator; // Needed for Animations
 Next we load all of the data:
 ```c
 // Open the title NARC
-NARC *narc = NARC_ctor(NARC_INDEX_DEMO__TITLE__TITLEDEMO, HEAP_ID_FIELD);
+NARC *narc = NARC_ctor(NARC_INDEX_DEMO__TITLE__TITLEDEMO, HEAP_ID_FIELD1);
 
 // Load the model from the title screen NARC. Member index 1 is the model data.
 // There is also Easy3DModel_Load which takes a NARC index and a member index.
-Easy3DModel_LoadFrom(&giratinaModel, narc, 1, HEAP_ID_FIELD);
+Easy3DModel_LoadFrom(&giratinaModel, narc, 1, HEAP_ID_FIELD1);
 Easy3DObject_Init(&giratinaObj, &giratinaModel);
 
 // Initialize the Allocator used by the animations
-Heap_FndInitAllocatorForExpHeap(&allocator, HEAP_ID_FIELD, 4);
+HeapExp_FndInitAllocator(&allocator, HEAP_ID_FIELD1, 4);
 
 // Load the model animation with member index 2.
-Easy3DAnim_LoadFrom(&giratinaModelAnim, &giratinaModel, narc, 2, HEAP_ID_FIELD, &allocator);
+Easy3DAnim_LoadFrom(&giratinaModelAnim, &giratinaModel, narc, 2, HEAP_ID_FIELD1, &allocator);
 // Bind the animation to the object
 Easy3DObject_AddAnim(&giratinaObj, &giratinaModelAnim);
 
 // Do the same for the texture animation
-Easy3DAnim_LoadFrom(&giratinaTexAnim, &giratinaModel, narc, 0, HEAP_ID_FIELD, &allocator);
+Easy3DAnim_LoadFrom(&giratinaTexAnim, &giratinaModel, narc, 0, HEAP_ID_FIELD1, &allocator);
 Easy3DObject_AddAnim(&giratinaObj, &giratinaTexAnim);
 
 NARC_dtor(narc);
@@ -74,7 +74,7 @@ This is all that needs to be done in terms of setup, now the model is ready to d
 ### Drawing the Model
 Before drawing there's a few things that should be configured on the object, one of them being the position of the model obviously. For simplicity's sake I will just set the models position to the player's position.
 ```c
-const VecFx32 *pos = PlayerAvatar_PosVector(fieldSystem->playerAvatar);
+const VecFx32 *pos = PlayerAvatar_GetPos(fieldSystem->playerAvatar);
 Easy3DObject_SetPosition(&giratinaObj, pos->x, pos->y, pos->z);
 
 // Make sure the model actually gets rendered
@@ -105,14 +105,14 @@ angle = (angle + 100) % 0xFFFF;
 Easy3DObject_SetRotation(&giratinaObj, angle, ROTATION_AXIS_Y);
 
 // Resize using L and R
-if (gCoreSys.heldKeys & PAD_BUTTON_R) {
+if (gSystem.heldKeys & PAD_BUTTON_R) {
     VecFx32 scale;
     Easy3DObject_GetScale(&giratinaObj, &scale.x, &scale.y, &scale.z);
     scale.x = FX_Mul(scale.x, FX32_CONST(1.01));
     scale.y = FX_Mul(scale.y, FX32_CONST(1.01));
     scale.z = FX_Mul(scale.z, FX32_CONST(1.01));
     Easy3DObject_SetScale(&giratinaObj, scale.x, scale.y, scale.z);
-} else if (gCoreSys.heldKeys & PAD_BUTTON_L) {
+} else if (gSystem.heldKeys & PAD_BUTTON_L) {
     VecFx32 scale;
     Easy3DObject_GetScale(&giratinaObj, &scale.x, &scale.y, &scale.z);
     scale.x = FX_Mul(scale.x, FX32_CONST(0.99));

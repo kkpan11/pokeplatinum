@@ -1,64 +1,57 @@
-    .include "macros/scrcmd.inc"
+#include "macros/scrcmd.inc"
+#include "res/text/bank/resort_area_house.h"
+#include "res/field/events/events_resort_area_house.h"
 
-    .data
 
-    ScriptEntry _000E
-    ScriptEntry _0034
-    ScriptEntry _0047
-    .short 0xFD13
+    ScriptEntry ResortAreaHouse_Collector
+    ScriptEntry ResortAreaHouse_OldMan
+    ScriptEntry ResortAreaHouse_NinjaBoy
+    ScriptEntryEnd
 
-_000E:
-    PlayFanfare SEQ_SE_CONFIRM
+ResortAreaHouse_Collector:
+    PlaySE SE_CONFIRM_sseq_3
     LockAll
     FacePlayer
-    Message 0
-    WaitABXPadPress
+    Message ResortAreaHouse_Text_AllINeedIsTV
+    WaitButton
     CloseMessage
-    ApplyMovement 0, _002C
+    ApplyMovement LOCALID_COLLECTOR, ResortAreaHouse_Movement_CollectorWalkOnSpotNorth
     WaitMovement
     ReleaseAll
     End
 
     .balign 4, 0
-_002C:
-    MoveAction_020
+ResortAreaHouse_Movement_CollectorWalkOnSpotNorth:
+    WalkOnSpotNormalNorth
     EndMovement
 
-_0034:
-    PlayFanfare SEQ_SE_CONFIRM
+ResortAreaHouse_OldMan:
+    NPCMessage ResortAreaHouse_Text_BestTrainersAtFrontier
+    End
+
+ResortAreaHouse_NinjaBoy:
+    PlaySE SE_CONFIRM_sseq_3
     LockAll
     FacePlayer
-    Message 2
-    WaitABXPadPress
+    GetPlayerGender VAR_RESULT
+    GoToIfEq VAR_RESULT, GENDER_MALE, ResortAreaHouse_SeenEveryPokemonSinnohMale
+    GoToIfEq VAR_RESULT, GENDER_FEMALE, ResortAreaHouse_SeenEveryPokemonSinnohFemale
+    End
+
+ResortAreaHouse_SeenEveryPokemonSinnohMale:
+    Message ResortAreaHouse_Text_SeenEveryPokemonSinnohMale
+    GoTo ResortAreaHouse_NinjaBoyEnd
+    End
+
+ResortAreaHouse_SeenEveryPokemonSinnohFemale:
+    Message ResortAreaHouse_Text_SeenEveryPokemonSinnohFemale
+    GoTo ResortAreaHouse_NinjaBoyEnd
+    End
+
+ResortAreaHouse_NinjaBoyEnd:
+    WaitButton
     CloseMessage
     ReleaseAll
     End
 
-_0047:
-    PlayFanfare SEQ_SE_CONFIRM
-    LockAll
-    FacePlayer
-    ScrCmd_14D 0x800C
-    GoToIfEq 0x800C, 0, _006F
-    GoToIfEq 0x800C, 1, _007A
-    End
-
-_006F:
-    Message 3
-    GoTo _0085
-    End
-
-_007A:
-    Message 4
-    GoTo _0085
-    End
-
-_0085:
-    WaitABXPadPress
-    CloseMessage
-    ReleaseAll
-    End
-
-    .byte 0
-    .byte 0
-    .byte 0
+    .balign 4, 0

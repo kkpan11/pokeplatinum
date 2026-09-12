@@ -7,9 +7,9 @@
 
 #include "buffer_manager.h"
 #include "heap.h"
+#include "sound_playback.h"
 #include "sys_task.h"
 #include "sys_task_manager.h"
-#include "unk_02005474.h"
 
 typedef struct UnkStruct_ov5_021EF4F8_t {
     u32 unk_00;
@@ -36,15 +36,13 @@ static void ov5_021EF6CC(UnkStruct_ov5_021EF4F8 *param0);
 static void ov5_021EF6F0(UnkStruct_ov5_021EF4F8 *param0);
 static void ov5_021EF710(UnkStruct_ov5_021EF4F8 *param0);
 
-UnkStruct_ov5_021EF4F8 *ov5_021EF4BC(u32 param0, HBlankSystem *param1)
+UnkStruct_ov5_021EF4F8 *ov5_021EF4BC(enum HeapID heapID, HBlankSystem *param1)
 {
-    UnkStruct_ov5_021EF4F8 *v0;
-
-    v0 = Heap_AllocFromHeap(param0, sizeof(UnkStruct_ov5_021EF4F8));
+    UnkStruct_ov5_021EF4F8 *v0 = Heap_Alloc(heapID, sizeof(UnkStruct_ov5_021EF4F8));
     memset(v0, 0, sizeof(UnkStruct_ov5_021EF4F8));
 
     v0->unk_00 = 0;
-    v0->bufferManager = BufferManager_New(param0, v0->unk_0C, v0->unk_18C);
+    v0->bufferManager = BufferManager_New(heapID, v0->unk_0C, v0->unk_18C);
     v0->unk_310 = param1;
 
     return v0;
@@ -57,10 +55,10 @@ void ov5_021EF4F8(UnkStruct_ov5_021EF4F8 *param0)
     }
 
     BufferManager_Delete(param0->bufferManager);
-    Heap_FreeToHeap(param0);
+    Heap_Free(param0);
 }
 
-void ov5_021EF518(UnkStruct_ov5_021EF4F8 *param0)
+void Field_DoPoisonEffect(UnkStruct_ov5_021EF4F8 *param0)
 {
     GF_ASSERT(param0->unk_00 == 0);
 
@@ -75,7 +73,7 @@ void ov5_021EF518(UnkStruct_ov5_021EF4F8 *param0)
     param0->unk_00 = 1;
     param0->unk_08 = 0;
 
-    Sound_PlayEffect(1552);
+    Sound_PlayEffect(SEQ_SE_DP_DOKU2_sseq);
 }
 
 static void ov5_021EF5A8(SysTask *param0, void *param1)
@@ -119,9 +117,7 @@ static void ov5_021EF5A8(SysTask *param0, void *param1)
 static void ov5_021EF634(UnkStruct_ov5_021EF4F8 *param0)
 {
     const u16 *v0;
-    int v1;
-
-    v1 = GX_GetVCount();
+    int v1 = GX_GetVCount();
     v0 = BufferManager_GetReadBuffer(param0->bufferManager);
 
     if (v1 < 192) {

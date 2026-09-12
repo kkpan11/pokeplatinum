@@ -1,515 +1,504 @@
-    .include "macros/scrcmd.inc"
+#include "macros/scrcmd.inc"
+#include "generated/distribution_events.h"
+#include "generated/hidden_locations.h"
+#include "res/text/bank/route_224.h"
+#include "res/field/events/events_route_224.h"
 
-    .data
 
-    ScriptEntry _001A
-    ScriptEntry _0082
-    ScriptEntry _00B8
-    ScriptEntry _00E4
-    ScriptEntry _0458
-    ScriptEntry _05F4
-    .short 0xFD13
+    ScriptEntry Route224_OnTransition
+    ScriptEntry Route224_OnResume
+    ScriptEntry Route224_Tablet
+    ScriptEntry Route224_ProfOak
+    ScriptEntry Route224_CoordEvent_Marley
+    ScriptEntry Route224_Marley
+    ScriptEntryEnd
 
-_001A:
-    CallIfEq 0x4057, 1, _00AA
-    GoToIfSet 0x12D, _0080
-    ScrCmd_166 0x4000
-    GoToIfEq 0x4000, 0, _0080
-    ScrCmd_22D 2, 0x4000
-    GoToIfEq 0x4000, 0, _0080
-    ScrCmd_07E 0x1C4, 1, 0x4000
-    GoToIfEq 0x4000, 0, _0080
-    ScrCmd_28B 1, 0x4000
-    GoToIfEq 0x4000, 0, _0080
-    ClearFlag 0x252
-_0080:
+Route224_OnTransition:
+    CallIfEq VAR_SHAYMIN_EVENT_STATE, 1, Route224_IncreaseVars
+    GoToIfSet FLAG_WROTE_ON_ROUTE_224_TABLET, Route224_DontHideProfOak
+    CheckGameCompleted VAR_MAP_LOCAL_0x00
+    GoToIfEq VAR_MAP_LOCAL_0x00, FALSE, Route224_DontHideProfOak
+    GetNationalDexEnabled VAR_MAP_LOCAL_0x00
+    GoToIfEq VAR_MAP_LOCAL_0x00, FALSE, Route224_DontHideProfOak
+    CheckItem ITEM_OAKS_LETTER, 1, VAR_MAP_LOCAL_0x00
+    GoToIfEq VAR_MAP_LOCAL_0x00, FALSE, Route224_DontHideProfOak
+    CheckDistributionEvent DISTRIBUTION_EVENT_SHAYMIN, VAR_MAP_LOCAL_0x00
+    GoToIfEq VAR_MAP_LOCAL_0x00, FALSE, Route224_DontHideProfOak
+    ClearFlag FLAG_HIDE_ROUTE_224_PROF_OAK
+Route224_DontHideProfOak:
     End
 
-_0082:
-    GoToIfSet 0x12D, _009A
-    CallIfEq 0x408D, 1, _009C
-_009A:
+Route224_OnResume:
+    GoToIfSet FLAG_WROTE_ON_ROUTE_224_TABLET, Route224_OnResumeEnd
+    CallIfEq VAR_ROUTE_224_PROF_OAK_STATE, 1, Route224_SetProfOakDirNorth
+Route224_OnResumeEnd:
     End
 
-_009C:
-    ScrCmd_18C 3, 0
+Route224_SetProfOakDirNorth:
+    ScrCmd_18C LOCALID_PROF_OAK, DIR_NORTH
     Return
 
-    .byte 30
-    .byte 0
-    .byte 202
-    .byte 2
-    .byte 27
-    .byte 0
-
-_00AA:
-    SetVar 0x4057, 2
-    SetVar 0x4085, 1
+Route224_Unused:
+    SetFlag FLAG_HIDE_ROUTE_224_MARLEY
     Return
 
-_00B8:
-    PlayFanfare SEQ_SE_CONFIRM
+Route224_IncreaseVars:
+    SetVar VAR_SHAYMIN_EVENT_STATE, 2
+    SetVar VAR_ROUTE_224_STATE, 1
+    Return
+
+Route224_Tablet:
+    PlaySE SE_CONFIRM_sseq_3
     LockAll
     FacePlayer
-    GoToIfSet 0x12D, _00D6
-    Message 7
-    WaitABXPadPress
+    GoToIfSet FLAG_WROTE_ON_ROUTE_224_TABLET, Route224_NameWhomIThank
+    Message Route224_Text_SurfaceIsUnmarked
+    WaitButton
     CloseMessage
     ReleaseAll
     End
 
-_00D6:
-    ScrCmd_272 1
-    Message 8
-    WaitABXPadPress
+Route224_NameWhomIThank:
+    BufferTabletName 1
+    Message Route224_Text_NameWhomIThank
+    WaitButton
     CloseMessage
     ReleaseAll
     End
 
-_00E4:
-    GoToIfSet 0x12D, _022D
-    PlayFanfare SEQ_SE_CONFIRM
+Route224_ProfOak:
+    GoToIfSet FLAG_WROTE_ON_ROUTE_224_TABLET, Route224_WhatWasThatPokemon2Return2
+    PlaySE SE_CONFIRM_sseq_3
     LockAll
     FacePlayer
-    SetVar 0x408D, 1
-    ScrCmd_0CD 0
-    ScrCmd_14D 0x800C
-    GoToIfEq 0x800C, 1, _0219
-    Message 0
-_0114:
+    SetVar VAR_ROUTE_224_PROF_OAK_STATE, 1
+    BufferPlayerName 0
+    GetPlayerGender VAR_RESULT
+    GoToIfEq VAR_RESULT, GENDER_FEMALE, Route224_ExamineTabletFemale
+    Message Route224_Text_ExamineTabletMale
+Route224_ExamineTablet:
     CloseMessage
-    Call _0240
-    ScrCmd_0CD 0
-    Message 2
+    Call Route224_PlayerWalkToTabletFaceProfOak
+    BufferPlayerName 0
+    Message Route224_Text_SayThanksToWhom
     CloseMessage
-_0124:
-    FadeScreen 6, 1, 0, 0
+Route224_ExpressThanks:
+    FadeScreenOut
     WaitFadeScreen
-    ScrCmd_271 0x800C
-    FadeScreen 6, 1, 1, 0
+    OpenShayminTabletNamingScreen VAR_RESULT
+    FadeScreenIn
     WaitFadeScreen
-    GoToIfEq 0x800C, 1, _0222
-    ScrCmd_0CD 0
-    ScrCmd_272 1
-    Message 3
-    ScrCmd_03E 0x800C
+    GoToIfEq VAR_RESULT, 1, Route224_NotSuggestingNoOne
+    BufferPlayerName 0
+    BufferTabletName 1
+    Message Route224_Text_ExpressThanksToName
+    ShowYesNoMenu VAR_RESULT
     CloseMessage
-    GoToIfEq 0x800C, 1, _0124
-    Call _029A
-    WaitTime 15, 0x800C
-    ScrCmd_054 0, 10
-    FadeScreen 6, 6, 0, 0x7FFF
+    GoToIfEq VAR_RESULT, MENU_NO, Route224_ExpressThanks
+    Call Route224_PlayerProfOakFaceTablet
+    WaitTime 15, VAR_RESULT
+    FadeOutBGM 0, 10
+    FadeScreenOut FADE_SCREEN_SPEED_SLOW, COLOR_WHITE
     WaitFadeScreen
-    ScrCmd_270 3, 1
-    ScrCmd_333 0
-    ScrCmd_0BE 0x18F, 0, 0x38C, 0x1EC, 0
-    WaitTime 15, 0x800C
-    FadeScreen 6, 6, 1, 0x7FFF
+    EnableHiddenLocation HIDDEN_LOCATION_SEABREAK_PATH
+    SetPlayerVolume SOUND_VOLUME_MIN
+    Warp MAP_HEADER_ROUTE_224, 908, 492, DIR_NORTH
+    WaitTime 15, VAR_RESULT
+    FadeScreenIn FADE_SCREEN_SPEED_SLOW, COLOR_WHITE
     WaitFadeScreen
-    Call _02B8
-    CallIfNe 0x4057, 2, _01F0
-    CallIfEq 0x4057, 2, _01F5
-    WaitABXPadPress
+    Call Route224_ShayminSceneMovement
+    CallIfNe VAR_SHAYMIN_EVENT_STATE, 2, Route224_WhatWasThatPokemon2Return
+    CallIfEq VAR_SHAYMIN_EVENT_STATE, 2, Route224_ThankYou
+    WaitButton
     CloseMessage
-    ScrCmd_333 127
-    ScrCmd_055 10
-    SetFlag 0x12D
-    SetFlag 0x252
-    SetFlag 0x2CA
-    SetVar 0x408D, 0
+    SetPlayerVolume SOUND_VOLUME_MAX
+    FadeInBGM 10
+    SetFlag FLAG_WROTE_ON_ROUTE_224_TABLET
+    SetFlag FLAG_HIDE_ROUTE_224_PROF_OAK
+    SetFlag FLAG_HIDE_ROUTE_224_MARLEY
+    SetVar VAR_ROUTE_224_PROF_OAK_STATE, 0
     ReleaseAll
     End
 
-_01F0:
-    Message 5
+Route224_WhatWasThatPokemon2Return:
+    Message Route224_Text_WhatWasThatPokemon2
     Return
 
-_01F5:
-    Message 4
+Route224_ThankYou:
+    Message Route224_Text_WhatWasThatPokemon
     CloseMessage
-    ApplyMovement 21, _05EC
+    ApplyMovement LOCALID_MARLEY, Route224_Movement_MarleyWalkOnSpotEast
     WaitMovement
-    ApplyMovement 0xFF, _0438
+    ApplyMovement LOCALID_PLAYER, Route224_Movement_PlayerWalkOnSpotWest
     WaitMovement
-    WaitTime 15, 0x800C
-    Message 11
+    WaitTime 15, VAR_RESULT
+    Message Route224_Text_ThankYou
     Return
 
-_0219:
-    Message 1
-    GoTo _0114
+Route224_ExamineTabletFemale:
+    Message Route224_Text_ExamineTabletFemale
+    GoTo Route224_ExamineTablet
 
-_0222:
-    Message 6
+Route224_NotSuggestingNoOne:
+    Message Route224_Text_NotSuggestingNoOne
     CloseMessage
-    GoTo _0124
+    GoTo Route224_ExpressThanks
 
-_022D:
-    PlayFanfare SEQ_SE_CONFIRM
+Route224_WhatWasThatPokemon2Return2:
+    NPCMessage Route224_Text_WhatWasThatPokemon2
+    End
+
+Route224_PlayerWalkToTabletFaceProfOak:
+    GetPlayerMapPos VAR_0x8000, VAR_0x8001
+    SetVar VAR_0x8008, VAR_0x8000
+    GoToIfEq VAR_0x8008, 909, Route224_PlayerWalkToTabletFaceProfOakX909
+    GoToIfEq VAR_0x8008, 910, Route224_PlayerWalkToTabletFaceProfOakX910
+    ApplyMovement LOCALID_PLAYER, Route224_Movement_PlayerFaceTabletThenProfOak
+    WaitMovement
+    Return
+
+Route224_PlayerWalkToTabletFaceProfOakX909:
+    ApplyMovement LOCALID_PLAYER, Route224_Movement_PlayerWalkToTabletFaceProfOakX909
+    ApplyMovement LOCALID_PROF_OAK, Route224_Movement_ProfOakWatchPlayerWalkToTabletX909
+    WaitMovement
+    Return
+
+Route224_PlayerWalkToTabletFaceProfOakX910:
+    ApplyMovement LOCALID_PLAYER, Route224_Movement_PlayerWalkToTabletFaceProfOakX910
+    ApplyMovement LOCALID_PROF_OAK, Route224_Movement_ProfOakWatchPlayerWalkToTabletX910
+    WaitMovement
+    Return
+
+Route224_PlayerProfOakFaceTablet:
+    ApplyMovement LOCALID_PLAYER, Route224_Movement_FaceNorth
+    ApplyMovement LOCALID_PROF_OAK, Route224_Movement_FaceNorth
+    WaitMovement
+    Return
+
+Route224_MarleyNoticeShaymin:
+    ApplyMovement LOCALID_MARLEY, Route224_Movement_MarleyNoticeShaymin
+    Return
+
+Route224_ShayminSceneMovement:
+    ApplyMovement LOCALID_PROF_OAK, Route224_Movement_ProfOakLookAround
+    ApplyMovement LOCALID_PLAYER, Route224_Movement_PlayerLookAround
+    ApplyMovement LOCALID_SHAYMIN, Route224_Movement_ShayminEnter
+    WaitMovement
+    PlayCry SPECIES_SHAYMIN
+    WaitCry
+    CallIfEq VAR_SHAYMIN_EVENT_STATE, 2, Route224_MarleyNoticeShaymin
+    ApplyMovement LOCALID_PROF_OAK, Route224_Movement_ProfOakNoticeShaymin
+    ApplyMovement LOCALID_SHAYMIN, Route224_Movement_ShayminNoticePeople
+    ApplyMovement LOCALID_PLAYER, Route224_Movement_PlayerNoticeShaymin
+    WaitMovement
+    ApplyMovement LOCALID_SHAYMIN, Route224_Movement_ShayminLeave
+    WaitMovement
+    SetFlag FLAG_HIDE_ROUTE_224_SHAYMIN
+    RemoveObject LOCALID_SHAYMIN
+    PlayCry SPECIES_SHAYMIN
+    WaitCry
+    ApplyMovement LOCALID_PROF_OAK, Route224_Movement_ProfOakFaceWest
+    WaitMovement
+    Return
+
+    .balign 4, 0
+Route224_Movement_PlayerFaceTabletThenProfOak:
+    FaceNorth
+    Delay16
+    FaceEast
+    EndMovement
+
+    .balign 4, 0
+Route224_Movement_PlayerWalkToTabletFaceProfOakX909:
+    WalkNormalWest
+    WalkNormalNorth
+    Delay16
+    FaceEast
+    EndMovement
+
+    .balign 4, 0
+Route224_Movement_PlayerWalkToTabletFaceProfOakX910:
+    WalkNormalSouth
+    WalkNormalWest 2
+    WalkNormalNorth
+    Delay16
+    FaceEast
+    EndMovement
+
+    .balign 4, 0
+Route224_Movement_ProfOakWatchPlayerWalkToTabletX909:
+    Delay8
+    FaceWest
+    EndMovement
+
+    .balign 4, 0
+Route224_Movement_ProfOakWatchPlayerWalkToTabletX910:
+    Delay8
+    FaceSouth
+    Delay8 2
+    FaceWest
+    EndMovement
+
+    .balign 4, 0
+Route224_Movement_FaceNorth:
+    FaceNorth
+    EndMovement
+
+    .balign 4, 0
+Route224_Movement_ProfOakNoticeShaymin:
+    FaceEast
+    EmoteExclamationMark
+    Delay16
+    EndMovement
+
+    .balign 4, 0
+Route224_Movement_PlayerNoticeShaymin:
+    Delay16
+    FaceEast
+    EmoteExclamationMark
+    Delay16
+    EndMovement
+
+    .balign 4, 0
+Route224_Movement_ShayminNoticePeople:
+    FaceWest
+    EmoteExclamationMark
+    Delay16
+    EndMovement
+
+    .balign 4, 0
+Route224_Movement_ProfOakFaceWest:
+    FaceWest
+    EndMovement
+
+    .balign 4, 0
+Route224_Movement_PlayerLookAround:
+    FaceWest
+    Delay16
+    FaceSouth
+    Delay16
+    FaceEast
+    Delay16
+    FaceSouth
+    Delay16
+    FaceWest
+    Delay16
+    FaceNorth
+    Delay16
+    FaceSouth
+    Delay16
+    EndMovement
+
+    .balign 4, 0
+Route224_Movement_ProfOakLookAround:
+    FaceSouth
+    Delay16
+    FaceEast
+    Delay16
+    FaceSouth
+    Delay16
+    FaceWest
+    Delay16
+    FaceNorth
+    Delay16
+    EndMovement
+
+Route224_Movement_Unused:
+    WalkOnSpotNormalSouth
+    EndMovement
+
+    .balign 4, 0
+Route224_Movement_PlayerWalkOnSpotWest:
+    WalkOnSpotNormalWest
+    EndMovement
+
+    .balign 4, 0
+Route224_Movement_ShayminEnter:
+    WalkNormalSouth 12
+    EndMovement
+
+    .balign 4, 0
+Route224_Movement_ShayminLeave:
+    FaceNorth
+    Delay16
+    WalkSlightlyFastNorth 12
+    EndMovement
+
+Route224_CoordEvent_Marley:
+    LockAll
+    ClearFlag FLAG_HIDE_ROUTE_224_MARLEY
+    GetPlayerMapPos VAR_0x8004, VAR_0x8005
+    GoToIfEq VAR_0x8005, 496, Route224_MarleyWalkToPlayerZ496
+    GoToIfEq VAR_0x8005, 497, Route224_MarleyWalkToPlayerZ497
+    GoToIfEq VAR_0x8005, 498, Route224_MarleyWalkToPlayerZ498
+    End
+
+Route224_MarleyWalkToPlayerZ496:
+    SetObjectEventPos LOCALID_MARLEY, 902, 504
+    AddObject LOCALID_MARLEY
+    LockObject LOCALID_MARLEY
+    ApplyMovement LOCALID_MARLEY, Route224_Movement_MarleyWalkToPlayerZ496
+    WaitMovement
+    GoTo Route224_PokemonThatConveysGratitude
+    End
+
+Route224_MarleyWalkToPlayerZ497:
+    SetObjectEventPos LOCALID_MARLEY, 902, 505
+    AddObject LOCALID_MARLEY
+    LockObject LOCALID_MARLEY
+    ApplyMovement LOCALID_MARLEY, Route224_Movement_MarleyWalkToPlayerZ497
+    WaitMovement
+    GoTo Route224_PokemonThatConveysGratitude
+    End
+
+Route224_MarleyWalkToPlayerZ498:
+    SetObjectEventPos LOCALID_MARLEY, 902, 506
+    AddObject LOCALID_MARLEY
+    LockObject LOCALID_MARLEY
+    ApplyMovement LOCALID_MARLEY, Route224_Movement_MarleyWalkToPlayerZ498
+    WaitMovement
+    GoTo Route224_PokemonThatConveysGratitude
+    End
+
+Route224_PokemonThatConveysGratitude:
+    ApplyMovement LOCALID_PLAYER, Route224_Movement_PlayerWalkOnSpotWest2
+    WaitMovement
+    Message Route224_Text_PokemonThatConveysGratitude
+    CloseMessage
+    GetPlayerMapPos VAR_0x8004, VAR_0x8005
+    GoToIfEq VAR_0x8005, 496, Route224_MarleyWalkToTabletZ496
+    GoToIfEq VAR_0x8005, 497, Route224_MarleyWalkToTabletZ497
+    GoToIfEq VAR_0x8005, 498, Route224_MarleyWalkToTabletZ498
+    End
+
+Route224_MarleyWalkToTabletZ496:
+    ApplyMovement LOCALID_MARLEY, Route224_Movement_MarleyWalkToTabletZ496
+    ApplyMovement LOCALID_PLAYER, Route224_Movement_PlayerWatchMarleyWalkToTabletZ496
+    WaitMovement
+    GoTo Route224_ThatStoneTablet
+    End
+
+Route224_MarleyWalkToTabletZ497:
+    ApplyMovement LOCALID_MARLEY, Route224_Movement_MarleyWalkToTabletZ497
+    ApplyMovement LOCALID_PLAYER, Route224_Movement_PlayerWatchMarleyWalkToTabletZ497
+    WaitMovement
+    GoTo Route224_ThatStoneTablet
+    End
+
+Route224_MarleyWalkToTabletZ498:
+    ApplyMovement LOCALID_MARLEY, Route224_Movement_MarleyWalkToTabletZ498
+    ApplyMovement LOCALID_PLAYER, Route224_Movement_PlayerWatchMarleyWalkToTabletZ498
+    WaitMovement
+    GoTo Route224_ThatStoneTablet
+    End
+
+Route224_ThatStoneTablet:
+    SetVar VAR_SHAYMIN_EVENT_STATE, 2
+    SetVar VAR_ROUTE_224_STATE, 2
+    Message Route224_Text_ThatStoneTablet
+    WaitButton
+    CloseMessage
+    ReleaseAll
+    End
+
+    .balign 4, 0
+Route224_Movement_MarleyWalkToPlayerZ496:
+    WalkNormalNorth 8
+    WalkOnSpotNormalEast
+    EndMovement
+
+    .balign 4, 0
+Route224_Movement_MarleyWalkToPlayerZ497:
+    WalkNormalNorth 8
+    WalkOnSpotNormalEast
+    EndMovement
+
+    .balign 4, 0
+Route224_Movement_MarleyWalkToPlayerZ498:
+    WalkNormalNorth 8
+    WalkOnSpotNormalEast
+    EndMovement
+
+    .balign 4, 0
+Route224_Movement_MarleyWalkToTabletZ496:
+    WalkNormalSouth
+    WalkNormalEast 5
+    WalkNormalNorth 4
+    EndMovement
+
+    .balign 4, 0
+Route224_Movement_MarleyWalkToTabletZ497:
+    WalkNormalNorth
+    WalkNormalEast 5
+    WalkNormalNorth 3
+    EndMovement
+
+    .balign 4, 0
+Route224_Movement_MarleyWalkToTabletZ498:
+    WalkNormalNorth 2
+    WalkNormalEast 5
+    WalkNormalNorth 3
+    EndMovement
+
+    .balign 4, 0
+Route224_Movement_MarleyWalkOnSpotEast:
+    WalkOnSpotNormalEast
+    EndMovement
+
+Route224_Marley:
+    PlaySE SE_CONFIRM_sseq_3
     LockAll
     FacePlayer
-    Message 5
-    WaitABXPadPress
+    GoToIfSet FLAG_WROTE_ON_ROUTE_224_TABLET, Route224_ThankYouToo
+    Message Route224_Text_ThatStoneTablet
+    WaitButton
     CloseMessage
+    ApplyMovement LOCALID_MARLEY, Route224_Movement_MarleyFaceNorth
+    WaitMovement
     ReleaseAll
     End
 
-_0240:
-    ScrCmd_069 0x8000, 0x8001
-    SetVar 0x8008, 0x8000
-    GoToIfEq 0x8008, 0x38D, _0272
-    GoToIfEq 0x8008, 0x38E, _0286
-    ApplyMovement 0xFF, _0328
-    WaitMovement
-    Return
-
-_0272:
-    ApplyMovement 0xFF, _0338
-    ApplyMovement 3, _0364
-    WaitMovement
-    Return
-
-_0286:
-    ApplyMovement 0xFF, _034C
-    ApplyMovement 3, _0370
-    WaitMovement
-    Return
-
-_029A:
-    ApplyMovement 0xFF, _0384
-    ApplyMovement 3, _0384
-    WaitMovement
-    Return
-
-_02AE:
-    ApplyMovement 21, _066C
-    Return
-
-_02B8:
-    ApplyMovement 3, _0404
-    ApplyMovement 0xFF, _03C8
-    ApplyMovement 16, _0440
-    WaitMovement
-    ScrCmd_04C 0x1EC, 0
-    ScrCmd_04D
-    CallIfEq 0x4057, 2, _02AE
-    ApplyMovement 3, _038C
-    ApplyMovement 16, _03B0
-    ApplyMovement 0xFF, _039C
-    WaitMovement
-    ApplyMovement 16, _0448
-    WaitMovement
-    SetFlag 0x25C
-    ScrCmd_065 16
-    ScrCmd_04C 0x1EC, 0
-    ScrCmd_04D
-    ApplyMovement 3, _03C0
-    WaitMovement
-    Return
-
-    .balign 4, 0
-_0328:
-    MoveAction_000
-    MoveAction_041
-    MoveAction_003
-    EndMovement
-
-    .balign 4, 0
-_0338:
-    MoveAction_00E
-    MoveAction_00C
-    MoveAction_041
-    MoveAction_003
-    EndMovement
-
-    .balign 4, 0
-_034C:
-    MoveAction_00D
-    MoveAction_00E 2
-    MoveAction_00C
-    MoveAction_041
-    MoveAction_003
-    EndMovement
-
-    .balign 4, 0
-_0364:
-    MoveAction_03F
-    MoveAction_002
-    EndMovement
-
-    .balign 4, 0
-_0370:
-    MoveAction_03F
-    MoveAction_001
-    MoveAction_03F 2
-    MoveAction_002
-    EndMovement
-
-    .balign 4, 0
-_0384:
-    MoveAction_000
-    EndMovement
-
-    .balign 4, 0
-_038C:
-    MoveAction_003
-    MoveAction_04B
-    MoveAction_041
-    EndMovement
-
-    .balign 4, 0
-_039C:
-    MoveAction_041
-    MoveAction_003
-    MoveAction_04B
-    MoveAction_041
-    EndMovement
-
-    .balign 4, 0
-_03B0:
-    MoveAction_002
-    MoveAction_04B
-    MoveAction_041
-    EndMovement
-
-    .balign 4, 0
-_03C0:
-    MoveAction_002
-    EndMovement
-
-    .balign 4, 0
-_03C8:
-    MoveAction_002
-    MoveAction_041
-    MoveAction_001
-    MoveAction_041
-    MoveAction_003
-    MoveAction_041
-    MoveAction_001
-    MoveAction_041
-    MoveAction_002
-    MoveAction_041
-    MoveAction_000
-    MoveAction_041
-    MoveAction_001
-    MoveAction_041
-    EndMovement
-
-    .balign 4, 0
-_0404:
-    MoveAction_001
-    MoveAction_041
-    MoveAction_003
-    MoveAction_041
-    MoveAction_001
-    MoveAction_041
-    MoveAction_002
-    MoveAction_041
-    MoveAction_000
-    MoveAction_041
-    EndMovement
-
-    .byte 33
-    .byte 0
-    .byte 1
-    .byte 0
-    .byte 254
-    .byte 0
-    .byte 0
-    .byte 0
-
-    .balign 4, 0
-_0438:
-    MoveAction_022
-    EndMovement
-
-    .balign 4, 0
-_0440:
-    MoveAction_00D 12
-    EndMovement
-
-    .balign 4, 0
-_0448:
-    MoveAction_000
-    MoveAction_041
-    MoveAction_04C 12
-    EndMovement
-
-_0458:
-    LockAll
-    ClearFlag 0x2CA
-    ScrCmd_069 0x8004, 0x8005
-    GoToIfEq 0x8005, 0x1F0, _048D
-    GoToIfEq 0x8005, 0x1F1, _04AF
-    GoToIfEq 0x8005, 0x1F2, _04D1
-    End
-
-_048D:
-    ScrCmd_186 21, 0x386, 0x1F8
-    ScrCmd_064 21
-    ScrCmd_062 21
-    ApplyMovement 21, _0598
-    WaitMovement
-    GoTo _04F3
-    End
-
-_04AF:
-    ScrCmd_186 21, 0x386, 0x1F9
-    ScrCmd_064 21
-    ScrCmd_062 21
-    ApplyMovement 21, _05A4
-    WaitMovement
-    GoTo _04F3
-    End
-
-_04D1:
-    ScrCmd_186 21, 0x386, 0x1FA
-    ScrCmd_064 21
-    ScrCmd_062 21
-    ApplyMovement 21, _05B0
-    WaitMovement
-    GoTo _04F3
-    End
-
-_04F3:
-    ApplyMovement 0xFF, _0628
-    WaitMovement
-    Message 9
-    CloseMessage
-    ScrCmd_069 0x8004, 0x8005
-    GoToIfEq 0x8005, 0x1F0, _0531
-    GoToIfEq 0x8005, 0x1F1, _054B
-    GoToIfEq 0x8005, 0x1F2, _0565
-    End
-
-_0531:
-    ApplyMovement 21, _05BC
-    ApplyMovement 0xFF, _0630
-    WaitMovement
-    GoTo _057F
-    End
-
-_054B:
-    ApplyMovement 21, _05CC
-    ApplyMovement 0xFF, _0644
-    WaitMovement
-    GoTo _057F
-    End
-
-_0565:
-    ApplyMovement 21, _05DC
-    ApplyMovement 0xFF, _0658
-    WaitMovement
-    GoTo _057F
-    End
-
-_057F:
-    SetVar 0x4057, 2
-    SetVar 0x4085, 2
-    Message 10
-    WaitABXPadPress
+Route224_ThankYouToo:
+    Message Route224_Text_ThankYouToo
+    WaitButton
     CloseMessage
     ReleaseAll
     End
 
     .balign 4, 0
-_0598:
-    MoveAction_00C 8
-    MoveAction_023
+Route224_Movement_PlayerWalkOnSpotWest2:
+    WalkOnSpotNormalWest
     EndMovement
 
     .balign 4, 0
-_05A4:
-    MoveAction_00C 8
-    MoveAction_023
+Route224_Movement_PlayerWatchMarleyWalkToTabletZ496:
+    Delay8 2
+    WalkOnSpotNormalEast
+    Delay8 4
+    WalkOnSpotNormalNorth
     EndMovement
 
     .balign 4, 0
-_05B0:
-    MoveAction_00C 8
-    MoveAction_023
+Route224_Movement_PlayerWatchMarleyWalkToTabletZ497:
+    Delay8 2
+    WalkOnSpotNormalEast
+    Delay8 3
+    WalkOnSpotNormalNorth
     EndMovement
 
     .balign 4, 0
-_05BC:
-    MoveAction_00D
-    MoveAction_00F 5
-    MoveAction_00C 4
+Route224_Movement_PlayerWatchMarleyWalkToTabletZ498:
+    Delay8 2
+    WalkOnSpotNormalNorth
     EndMovement
 
     .balign 4, 0
-_05CC:
-    MoveAction_00C
-    MoveAction_00F 5
-    MoveAction_00C 3
+Route224_Movement_MarleyFaceNorth:
+    FaceNorth
     EndMovement
 
     .balign 4, 0
-_05DC:
-    MoveAction_00C 2
-    MoveAction_00F 5
-    MoveAction_00C 3
-    EndMovement
-
-    .balign 4, 0
-_05EC:
-    MoveAction_023
-    EndMovement
-
-_05F4:
-    PlayFanfare SEQ_SE_CONFIRM
-    LockAll
-    FacePlayer
-    GoToIfSet 0x12D, _061C
-    Message 10
-    WaitABXPadPress
-    CloseMessage
-    ApplyMovement 21, _0664
-    WaitMovement
-    ReleaseAll
-    End
-
-_061C:
-    Message 12
-    WaitABXPadPress
-    CloseMessage
-    ReleaseAll
-    End
-
-    .balign 4, 0
-_0628:
-    MoveAction_022
-    EndMovement
-
-    .balign 4, 0
-_0630:
-    MoveAction_03F 2
-    MoveAction_023
-    MoveAction_03F 4
-    MoveAction_020
-    EndMovement
-
-    .balign 4, 0
-_0644:
-    MoveAction_03F 2
-    MoveAction_023
-    MoveAction_03F 3
-    MoveAction_020
-    EndMovement
-
-    .balign 4, 0
-_0658:
-    MoveAction_03F 2
-    MoveAction_020
-    EndMovement
-
-    .balign 4, 0
-_0664:
-    MoveAction_000
-    EndMovement
-
-    .balign 4, 0
-_066C:
-    MoveAction_003
-    MoveAction_04B
+Route224_Movement_MarleyNoticeShaymin:
+    FaceEast
+    EmoteExclamationMark
     EndMovement

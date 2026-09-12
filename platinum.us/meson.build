@@ -1,25 +1,3 @@
-banner_bsf = files('banner.bsf')
-icon_png = files('icon.png')
-
-icon_nbfc = custom_target('icon.nbfc',
-    input: icon_png,
-    output: 'icon.nbfc',
-    command: [nitrogfx_exe, '@INPUT@', '@OUTPUT@' ]
-)
-
-icon_nbfp = custom_target('icon.nbfp',
-    input: icon_png,
-    output: 'icon.nbfp',
-    command: [nitrogfx_exe, '@INPUT@', '@OUTPUT@']
-)
-
-banner_bnr = custom_target('banner.bnr',
-    input: banner_bsf,
-    output: 'banner.bnr',
-    depends: [icon_nbfc, icon_nbfp],
-    command: [makebanner_exe, '@INPUT@', '@OUTPUT@']
-)
-
 # Collect inputs for main.lcf
 main_lsf = files('main.lsf')
 main_lcf_template = subproject('NitroSDK').get_variable('main_lcf_template')
@@ -31,9 +9,21 @@ main_lcf = custom_target('main.lcf',
     command: [makelcf_exe, '@INPUT@','@OUTPUT@']
 )
 
-# Collect spec files for later use
-sbins_sha1 = files('sbins.sha1')
+# Collect ROM inputs and SHA-sums for later use
+filesys_csv = files('filesys.csv')
 filesys_sha1 = files('filesys.sha1')
-rom_header_template = files('rom_header_template.sbin')
-rom_rsf = files('rom.rsf')
-rom_sha1 = files('rom.sha1')
+icon_png = files('icon.png')
+sbins_sha1 = files('sbins_shared.sha1')
+sbins_arm7_sha1 = files('sbins_arm7.sha1')
+
+if get_option('revision') == '0'
+    rom_header_template = files('rom_header_template_rev0.sbin')
+    rom_ini = files('rom_rev0.ini')
+    sbins_for_rev_sha1 = files('sbins_rev0.sha1')
+    rom_sha1 = files('rom_rev0.sha1')
+else
+    rom_header_template = files('rom_header_template_rev1.sbin')
+    rom_ini = files('rom_rev1.ini')
+    sbins_for_rev_sha1 = files('sbins_rev1.sha1')
+    rom_sha1 = files('rom_rev1.sha1')
+endif

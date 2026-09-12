@@ -1,20 +1,13 @@
-    .include "macros/scrcmd.inc"
+#include "macros/scrcmd.inc"
+#include "res/text/bank/pastoria_city_pokecenter_2f.h"
 
-    .data
 
-    ScriptEntry _0006
-    .short 0xFD13
+    ScriptEntry PastoriaCityPokecenter2F_Artist
+    ScriptEntryEnd
 
-_0006:
-    PlayFanfare SEQ_SE_CONFIRM
-    LockAll
-    FacePlayer
-    Message 0
-    WaitABXPadPress
-    CloseMessage
-    ReleaseAll
+PastoriaCityPokecenter2F_Artist:
+    NPCMessage PastoriaCityPokecenter2F_Text_PleasureFromDrawing
     End
 
-    .byte 0
-    .byte 0
-    .byte 0
+    .balign 4, 0
+

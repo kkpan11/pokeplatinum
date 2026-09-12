@@ -1,83 +1,82 @@
-    .include "macros/scrcmd.inc"
+#include "macros/scrcmd.inc"
+#include "constants/npc_trades.h"
+#include "res/text/bank/snowpoint_city_west_house.h"
 
-    .data
 
-    ScriptEntry _000A
-    ScriptEntry _0033
-    .short 0xFD13
+    ScriptEntry SnowpointCityWestHouse_AceTrainerM
+    ScriptEntry SnowpointCityWestHouse_Mindy
+    ScriptEntryEnd
 
-_000A:
-    PlayFanfare SEQ_SE_CONFIRM
+SnowpointCityWestHouse_AceTrainerM:
+    PlaySE SE_CONFIRM_sseq_3
     LockAll
     FacePlayer
-    GoToIfSet 244, _0028
-    Message 0
-    WaitABXPadPress
+    GoToIfSet FLAG_TRADED_FOR_GASPAR_HAUNTER, SnowpointCityWestHouse_MyGirlsHappy
+    Message SnowpointCityWestHouse_Text_SuchVivacityAndCharm
+    WaitButton
     CloseMessage
     ReleaseAll
     End
 
-_0028:
-    Message 1
-    WaitABXPadPress
+SnowpointCityWestHouse_MyGirlsHappy:
+    Message SnowpointCityWestHouse_Text_MyGirlsHappy
+    WaitButton
     CloseMessage
     ReleaseAll
     End
 
-_0033:
-    PlayFanfare SEQ_SE_CONFIRM
+SnowpointCityWestHouse_Mindy:
+    PlaySE SE_CONFIRM_sseq_3
     LockAll
     FacePlayer
-    GoToIfSet 244, _00DC
-    Message 2
-    ScrCmd_03E 0x800C
-    GoToIfEq 0x800C, 0, _0060
-    GoTo _00D1
+    GoToIfSet FLAG_TRADED_FOR_GASPAR_HAUNTER, SnowpointCityWestHouse_WeGotToBeFriends
+    Message SnowpointCityWestHouse_Text_AskTradeMedichamForHaunter
+    ShowYesNoMenu VAR_RESULT
+    GoToIfEq VAR_RESULT, MENU_YES, SnowpointCityWestHouse_TryTrade
+    GoTo SnowpointCityWestHouse_OKIfYouDontWant
 
-_0060:
+SnowpointCityWestHouse_TryTrade:
     CloseMessage
-    FadeScreen 6, 1, 0, 0
+    FadeScreenOut
     WaitFadeScreen
-    ScrCmd_2A5
-    ScrCmd_193 0x800C
-    ScrCmd_0A1
-    FadeScreen 6, 1, 1, 0
+    SelectPokemonToTrade
+    FadeScreenIn
     WaitFadeScreen
-    GoToIfEq 0x800C, 0xFF, _00D1
-    ScrCmd_226 2
-    SetVar 0x8004, 0x800C
-    ScrCmd_198 0x8004, 0x8005
-    ScrCmd_228 0x800C
-    GoToIfNe 0x8005, 0x800C, _00C4
-    ScrCmd_229 0x8004
-    ScrCmd_22A
-    SetFlag 244
-    Message 3
-    WaitABXPadPress
+    GoToIfEq VAR_RESULT, PARTY_SLOT_NONE, SnowpointCityWestHouse_OKIfYouDontWant
+    InitNPCTrade NPC_TRADE_GASPAR_HAUNTER
+    SetVar VAR_0x8004, VAR_RESULT
+    GetPartyMonSpecies VAR_0x8004, VAR_0x8005
+    GetNPCTradeRequestedSpecies VAR_RESULT
+    GoToIfNe VAR_0x8005, VAR_RESULT, SnowpointCityWestHouse_IAskedForMedicham
+    StartNPCTrade VAR_0x8004
+    FinishNPCTrade
+    SetFlag FLAG_TRADED_FOR_GASPAR_HAUNTER
+    Message SnowpointCityWestHouse_Text_IMadeItPreventEvolving
+    WaitButton
     CloseMessage
     ReleaseAll
     End
 
-_00C4:
-    ScrCmd_22A
-    Message 4
-    WaitABXPadPress
+SnowpointCityWestHouse_IAskedForMedicham:
+    FinishNPCTrade
+    Message SnowpointCityWestHouse_Text_IAskedForMedicham
+    WaitButton
     CloseMessage
     ReleaseAll
     End
 
-_00D1:
-    Message 5
-    WaitABXPadPress
+SnowpointCityWestHouse_OKIfYouDontWant:
+    Message SnowpointCityWestHouse_Text_OKIfYouDontWant
+    WaitButton
     CloseMessage
     ReleaseAll
     End
 
-_00DC:
-    Message 6
-    WaitABXPadPress
+SnowpointCityWestHouse_WeGotToBeFriends:
+    Message SnowpointCityWestHouse_Text_WeGotToBeFriends
+    WaitButton
     CloseMessage
     ReleaseAll
     End
 
-    .byte 0
+    .balign 4, 0

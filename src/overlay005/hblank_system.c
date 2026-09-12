@@ -4,7 +4,7 @@
 #include <string.h>
 
 #include "heap.h"
-#include "unk_02017728.h"
+#include "system.h"
 
 static void HBlankSystem_Init(HBlankSystem *hBlankSystem);
 static void HBlankTask_Init(HBlankTask *task);
@@ -12,9 +12,9 @@ static void HBlankSystem_HBlankCallback(void *param);
 static void HBlankTask_DummyCallback(HBlankTask *task, void *param);
 static HBlankTask *HBlankSystem_GetAvailableTask(HBlankSystem *hBlankSystem);
 
-HBlankSystem *HBlankSystem_New(enum HeapId heapID)
+HBlankSystem *HBlankSystem_New(enum HeapID heapID)
 {
-    HBlankSystem *hBlankSystem = Heap_AllocFromHeap(heapID, sizeof(HBlankSystem));
+    HBlankSystem *hBlankSystem = Heap_Alloc(heapID, sizeof(HBlankSystem));
     HBlankSystem_Init(hBlankSystem);
 
     return hBlankSystem;
@@ -31,7 +31,7 @@ void HBlankSystem_Delete(HBlankSystem *hBlankSystem)
     }
 
     HBlankSystem_Init(hBlankSystem);
-    Heap_FreeToHeap(hBlankSystem);
+    Heap_Free(hBlankSystem);
 }
 
 void HBlankSystem_Start(HBlankSystem *hBlankSystem)

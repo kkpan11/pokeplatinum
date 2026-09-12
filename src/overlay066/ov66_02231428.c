@@ -4,11 +4,11 @@
 #include <nitro.h>
 #include <string.h>
 
-#include "overlay004/ov4_021D0D80.h"
+#include "nintendo_wfc/main.h"
 #include "overlay066/struct_ov66_02231428.h"
 #include "overlay066/struct_ov66_02231560.h"
 
-#include "unk_020366A0.h"
+#include "comm_manager.h"
 #include "unk_020996D0.h"
 
 void ov66_02231428(UnkStruct_ov66_02231428 *param0, const s64 *param1)
@@ -161,11 +161,8 @@ BOOL ov66_0223164C(const UnkStruct_ov66_02231560 *param0, u8 param1)
 
 void ov66_02231668(void *param0)
 {
-    NNSG3dResMdlSet *v0;
-    NNSG3dResMdl *v1;
-
-    v0 = NNS_G3dGetMdlSet(param0);
-    v1 = NNS_G3dGetMdlByIdx(v0, 0);
+    NNSG3dResMdlSet *v0 = NNS_G3dGetMdlSet(param0);
+    NNSG3dResMdl *v1 = NNS_G3dGetMdlByIdx(v0, 0);
 
     NNS_G3dMdlUseGlbDiff(v1);
     NNS_G3dMdlUseGlbAmb(v1);
@@ -175,9 +172,7 @@ void ov66_02231668(void *param0)
 
 BOOL ov66_022316C4(u16 param0, u16 param1)
 {
-    u32 v0;
-
-    v0 = sub_020996F4(param0);
+    u32 v0 = sub_020996F4(param0);
 
     if (v0 == 0) {
         if (param1 == 0) {
@@ -223,7 +218,7 @@ int ov66_022316F4(int param0, int param1)
     int v0;
     int v1;
 
-    v0 = ov4_021D1F3C(param0, param1);
+    v0 = NintendoWFC_GetErrorCode(param0, param1);
 
     if ((v0 == 11) || (param0 == ((DWC_ERROR_NUM) + 5))) {
         v1 = 14;
@@ -245,7 +240,7 @@ int ov66_02231718(int param0, int param1)
     int v0;
     int v1;
 
-    v0 = ov4_021D1F3C(param0, param1);
+    v0 = NintendoWFC_GetErrorCode(param0, param1);
 
     if (param0 == ((DWC_ERROR_NUM) + 5)) {
         v0 = 11;
@@ -278,7 +273,7 @@ int ov66_02231718(int param0, int param1)
 
 BOOL ov66_02231760(void)
 {
-    if (sub_020383E8() || sub_0203881C()) {
+    if (CommManager_CheckWifiError() || CommManager_IsWifiPlazaError()) {
         return 1;
     }
 

@@ -1,370 +1,360 @@
-    .include "macros/scrcmd.inc"
+#include "macros/scrcmd.inc"
+#include "res/text/bank/pokemon_mansion.h"
+#include "res/field/events/events_pokemon_mansion.h"
 
-    .data
 
-    ScriptEntry _001A
-    ScriptEntry _004D
-    ScriptEntry _006A
-    ScriptEntry _0087
-    ScriptEntry _048A
-    ScriptEntry _04C8
-    .short 0xFD13
+    ScriptEntry PokemonMansion_OnTransition
+    ScriptEntry PokemonMansion_MaidOffice
+    ScriptEntry PokemonMansion_MaidTrophyGarden
+    ScriptEntry PokemonMansion_MaidWest
+    ScriptEntry PokemonMansion_MaidFarEast
+    ScriptEntry PokemonMansion_MaidEast
+    ScriptEntryEnd
 
-_001A:
-    SetFlag 0x9EB
-    SetFlag 0x257
-    SetFlag 0x258
-    GoToIfUnset 0xAB6, _0033
+PokemonMansion_OnTransition:
+    SetFlag FLAG_FIRST_ARRIVAL_POKEMON_MANSION
+    SetFlag FLAG_HIDE_POKEMON_MANSION_FIVE_MAID_KNOCKOUT_MAID
+    SetFlag FLAG_HIDE_POKEMON_MANSION_FIVE_MAID_KNOCKOUT_BOSS
+    GoToIfUnset FLAG_DAILY_SET_FIVE_MAID_KNOCKOUT_TURN_TARGET, PokemonMansion_InitFiveMaidKnockoutChallenge
     End
 
-_0033:
-    ScrCmd_1B7 0x404C, 5
-    AddVar 0x404C, 5
-    SetFlag 0xAB6
-    ClearTrainerFlag 0x37C
-    ClearTrainerFlag 0x37D
+PokemonMansion_InitFiveMaidKnockoutChallenge:
+    GetRandom VAR_FIVE_MAID_KNOCKOUT_TURN_TARGET, 5
+    AddVar VAR_FIVE_MAID_KNOCKOUT_TURN_TARGET, 5
+    SetFlag FLAG_DAILY_SET_FIVE_MAID_KNOCKOUT_TURN_TARGET
+    ClearTrainerFlag TRAINER_RICH_BOY_LIAM
+    ClearTrainerFlag TRAINER_LADY_CELESTE
     End
 
-_004D:
-    PlayFanfare SEQ_SE_CONFIRM
+PokemonMansion_MaidOffice:
+    PlaySE SE_CONFIRM_sseq_3
     LockAll
     FacePlayer
-    Message 0
-    WaitABXPadPress
+    Message PokemonMansion_Text_MrBacklotOffice
+    WaitButton
     CloseMessage
-    ApplyMovement 0, _04A8
+    ApplyMovement LOCALID_MAID_OFFICE, PokemonMansion_Movement_MaidOfficeFaceSouth
     WaitMovement
     ReleaseAll
     End
 
-_006A:
-    PlayFanfare SEQ_SE_CONFIRM
+PokemonMansion_MaidTrophyGarden:
+    PlaySE SE_CONFIRM_sseq_3
     LockAll
     FacePlayer
-    Message 1
-    WaitABXPadPress
+    Message PokemonMansion_Text_ThisWayTrophyGarden
+    WaitButton
     CloseMessage
-    ApplyMovement 1, _04B0
+    ApplyMovement LOCALID_MAID_TROPHY_GARDEN, PokemonMansion_Movement_MaidTrophyGardenFaceSouth
     WaitMovement
     ReleaseAll
     End
 
-_0087:
-    PlayFanfare SEQ_SE_CONFIRM
+PokemonMansion_MaidWest:
+    PlaySE SE_CONFIRM_sseq_3
     LockAll
     FacePlayer
-    GoToIfDefeated 0x37C, _0396
-    GoToIfDefeated 0x37D, _0396
-    ScrCmd_1BD 0x800C
-    GoToIfEq 0x800C, 0, _00CB
-    GoToIfEq 0x800C, 1, _00E5
-    GoTo _00FF
+    GoToIfDefeated TRAINER_RICH_BOY_LIAM, PokemonMansion_VisitAgainTomorrow
+    GoToIfDefeated TRAINER_LADY_CELESTE, PokemonMansion_VisitAgainTomorrow
+    GetPlayerDir VAR_RESULT
+    GoToIfEq VAR_RESULT, DIR_NORTH, PokemonMansion_GetInPositionNorth
+    GoToIfEq VAR_RESULT, DIR_SOUTH, PokemonMansion_GetInPositionSouth
+    GoTo PokemonMansion_FiveMaidKnockoutChallenge
     End
 
-_00CB:
-    ApplyMovement 2, _03EC
-    ApplyMovement 0xFF, _042C
+PokemonMansion_GetInPositionNorth:
+    ApplyMovement LOCALID_MAID_FAR_WEST, PokemonMansion_Movement_MaidFarWestWalkOnSpotEast
+    ApplyMovement LOCALID_PLAYER, PokemonMansion_Movement_PlayerGetInPositionNorth
     WaitMovement
-    GoTo _00FF
+    GoTo PokemonMansion_FiveMaidKnockoutChallenge
     End
 
-_00E5:
-    ApplyMovement 2, _03F4
-    ApplyMovement 0xFF, _043C
+PokemonMansion_GetInPositionSouth:
+    ApplyMovement LOCALID_MAID_FAR_WEST, PokemonMansion_Movement_MaidFarWestWalkOnSpotEast2
+    ApplyMovement LOCALID_PLAYER, PokemonMansion_Movement_PlayerGetInPositionSouth
     WaitMovement
-    GoTo _00FF
+    GoTo PokemonMansion_FiveMaidKnockoutChallenge
     End
 
-_00FF:
-    CallIfUnset 0x166, _045A
-    CallIfSet 0x166, _0467
-    SetFlag 0x166
-    ScrCmd_03E 0x800C
-    GoToIfEq 0x800C, 1, _0471
-    SetTrainerFlag 0x37C
-    SetTrainerFlag 0x37D
-    Message 5
+PokemonMansion_FiveMaidKnockoutChallenge:
+    CallIfUnset FLAG_STARTED_FIVE_MAID_KNOCKOUT_CHALLENGE, PokemonMansion_ExplainChallenge
+    CallIfSet FLAG_STARTED_FIVE_MAID_KNOCKOUT_CHALLENGE, PokemonMansion_TargetedTurnsIsThis
+    SetFlag FLAG_STARTED_FIVE_MAID_KNOCKOUT_CHALLENGE
+    ShowYesNoMenu VAR_RESULT
+    GoToIfEq VAR_RESULT, MENU_NO, PokemonMansion_DontDoChallenge
+    SetTrainerFlag TRAINER_RICH_BOY_LIAM
+    SetTrainerFlag TRAINER_LADY_CELESTE
+    Message PokemonMansion_Text_OurFirstMaid
     CloseMessage
-    ApplyMovement 2, _03FC
+    ApplyMovement LOCALID_MAID_FAR_WEST, PokemonMansion_Movement_MaidFarWestMoveAside
     WaitMovement
-    SetVar 0x404D, 0
-    SetVar 0x8005, 0
-    ClearFlag 0x257
-    ScrCmd_064 5
-    ApplyMovement 5, _0420
+    SetVar VAR_TOTAL_TURNS_LAST_BATTLE, 0
+    SetVar VAR_0x8005, 0
+    ClearFlag FLAG_HIDE_POKEMON_MANSION_FIVE_MAID_KNOCKOUT_MAID
+    AddObject LOCALID_FIVE_MAID_KNOCKOUT_MAID
+    ApplyMovement LOCALID_FIVE_MAID_KNOCKOUT_MAID, PokemonMansion_Movement_KnockoutTrainerEnter
     WaitMovement
-    Message 15
+    Message PokemonMansion_Text_Maid1Intro
     CloseMessage
-    ScrCmd_0E5 0x381, 0
-    ScrCmd_0EC 0x800C
-    GoToIfEq 0x800C, 0, _0484
-    AddVar 0x8005, 0x404D
-    Message 16
+    StartTrainerBattle TRAINER_MAID_BELINDA
+    CheckWonBattle VAR_RESULT
+    GoToIfEq VAR_RESULT, FALSE, PokemonMansion_BlackOut
+    AddVar VAR_0x8005, VAR_TOTAL_TURNS_LAST_BATTLE
+    Message PokemonMansion_Text_Maid1Defeat
     CloseMessage
-    ApplyMovement 5, _0414
+    ApplyMovement LOCALID_FIVE_MAID_KNOCKOUT_MAID, PokemonMansion_Movement_KnockoutTrainerLeave
     WaitMovement
-    ApplyMovement 5, _0420
+    ApplyMovement LOCALID_FIVE_MAID_KNOCKOUT_MAID, PokemonMansion_Movement_KnockoutTrainerEnter
     WaitMovement
-    Message 17
+    Message PokemonMansion_Text_Maid2Intro
     CloseMessage
-    ScrCmd_0E5 0x382, 0
-    ScrCmd_0EC 0x800C
-    GoToIfEq 0x800C, 0, _0484
-    AddVar 0x8005, 0x404D
-    Message 18
+    StartTrainerBattle TRAINER_MAID_SOPHIE
+    CheckWonBattle VAR_RESULT
+    GoToIfEq VAR_RESULT, FALSE, PokemonMansion_BlackOut
+    AddVar VAR_0x8005, VAR_TOTAL_TURNS_LAST_BATTLE
+    Message PokemonMansion_Text_Maid2Defeat
     CloseMessage
-    ApplyMovement 5, _0414
+    ApplyMovement LOCALID_FIVE_MAID_KNOCKOUT_MAID, PokemonMansion_Movement_KnockoutTrainerLeave
     WaitMovement
-    ApplyMovement 5, _0420
+    ApplyMovement LOCALID_FIVE_MAID_KNOCKOUT_MAID, PokemonMansion_Movement_KnockoutTrainerEnter
     WaitMovement
-    Message 19
+    Message PokemonMansion_Text_Maid3Intro
     CloseMessage
-    ScrCmd_0E5 0x383, 0
-    ScrCmd_0EC 0x800C
-    GoToIfEq 0x800C, 0, _0484
-    AddVar 0x8005, 0x404D
-    Message 20
+    StartTrainerBattle TRAINER_MAID_EMILY
+    CheckWonBattle VAR_RESULT
+    GoToIfEq VAR_RESULT, FALSE, PokemonMansion_BlackOut
+    AddVar VAR_0x8005, VAR_TOTAL_TURNS_LAST_BATTLE
+    Message PokemonMansion_Text_Maid3Defeat
     CloseMessage
-    ApplyMovement 5, _0414
+    ApplyMovement LOCALID_FIVE_MAID_KNOCKOUT_MAID, PokemonMansion_Movement_KnockoutTrainerLeave
     WaitMovement
-    ApplyMovement 5, _0420
+    ApplyMovement LOCALID_FIVE_MAID_KNOCKOUT_MAID, PokemonMansion_Movement_KnockoutTrainerEnter
     WaitMovement
-    Message 21
+    Message PokemonMansion_Text_Maid4Intro
     CloseMessage
-    ScrCmd_0E5 0x384, 0
-    ScrCmd_0EC 0x800C
-    GoToIfEq 0x800C, 0, _0484
-    AddVar 0x8005, 0x404D
-    Message 22
+    StartTrainerBattle TRAINER_MAID_ELENA
+    CheckWonBattle VAR_RESULT
+    GoToIfEq VAR_RESULT, FALSE, PokemonMansion_BlackOut
+    AddVar VAR_0x8005, VAR_TOTAL_TURNS_LAST_BATTLE
+    Message PokemonMansion_Text_Maid4Defeat
     CloseMessage
-    ApplyMovement 5, _0414
+    ApplyMovement LOCALID_FIVE_MAID_KNOCKOUT_MAID, PokemonMansion_Movement_KnockoutTrainerLeave
     WaitMovement
-    ApplyMovement 2, _0408
+    ApplyMovement LOCALID_MAID_FAR_WEST, PokemonMansion_Movement_MaidFarWestMoveBackInPlace
     WaitMovement
-    ScrCmd_0D5 0, 0x404C
-    ScrCmd_0D5 1, 0x8005
-    Message 6
+    BufferNumber 0, VAR_FIVE_MAID_KNOCKOUT_TURN_TARGET
+    BufferNumber 1, VAR_0x8005
+    Message PokemonMansion_Text_DefeatedFourMaids
     CloseMessage
-    ApplyMovement 2, _03FC
+    ApplyMovement LOCALID_MAID_FAR_WEST, PokemonMansion_Movement_MaidFarWestMoveAside
     WaitMovement
-    ApplyMovement 5, _0420
+    ApplyMovement LOCALID_FIVE_MAID_KNOCKOUT_MAID, PokemonMansion_Movement_KnockoutTrainerEnter
     WaitMovement
-    Message 23
+    Message PokemonMansion_Text_Maid5Intro
     CloseMessage
-    ScrCmd_0E5 0x385, 0
-    ScrCmd_0EC 0x800C
-    GoToIfEq 0x800C, 0, _0484
-    AddVar 0x8005, 0x404D
-    Message 24
+    StartTrainerBattle TRAINER_MAID_CLARE
+    CheckWonBattle VAR_RESULT
+    GoToIfEq VAR_RESULT, FALSE, PokemonMansion_BlackOut
+    AddVar VAR_0x8005, VAR_TOTAL_TURNS_LAST_BATTLE
+    Message PokemonMansion_Text_Maid5Defeat
     CloseMessage
-    ApplyMovement 5, _0414
+    ApplyMovement LOCALID_FIVE_MAID_KNOCKOUT_MAID, PokemonMansion_Movement_KnockoutTrainerLeave
     WaitMovement
-    ScrCmd_065 5
-    ApplyMovement 2, _0408
+    RemoveObject LOCALID_FIVE_MAID_KNOCKOUT_MAID
+    ApplyMovement LOCALID_MAID_FAR_WEST, PokemonMansion_Movement_MaidFarWestMoveBackInPlace
     WaitMovement
-    ScrCmd_0D5 0, 0x404C
-    ScrCmd_0D5 1, 0x8005
-    Message 7
-    GoToIfNe 0x8005, 0x404C, _044C
-    ScrCmd_1B7 0x8006, 2
-    CallIfEq 0x8006, 0, _03A1
-    CallIfEq 0x8006, 1, _03B7
+    BufferNumber 0, VAR_FIVE_MAID_KNOCKOUT_TURN_TARGET
+    BufferNumber 1, VAR_0x8005
+    Message PokemonMansion_Text_TargetedTurnsYourTurns
+    GoToIfNe VAR_0x8005, VAR_FIVE_MAID_KNOCKOUT_TURN_TARGET, PokemonMansion_FailedChallenge
+    GetRandom VAR_0x8006, 2
+    CallIfEq VAR_0x8006, 0, PokemonMansion_SetOpponentLiam
+    CallIfEq VAR_0x8006, 1, PokemonMansion_SetOpponentCeleste
     CloseMessage
-    ApplyMovement 2, _03FC
+    ApplyMovement LOCALID_MAID_FAR_WEST, PokemonMansion_Movement_MaidFarWestMoveAside
     WaitMovement
-    ClearFlag 0x258
-    ScrCmd_064 4
-    ApplyMovement 4, _0420
+    ClearFlag FLAG_HIDE_POKEMON_MANSION_FIVE_MAID_KNOCKOUT_BOSS
+    AddObject LOCALID_FIVE_MAID_KNOCKOUT_BOSS
+    ApplyMovement LOCALID_FIVE_MAID_KNOCKOUT_BOSS, PokemonMansion_Movement_KnockoutTrainerEnter
     WaitMovement
-    CallIfEq 0x8006, 0, _03CD
-    CallIfEq 0x8006, 1, _03D2
+    CallIfEq VAR_0x8006, 0, PokemonMansion_LiamIntro
+    CallIfEq VAR_0x8006, 1, PokemonMansion_CelesteIntro
     CloseMessage
-    ScrCmd_0E5 0x8007, 0
-    ScrCmd_0EC 0x800C
-    GoToIfEq 0x800C, 0, _0484
-    SetTrainerFlag 0x37C
-    SetTrainerFlag 0x37D
-    CallIfEq 0x8006, 0, _03D7
-    CallIfEq 0x8006, 1, _03DC
+    StartTrainerBattle VAR_0x8007
+    CheckWonBattle VAR_RESULT
+    GoToIfEq VAR_RESULT, FALSE, PokemonMansion_BlackOut
+    SetTrainerFlag TRAINER_RICH_BOY_LIAM
+    SetTrainerFlag TRAINER_LADY_CELESTE
+    CallIfEq VAR_0x8006, 0, PokemonMansion_LiamDefeat
+    CallIfEq VAR_0x8006, 1, PokemonMansion_CelesteDefeat
     CloseMessage
-    ApplyMovement 4, _0414
+    ApplyMovement LOCALID_FIVE_MAID_KNOCKOUT_BOSS, PokemonMansion_Movement_KnockoutTrainerLeave
     WaitMovement
-    ScrCmd_065 4
-    ApplyMovement 2, _0408
+    RemoveObject LOCALID_FIVE_MAID_KNOCKOUT_BOSS
+    ApplyMovement LOCALID_MAID_FAR_WEST, PokemonMansion_Movement_MaidFarWestMoveBackInPlace
     WaitMovement
-    CallIfEq 0x8006, 0, _03E1
-    CallIfEq 0x8006, 1, _03E6
-    GoTo _0396
+    CallIfEq VAR_0x8006, 0, PokemonMansion_TriumphedOverLiam
+    CallIfEq VAR_0x8006, 1, PokemonMansion_TriumphedOverCeleste
+    GoTo PokemonMansion_VisitAgainTomorrow
     End
 
-_0396:
-    Message 13
-    GoTo _047C
+PokemonMansion_VisitAgainTomorrow:
+    Message PokemonMansion_Text_VisitAgainTomorrow
+    GoTo PokemonMansion_MaidChallengeEnd
     End
 
-_03A1:
-    SetVar 0x8007, 0x37C
-    SetVar 0x4020, 62
-    ScrCmd_2F3 2, 0x8007
-    Message 8
+PokemonMansion_SetOpponentLiam:
+    SetVar VAR_0x8007, TRAINER_RICH_BOY_LIAM
+    SetVar VAR_OBJ_GFX_ID_0, OBJ_EVENT_GFX_RICH_BOY
+    BufferTrainerName 2, VAR_0x8007
+    Message PokemonMansion_Text_HitTargetBattleLiam
     Return
 
-_03B7:
-    SetVar 0x8007, 0x37D
-    SetVar 0x4020, 63
-    ScrCmd_2F3 2, 0x8007
-    Message 9
+PokemonMansion_SetOpponentCeleste:
+    SetVar VAR_0x8007, TRAINER_LADY_CELESTE
+    SetVar VAR_OBJ_GFX_ID_0, OBJ_EVENT_GFX_LADY
+    BufferTrainerName 2, VAR_0x8007
+    Message PokemonMansion_Text_HitTargetBattleCeleste
     Return
 
-_03CD:
-    Message 25
+PokemonMansion_LiamIntro:
+    Message PokemonMansion_Text_LiamIntro
     Return
 
-_03D2:
-    Message 27
+PokemonMansion_CelesteIntro:
+    Message PokemonMansion_Text_CelesteIntro
     Return
 
-_03D7:
-    Message 26
+PokemonMansion_LiamDefeat:
+    Message PokemonMansion_Text_LiamDefeat
     Return
 
-_03DC:
-    Message 28
+PokemonMansion_CelesteDefeat:
+    Message PokemonMansion_Text_CelesteDefeat
     Return
 
-_03E1:
-    Message 10
+PokemonMansion_TriumphedOverLiam:
+    Message PokemonMansion_Text_TriumphedOverLiam
     Return
 
-_03E6:
-    Message 11
+PokemonMansion_TriumphedOverCeleste:
+    Message PokemonMansion_Text_TriumphedOverCeleste
     Return
 
     .balign 4, 0
-_03EC:
-    MoveAction_023
+PokemonMansion_Movement_MaidFarWestWalkOnSpotEast:
+    WalkOnSpotNormalEast
     EndMovement
 
     .balign 4, 0
-_03F4:
-    MoveAction_023
+PokemonMansion_Movement_MaidFarWestWalkOnSpotEast2:
+    WalkOnSpotNormalEast
     EndMovement
 
     .balign 4, 0
-_03FC:
-    MoveAction_00C
-    MoveAction_021
+PokemonMansion_Movement_MaidFarWestMoveAside:
+    WalkNormalNorth
+    WalkOnSpotNormalSouth
     EndMovement
 
     .balign 4, 0
-_0408:
-    MoveAction_00D
-    MoveAction_023
+PokemonMansion_Movement_MaidFarWestMoveBackInPlace:
+    WalkNormalSouth
+    WalkOnSpotNormalEast
     EndMovement
 
     .balign 4, 0
-_0414:
-    MoveAction_022
-    MoveAction_045
+PokemonMansion_Movement_KnockoutTrainerLeave:
+    WalkOnSpotNormalWest
+    SetInvisible
     EndMovement
 
     .balign 4, 0
-_0420:
-    MoveAction_046
-    MoveAction_023
+PokemonMansion_Movement_KnockoutTrainerEnter:
+    SetVisible
+    WalkOnSpotNormalEast
     EndMovement
 
     .balign 4, 0
-_042C:
-    MoveAction_00F
-    MoveAction_00C
-    MoveAction_022
+PokemonMansion_Movement_PlayerGetInPositionNorth:
+    WalkNormalEast
+    WalkNormalNorth
+    WalkOnSpotNormalWest
     EndMovement
 
     .balign 4, 0
-_043C:
-    MoveAction_00F
-    MoveAction_00D
-    MoveAction_022
+PokemonMansion_Movement_PlayerGetInPositionSouth:
+    WalkNormalEast
+    WalkNormalSouth
+    WalkOnSpotNormalWest
     EndMovement
 
-_044C:
-    Message 12
-    Message 13
-    GoTo _047C
+PokemonMansion_FailedChallenge:
+    Message PokemonMansion_Text_PlentyToBeProud
+    Message PokemonMansion_Text_VisitAgainTomorrow
+    GoTo PokemonMansion_MaidChallengeEnd
     End
 
-_045A:
-    Message 2
-    ScrCmd_0D5 0, 0x404C
-    Message 3
+PokemonMansion_ExplainChallenge:
+    Message PokemonMansion_Text_ChallengeFiveMaids
+    BufferNumber 0, VAR_FIVE_MAID_KNOCKOUT_TURN_TARGET
+    Message PokemonMansion_Text_TargetedTurnsIsThis
     Return
 
-_0467:
-    ScrCmd_0D5 0, 0x404C
-    Message 3
+PokemonMansion_TargetedTurnsIsThis:
+    BufferNumber 0, VAR_FIVE_MAID_KNOCKOUT_TURN_TARGET
+    Message PokemonMansion_Text_TargetedTurnsIsThis
     Return
 
-_0471:
-    Message 4
-    GoTo _047C
+PokemonMansion_DontDoChallenge:
+    Message PokemonMansion_Text_HowDisappointing
+    GoTo PokemonMansion_MaidChallengeEnd
     End
 
-_047C:
-    WaitABXPadPress
+PokemonMansion_MaidChallengeEnd:
+    WaitButton
     CloseMessage
     ReleaseAll
     End
 
-_0484:
-    ScrCmd_0EB
+PokemonMansion_BlackOut:
+    BlackOutFromBattle
     ReleaseAll
     End
 
-_048A:
-    PlayFanfare SEQ_SE_CONFIRM
+PokemonMansion_MaidFarEast:
+    PlaySE SE_CONFIRM_sseq_3
     LockAll
     FacePlayer
-    Message 14
-    WaitABXPadPress
+    Message PokemonMansion_Text_StrictlyOffLimits
+    WaitButton
     CloseMessage
-    ApplyMovement 3, _04C0
+    ApplyMovement LOCALID_MAID_FAR_EAST, PokemonMansion_Movement_MaidFarEastFaceWest
     WaitMovement
     ReleaseAll
     End
 
     .balign 4, 0
-_04A8:
-    MoveAction_001
+PokemonMansion_Movement_MaidOfficeFaceSouth:
+    FaceSouth
     EndMovement
 
     .balign 4, 0
-_04B0:
-    MoveAction_001
+PokemonMansion_Movement_MaidTrophyGardenFaceSouth:
+    FaceSouth
     EndMovement
 
-    .byte 3
-    .byte 0
-    .byte 1
-    .byte 0
-    .byte 254
-    .byte 0
-    .byte 0
-    .byte 0
+PokemonMansion_Movement_Unused:
+    FaceEast
+    EndMovement
 
     .balign 4, 0
-_04C0:
-    MoveAction_002
+PokemonMansion_Movement_MaidFarEastFaceWest:
+    FaceWest
     EndMovement
 
-_04C8:
-    PlayFanfare SEQ_SE_CONFIRM
-    LockAll
-    FacePlayer
-    Message 29
-    WaitABXPadPress
-    CloseMessage
-    ReleaseAll
+PokemonMansion_MaidEast:
+    NPCMessage PokemonMansion_Text_BookTugsAttention
     End
 
-    .byte 0
+    .balign 4, 0

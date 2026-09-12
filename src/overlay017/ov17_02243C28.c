@@ -3,9 +3,10 @@
 #include <nitro.h>
 #include <string.h>
 
-#include "battle/struct_ov16_02264408.h"
-#include "battle/struct_ov16_02265BBC.h"
-#include "overlay012/ov12_0221FC20.h"
+#include "struct_defs/move_animation.h"
+
+#include "battle/battle_anim_battler_context.h"
+#include "battle_anim/battle_anim_system.h"
 #include "overlay017/ov17_0223F7E4.h"
 #include "overlay017/ov17_022413D8.h"
 #include "overlay017/ov17_0224F18C.h"
@@ -33,10 +34,10 @@
 
 #include "heap.h"
 #include "pokemon.h"
+#include "pokemon_sprite.h"
+#include "sound_playback.h"
 #include "sys_task.h"
 #include "sys_task_manager.h"
-#include "unk_02005474.h"
-#include "unk_0200762C.h"
 #include "unk_02094EDC.h"
 
 static int ov17_02243C68(UnkStruct_ov17_0224F30C *param0, void *param1, int param2, void *param3);
@@ -59,7 +60,7 @@ static void ov17_022443F8(UnkStruct_ov17_0224F30C *param0, void *param1, const U
 static void ov17_022444BC(SysTask *param0, void *param1);
 static int ov17_02244958(UnkStruct_ov17_0224F30C *param0, void *param1, int param2, void *param3);
 static void ov17_02244970(UnkStruct_ov17_0224F30C *param0, void *param1, const UnkStruct_ov17_02243C80 *param2, void *param3);
-static void ov17_02244BB0(UnkStruct_ov17_0224F30C *param0, void *param1, const UnkStruct_ov17_02243C80 *param2, UnkStruct_ov17_0224F3D8 *param3, int param4);
+static void ov17_02244BB0(UnkStruct_ov17_0224F30C *param0, void *param1, const UnkStruct_ov17_02243C80 *param2, UnkStruct_ov17_0224F3D8 *param3, int contestantID);
 static void ov17_022449B8(SysTask *param0, void *param1);
 static int ov17_02244BD4(UnkStruct_ov17_0224F30C *param0, void *param1, int param2, void *param3);
 static void ov17_02244BEC(UnkStruct_ov17_0224F30C *param0, void *param1, const UnkStruct_ov17_02243C80 *param2, void *param3);
@@ -132,9 +133,9 @@ void ov17_02243C28(UnkStruct_ov17_02246F24 *param0)
 
     v0.unk_00 = Unk_ov17_022539E4;
     v0.unk_04 = NELEMS(Unk_ov17_022539E4);
-    v0.unk_06 = param0->unk_00->unk_00.unk_113;
+    v0.playerContestantID = param0->unk_00->unk_00.playerContestantID;
     v0.unk_08 = param0->unk_00->unk_00.unk_10C;
-    v0.unk_07 = param0->unk_00->unk_155;
+    v0.isLinkContest = param0->unk_00->isLinkContest;
 
     ov17_0224F18C(&param0->unk_BF8, &v0);
 }
@@ -142,9 +143,7 @@ void ov17_02243C28(UnkStruct_ov17_02246F24 *param0)
 static int ov17_02243C68(UnkStruct_ov17_0224F30C *param0, void *param1, int param2, void *param3)
 {
     UnkStruct_ov17_02246F24 *v0 = param1;
-    int v1;
-
-    v1 = ov17_0224F1F8(&v0->unk_BF8, 0xff, param2, NULL, 0);
+    int v1 = ov17_0224F1F8(&v0->unk_BF8, 0xff, param2, NULL, 0);
     return v1;
 }
 
@@ -163,9 +162,7 @@ static void ov17_02243C94(UnkStruct_ov17_0224F30C *param0, void *param1, const U
 static int ov17_02243C98(UnkStruct_ov17_0224F30C *param0, void *param1, int param2, void *param3)
 {
     UnkStruct_ov17_02246F24 *v0 = param1;
-    int v1;
-
-    v1 = ov17_0224F1F8(&v0->unk_BF8, 0xff, param2, NULL, 0);
+    int v1 = ov17_0224F1F8(&v0->unk_BF8, 0xff, param2, NULL, 0);
     return v1;
 }
 
@@ -175,7 +172,7 @@ static void ov17_02243CB0(UnkStruct_ov17_0224F30C *param0, void *param1, const U
 
     v0->unk_1614 = 1;
 
-    if (sub_02094EDC(v0->unk_00) == 0) {
+    if (sub_02094EDC(v0->unk_00) == FALSE) {
         ov17_0224F26C(&v0->unk_BF8, param2, NULL, 0);
     }
 }
@@ -183,18 +180,14 @@ static void ov17_02243CB0(UnkStruct_ov17_0224F30C *param0, void *param1, const U
 static int ov17_02243CDC(UnkStruct_ov17_0224F30C *param0, void *param1, int param2, void *param3)
 {
     UnkStruct_ov17_02246F24 *v0 = param1;
-    int v1;
-
-    v1 = ov17_0224F1F8(&v0->unk_BF8, 0xff, param2, NULL, 0);
+    int v1 = ov17_0224F1F8(&v0->unk_BF8, 0xff, param2, NULL, 0);
     return v1;
 }
 
 static void ov17_02243CF4(UnkStruct_ov17_0224F30C *param0, void *param1, const UnkStruct_ov17_02243C80 *param2, void *param3)
 {
     UnkStruct_ov17_02246F24 *v0 = param1;
-    UnkStruct_ov17_02243D34 *v1;
-
-    v1 = Heap_AllocFromHeap(21, sizeof(UnkStruct_ov17_02243D34));
+    UnkStruct_ov17_02243D34 *v1 = Heap_Alloc(HEAP_ID_21, sizeof(UnkStruct_ov17_02243D34));
     MI_CpuClear8(v1, sizeof(UnkStruct_ov17_02243D34));
 
     v1->unk_00 = v0;
@@ -227,7 +220,7 @@ static void ov17_02243D34(SysTask *param0, void *param1)
         break;
     default:
         ov17_0224F26C(&v0->unk_00->unk_BF8, &v0->unk_04, NULL, 0);
-        Heap_FreeToHeap(v0);
+        Heap_Free(v0);
         SysTask_Done(param0);
         return;
     }
@@ -236,9 +229,7 @@ static void ov17_02243D34(SysTask *param0, void *param1)
 static int ov17_02243DB4(UnkStruct_ov17_0224F30C *param0, void *param1, int param2, void *param3)
 {
     UnkStruct_ov17_02246F24 *v0 = param1;
-    int v1;
-
-    v1 = ov17_0224F1F8(&v0->unk_BF8, 0xff, param2, param3, sizeof(UnkStruct_ov17_02246F24_sub1));
+    int v1 = ov17_0224F1F8(&v0->unk_BF8, 0xff, param2, param3, sizeof(UnkStruct_ov17_02246F24_sub1));
     return v1;
 }
 
@@ -246,14 +237,12 @@ static void ov17_02243DCC(UnkStruct_ov17_0224F30C *param0, void *param1, const U
 {
     UnkStruct_ov17_02246F24 *v0 = param1;
     UnkStruct_ov17_02246F24_sub1 *v1 = param3;
-    UnkStruct_ov17_02243DCC *v2;
-
-    v2 = Heap_AllocFromHeap(21, sizeof(UnkStruct_ov17_02243DCC));
+    UnkStruct_ov17_02243DCC *v2 = Heap_Alloc(HEAP_ID_21, sizeof(UnkStruct_ov17_02243DCC));
     MI_CpuClear8(v2, sizeof(UnkStruct_ov17_02243DCC));
 
     v2->unk_00 = v0;
     v2->unk_04 = *param2;
-    v2->unk_18 = v1->unk_C6.unk_0C;
+    v2->actingMessagesID = v1->unk_C6.actingMessagesID;
     v2->unk_12 = v1->unk_C6.unk_00;
 
     SysTask_Start(ov17_02243E2C, v2, 30000);
@@ -265,15 +254,15 @@ static void ov17_02243E2C(SysTask *param0, void *param1)
 
     switch (v0->unk_0C) {
     case 0:
-        if (v0->unk_18 != 0) {
-            ov17_02242E5C(v0->unk_00, v0->unk_18, &v0->unk_12, NULL);
+        if (v0->actingMessagesID != ACTING_COMPETITION_MESSAGE_NONE) {
+            ov17_02242E5C(v0->unk_00, v0->actingMessagesID, &v0->unk_12, NULL);
         }
 
-        Sound_PlayEffect(1785);
+        Sound_PlayEffect(SEQ_SE_DP_CON_032_sseq);
         v0->unk_0C++;
         break;
     case 1:
-        if ((v0->unk_18 == 0) || (ov17_02242ECC(v0->unk_00) == 0)) {
+        if (v0->actingMessagesID == ACTING_COMPETITION_MESSAGE_NONE || (ov17_02242ECC(v0->unk_00) == 0)) {
             v0->unk_0C++;
         }
         break;
@@ -296,7 +285,7 @@ static void ov17_02243E2C(SysTask *param0, void *param1)
         break;
     default:
         ov17_0224F26C(&v0->unk_00->unk_BF8, &v0->unk_04, NULL, 0);
-        Heap_FreeToHeap(v0);
+        Heap_Free(v0);
         SysTask_Done(param0);
         return;
     }
@@ -305,26 +294,21 @@ static void ov17_02243E2C(SysTask *param0, void *param1)
 static int ov17_02243EF8(UnkStruct_ov17_0224F30C *param0, void *param1, int param2, void *param3)
 {
     UnkStruct_ov17_02246F24 *v0 = param1;
-    int v1;
-
-    v1 = ov17_0224F1F8(&v0->unk_BF8, 0xff, param2, param3, sizeof(UnkStruct_ov17_02246F24_sub1));
+    int v1 = ov17_0224F1F8(&v0->unk_BF8, 0xff, param2, param3, sizeof(UnkStruct_ov17_02246F24_sub1));
     return v1;
 }
 
 static void ov17_02243F10(UnkStruct_ov17_0224F30C *param0, void *param1, const UnkStruct_ov17_02243C80 *param2, void *param3)
 {
     UnkStruct_ov17_02246F24 *v0 = param1;
-    UnkStruct_ov17_02243F10 *v1;
-    UnkStruct_ov17_02246F24_sub1 *v2;
-
-    v2 = param3;
-    v1 = Heap_AllocFromHeap(21, sizeof(UnkStruct_ov17_02243F10));
+    UnkStruct_ov17_02246F24_sub1 *v2 = param3;
+    UnkStruct_ov17_02243F10 *v1 = Heap_Alloc(HEAP_ID_21, sizeof(UnkStruct_ov17_02243F10));
 
     MI_CpuClear8(v1, sizeof(UnkStruct_ov17_02243F10));
 
     v1->unk_00 = v0;
     v1->unk_04 = *param2;
-    v1->unk_15 = v2->unk_00;
+    v1->contestantID = v2->contestantID;
 
     ov17_022426E8(v0, 0, &v1->unk_16);
     SysTask_Start(ov17_02243F68, v1, 30000);
@@ -334,10 +318,8 @@ static void ov17_02243F10(UnkStruct_ov17_0224F30C *param0, void *param1, const U
 static void ov17_02243F68(SysTask *param0, void *param1)
 {
     UnkStruct_ov17_02243F10 *v0 = param1;
-    int v1, v2;
-
-    v1 = v0->unk_15;
-    v2 = Pokemon_SpriteYOffset(v0->unk_00->unk_0C.unk_00->unk_00[v1], 0);
+    int contestantID = v0->contestantID;
+    int v2 = Pokemon_SpriteYOffset(v0->unk_00->unk_0C.unk_00->contestMons[contestantID], 0);
 
     switch (v0->unk_14) {
     case 0:
@@ -351,13 +333,13 @@ static void ov17_02243F68(SysTask *param0, void *param1)
     case 1: {
         int v3, v4;
 
-        v3 = v0->unk_15;
-        v4 = Pokemon_SpriteYOffset(v0->unk_00->unk_0C.unk_00->unk_00[v3], 0);
+        v3 = v0->contestantID;
+        v4 = Pokemon_SpriteYOffset(v0->unk_00->unk_0C.unk_00->contestMons[v3], 0);
 
-        sub_02007DEC(v0->unk_00->unk_0C.unk_08[v3], 37, 0);
-        sub_02007DEC(v0->unk_00->unk_0C.unk_08[v3], 6, 0);
-        sub_02007DEC(v0->unk_00->unk_0C.unk_08[v3], 0, ((256 - 40) + 40));
-        sub_02007DEC(v0->unk_00->unk_0C.unk_08[v3], 1, ((104 + 8) + 60) + v4);
+        PokemonSprite_SetAttribute(v0->unk_00->unk_0C.unk_08[v3], MON_SPRITE_HIDE_2, 0);
+        PokemonSprite_SetAttribute(v0->unk_00->unk_0C.unk_08[v3], MON_SPRITE_HIDE, 0);
+        PokemonSprite_SetAttribute(v0->unk_00->unk_0C.unk_08[v3], MON_SPRITE_X_CENTER, (256 - 40) + 40);
+        PokemonSprite_SetAttribute(v0->unk_00->unk_0C.unk_08[v3], MON_SPRITE_Y_CENTER, ((104 + 8) + 60) + v4);
 
         v0->unk_0C = ((256 - 40) + 40) << 8;
         v0->unk_10 = ((104 + 8) + 60) << 8;
@@ -366,8 +348,8 @@ static void ov17_02243F68(SysTask *param0, void *param1)
         break;
 
     case 2:
-        if (v0->unk_15 == v0->unk_00->unk_00->unk_00.unk_113) {
-            Sound_PlayEffect(1784);
+        if (v0->contestantID == v0->unk_00->unk_00->unk_00.playerContestantID) {
+            Sound_PlayEffect(SEQ_SE_DP_CON_031_sseq);
         }
 
         v0->unk_14++;
@@ -382,13 +364,13 @@ static void ov17_02243F68(SysTask *param0, void *param1)
             v0->unk_14++;
         }
 
-        sub_02007DEC(v0->unk_00->unk_0C.unk_08[v0->unk_15], 0, v0->unk_0C >> 8);
-        sub_02007DEC(v0->unk_00->unk_0C.unk_08[v0->unk_15], 1, (v0->unk_10 >> 8) + v2);
+        PokemonSprite_SetAttribute(v0->unk_00->unk_0C.unk_08[v0->contestantID], MON_SPRITE_X_CENTER, v0->unk_0C >> 8);
+        PokemonSprite_SetAttribute(v0->unk_00->unk_0C.unk_08[v0->contestantID], MON_SPRITE_Y_CENTER, (v0->unk_10 >> 8) + v2);
         break;
     default:
         if (v0->unk_16 == 1) {
             ov17_0224F26C(&v0->unk_00->unk_BF8, &v0->unk_04, NULL, 0);
-            Heap_FreeToHeap(v0);
+            Heap_Free(v0);
             SysTask_Done(param0);
             return;
         }
@@ -399,9 +381,7 @@ static void ov17_02243F68(SysTask *param0, void *param1)
 static int ov17_022440C8(UnkStruct_ov17_0224F30C *param0, void *param1, int param2, void *param3)
 {
     UnkStruct_ov17_02246F24 *v0 = param1;
-    int v1;
-
-    v1 = ov17_0224F1F8(&v0->unk_BF8, 0xff, param2, param3, sizeof(UnkStruct_ov17_02246F24_sub1));
+    int v1 = ov17_0224F1F8(&v0->unk_BF8, 0xff, param2, param3, sizeof(UnkStruct_ov17_02246F24_sub1));
     return v1;
 }
 
@@ -410,19 +390,19 @@ static void ov17_022440E0(UnkStruct_ov17_0224F30C *param0, void *param1, const U
     UnkStruct_ov17_02246F24 *v0 = param1;
     UnkStruct_ov17_02243F10 *v1;
     UnkStruct_ov17_02246F24_sub1 *v2;
-    int v3, v4;
+    int v3;
 
     v2 = param3;
-    v1 = Heap_AllocFromHeap(21, sizeof(UnkStruct_ov17_02243F10));
+    v1 = Heap_Alloc(HEAP_ID_21, sizeof(UnkStruct_ov17_02243F10));
 
     MI_CpuClear8(v1, sizeof(UnkStruct_ov17_02243F10));
 
     v1->unk_00 = v0;
     v1->unk_04 = *param2;
-    v1->unk_15 = v2->unk_00;
+    v1->contestantID = v2->contestantID;
 
-    v4 = v1->unk_15;
-    v3 = Pokemon_SpriteYOffset(v0->unk_0C.unk_00->unk_00[v4], 0);
+    int contestantID = v1->contestantID;
+    v3 = Pokemon_SpriteYOffset(v0->unk_0C.unk_00->contestMons[contestantID], 0);
 
     v1->unk_0C = (256 - 40) << 8;
     v1->unk_10 = (104 + 8) << 8;
@@ -433,10 +413,8 @@ static void ov17_022440E0(UnkStruct_ov17_0224F30C *param0, void *param1, const U
 static void ov17_0224413C(SysTask *param0, void *param1)
 {
     UnkStruct_ov17_02243F10 *v0 = param1;
-    int v1, v2;
-
-    v1 = v0->unk_15;
-    v2 = Pokemon_SpriteYOffset(v0->unk_00->unk_0C.unk_00->unk_00[v1], 0);
+    int contestantID = v0->contestantID;
+    int v2 = Pokemon_SpriteYOffset(v0->unk_00->unk_0C.unk_00->contestMons[contestantID], 0);
 
     switch (v0->unk_14) {
     case 0:
@@ -444,25 +422,25 @@ static void ov17_0224413C(SysTask *param0, void *param1)
         v0->unk_10 += (((((104 + 8) + 60) - (104 + 8)) << 8) / 7);
 
         if (((v0->unk_0C >> 8) >= ((256 - 40) + 40)) || ((v0->unk_10 >> 8) >= ((104 + 8) + 60))) {
-            sub_02007DEC(v0->unk_00->unk_0C.unk_08[v1], 37, 1);
-            sub_02007DEC(v0->unk_00->unk_0C.unk_08[v1], 6, 1);
+            PokemonSprite_SetAttribute(v0->unk_00->unk_0C.unk_08[contestantID], MON_SPRITE_HIDE_2, 1);
+            PokemonSprite_SetAttribute(v0->unk_00->unk_0C.unk_08[contestantID], MON_SPRITE_HIDE, 1);
             v0->unk_14++;
         }
 
-        sub_02007DEC(v0->unk_00->unk_0C.unk_08[v0->unk_15], 0, v0->unk_0C >> 8);
-        sub_02007DEC(v0->unk_00->unk_0C.unk_08[v0->unk_15], 1, (v0->unk_10 >> 8) + v2);
+        PokemonSprite_SetAttribute(v0->unk_00->unk_0C.unk_08[v0->contestantID], MON_SPRITE_X_CENTER, v0->unk_0C >> 8);
+        PokemonSprite_SetAttribute(v0->unk_00->unk_0C.unk_08[v0->contestantID], MON_SPRITE_Y_CENTER, (v0->unk_10 >> 8) + v2);
         break;
     case 1:
-        if (v0->unk_00->unk_1616[v0->unk_15] == 1) {
-            ov17_02241524(&v0->unk_00->unk_0C, v0->unk_15);
-            v0->unk_00->unk_1616[v0->unk_15] = 0;
+        if (v0->unk_00->unk_1616[v0->contestantID] == 1) {
+            ov17_02241524(&v0->unk_00->unk_0C, v0->contestantID);
+            v0->unk_00->unk_1616[v0->contestantID] = 0;
         }
 
         v0->unk_14++;
         break;
     default:
         ov17_0224F26C(&v0->unk_00->unk_BF8, &v0->unk_04, NULL, 0);
-        Heap_FreeToHeap(v0);
+        Heap_Free(v0);
         SysTask_Done(param0);
         return;
     }
@@ -471,9 +449,7 @@ static void ov17_0224413C(SysTask *param0, void *param1)
 static int ov17_02244228(UnkStruct_ov17_0224F30C *param0, void *param1, int param2, void *param3)
 {
     UnkStruct_ov17_02246F24 *v0 = param1;
-    int v1;
-
-    v1 = ov17_0224F1F8(&v0->unk_BF8, 0xff, param2, param3, sizeof(UnkStruct_ov17_02246F24_sub1));
+    int v1 = ov17_0224F1F8(&v0->unk_BF8, 0xff, param2, param3, sizeof(UnkStruct_ov17_02246F24_sub1));
     return v1;
 }
 
@@ -483,14 +459,14 @@ static void ov17_02244240(UnkStruct_ov17_0224F30C *param0, void *param1, const U
     UnkStruct_ov17_02244240 *v1;
     UnkStruct_ov17_02246F24_sub1 *v2 = param3;
 
-    v1 = Heap_AllocFromHeap(21, sizeof(UnkStruct_ov17_02244240));
+    v1 = Heap_Alloc(HEAP_ID_21, sizeof(UnkStruct_ov17_02244240));
     MI_CpuClear8(v1, sizeof(UnkStruct_ov17_02244240));
 
     v1->unk_00 = v0;
     v1->unk_04 = *param2;
-    v1->unk_0D = v2->unk_00;
+    v1->contestantID = v2->contestantID;
     v1->unk_0E = v2->unk_02;
-    v1->unk_1A = v2->unk_C6.unk_0C;
+    v1->actingMessagesID = v2->unk_C6.actingMessagesID;
     v1->unk_14 = v2->unk_C6.unk_00;
     v1->unk_10 = v2->unk_03;
 
@@ -506,7 +482,7 @@ static void ov17_022442AC(SysTask *param0, void *param1)
     case 0: {
         int v2;
 
-        v2 = ov17_02243174(v0->unk_00->unk_220.unk_12[v0->unk_0D]);
+        v2 = ov17_02243174(v0->unk_00->unk_220.unk_12[v0->contestantID]);
 
         if (v2 > 0) {
             ov17_022431A0(v0->unk_00, 0, 0, v2, 0, &v0->unk_12);
@@ -526,8 +502,8 @@ static void ov17_022442AC(SysTask *param0, void *param1)
         v0->unk_0C++;
         break;
     case 3:
-        if (v0->unk_1A != 0) {
-            ov17_02242E5C(v0->unk_00, v0->unk_1A, &v0->unk_14, NULL);
+        if (v0->actingMessagesID != ACTING_COMPETITION_MESSAGE_NONE) {
+            ov17_02242E5C(v0->unk_00, v0->actingMessagesID, &v0->unk_14, NULL);
             v0->unk_0C++;
         } else {
             v0->unk_0C = 5;
@@ -562,7 +538,7 @@ static void ov17_022442AC(SysTask *param0, void *param1)
 
     default:
         ov17_0224F26C(&v0->unk_00->unk_BF8, &v0->unk_04, NULL, 0);
-        Heap_FreeToHeap(v0);
+        Heap_Free(v0);
         SysTask_Done(param0);
         return;
     }
@@ -571,9 +547,7 @@ static void ov17_022442AC(SysTask *param0, void *param1)
 static int ov17_022443E0(UnkStruct_ov17_0224F30C *param0, void *param1, int param2, void *param3)
 {
     UnkStruct_ov17_02246F24 *v0 = param1;
-    int v1;
-
-    v1 = ov17_0224F1F8(&v0->unk_BF8, 0xff, param2, param3, sizeof(UnkStruct_ov17_02246F24_sub1));
+    int v1 = ov17_0224F1F8(&v0->unk_BF8, 0xff, param2, param3, sizeof(UnkStruct_ov17_02246F24_sub1));
     return v1;
 }
 
@@ -583,16 +557,16 @@ static void ov17_022443F8(UnkStruct_ov17_0224F30C *param0, void *param1, const U
     UnkStruct_ov17_022443F8 *v1;
     UnkStruct_ov17_02246F24_sub1 *v2 = param3;
 
-    v1 = Heap_AllocFromHeap(21, sizeof(UnkStruct_ov17_022443F8));
+    v1 = Heap_Alloc(HEAP_ID_21, sizeof(UnkStruct_ov17_022443F8));
     MI_CpuClear8(v1, sizeof(UnkStruct_ov17_022443F8));
 
     v1->unk_00 = v0;
     v1->unk_04 = *param2;
-    v1->unk_0D = v2->unk_00;
-    v1->unk_0E = v2->unk_10.unk_00[v2->unk_00].unk_00;
-    v1->unk_F8 = v2->unk_C6.unk_0C;
+    v1->contestantID = v2->contestantID;
+    v1->moveID = v2->unk_10.unk_00[v2->contestantID].moveID;
+    v1->actingMessagesID = v2->unk_C6.actingMessagesID;
     v1->unk_F2 = v2->unk_C6.unk_00;
-    v1->unk_100 = v2->unk_C6.unk_0D;
+    v1->actingMessagesID2 = v2->unk_C6.actingMessagesID2;
     v1->unk_FA = v2->unk_C6.unk_06;
     v1->unk_14 = *v2;
 
@@ -603,177 +577,171 @@ static void ov17_022444BC(SysTask *param0, void *param1)
 {
     UnkStruct_ov17_022443F8 *v0 = param1;
     int v1;
-    UnkStruct_ov17_022444BC *v2;
+    UnkStruct_ov17_022444BC *v2 = &v0->unk_14.unk_10.unk_00[v0->contestantID];
 
-    v2 = &v0->unk_14.unk_10.unk_00[v0->unk_0D];
-
-    switch (v0->unk_0C) {
+    switch (v0->state) {
     case 0:
-        if (v0->unk_F8 != 0) {
-            ov17_02242E5C(v0->unk_00, v0->unk_F8, &v0->unk_F2, NULL);
-            v0->unk_0C++;
+        if (v0->actingMessagesID != ACTING_COMPETITION_MESSAGE_NONE) {
+            ov17_02242E5C(v0->unk_00, v0->actingMessagesID, &v0->unk_F2, NULL);
+            v0->state++;
         } else {
-            v0->unk_0C = 2;
+            v0->state = 2;
         }
         break;
     case 1:
         if (ov17_02242ECC(v0->unk_00) == 0) {
-            v0->unk_0C++;
+            v0->state++;
         }
         break;
     case 2:
-        v0->unk_0C++;
+        v0->state++;
         break;
     case 3:
         if (v2->unk_12 != 0) {
             ov17_02242E9C(v0->unk_00, v2->unk_12, v2->unk_13, &v2->unk_0C, NULL);
-            v0->unk_0C++;
+            v0->state++;
         } else {
-            v0->unk_0C = 5;
+            v0->state = 5;
         }
         break;
     case 4:
         if (ov17_02242ECC(v0->unk_00) == 0) {
-            v0->unk_0C++;
+            v0->state++;
         }
         break;
     case 5:
-        v0->unk_0C++;
+        v0->state++;
         break;
     case 6:
-        if (v0->unk_100 != 0) {
-            ov17_02242E5C(v0->unk_00, v0->unk_100, &v0->unk_F2, NULL);
-            v0->unk_0C++;
+        if (v0->actingMessagesID2 != ACTING_COMPETITION_MESSAGE_NONE) {
+            ov17_02242E5C(v0->unk_00, v0->actingMessagesID2, &v0->unk_F2, NULL);
+            v0->state++;
         } else {
-            v0->unk_0C = 8;
+            v0->state = 8;
         }
         break;
     case 7:
         if (ov17_02242ECC(v0->unk_00) == 0) {
-            v0->unk_0C++;
+            v0->state++;
         }
         break;
     case 8:
-        v0->unk_0C++;
+        v0->state++;
         break;
     case 9:
-        ov17_022439C8(v0->unk_00->unk_00, v0->unk_0D, v0->unk_0E, &v0->unk_104);
-        v0->unk_0C++;
+        ov17_022439C8(v0->unk_00->unk_00, v0->contestantID, v0->moveID, &v0->unk_104);
+        v0->state++;
     case 10: {
-        UnkStruct_ov16_02265BBC v3;
-        UnkStruct_ov16_02264408 v4;
+        MoveAnimation moveAnim;
+        BattleAnimBattlerContext battlerContext;
         int v5;
-        int v6, v7, v8, v9;
+        int isShiny, monForm;
         int v10, v11, v12, v13;
-        u32 v14, v15;
-        int v16;
+        u32 personality, v15;
 
-        v16 = v0->unk_0D + 1;
-
+        int v16 = v0->contestantID + 1;
         if (v16 >= 4) {
             v16 = 0;
         }
 
-        MI_CpuClear8(&v3, sizeof(UnkStruct_ov16_02265BBC));
-        MI_CpuClear8(&v4, sizeof(UnkStruct_ov16_02264408));
+        MI_CpuClear8(&moveAnim, sizeof(MoveAnimation));
+        MI_CpuClear8(&battlerContext, sizeof(BattleAnimBattlerContext));
 
-        v6 = Pokemon_GetValue(v0->unk_00->unk_0C.unk_00->unk_00[v0->unk_0D], MON_DATA_SPECIES, NULL);
-        v7 = Pokemon_GetValue(v0->unk_00->unk_0C.unk_00->unk_00[v0->unk_0D], MON_DATA_GENDER, NULL);
-        v8 = Pokemon_IsShiny(v0->unk_00->unk_0C.unk_00->unk_00[v0->unk_0D]);
-        v9 = Pokemon_GetValue(v0->unk_00->unk_0C.unk_00->unk_00[v0->unk_0D], MON_DATA_FORM, NULL);
-        v14 = Pokemon_GetValue(v0->unk_00->unk_0C.unk_00->unk_00[v0->unk_0D], MON_DATA_PERSONALITY, NULL);
+        int species = Pokemon_GetValue(v0->unk_00->unk_0C.unk_00->contestMons[v0->contestantID], MON_DATA_SPECIES, NULL);
+        int gender = Pokemon_GetValue(v0->unk_00->unk_0C.unk_00->contestMons[v0->contestantID], MON_DATA_GENDER, NULL);
+        isShiny = Pokemon_IsShiny(v0->unk_00->unk_0C.unk_00->contestMons[v0->contestantID]);
+        monForm = Pokemon_GetValue(v0->unk_00->unk_0C.unk_00->contestMons[v0->contestantID], MON_DATA_FORM, NULL);
+        personality = Pokemon_GetValue(v0->unk_00->unk_0C.unk_00->contestMons[v0->contestantID], MON_DATA_PERSONALITY, NULL);
 
-        v10 = Pokemon_GetValue(v0->unk_00->unk_0C.unk_00->unk_00[v16], MON_DATA_SPECIES, NULL);
-        v11 = Pokemon_GetValue(v0->unk_00->unk_0C.unk_00->unk_00[v16], MON_DATA_GENDER, NULL);
-        v12 = Pokemon_IsShiny(v0->unk_00->unk_0C.unk_00->unk_00[v16]);
-        v13 = Pokemon_GetValue(v0->unk_00->unk_0C.unk_00->unk_00[v16], MON_DATA_FORM, NULL);
-        v15 = Pokemon_GetValue(v0->unk_00->unk_0C.unk_00->unk_00[v16], MON_DATA_PERSONALITY, NULL);
+        v10 = Pokemon_GetValue(v0->unk_00->unk_0C.unk_00->contestMons[v16], MON_DATA_SPECIES, NULL);
+        v11 = Pokemon_GetValue(v0->unk_00->unk_0C.unk_00->contestMons[v16], MON_DATA_GENDER, NULL);
+        v12 = Pokemon_IsShiny(v0->unk_00->unk_0C.unk_00->contestMons[v16]);
+        v13 = Pokemon_GetValue(v0->unk_00->unk_0C.unk_00->contestMons[v16], MON_DATA_FORM, NULL);
+        v15 = Pokemon_GetValue(v0->unk_00->unk_0C.unk_00->contestMons[v16], MON_DATA_PERSONALITY, NULL);
 
-        v3.unk_00 = 0;
-        v3.unk_01 = 0;
-        v3.unk_02 = v0->unk_104.unk_04;
-        v3.unk_04 = 1;
-        v3.unk_08 = 10;
-        v3.unk_0A = v0->unk_104.unk_07;
-        v3.unk_0C = v0->unk_104.unk_08;
-        v3.unk_10 = 0;
-        v3.unk_14 = 0;
-        v3.unk_16 = 1;
-        v3.unk_54 = 9;
-
-        for (v5 = 0; v5 < 4; v5++) {
-            v3.unk_18[v5] = v6;
-        }
-
-        v3.unk_18[1] = v10;
-
-        v4.unk_04 = v0->unk_00->unk_0C.unk_24;
-        v4.unk_08 = v0->unk_00->unk_0C.unk_50;
-        v4.unk_0C[0] = &v0->unk_00->unk_0C.unk_58[v0->unk_0D];
-        v4.unk_0C[1] = &v0->unk_00->unk_0C.unk_98;
+        moveAnim.command = 0;
+        moveAnim.unk_01 = 0;
+        moveAnim.move = v0->unk_104.actingAnimationMoveID;
+        moveAnim.damage = 1;
+        moveAnim.power = 10;
+        moveAnim.effectChance = v0->unk_104.unk_07;
+        moveAnim.friendship = v0->unk_104.friendship;
+        moveAnim.fieldConditions = 0;
+        moveAnim.attacker = 0;
+        moveAnim.defender = 1;
+        moveAnim.terrain = 9;
 
         for (v5 = 0; v5 < 4; v5++) {
-            v4.unk_1C[v5] = 0xff;
-            v4.unk_34[v5] = v6;
-            v4.unk_3C[v5] = v7;
-            v4.unk_40[v5] = v8;
-            v4.unk_44[v5] = v9;
-            v4.unk_48[v5] = v14;
-            v4.unk_4C[v5] = 0;
+            moveAnim.species[v5] = species;
         }
 
-        v4.unk_4C[0] = v0->unk_104.unk_00;
-        v4.unk_1C[0] = 0;
-        v4.unk_1C[1] = 1;
-        v4.unk_34[1] = v10;
-        v4.unk_3C[1] = v11;
-        v4.unk_40[1] = v12;
-        v4.unk_44[1] = v13;
-        v4.unk_48[1] = v15;
-        v4.unk_20[0] = v0->unk_00->unk_0C.unk_08[v0->unk_0D];
+        moveAnim.species[1] = v10;
 
-        v1 = (v0->unk_0D == 0) ? 1 : 0;
+        battlerContext.bgConfig = v0->unk_00->unk_0C.unk_24;
+        battlerContext.paletteData = v0->unk_00->unk_0C.unk_50;
+        battlerContext.pokemonSpriteData[0] = &v0->unk_00->unk_0C.pokemonSpriteDataArray[v0->contestantID];
+        battlerContext.pokemonSpriteData[1] = &v0->unk_00->unk_0C.pokemonSpriteData;
 
-        v4.unk_20[1] = v0->unk_00->unk_0C.unk_08[v1];
-        v4.unk_30 = 0;
-        v4.unk_50 = 8;
-        v4.unk_54.unk_00 = 45;
-        v4.unk_54.unk_04 = 1;
-        v4.unk_54.unk_08 = 30;
-        v4.unk_54.unk_0C = 2;
-        v4.unk_54.unk_10 = 0;
-        v4.unk_54.unk_14 = 3;
-        v4.unk_00 = v0->unk_00->unk_0C.unk_18;
-        v4.unk_6C = v0->unk_00->unk_00->unk_14C[v0->unk_0D];
+        for (v5 = 0; v5 < 4; v5++) {
+            battlerContext.battlerTypes[v5] = 0xff;
+            battlerContext.battlerSpecies[v5] = species;
+            battlerContext.battlerGenders[v5] = gender;
+            battlerContext.battlerShinyFlags[v5] = isShiny;
+            battlerContext.battlerForms[v5] = monForm;
+            battlerContext.battlerPersonalities[v5] = personality;
+            battlerContext.battlerMoveEffects[v5] = 0;
+        }
 
-        ov12_0221FE30(v0->unk_00->unk_0C.unk_20, &v3, v0->unk_104.unk_04, &v4);
+        battlerContext.battlerMoveEffects[0] = v0->unk_104.unk_00;
+        battlerContext.battlerTypes[0] = 0;
+        battlerContext.battlerTypes[1] = 1;
+        battlerContext.battlerSpecies[1] = v10;
+        battlerContext.battlerGenders[1] = v11;
+        battlerContext.battlerShinyFlags[1] = v12;
+        battlerContext.battlerForms[1] = v13;
+        battlerContext.battlerPersonalities[1] = v15;
+        battlerContext.pokemonSprites[0] = v0->unk_00->unk_0C.unk_08[v0->contestantID];
+
+        v1 = (v0->contestantID == 0) ? 1 : 0;
+
+        battlerContext.pokemonSprites[1] = v0->unk_00->unk_0C.unk_08[v1];
+        battlerContext.battleType = 0;
+        battlerContext.moveArcID = 8;
+        battlerContext.battleBgRef.narcID = 45;
+        battlerContext.battleBgRef.tilesNarcMemberIdx = 1;
+        battlerContext.battleBgRef.paletteNarcMemberIdx = 30;
+        battlerContext.battleBgRef.tilemapNarcMemberIdx = 2;
+        battlerContext.battleBgRef.paletteDestStart = 0;
+        battlerContext.battleBgRef.paletteSrcSize = 3;
+        battlerContext.spriteSystem = v0->unk_00->unk_0C.unk_18;
+        battlerContext.chatotCry = v0->unk_00->unk_00->chatotCry[v0->contestantID];
+
+        BattleAnimSystem_StartMove(v0->unk_00->unk_0C.unk_20, &moveAnim, v0->unk_104.actingAnimationMoveID, &battlerContext);
     }
 
         {
-            int v17;
-
-            v17 = Pokemon_SpriteYOffset(v0->unk_00->unk_0C.unk_00->unk_00[v0->unk_0D], 0);
+            int v17 = Pokemon_SpriteYOffset(v0->unk_00->unk_0C.unk_00->contestMons[v0->contestantID], 0);
 
             if (v0->unk_104.unk_00 != ((0x40 ^ 0xffffffff) & (0x80 ^ 0xffffffff) & (0x40000 ^ 0xffffffff) & (0x20000000 ^ 0xffffffff))) {
-                sub_02007DEC(v0->unk_00->unk_0C.unk_08[v0->unk_0D], 6, 0);
+                PokemonSprite_SetAttribute(v0->unk_00->unk_0C.unk_08[v0->contestantID], MON_SPRITE_HIDE, 0);
             }
 
-            sub_02007DEC(v0->unk_00->unk_0C.unk_08[v0->unk_0D], 37, 0);
-            sub_02007DEC(v0->unk_00->unk_0C.unk_08[v0->unk_0D], 0, (256 - 40));
-            sub_02007DEC(v0->unk_00->unk_0C.unk_08[v0->unk_0D], 1, (104 + 8) + v17);
+            PokemonSprite_SetAttribute(v0->unk_00->unk_0C.unk_08[v0->contestantID], MON_SPRITE_HIDE_2, 0);
+            PokemonSprite_SetAttribute(v0->unk_00->unk_0C.unk_08[v0->contestantID], MON_SPRITE_X_CENTER, 256 - 40);
+            PokemonSprite_SetAttribute(v0->unk_00->unk_0C.unk_08[v0->contestantID], MON_SPRITE_Y_CENTER, (104 + 8) + v17);
 
-            sub_02007DEC(v0->unk_00->unk_0C.unk_08[v1], 37, 1);
-            sub_02007DEC(v0->unk_00->unk_0C.unk_08[v1], 0, 80);
-            sub_02007DEC(v0->unk_00->unk_0C.unk_08[v1], 1, (50 - 8));
+            PokemonSprite_SetAttribute(v0->unk_00->unk_0C.unk_08[v1], MON_SPRITE_HIDE_2, 1);
+            PokemonSprite_SetAttribute(v0->unk_00->unk_0C.unk_08[v1], MON_SPRITE_X_CENTER, 80);
+            PokemonSprite_SetAttribute(v0->unk_00->unk_0C.unk_08[v1], MON_SPRITE_Y_CENTER, 50 - 8);
         }
 
-        v0->unk_0C++;
+        v0->state++;
         break;
     case 11:
-        ov12_0222016C(v0->unk_00->unk_0C.unk_20);
+        BattleAnimSystem_ExecuteScript(v0->unk_00->unk_0C.unk_20);
 
-        if (ov12_02220188(v0->unk_00->unk_0C.unk_20) == 0) {
-            ov12_02220198(v0->unk_00->unk_0C.unk_20);
+        if (BattleAnimSystem_IsMoveActive(v0->unk_00->unk_0C.unk_20) == 0) {
+            BattleAnimSystem_FreeScriptData(v0->unk_00->unk_0C.unk_20);
 
             if (v0->unk_104.unk_06 > 0) {
                 v0->unk_104.unk_06--;
@@ -783,34 +751,34 @@ static void ov17_022444BC(SysTask *param0, void *param1)
                     v0->unk_104.unk_00 = ((0x40 ^ 0xffffffff) & (0x80 ^ 0xffffffff) & (0x40000 ^ 0xffffffff) & (0x20000000 ^ 0xffffffff));
                 }
 
-                v0->unk_0C = 10;
+                v0->state = 10;
             } else {
-                v0->unk_0C++;
+                v0->state++;
             }
         }
         break;
     case 12:
-        switch (v0->unk_104.unk_04) {
-        case 144:
-        case 164:
-            v0->unk_00->unk_1616[v0->unk_0D] = 1;
+        switch (v0->unk_104.actingAnimationMoveID) {
+        case MOVE_TRANSFORM:
+        case MOVE_SUBSTITUTE:
+            v0->unk_00->unk_1616[v0->contestantID] = 1;
             break;
         }
 
-        v0->unk_0C++;
+        v0->state++;
         break;
     case 13:
         ov17_022426E8(v0->unk_00, 1, &v0->unk_10);
-        v0->unk_0C++;
+        v0->state++;
         break;
     case 14:
         if (v0->unk_10 == 1) {
-            v0->unk_0C++;
+            v0->state++;
         }
         break;
     default:
         ov17_0224F26C(&v0->unk_00->unk_BF8, &v0->unk_04, NULL, 0);
-        Heap_FreeToHeap(v0);
+        Heap_Free(v0);
         SysTask_Done(param0);
         return;
     }
@@ -819,9 +787,7 @@ static void ov17_022444BC(SysTask *param0, void *param1)
 static int ov17_02244958(UnkStruct_ov17_0224F30C *param0, void *param1, int param2, void *param3)
 {
     UnkStruct_ov17_02246F24 *v0 = param1;
-    int v1;
-
-    v1 = ov17_0224F1F8(&v0->unk_BF8, 0xff, param2, NULL, 0);
+    int v1 = ov17_0224F1F8(&v0->unk_BF8, 0xff, param2, NULL, 0);
     return v1;
 }
 
@@ -831,12 +797,12 @@ static void ov17_02244970(UnkStruct_ov17_0224F30C *param0, void *param1, const U
     UnkStruct_ov17_02244970 *v1;
     UnkStruct_ov17_02246F24_sub1 *v2 = param3;
 
-    v1 = Heap_AllocFromHeap(21, sizeof(UnkStruct_ov17_02244970));
+    v1 = Heap_Alloc(HEAP_ID_21, sizeof(UnkStruct_ov17_02244970));
     MI_CpuClear8(v1, sizeof(UnkStruct_ov17_02244970));
 
     v1->unk_00 = v0;
     v1->unk_04 = *param2;
-    v1->unk_0D = v0->unk_0C.unk_00->unk_113;
+    v1->unk_0D = v0->unk_0C.unk_00->playerContestantID;
 
     SysTask_Start(ov17_022449B8, v1, 100);
 }
@@ -855,21 +821,21 @@ static void ov17_022449B8(SysTask *param0, void *param1)
         ov17_0223F9C4(v0->unk_00->unk_7E4, 2, 0, NULL);
 
         {
-            u32 v2;
+            u32 actingCompetitionMessageID;
             UnkStruct_ov17_022449B8 v3;
 
             if (v0->unk_00->unk_220.unk_00 + 1 == 4) {
-                v2 = 3;
+                actingCompetitionMessageID = ACTING_COMPETITION_MESSAGE_LAST_PERFORMANCE_CHOOSE_MOVE;
             } else {
-                v2 = 2;
+                actingCompetitionMessageID = ACTING_COMPETITION_MESSAGE_WHICH_MOVE_IS_YOUR_CHOICE;
             }
 
             v3.unk_04 = v0->unk_00->unk_220.unk_00 + 1;
-            ov17_02242E5C(v0->unk_00, v2, &v3, NULL);
+            ov17_02242E5C(v0->unk_00, actingCompetitionMessageID, &v3, NULL);
         }
 
         if ((v0->unk_00->unk_220.unk_00 + 1 == 4) && (v0->unk_0E == 0)) {
-            Sound_PlayEffect(1782);
+            Sound_PlayEffect(SEQ_SE_DP_CON_029_sseq);
             v0->unk_0E++;
         }
 
@@ -886,8 +852,8 @@ static void ov17_022449B8(SysTask *param0, void *param1)
         v1 = ov17_0223FAF8(v0->unk_00->unk_7E4);
 
         if (v1 != 0xffffffff) {
-            v0->unk_10.unk_00 = Pokemon_GetValue(v0->unk_00->unk_0C.unk_00->unk_00[v0->unk_0D], MON_DATA_MOVE1 + v1, NULL);
-            Sound_PlayEffect(1501);
+            v0->unk_10.unk_00 = Pokemon_GetValue(v0->unk_00->unk_0C.unk_00->contestMons[v0->unk_0D], MON_DATA_MOVE1 + v1, NULL);
+            Sound_PlayEffect(SEQ_SE_DP_DECIDE_sseq);
             v0->unk_0C++;
         }
         break;
@@ -903,12 +869,10 @@ static void ov17_022449B8(SysTask *param0, void *param1)
         ov17_0223F9C4(v0->unk_00->unk_7E4, 3, 0, NULL);
 
         {
-            u32 v4;
             UnkStruct_ov17_022449B8 v5;
 
-            v4 = 1;
             v5.unk_04 = v0->unk_00->unk_220.unk_00 + 1;
-            ov17_02242E5C(v0->unk_00, v4, &v5, NULL);
+            ov17_02242E5C(v0->unk_00, ACTING_COMPETITION_MESSAGE_CHOOSE_JUDGE, &v5, NULL);
         }
 
         v0->unk_0C++;
@@ -924,7 +888,7 @@ static void ov17_022449B8(SysTask *param0, void *param1)
 
         if (v1 != 0xffffffff) {
             v0->unk_10.unk_02 = v1;
-            Sound_PlayEffect(1501);
+            Sound_PlayEffect(SEQ_SE_DP_DECIDE_sseq);
             v0->unk_0C++;
         }
         break;
@@ -942,37 +906,33 @@ static void ov17_022449B8(SysTask *param0, void *param1)
     case 10:
         v0->unk_0C++;
     default:
-        if (v0->unk_00->unk_00->unk_155 == 1) {
-            ov17_02242E5C(v0->unk_00, 46, NULL, NULL);
+        if (v0->unk_00->unk_00->isLinkContest == TRUE) {
+            ov17_02242E5C(v0->unk_00, ACTING_COMPETITION_MESSAGE_COMMUNICATING_PLEASE_STAND_BY, NULL, NULL);
         }
 
         ov17_0224F26C(&v0->unk_00->unk_BF8, &v0->unk_04, &v0->unk_10, sizeof(UnkStruct_ov17_02244BB0));
         ov17_0223F9C4(v0->unk_00->unk_7E4, 0, 0, NULL);
 
-        Heap_FreeToHeap(v0);
+        Heap_Free(v0);
         SysTask_Done(param0);
 
         return;
     }
 }
 
-static void ov17_02244BB0(UnkStruct_ov17_0224F30C *param0, void *param1, const UnkStruct_ov17_02243C80 *param2, UnkStruct_ov17_0224F3D8 *param3, int param4)
+static void ov17_02244BB0(UnkStruct_ov17_0224F30C *param0, void *param1, const UnkStruct_ov17_02243C80 *param2, UnkStruct_ov17_0224F3D8 *param3, int contestantID)
 {
     UnkStruct_ov17_02246F24 *v0 = param1;
-    UnkStruct_ov17_02244BB0 *v1;
+    UnkStruct_ov17_02244BB0 *v1 = param3->unk_00[contestantID];
 
-    v1 = param3->unk_00[param4];
-
-    v0->unk_220.unk_06[param4] = v1->unk_00;
-    v0->unk_220.unk_0E[param4] = v1->unk_02;
+    v0->unk_220.moveIDs[contestantID] = v1->unk_00;
+    v0->unk_220.unk_0E[contestantID] = v1->unk_02;
 }
 
 static int ov17_02244BD4(UnkStruct_ov17_0224F30C *param0, void *param1, int param2, void *param3)
 {
     UnkStruct_ov17_02246F24 *v0 = param1;
-    int v1;
-
-    v1 = ov17_0224F1F8(&v0->unk_BF8, 0xff, param2, param3, sizeof(UnkStruct_ov17_02246F24_sub1));
+    int v1 = ov17_0224F1F8(&v0->unk_BF8, 0xff, param2, param3, sizeof(UnkStruct_ov17_02246F24_sub1));
     return v1;
 }
 
@@ -984,9 +944,7 @@ static void ov17_02244BEC(UnkStruct_ov17_0224F30C *param0, void *param1, const U
 static int ov17_02244BF0(UnkStruct_ov17_0224F30C *param0, void *param1, int param2, void *param3)
 {
     UnkStruct_ov17_02246F24 *v0 = param1;
-    int v1;
-
-    v1 = ov17_0224F1F8(&v0->unk_BF8, 0xff, param2, param3, sizeof(UnkStruct_ov17_02246F24_sub1));
+    int v1 = ov17_0224F1F8(&v0->unk_BF8, 0xff, param2, param3, sizeof(UnkStruct_ov17_02246F24_sub1));
     return v1;
 }
 
@@ -996,12 +954,12 @@ static void ov17_02244C08(UnkStruct_ov17_0224F30C *param0, void *param1, const U
     UnkStruct_ov17_02244C08 *v1;
     UnkStruct_ov17_02246F24_sub1 *v2 = param3;
 
-    v1 = Heap_AllocFromHeap(21, sizeof(UnkStruct_ov17_02244C08));
+    v1 = Heap_Alloc(HEAP_ID_21, sizeof(UnkStruct_ov17_02244C08));
     MI_CpuClear8(v1, sizeof(UnkStruct_ov17_02244C08));
 
     v1->unk_00 = v0;
     v1->unk_04 = *param2;
-    v1->unk_0D = v2->unk_00;
+    v1->contestantID = v2->contestantID;
     v1->unk_0E = v2->unk_01;
     v1->unk_14 = *v2;
 
@@ -1011,9 +969,7 @@ static void ov17_02244C08(UnkStruct_ov17_0224F30C *param0, void *param1, const U
 static void ov17_02244C68(SysTask *param0, void *param1)
 {
     UnkStruct_ov17_02244C08 *v0 = param1;
-    UnkStruct_ov17_022444BC *v1;
-
-    v1 = &v0->unk_14.unk_10.unk_00[v0->unk_0D];
+    UnkStruct_ov17_022444BC *v1 = &v0->unk_14.unk_10.unk_00[v0->contestantID];
 
     switch (v0->unk_0C) {
     case 0:
@@ -1026,7 +982,7 @@ static void ov17_02244C68(SysTask *param0, void *param1)
     case 2:
         if (v0->unk_F2 < v1->unk_18) {
             v0->unk_F2 += 10;
-            ov17_02241F34(&v0->unk_00->unk_0C, v0->unk_0D, v0->unk_0E, v0->unk_F2);
+            ov17_02241F34(&v0->unk_00->unk_0C, v0->contestantID, v0->unk_0E, v0->unk_F2);
             v0->unk_0C++;
         } else {
             v0->unk_0C = 4;
@@ -1043,7 +999,7 @@ static void ov17_02244C68(SysTask *param0, void *param1)
     case 4:
     default:
         ov17_0224F26C(&v0->unk_00->unk_BF8, &v0->unk_04, NULL, 0);
-        Heap_FreeToHeap(v0);
+        Heap_Free(v0);
         SysTask_Done(param0);
 
         return;
@@ -1053,9 +1009,7 @@ static void ov17_02244C68(SysTask *param0, void *param1)
 static int ov17_02244D20(UnkStruct_ov17_0224F30C *param0, void *param1, int param2, void *param3)
 {
     UnkStruct_ov17_02246F24 *v0 = param1;
-    int v1;
-
-    v1 = ov17_0224F1F8(&v0->unk_BF8, 0xff, param2, param3, sizeof(UnkStruct_ov17_02246F24_sub1));
+    int v1 = ov17_0224F1F8(&v0->unk_BF8, 0xff, param2, param3, sizeof(UnkStruct_ov17_02246F24_sub1));
     return v1;
 }
 
@@ -1065,12 +1019,12 @@ static void ov17_02244D38(UnkStruct_ov17_0224F30C *param0, void *param1, const U
     UnkStruct_ov17_02244C08 *v1;
     UnkStruct_ov17_02246F24_sub1 *v2 = param3;
 
-    v1 = Heap_AllocFromHeap(21, sizeof(UnkStruct_ov17_02244C08));
+    v1 = Heap_Alloc(HEAP_ID_21, sizeof(UnkStruct_ov17_02244C08));
     MI_CpuClear8(v1, sizeof(UnkStruct_ov17_02244C08));
 
     v1->unk_00 = v0;
     v1->unk_04 = *param2;
-    v1->unk_0D = v2->unk_00;
+    v1->contestantID = v2->contestantID;
     v1->unk_0E = v2->unk_01;
     v1->unk_14 = *v2;
 
@@ -1080,9 +1034,7 @@ static void ov17_02244D38(UnkStruct_ov17_0224F30C *param0, void *param1, const U
 static void ov17_02244D98(SysTask *param0, void *param1)
 {
     UnkStruct_ov17_02244C08 *v0 = param1;
-    UnkStruct_ov17_022444BC *v1;
-
-    v1 = &v0->unk_14.unk_10.unk_00[v0->unk_0D];
+    UnkStruct_ov17_022444BC *v1 = &v0->unk_14.unk_10.unk_00[v0->contestantID];
 
     switch (v0->unk_0C) {
     case 0:
@@ -1109,7 +1061,7 @@ static void ov17_02244D98(SysTask *param0, void *param1)
     case 5:
         if (v0->unk_F2 < v1->unk_18) {
             v0->unk_F2 += 10;
-            ov17_02241F34(&v0->unk_00->unk_0C, v0->unk_0D, v0->unk_0E, v0->unk_F2);
+            ov17_02241F34(&v0->unk_00->unk_0C, v0->contestantID, v0->unk_0E, v0->unk_F2);
             v0->unk_0C++;
         } else {
             v0->unk_0C = 7;
@@ -1145,7 +1097,7 @@ static void ov17_02244D98(SysTask *param0, void *param1)
             if (v0->unk_14.unk_10.unk_B3[v4] <= v3) {
                 v2++;
                 ov17_022424D4(&v0->unk_00->unk_0C, v4, v3);
-                Sound_PlayEffect(1759);
+                Sound_PlayEffect(SEQ_SE_DP_CON_001_sseq);
             }
         }
 
@@ -1175,7 +1127,7 @@ static void ov17_02244D98(SysTask *param0, void *param1)
 
             if ((v0->unk_14.unk_10.unk_00[v6].unk_28_4 != v0->unk_14.unk_10.unk_00[v6].unk_28_8) || (v0->unk_14.unk_10.unk_00[v6].unk_28_6 != v0->unk_14.unk_10.unk_00[v6].unk_28_10)) {
                 ov17_022430AC(&v0->unk_00->unk_0C, v5, v0->unk_14.unk_10.unk_00[v6].unk_28_6);
-                Sound_PlayEffect(1762);
+                Sound_PlayEffect(SEQ_SE_DP_CON_004_sseq);
             }
         }
     }
@@ -1187,7 +1139,7 @@ static void ov17_02244D98(SysTask *param0, void *param1)
     case 16:
     default:
         ov17_0224F26C(&v0->unk_00->unk_BF8, &v0->unk_04, NULL, 0);
-        Heap_FreeToHeap(v0);
+        Heap_Free(v0);
         SysTask_Done(param0);
         return;
     }
@@ -1196,9 +1148,7 @@ static void ov17_02244D98(SysTask *param0, void *param1)
 static int ov17_02244FBC(UnkStruct_ov17_0224F30C *param0, void *param1, int param2, void *param3)
 {
     UnkStruct_ov17_02246F24 *v0 = param1;
-    int v1;
-
-    v1 = ov17_0224F1F8(&v0->unk_BF8, 0xff, param2, param3, sizeof(UnkStruct_ov17_02246F24_sub1));
+    int v1 = ov17_0224F1F8(&v0->unk_BF8, 0xff, param2, param3, sizeof(UnkStruct_ov17_02246F24_sub1));
     return v1;
 }
 
@@ -1208,12 +1158,12 @@ static void ov17_02244FD4(UnkStruct_ov17_0224F30C *param0, void *param1, const U
     UnkStruct_ov17_02244C08 *v1;
     UnkStruct_ov17_02246F24_sub1 *v2 = param3;
 
-    v1 = Heap_AllocFromHeap(21, sizeof(UnkStruct_ov17_02244C08));
+    v1 = Heap_Alloc(HEAP_ID_21, sizeof(UnkStruct_ov17_02244C08));
     MI_CpuClear8(v1, sizeof(UnkStruct_ov17_02244C08));
 
     v1->unk_00 = v0;
     v1->unk_04 = *param2;
-    v1->unk_0D = v2->unk_00;
+    v1->contestantID = v2->contestantID;
     v1->unk_0E = v2->unk_01;
     v1->unk_14 = *v2;
 
@@ -1223,9 +1173,7 @@ static void ov17_02244FD4(UnkStruct_ov17_0224F30C *param0, void *param1, const U
 static void ov17_02245034(SysTask *param0, void *param1)
 {
     UnkStruct_ov17_02244C08 *v0 = param1;
-    UnkStruct_ov17_022444BC *v1;
-
-    v1 = &v0->unk_14.unk_10.unk_00[v0->unk_0D];
+    UnkStruct_ov17_022444BC *v1 = &v0->unk_14.unk_10.unk_00[v0->contestantID];
 
     switch (v0->unk_0C) {
     case 0:
@@ -1252,7 +1200,7 @@ static void ov17_02245034(SysTask *param0, void *param1)
     case 5:
         if (v0->unk_F2 < v1->unk_18) {
             v0->unk_F2 += 10;
-            ov17_02241F34(&v0->unk_00->unk_0C, v0->unk_0D, v0->unk_0E, v0->unk_F2);
+            ov17_02241F34(&v0->unk_00->unk_0C, v0->contestantID, v0->unk_0E, v0->unk_F2);
             v0->unk_0C++;
         } else {
             v0->unk_0C = 7;
@@ -1271,7 +1219,7 @@ static void ov17_02245034(SysTask *param0, void *param1)
     case 8:
     default:
         ov17_0224F26C(&v0->unk_00->unk_BF8, &v0->unk_04, NULL, 0);
-        Heap_FreeToHeap(v0);
+        Heap_Free(v0);
         SysTask_Done(param0);
         return;
     }
@@ -1280,9 +1228,7 @@ static void ov17_02245034(SysTask *param0, void *param1)
 static int ov17_02245124(UnkStruct_ov17_0224F30C *param0, void *param1, int param2, void *param3)
 {
     UnkStruct_ov17_02246F24 *v0 = param1;
-    int v1;
-
-    v1 = ov17_0224F1F8(&v0->unk_BF8, 0xff, param2, param3, sizeof(UnkStruct_ov17_02246F24_sub1));
+    int v1 = ov17_0224F1F8(&v0->unk_BF8, 0xff, param2, param3, sizeof(UnkStruct_ov17_02246F24_sub1));
     return v1;
 }
 
@@ -1292,12 +1238,12 @@ static void ov17_0224513C(UnkStruct_ov17_0224F30C *param0, void *param1, const U
     UnkStruct_ov17_02244C08 *v1;
     UnkStruct_ov17_02246F24_sub1 *v2 = param3;
 
-    v1 = Heap_AllocFromHeap(21, sizeof(UnkStruct_ov17_02244C08));
+    v1 = Heap_Alloc(HEAP_ID_21, sizeof(UnkStruct_ov17_02244C08));
     MI_CpuClear8(v1, sizeof(UnkStruct_ov17_02244C08));
 
     v1->unk_00 = v0;
     v1->unk_04 = *param2;
-    v1->unk_0D = v2->unk_00;
+    v1->contestantID = v2->contestantID;
     v1->unk_0E = v2->unk_01;
     v1->unk_14 = *v2;
 
@@ -1307,9 +1253,7 @@ static void ov17_0224513C(UnkStruct_ov17_0224F30C *param0, void *param1, const U
 static void ov17_0224519C(SysTask *param0, void *param1)
 {
     UnkStruct_ov17_02244C08 *v0 = param1;
-    UnkStruct_ov17_022444BC *v1;
-
-    v1 = &v0->unk_14.unk_10.unk_00[v0->unk_0D];
+    UnkStruct_ov17_022444BC *v1 = &v0->unk_14.unk_10.unk_00[v0->contestantID];
 
     switch (v0->unk_0C) {
     case 0:
@@ -1341,8 +1285,8 @@ static void ov17_0224519C(SysTask *param0, void *param1)
     case 3:
         v0->unk_0C++;
     case 4:
-        if (v0->unk_14.unk_C6.unk_0C != 0) {
-            ov17_02242E5C(v0->unk_00, v0->unk_14.unk_C6.unk_0C, &v0->unk_14.unk_C6.unk_00, NULL);
+        if (v0->unk_14.unk_C6.actingMessagesID != ACTING_COMPETITION_MESSAGE_NONE) {
+            ov17_02242E5C(v0->unk_00, v0->unk_14.unk_C6.actingMessagesID, &v0->unk_14.unk_C6.unk_00, NULL);
             v0->unk_0C++;
         } else {
             v0->unk_0C = 6;
@@ -1384,7 +1328,7 @@ static void ov17_0224519C(SysTask *param0, void *param1)
             } else {
                 v0->unk_F4 -= 10;
                 ov17_022424D4(&v0->unk_00->unk_0C, v1->unk_03, v0->unk_F4);
-                Sound_PlayEffect(1759);
+                Sound_PlayEffect(SEQ_SE_DP_CON_001_sseq);
             }
 
             v0->unk_0C++;
@@ -1413,8 +1357,8 @@ static void ov17_0224519C(SysTask *param0, void *param1)
         v0->unk_0C++;
         break;
     case 15:
-        if (v0->unk_14.unk_C6.unk_0D != 0) {
-            ov17_02242E5C(v0->unk_00, v0->unk_14.unk_C6.unk_0D, &v0->unk_14.unk_C6.unk_06, NULL);
+        if (v0->unk_14.unk_C6.actingMessagesID2 != ACTING_COMPETITION_MESSAGE_NONE) {
+            ov17_02242E5C(v0->unk_00, v0->unk_14.unk_C6.actingMessagesID2, &v0->unk_14.unk_C6.unk_06, NULL);
             v0->unk_0C++;
         } else {
             v0->unk_0C = 17;
@@ -1429,7 +1373,7 @@ static void ov17_0224519C(SysTask *param0, void *param1)
         v0->unk_0C++;
     case 18:
         if (v0->unk_F4 >= (10 * 5)) {
-            ov17_022436D0(v0->unk_00, v0->unk_0D, v0->unk_0E, v1->unk_03, &v0->unk_12);
+            ov17_022436D0(v0->unk_00, v0->contestantID, v0->unk_0E, v1->unk_03, &v0->unk_12);
             v0->unk_0C++;
         } else {
             v0->unk_0C = 20;
@@ -1449,7 +1393,7 @@ static void ov17_0224519C(SysTask *param0, void *param1)
     case 22:
         if (v0->unk_F2 < v1->unk_18) {
             v0->unk_F2 += 10;
-            ov17_02241F34(&v0->unk_00->unk_0C, v0->unk_0D, v0->unk_0E, v0->unk_F2);
+            ov17_02241F34(&v0->unk_00->unk_0C, v0->contestantID, v0->unk_0E, v0->unk_F2);
             v0->unk_0C++;
         } else {
             ov17_02241B1C(&v0->unk_00->unk_0C);
@@ -1476,7 +1420,7 @@ static void ov17_0224519C(SysTask *param0, void *param1)
     default:
         if (v0->unk_11 == 1) {
             ov17_0224F26C(&v0->unk_00->unk_BF8, &v0->unk_04, NULL, 0);
-            Heap_FreeToHeap(v0);
+            Heap_Free(v0);
             SysTask_Done(param0);
             return;
         }
@@ -1487,9 +1431,7 @@ static void ov17_0224519C(SysTask *param0, void *param1)
 static int ov17_02245510(UnkStruct_ov17_0224F30C *param0, void *param1, int param2, void *param3)
 {
     UnkStruct_ov17_02246F24 *v0 = param1;
-    int v1;
-
-    v1 = ov17_0224F1F8(&v0->unk_BF8, 0xff, param2, param3, sizeof(UnkStruct_ov17_02246F24_sub1));
+    int v1 = ov17_0224F1F8(&v0->unk_BF8, 0xff, param2, param3, sizeof(UnkStruct_ov17_02246F24_sub1));
     return v1;
 }
 
@@ -1499,12 +1441,12 @@ static void ov17_02245528(UnkStruct_ov17_0224F30C *param0, void *param1, const U
     UnkStruct_ov17_02244C08 *v1;
     UnkStruct_ov17_02246F24_sub1 *v2 = param3;
 
-    v1 = Heap_AllocFromHeap(21, sizeof(UnkStruct_ov17_02244C08));
+    v1 = Heap_Alloc(HEAP_ID_21, sizeof(UnkStruct_ov17_02244C08));
     MI_CpuClear8(v1, sizeof(UnkStruct_ov17_02244C08));
 
     v1->unk_00 = v0;
     v1->unk_04 = *param2;
-    v1->unk_0D = v2->unk_00;
+    v1->contestantID = v2->contestantID;
     v1->unk_0E = v2->unk_01;
     v1->unk_14 = *v2;
 
@@ -1514,9 +1456,7 @@ static void ov17_02245528(UnkStruct_ov17_0224F30C *param0, void *param1, const U
 static void ov17_02245588(SysTask *param0, void *param1)
 {
     UnkStruct_ov17_02244C08 *v0 = param1;
-    UnkStruct_ov17_022444BC *v1;
-
-    v1 = &v0->unk_14.unk_10.unk_00[v0->unk_0D];
+    UnkStruct_ov17_022444BC *v1 = &v0->unk_14.unk_10.unk_00[v0->contestantID];
 
     switch (v0->unk_0C) {
     case 0:
@@ -1543,7 +1483,7 @@ static void ov17_02245588(SysTask *param0, void *param1)
     case 5:
         if (v0->unk_F2 < v1->unk_18) {
             v0->unk_F2 += 10;
-            ov17_02241F34(&v0->unk_00->unk_0C, v0->unk_0D, v0->unk_0E, v0->unk_F2);
+            ov17_02241F34(&v0->unk_00->unk_0C, v0->contestantID, v0->unk_0E, v0->unk_F2);
         } else {
             v0->unk_0C = 7;
         }
@@ -1563,7 +1503,7 @@ static void ov17_02245588(SysTask *param0, void *param1)
     case 8:
     default:
         ov17_0224F26C(&v0->unk_00->unk_BF8, &v0->unk_04, NULL, 0);
-        Heap_FreeToHeap(v0);
+        Heap_Free(v0);
         SysTask_Done(param0);
         return;
     }
@@ -1572,9 +1512,7 @@ static void ov17_02245588(SysTask *param0, void *param1)
 static int ov17_02245678(UnkStruct_ov17_0224F30C *param0, void *param1, int param2, void *param3)
 {
     UnkStruct_ov17_02246F24 *v0 = param1;
-    int v1;
-
-    v1 = ov17_0224F1F8(&v0->unk_BF8, 0xff, param2, param3, sizeof(UnkStruct_ov17_02246F24_sub1));
+    int v1 = ov17_0224F1F8(&v0->unk_BF8, 0xff, param2, param3, sizeof(UnkStruct_ov17_02246F24_sub1));
     return v1;
 }
 
@@ -1584,7 +1522,7 @@ static void ov17_02245690(UnkStruct_ov17_0224F30C *param0, void *param1, const U
     UnkStruct_ov17_02245690 *v1;
     UnkStruct_ov17_02246F24_sub1 *v2 = param3;
 
-    v1 = Heap_AllocFromHeap(21, sizeof(UnkStruct_ov17_02245690));
+    v1 = Heap_Alloc(HEAP_ID_21, sizeof(UnkStruct_ov17_02245690));
     MI_CpuClear8(v1, sizeof(UnkStruct_ov17_02245690));
 
     v1->unk_00 = v0;
@@ -1625,16 +1563,16 @@ static void ov17_022456E8(SysTask *param0, void *param1)
 
         if (v1->unk_09 == 0) {
             v5 = 4;
-            Sound_PlayEffect(1776);
+            Sound_PlayEffect(SEQ_SE_DP_CON_023_sseq);
         } else if (v1->unk_09 == 1) {
             v5 = 5;
-            Sound_PlayEffect(1775);
+            Sound_PlayEffect(SEQ_SE_DP_CON_022_sseq);
         } else if (v1->unk_09 == 2) {
             v5 = 6;
-            Sound_PlayEffect(1774);
+            Sound_PlayEffect(SEQ_SE_DP_CON_021_sseq);
         } else {
             v0->unk_0C = 3;
-            Sound_PlayEffect(1759);
+            Sound_PlayEffect(SEQ_SE_DP_CON_001_sseq);
             break;
         }
 
@@ -1665,8 +1603,8 @@ static void ov17_022456E8(SysTask *param0, void *param1)
     case 6:
         v0->unk_0C++;
     case 7:
-        if (v0->unk_10.unk_C6.unk_0C != 0) {
-            ov17_02242E5C(v0->unk_00, v0->unk_10.unk_C6.unk_0C, &v0->unk_10.unk_C6.unk_00, &v0->unk_10.unk_D6_val1);
+        if (v0->unk_10.unk_C6.actingMessagesID != ACTING_COMPETITION_MESSAGE_NONE) {
+            ov17_02242E5C(v0->unk_00, v0->unk_10.unk_C6.actingMessagesID, &v0->unk_10.unk_C6.unk_00, &v0->unk_10.unk_D6_val1);
             v0->unk_0C++;
         } else {
             v0->unk_0C = 9;
@@ -1680,8 +1618,8 @@ static void ov17_022456E8(SysTask *param0, void *param1)
     case 9:
         v0->unk_0C++;
     case 10:
-        if (v0->unk_10.unk_C6.unk_0D != 0) {
-            ov17_02242E5C(v0->unk_00, v0->unk_10.unk_C6.unk_0D, &v0->unk_10.unk_C6.unk_06, NULL);
+        if (v0->unk_10.unk_C6.actingMessagesID2 != ACTING_COMPETITION_MESSAGE_NONE) {
+            ov17_02242E5C(v0->unk_00, v0->unk_10.unk_C6.actingMessagesID2, &v0->unk_10.unk_C6.unk_06, NULL);
             v0->unk_0C++;
         } else {
             v0->unk_0C = 12;
@@ -1729,7 +1667,7 @@ static void ov17_022456E8(SysTask *param0, void *param1)
     case 17:
     default:
         ov17_0224F26C(&v0->unk_00->unk_BF8, &v0->unk_04, NULL, 0);
-        Heap_FreeToHeap(v0);
+        Heap_Free(v0);
         SysTask_Done(param0);
         return;
     }
@@ -1738,9 +1676,7 @@ static void ov17_022456E8(SysTask *param0, void *param1)
 static int ov17_0224595C(UnkStruct_ov17_0224F30C *param0, void *param1, int param2, void *param3)
 {
     UnkStruct_ov17_02246F24 *v0 = param1;
-    int v1;
-
-    v1 = ov17_0224F1F8(&v0->unk_BF8, 0xff, param2, param3, sizeof(UnkStruct_ov17_02246F24_sub1));
+    int v1 = ov17_0224F1F8(&v0->unk_BF8, 0xff, param2, param3, sizeof(UnkStruct_ov17_02246F24_sub1));
     return v1;
 }
 
@@ -1750,12 +1686,12 @@ static void ov17_02245974(UnkStruct_ov17_0224F30C *param0, void *param1, const U
     UnkStruct_ov17_02244C08 *v1;
     UnkStruct_ov17_02246F24_sub1 *v2 = param3;
 
-    v1 = Heap_AllocFromHeap(21, sizeof(UnkStruct_ov17_02244C08));
+    v1 = Heap_Alloc(HEAP_ID_21, sizeof(UnkStruct_ov17_02244C08));
     MI_CpuClear8(v1, sizeof(UnkStruct_ov17_02244C08));
 
     v1->unk_00 = v0;
     v1->unk_04 = *param2;
-    v1->unk_0D = v2->unk_00;
+    v1->contestantID = v2->contestantID;
     v1->unk_0E = v2->unk_01;
     v1->unk_14 = *v2;
 
@@ -1765,9 +1701,7 @@ static void ov17_02245974(UnkStruct_ov17_0224F30C *param0, void *param1, const U
 static void ov17_022459D4(SysTask *param0, void *param1)
 {
     UnkStruct_ov17_02244C08 *v0 = param1;
-    UnkStruct_ov17_022444BC *v1;
-
-    v1 = &v0->unk_14.unk_10.unk_00[v0->unk_0D];
+    UnkStruct_ov17_022444BC *v1 = &v0->unk_14.unk_10.unk_00[v0->contestantID];
 
     switch (v0->unk_0C) {
     case 0:
@@ -1790,8 +1724,8 @@ static void ov17_022459D4(SysTask *param0, void *param1)
     case 3:
         v0->unk_0C++;
     case 4:
-        if (v0->unk_14.unk_C6.unk_0C != 0) {
-            ov17_02242E5C(v0->unk_00, v0->unk_14.unk_C6.unk_0C, &v0->unk_14.unk_C6.unk_00, NULL);
+        if (v0->unk_14.unk_C6.actingMessagesID != ACTING_COMPETITION_MESSAGE_NONE) {
+            ov17_02242E5C(v0->unk_00, v0->unk_14.unk_C6.actingMessagesID, &v0->unk_14.unk_C6.unk_00, NULL);
             v0->unk_0C++;
         } else {
             v0->unk_0C = 6;
@@ -1805,8 +1739,8 @@ static void ov17_022459D4(SysTask *param0, void *param1)
     case 6:
         v0->unk_0C++;
     case 7:
-        if (v0->unk_14.unk_C6.unk_0D != 0) {
-            ov17_02242E5C(v0->unk_00, v0->unk_14.unk_C6.unk_0D, &v0->unk_14.unk_C6.unk_06, NULL);
+        if (v0->unk_14.unk_C6.actingMessagesID2 != ACTING_COMPETITION_MESSAGE_NONE) {
+            ov17_02242E5C(v0->unk_00, v0->unk_14.unk_C6.actingMessagesID2, &v0->unk_14.unk_C6.unk_06, NULL);
             v0->unk_0C++;
         } else {
             v0->unk_0C = 9;
@@ -1824,7 +1758,7 @@ static void ov17_022459D4(SysTask *param0, void *param1)
     case 11:
         if (v0->unk_F2 < v1->unk_18) {
             v0->unk_F2 += 10;
-            ov17_02241F34(&v0->unk_00->unk_0C, v0->unk_0D, v0->unk_0E, v0->unk_F2);
+            ov17_02241F34(&v0->unk_00->unk_0C, v0->contestantID, v0->unk_0E, v0->unk_F2);
         } else {
             v0->unk_0C = 13;
         }
@@ -1844,7 +1778,7 @@ static void ov17_022459D4(SysTask *param0, void *param1)
     case 14:
     default:
         ov17_0224F26C(&v0->unk_00->unk_BF8, &v0->unk_04, NULL, 0);
-        Heap_FreeToHeap(v0);
+        Heap_Free(v0);
         SysTask_Done(param0);
         return;
     }
@@ -1853,9 +1787,7 @@ static void ov17_022459D4(SysTask *param0, void *param1)
 static int ov17_02245B48(UnkStruct_ov17_0224F30C *param0, void *param1, int param2, void *param3)
 {
     UnkStruct_ov17_02246F24 *v0 = param1;
-    int v1;
-
-    v1 = ov17_0224F1F8(&v0->unk_BF8, 0xff, param2, param3, sizeof(UnkStruct_ov17_02246F24_sub1));
+    int v1 = ov17_0224F1F8(&v0->unk_BF8, 0xff, param2, param3, sizeof(UnkStruct_ov17_02246F24_sub1));
     return v1;
 }
 
@@ -1865,12 +1797,12 @@ static void ov17_02245B60(UnkStruct_ov17_0224F30C *param0, void *param1, const U
     UnkStruct_ov17_02244C08 *v1;
     UnkStruct_ov17_02246F24_sub1 *v2 = param3;
 
-    v1 = Heap_AllocFromHeap(21, sizeof(UnkStruct_ov17_02244C08));
+    v1 = Heap_Alloc(HEAP_ID_21, sizeof(UnkStruct_ov17_02244C08));
     MI_CpuClear8(v1, sizeof(UnkStruct_ov17_02244C08));
 
     v1->unk_00 = v0;
     v1->unk_04 = *param2;
-    v1->unk_0D = v0->unk_0C.unk_00->unk_113;
+    v1->contestantID = v0->unk_0C.unk_00->playerContestantID;
     v1->unk_0E = v2->unk_01;
     v1->unk_14 = *v2;
 
@@ -1880,17 +1812,14 @@ static void ov17_02245B60(UnkStruct_ov17_0224F30C *param0, void *param1, const U
 static void ov17_02245BC8(SysTask *param0, void *param1)
 {
     UnkStruct_ov17_02244C08 *v0 = param1;
-    UnkStruct_ov17_022444BC *v1;
-
-    v1 = &v0->unk_14.unk_10.unk_00[v0->unk_0D];
+    UnkStruct_ov17_022444BC *v1 = &v0->unk_14.unk_10.unk_00[v0->contestantID];
 
     switch (v0->unk_0C) {
     case 0: {
-        u32 v2;
         UnkStruct_ov17_022449B8 v3;
 
-        v2 = ov17_0224314C(v0->unk_0D, v1->unk_18, &v3);
-        ov17_02242E5C(v0->unk_00, v2, &v3, NULL);
+        u32 actingMessagesID = ov17_0224314C(v0->contestantID, v1->unk_18, &v3);
+        ov17_02242E5C(v0->unk_00, actingMessagesID, &v3, NULL);
         v0->unk_0C++;
     } break;
     case 1:
@@ -1903,7 +1832,7 @@ static void ov17_02245BC8(SysTask *param0, void *param1)
         break;
     default:
         ov17_0224F26C(&v0->unk_00->unk_BF8, &v0->unk_04, NULL, 0);
-        Heap_FreeToHeap(v0);
+        Heap_Free(v0);
         SysTask_Done(param0);
         return;
     }
@@ -1912,9 +1841,7 @@ static void ov17_02245BC8(SysTask *param0, void *param1)
 static int ov17_02245C4C(UnkStruct_ov17_0224F30C *param0, void *param1, int param2, void *param3)
 {
     UnkStruct_ov17_02246F24 *v0 = param1;
-    int v1;
-
-    v1 = ov17_0224F1F8(param0, 0xff, param2, param3, sizeof(UnkStruct_ov17_02246F24_sub1));
+    int v1 = ov17_0224F1F8(param0, 0xff, param2, param3, sizeof(UnkStruct_ov17_02246F24_sub1));
     return v1;
 }
 
@@ -1922,9 +1849,7 @@ static void ov17_02245C60(UnkStruct_ov17_0224F30C *param0, void *param1, const U
 {
     UnkStruct_ov17_02246F24 *v0 = param1;
     UnkStruct_ov17_02246F24_sub1 *v1 = param3;
-    UnkStruct_ov17_02245C60 *v2;
-
-    v2 = Heap_AllocFromHeap(21, sizeof(UnkStruct_ov17_02245C60));
+    UnkStruct_ov17_02245C60 *v2 = Heap_Alloc(HEAP_ID_21, sizeof(UnkStruct_ov17_02245C60));
     MI_CpuClear8(v2, sizeof(UnkStruct_ov17_02245C60));
 
     v2->unk_00 = v0;
@@ -1976,7 +1901,7 @@ static void ov17_02245CA4(SysTask *param0, void *param1)
     default:
         if (v0->unk_27 == 1) {
             ov17_0224F26C(v0->unk_0C, &v0->unk_04, NULL, 0);
-            Heap_FreeToHeap(v0);
+            Heap_Free(v0);
             SysTask_Done(param0);
             return;
         }
@@ -1988,18 +1913,14 @@ static void ov17_02245CA4(SysTask *param0, void *param1)
 static int ov17_02245DA4(UnkStruct_ov17_0224F30C *param0, void *param1, int param2, void *param3)
 {
     UnkStruct_ov17_02246F24 *v0 = param1;
-    int v1;
-
-    v1 = ov17_0224F1F8(&v0->unk_BF8, 0xff, param2, param3, sizeof(UnkStruct_ov17_022472F8));
+    int v1 = ov17_0224F1F8(&v0->unk_BF8, 0xff, param2, param3, sizeof(UnkStruct_ov17_022472F8));
     return v1;
 }
 
 static void ov17_02245DBC(UnkStruct_ov17_0224F30C *param0, void *param1, const UnkStruct_ov17_02243C80 *param2, void *param3)
 {
     UnkStruct_ov17_02246F24 *v0 = param1;
-    UnkStruct_ov17_022472F8 *v1;
-
-    v1 = param3;
+    UnkStruct_ov17_022472F8 *v1 = param3;
     v0->unk_220 = *v1;
 
     ov17_02241EF0(&v0->unk_0C);
@@ -2012,9 +1933,7 @@ static void ov17_02245DBC(UnkStruct_ov17_0224F30C *param0, void *param1, const U
 static int ov17_02245E00(UnkStruct_ov17_0224F30C *param0, void *param1, int param2, void *param3)
 {
     UnkStruct_ov17_02246F24 *v0 = param1;
-    int v1;
-
-    v1 = ov17_0224F1F8(param0, 0xff, param2, param3, sizeof(UnkStruct_ov17_02246F24_sub1));
+    int v1 = ov17_0224F1F8(param0, 0xff, param2, param3, sizeof(UnkStruct_ov17_02246F24_sub1));
     return v1;
 }
 
@@ -2022,17 +1941,15 @@ static void ov17_02245E14(UnkStruct_ov17_0224F30C *param0, void *param1, const U
 {
     UnkStruct_ov17_02246F24 *v0 = param1;
     UnkStruct_ov17_02246F24_sub1 *v1 = param3;
-    UnkStruct_ov17_02245E14 *v2;
-
-    v2 = Heap_AllocFromHeap(21, sizeof(UnkStruct_ov17_02245E14));
+    UnkStruct_ov17_02245E14 *v2 = Heap_Alloc(HEAP_ID_21, sizeof(UnkStruct_ov17_02245E14));
     MI_CpuClear8(v2, sizeof(UnkStruct_ov17_02245E14));
 
     v2->unk_00 = v0;
     v2->unk_04 = *param2;
     v2->unk_0C = param0;
-    v2->unk_11 = v1->unk_00;
+    v2->contestantID = v1->contestantID;
     v2->unk_14 = v1->unk_C6.unk_00;
-    v2->unk_1A = v1->unk_C6.unk_0C;
+    v2->actingMessagesID = v1->unk_C6.actingMessagesID;
     v2->unk_1C = v1->unk_C6.unk_0F;
     v2->unk_1B = v1->unk_C6.unk_0E;
 
@@ -2045,8 +1962,8 @@ static void ov17_02245E8C(SysTask *param0, void *param1)
 
     switch (v0->unk_10) {
     case 0:
-        if (v0->unk_1A != 0) {
-            ov17_02242E5C(v0->unk_00, v0->unk_1A, &v0->unk_14, NULL);
+        if (v0->actingMessagesID != ACTING_COMPETITION_MESSAGE_NONE) {
+            ov17_02242E5C(v0->unk_00, v0->actingMessagesID, &v0->unk_14, NULL);
             v0->unk_10++;
         } else {
             v0->unk_10 = 100;
@@ -2068,7 +1985,7 @@ static void ov17_02245E8C(SysTask *param0, void *param1)
         break;
     default:
         ov17_0224F26C(v0->unk_0C, &v0->unk_04, NULL, 0);
-        Heap_FreeToHeap(v0);
+        Heap_Free(v0);
         SysTask_Done(param0);
         return;
     }

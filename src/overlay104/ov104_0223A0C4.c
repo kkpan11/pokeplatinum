@@ -3,591 +3,591 @@
 #include <nitro.h>
 #include <string.h>
 
-#include "struct_decls/struct_party_decl.h"
-#include "struct_defs/struct_0202D764.h"
-#include "struct_defs/struct_0204AFC4.h"
-#include "struct_defs/struct_0204B184.h"
-#include "struct_defs/struct_0204B1E8.h"
-#include "struct_defs/struct_0204B404.h"
+#include "constants/battle_tower.h"
+#include "constants/charcode.h"
+#include "constants/pokemon.h"
+#include "generated/ai_flags.h"
+#include "generated/battle_tower_modes.h"
+#include "generated/moves.h"
+#include "generated/species_data_params.h"
 
-#include "overlay006/battle_params.h"
-#include "overlay104/ov104_0222DCE0.h"
+#include "struct_defs/battle_tower.h"
+#include "struct_defs/frontier_pokemon_base.h"
+#include "struct_defs/wifi_battle_tower_data.h"
+
+#include "overlay104/frontier_opponents.h"
 #include "overlay104/struct_ov104_02230BE4.h"
-#include "overlay104/struct_ov104_0223A348.h"
-#include "overlay104/struct_ov104_0223A348_sub1.h"
-#include "overlay104/struct_ov104_0223A348_sub2.h"
 
 #include "communication_information.h"
+#include "field_battle_data_transfer.h"
 #include "flags.h"
-#include "heap.h"
 #include "message.h"
 #include "party.h"
 #include "pokemon.h"
 #include "savedata.h"
 #include "trainer_info.h"
-#include "unk_0202D05C.h"
 #include "unk_02049D08.h"
-#include "unk_02051D8C.h"
+#include "wifi_battle_tower_save.h"
 
-const UnkStruct_ov104_0223A348_sub2 Unk_ov104_0223FE30[] = {
+const FrontierPokemon sDummyFrontierPokemon[] = {
     {
-        0x1,
-        0x0,
-        0xEA,
-        { 0x16, 0x4B, 0xEB, 0x4C },
-        0x12345678,
-        0x98765432,
-        0x1F,
-        0x1F,
-        0x1F,
-        0x1F,
-        0x1F,
-        0x1F,
-        0x0,
-        0x20,
-        0x20,
-        0x20,
-        0x20,
-        0x20,
-        0x20,
-        0x0,
-        0x0,
-        0x0,
-        0x0,
-        0x0,
-        0x0,
-        0xFF,
-        { 0x86, 0x68, 0x5f, 0x71, 0x7E, 0xffff, 0xffff, 0xffff, 0xffff, 0xffff, 0xffff },
+        .species = SPECIES_BULBASAUR,
+        .form = 0,
+        .item = ITEM_LEFTOVERS,
+        .moves = { MOVE_VINE_WHIP, MOVE_RAZOR_LEAF, MOVE_SYNTHESIS, MOVE_SOLAR_BEAM },
+        .otID = 0x12345678,
+        .personality = 0x98765432,
+        .hpIV = MAX_IVS_SINGLE_STAT,
+        .atkIV = MAX_IVS_SINGLE_STAT,
+        .defIV = MAX_IVS_SINGLE_STAT,
+        .speedIV = MAX_IVS_SINGLE_STAT,
+        .spAtkIV = MAX_IVS_SINGLE_STAT,
+        .spDefIV = MAX_IVS_SINGLE_STAT,
+        .setSpeciesAsNickname = 0,
+        .hpEV = 32,
+        .atkEV = 32,
+        .defEV = 32,
+        .speedEV = 32,
+        .spAtkEV = 32,
+        .spDefEV = 32,
+        .move0PPUps = 0,
+        .move1PPUps = 0,
+        .move2PPUps = 0,
+        .move3PPUps = 0,
+        .language = 0,
+        .ability = 0,
+        .friendship = MAX_FRIENDSHIP_VALUE,
+        .nickname = { CHAR_KATAKANA_FU, CHAR_KATAKANA_SHI, CHAR_KATAKANA_GI, CHAR_KATAKANA_DA, CHAR_KATAKANA_NE, CHAR_EOS, CHAR_EOS, CHAR_EOS, CHAR_EOS, CHAR_EOS, CHAR_EOS },
     },
     {
-        0x4,
-        0x0,
-        0xFD,
-        { 0x34, 0x53, 0x35, 0x7E },
-        0x12345678,
-        0x98765432,
-        0x1F,
-        0x1F,
-        0x1F,
-        0x1F,
-        0x1F,
-        0x1F,
-        0x0,
-        0x20,
-        0x20,
-        0x20,
-        0x20,
-        0x20,
-        0x20,
-        0x0,
-        0x0,
-        0x0,
-        0x0,
-        0x0,
-        0x0,
-        0xFF,
-        { 0x83, 0x79, 0x5C, 0x63, 0xffff, 0xffff, 0xffff, 0xffff, 0xffff, 0xffff, 0xffff },
+        .species = SPECIES_CHARMANDER,
+        .form = 0,
+        .item = ITEM_SHELL_BELL,
+        .moves = { MOVE_EMBER, MOVE_FIRE_SPIN, MOVE_FLAMETHROWER, MOVE_FIRE_BLAST },
+        .otID = 0x12345678,
+        .personality = 0x98765432,
+        .hpIV = MAX_IVS_SINGLE_STAT,
+        .atkIV = MAX_IVS_SINGLE_STAT,
+        .defIV = MAX_IVS_SINGLE_STAT,
+        .speedIV = MAX_IVS_SINGLE_STAT,
+        .spAtkIV = MAX_IVS_SINGLE_STAT,
+        .spDefIV = MAX_IVS_SINGLE_STAT,
+        .setSpeciesAsNickname = 0,
+        .hpEV = 32,
+        .atkEV = 32,
+        .defEV = 32,
+        .speedEV = 32,
+        .spAtkEV = 32,
+        .spDefEV = 32,
+        .move0PPUps = 0,
+        .move1PPUps = 0,
+        .move2PPUps = 0,
+        .move3PPUps = 0,
+        .language = 0,
+        .ability = 0,
+        .friendship = MAX_FRIENDSHIP_VALUE,
+        .nickname = { CHAR_KATAKANA_HI, CHAR_KATAKANA_TO, CHAR_KATAKANA_KA, CHAR_KATAKANA_GE, CHAR_EOS, CHAR_EOS, CHAR_EOS, CHAR_EOS, CHAR_EOS, CHAR_EOS, CHAR_EOS },
     },
     {
-        0x7,
-        0x0,
-        0xF3,
-        { 0x37, 0x39, 0x160, 0x38 },
-        0x12345678,
-        0x98765432,
-        0x1F,
-        0x1F,
-        0x1F,
-        0x1F,
-        0x1F,
-        0x1F,
-        0x0,
-        0x20,
-        0x20,
-        0x20,
-        0x20,
-        0x20,
-        0x20,
-        0x0,
-        0x0,
-        0x0,
-        0x0,
-        0x0,
-        0x0,
-        0xFF,
-        { 0x6D, 0x7C, 0x5D, 0x92, 0xffff, 0xffff, 0xffff, 0xffff, 0xffff, 0xffff, 0xffff },
+        .species = SPECIES_SQUIRTLE,
+        .form = 0,
+        .item = ITEM_MYSTIC_WATER,
+        .moves = { MOVE_WATER_GUN, MOVE_SURF, MOVE_WATER_PULSE, MOVE_HYDRO_PUMP },
+        .otID = 0x12345678,
+        .personality = 0x98765432,
+        .hpIV = MAX_IVS_SINGLE_STAT,
+        .atkIV = MAX_IVS_SINGLE_STAT,
+        .defIV = MAX_IVS_SINGLE_STAT,
+        .speedIV = MAX_IVS_SINGLE_STAT,
+        .spAtkIV = MAX_IVS_SINGLE_STAT,
+        .spDefIV = MAX_IVS_SINGLE_STAT,
+        .setSpeciesAsNickname = 0,
+        .hpEV = 32,
+        .atkEV = 32,
+        .defEV = 32,
+        .speedEV = 32,
+        .spAtkEV = 32,
+        .spDefEV = 32,
+        .move0PPUps = 0,
+        .move1PPUps = 0,
+        .move2PPUps = 0,
+        .move3PPUps = 0,
+        .language = 0,
+        .ability = 0,
+        .friendship = MAX_FRIENDSHIP_VALUE,
+        .nickname = { CHAR_KATAKANA_ZE, CHAR_KATAKANA_NI, CHAR_KATAKANA_GA, CHAR_KATAKANA_ME, CHAR_EOS, CHAR_EOS, CHAR_EOS, CHAR_EOS, CHAR_EOS, CHAR_EOS, CHAR_EOS },
     },
     {
-        0x7B,
-        0x0,
-        0xDD,
-        { 0x13E, 0xD3, 0x68, 0x13A },
-        0x12345678,
-        0x98765432,
-        0x1F,
-        0x1F,
-        0x1F,
-        0x1F,
-        0x1F,
-        0x1F,
-        0x0,
-        0x20,
-        0x20,
-        0x20,
-        0x20,
-        0x20,
-        0x20,
-        0x0,
-        0x0,
-        0x0,
-        0x0,
-        0x0,
-        0x0,
-        0xFF,
-        { 0x6A, 0x79, 0x9A, 0x55, 0x60, 0xffff, 0xffff, 0xffff, 0xffff, 0xffff, 0xffff },
+        .species = SPECIES_SCYTHER,
+        .form = 0,
+        .item = ITEM_KINGS_ROCK,
+        .moves = { MOVE_SILVER_WIND, MOVE_STEEL_WING, MOVE_DOUBLE_TEAM, MOVE_AIR_CUTTER },
+        .otID = 0x12345678,
+        .personality = 0x98765432,
+        .hpIV = MAX_IVS_SINGLE_STAT,
+        .atkIV = MAX_IVS_SINGLE_STAT,
+        .defIV = MAX_IVS_SINGLE_STAT,
+        .speedIV = MAX_IVS_SINGLE_STAT,
+        .spAtkIV = MAX_IVS_SINGLE_STAT,
+        .spDefIV = MAX_IVS_SINGLE_STAT,
+        .setSpeciesAsNickname = 0,
+        .hpEV = 32,
+        .atkEV = 32,
+        .defEV = 32,
+        .speedEV = 32,
+        .spAtkEV = 32,
+        .spDefEV = 32,
+        .move0PPUps = 0,
+        .move1PPUps = 0,
+        .move2PPUps = 0,
+        .move3PPUps = 0,
+        .language = 0,
+        .ability = 0,
+        .friendship = MAX_FRIENDSHIP_VALUE,
+        .nickname = { CHAR_KATAKANA_SU, CHAR_KATAKANA_TO, CHAR_KATAKANA_RA, CHAR_KATAKANA_I, CHAR_KATAKANA_KU, CHAR_EOS, CHAR_EOS, CHAR_EOS, CHAR_EOS, CHAR_EOS, CHAR_EOS },
     },
     {
-        0x16B,
-        0x0,
-        0xF6,
-        { 0x12D, 0x160, 0x102, 0xBD },
-        0x12345678,
-        0x98765432,
-        0x1F,
-        0x1F,
-        0x1F,
-        0x1F,
-        0x1F,
-        0x1F,
-        0x0,
-        0x20,
-        0x20,
-        0x20,
-        0x20,
-        0x20,
-        0x20,
-        0x0,
-        0x0,
-        0x0,
-        0x0,
-        0x0,
-        0x0,
-        0xFF,
-        { 0x70, 0x8f, 0x67, 0x9A, 0x68, 0xffff, 0xffff, 0xffff, 0xffff, 0xffff, 0xffff },
+        .species = SPECIES_SPHEAL,
+        .form = 0,
+        .item = ITEM_NEVERMELTICE,
+        .moves = { MOVE_ICE_BALL, MOVE_WATER_PULSE, MOVE_HAIL, MOVE_MUD_SLAP },
+        .otID = 0x12345678,
+        .personality = 0x98765432,
+        .hpIV = MAX_IVS_SINGLE_STAT,
+        .atkIV = MAX_IVS_SINGLE_STAT,
+        .defIV = MAX_IVS_SINGLE_STAT,
+        .speedIV = MAX_IVS_SINGLE_STAT,
+        .spAtkIV = MAX_IVS_SINGLE_STAT,
+        .spDefIV = MAX_IVS_SINGLE_STAT,
+        .setSpeciesAsNickname = 0,
+        .hpEV = 32,
+        .atkEV = 32,
+        .defEV = 32,
+        .speedEV = 32,
+        .spAtkEV = 32,
+        .spDefEV = 32,
+        .move0PPUps = 0,
+        .move1PPUps = 0,
+        .move2PPUps = 0,
+        .move3PPUps = 0,
+        .language = 0,
+        .ability = 0,
+        .friendship = MAX_FRIENDSHIP_VALUE,
+        .nickname = { CHAR_KATAKANA_TA, CHAR_KATAKANA_MA, CHAR_KATAKANA_ZA, CHAR_KATAKANA_RA, CHAR_KATAKANA_SHI, CHAR_EOS, CHAR_EOS, CHAR_EOS, CHAR_EOS, CHAR_EOS, CHAR_EOS },
     },
     {
-        0x51,
-        0x0,
-        0x99,
-        { 0x15F, 0x30, 0x13F, 0x73 },
-        0x12345678,
-        0x98765432,
-        0x1F,
-        0x1F,
-        0x1F,
-        0x1F,
-        0x1F,
-        0x1F,
-        0x0,
-        0x20,
-        0x20,
-        0x20,
-        0x20,
-        0x20,
-        0x20,
-        0x0,
-        0x0,
-        0x0,
-        0x0,
-        0x0,
-        0x0,
-        0xFF,
-        { 0x64, 0x55, 0x9C, 0xffff, 0xffff, 0xffff, 0xffff, 0xffff, 0xffff, 0xffff, 0xffff },
+        .species = SPECIES_MAGNEMITE,
+        .form = 0,
+        .item = ITEM_ASPEAR_BERRY,
+        .moves = { MOVE_SHOCK_WAVE, MOVE_SUPERSONIC, MOVE_METAL_SOUND, MOVE_REFLECT },
+        .otID = 0x12345678,
+        .personality = 0x98765432,
+        .hpIV = MAX_IVS_SINGLE_STAT,
+        .atkIV = MAX_IVS_SINGLE_STAT,
+        .defIV = MAX_IVS_SINGLE_STAT,
+        .speedIV = MAX_IVS_SINGLE_STAT,
+        .spAtkIV = MAX_IVS_SINGLE_STAT,
+        .spDefIV = MAX_IVS_SINGLE_STAT,
+        .setSpeciesAsNickname = 0,
+        .hpEV = 32,
+        .atkEV = 32,
+        .defEV = 32,
+        .speedEV = 32,
+        .spAtkEV = 32,
+        .spDefEV = 32,
+        .move0PPUps = 0,
+        .move1PPUps = 0,
+        .move2PPUps = 0,
+        .move3PPUps = 0,
+        .language = 0,
+        .ability = 0,
+        .friendship = MAX_FRIENDSHIP_VALUE,
+        .nickname = { CHAR_KATAKANA_KO, CHAR_KATAKANA_I, CHAR_KATAKANA_RU, CHAR_EOS, CHAR_EOS, CHAR_EOS, CHAR_EOS, CHAR_EOS, CHAR_EOS, CHAR_EOS, CHAR_EOS },
     },
     {
-        0x12C,
-        0x0,
-        0xD9,
-        { 0x2F, 0x139, 0xCC, 0x3 },
-        0x12345678,
-        0x98765432,
-        0x1F,
-        0x1F,
-        0x1F,
-        0x1F,
-        0x1F,
-        0x1F,
-        0x0,
-        0x20,
-        0x20,
-        0x20,
-        0x20,
-        0x20,
-        0x20,
-        0x0,
-        0x0,
-        0x0,
-        0x0,
-        0x0,
-        0x0,
-        0xFF,
-        { 0x59, 0x7E, 0x64, 0xffff, 0xffff, 0xffff, 0xffff, 0xffff, 0xffff, 0xffff, 0xffff },
+        .species = SPECIES_SKITTY,
+        .form = 0,
+        .item = ITEM_QUICK_CLAW,
+        .moves = { MOVE_SING, MOVE_FAKE_TEARS, MOVE_CHARM, MOVE_DOUBLE_SLAP },
+        .otID = 0x12345678,
+        .personality = 0x98765432,
+        .hpIV = MAX_IVS_SINGLE_STAT,
+        .atkIV = MAX_IVS_SINGLE_STAT,
+        .defIV = MAX_IVS_SINGLE_STAT,
+        .speedIV = MAX_IVS_SINGLE_STAT,
+        .spAtkIV = MAX_IVS_SINGLE_STAT,
+        .spDefIV = MAX_IVS_SINGLE_STAT,
+        .setSpeciesAsNickname = 0,
+        .hpEV = 32,
+        .atkEV = 32,
+        .defEV = 32,
+        .speedEV = 32,
+        .spAtkEV = 32,
+        .spDefEV = 32,
+        .move0PPUps = 0,
+        .move1PPUps = 0,
+        .move2PPUps = 0,
+        .move3PPUps = 0,
+        .language = 0,
+        .ability = 0,
+        .friendship = MAX_FRIENDSHIP_VALUE,
+        .nickname = { CHAR_KATAKANA_E, CHAR_KATAKANA_NE, CHAR_KATAKANA_KO, CHAR_EOS, CHAR_EOS, CHAR_EOS, CHAR_EOS, CHAR_EOS, CHAR_EOS, CHAR_EOS, CHAR_EOS },
     },
     {
-        0x128,
-        0x0,
-        0xE8,
-        { 0xFC, 0x45, 0xC5, 0x12 },
-        0x12345678,
-        0x98765432,
-        0x1F,
-        0x1F,
-        0x1F,
-        0x1F,
-        0x1F,
-        0x1F,
-        0x0,
-        0x20,
-        0x20,
-        0x20,
-        0x20,
-        0x20,
-        0x20,
-        0x0,
-        0x0,
-        0x0,
-        0x0,
-        0x0,
-        0x0,
-        0xFF,
-        { 0x8f, 0x60, 0x7f, 0x68, 0x70, 0xffff, 0xffff, 0xffff, 0xffff, 0xffff, 0xffff },
+        .species = SPECIES_MAKUHITA,
+        .form = 0,
+        .item = ITEM_SCOPE_LENS,
+        .moves = { MOVE_FAKE_OUT, MOVE_SEISMIC_TOSS, MOVE_DETECT, MOVE_WHIRLWIND },
+        .otID = 0x12345678,
+        .personality = 0x98765432,
+        .hpIV = MAX_IVS_SINGLE_STAT,
+        .atkIV = MAX_IVS_SINGLE_STAT,
+        .defIV = MAX_IVS_SINGLE_STAT,
+        .speedIV = MAX_IVS_SINGLE_STAT,
+        .spAtkIV = MAX_IVS_SINGLE_STAT,
+        .spDefIV = MAX_IVS_SINGLE_STAT,
+        .setSpeciesAsNickname = 0,
+        .hpEV = 32,
+        .atkEV = 32,
+        .defEV = 32,
+        .speedEV = 32,
+        .spAtkEV = 32,
+        .spDefEV = 32,
+        .move0PPUps = 0,
+        .move1PPUps = 0,
+        .move2PPUps = 0,
+        .move3PPUps = 0,
+        .language = 0,
+        .ability = 0,
+        .friendship = MAX_FRIENDSHIP_VALUE,
+        .nickname = { CHAR_KATAKANA_MA, CHAR_KATAKANA_KU, CHAR_KATAKANA_NO, CHAR_KATAKANA_SHI, CHAR_KATAKANA_TA, CHAR_EOS, CHAR_EOS, CHAR_EOS, CHAR_EOS, CHAR_EOS, CHAR_EOS },
     },
     {
-        0xA7,
-        0x0,
-        0xC9,
-        { 0x144, 0x65, 0xA9, 0xB8 },
-        0x12345678,
-        0x98765432,
-        0x1F,
-        0x1F,
-        0x1F,
-        0x1F,
-        0x1F,
-        0x1F,
-        0x0,
-        0x20,
-        0x20,
-        0x20,
-        0x20,
-        0x20,
-        0x20,
-        0x0,
-        0x0,
-        0x0,
-        0x0,
-        0x0,
-        0x0,
-        0xFF,
-        { 0x55, 0x79, 0x8f, 0x9C, 0xffff, 0xffff, 0xffff, 0xffff, 0xffff, 0xffff, 0xffff },
+        .species = SPECIES_SPINARAK,
+        .form = 0,
+        .item = ITEM_LIECHI_BERRY,
+        .moves = { MOVE_SIGNAL_BEAM, MOVE_NIGHT_SHADE, MOVE_SPIDER_WEB, MOVE_SCARY_FACE },
+        .otID = 0x12345678,
+        .personality = 0x98765432,
+        .hpIV = MAX_IVS_SINGLE_STAT,
+        .atkIV = MAX_IVS_SINGLE_STAT,
+        .defIV = MAX_IVS_SINGLE_STAT,
+        .speedIV = MAX_IVS_SINGLE_STAT,
+        .spAtkIV = MAX_IVS_SINGLE_STAT,
+        .spDefIV = MAX_IVS_SINGLE_STAT,
+        .setSpeciesAsNickname = 0,
+        .hpEV = 32,
+        .atkEV = 32,
+        .defEV = 32,
+        .speedEV = 32,
+        .spAtkEV = 32,
+        .spDefEV = 32,
+        .move0PPUps = 0,
+        .move1PPUps = 0,
+        .move2PPUps = 0,
+        .move3PPUps = 0,
+        .language = 0,
+        .ability = 0,
+        .friendship = MAX_FRIENDSHIP_VALUE,
+        .nickname = { CHAR_KATAKANA_I, CHAR_KATAKANA_TO, CHAR_KATAKANA_MA, CHAR_KATAKANA_RU, CHAR_EOS, CHAR_EOS, CHAR_EOS, CHAR_EOS, CHAR_EOS, CHAR_EOS, CHAR_EOS },
     },
     {
-        0x1B,
-        0x0,
-        0xED,
-        { 0x5B, 0x13D, 0xC9, 0x1C },
-        0x12345678,
-        0x98765432,
-        0x1F,
-        0x1F,
-        0x1F,
-        0x1F,
-        0x1F,
-        0x1F,
-        0x0,
-        0x20,
-        0x20,
-        0x20,
-        0x20,
-        0x20,
-        0x20,
-        0x0,
-        0x0,
-        0x0,
-        0x0,
-        0x0,
-        0x0,
-        0xFF,
-        { 0x66, 0xA1, 0x7A, 0xffff, 0xffff, 0xffff, 0xffff, 0xffff, 0xffff, 0xffff, 0xffff },
+        .species = SPECIES_SANDSHREW,
+        .form = 0,
+        .item = ITEM_SOFT_SAND,
+        .moves = { MOVE_DIG, MOVE_ROCK_TOMB, MOVE_SANDSTORM, MOVE_SAND_ATTACK },
+        .otID = 0x12345678,
+        .personality = 0x98765432,
+        .hpIV = MAX_IVS_SINGLE_STAT,
+        .atkIV = MAX_IVS_SINGLE_STAT,
+        .defIV = MAX_IVS_SINGLE_STAT,
+        .speedIV = MAX_IVS_SINGLE_STAT,
+        .spAtkIV = MAX_IVS_SINGLE_STAT,
+        .spDefIV = MAX_IVS_SINGLE_STAT,
+        .setSpeciesAsNickname = 0,
+        .hpEV = 32,
+        .atkEV = 32,
+        .defEV = 32,
+        .speedEV = 32,
+        .spAtkEV = 32,
+        .spDefEV = 32,
+        .move0PPUps = 0,
+        .move1PPUps = 0,
+        .move2PPUps = 0,
+        .move3PPUps = 0,
+        .language = 0,
+        .ability = 0,
+        .friendship = MAX_FRIENDSHIP_VALUE,
+        .nickname = { CHAR_KATAKANA_SA, CHAR_KATAKANA_N, CHAR_KATAKANA_DO, CHAR_EOS, CHAR_EOS, CHAR_EOS, CHAR_EOS, CHAR_EOS, CHAR_EOS, CHAR_EOS, CHAR_EOS },
     },
     {
-        0x114,
-        0x0,
-        0xCB,
-        { 0x13, 0x62, 0x11B, 0x74 },
-        0x12345678,
-        0x98765432,
-        0x1F,
-        0x1F,
-        0x1F,
-        0x1F,
-        0x1F,
-        0x1F,
-        0x0,
-        0x20,
-        0x20,
-        0x20,
-        0x20,
-        0x20,
-        0x20,
-        0x0,
-        0x0,
-        0x0,
-        0x0,
-        0x0,
-        0x0,
-        0xFF,
-        { 0x6A, 0x81, 0x92, 0xffff, 0xffff, 0xffff, 0xffff, 0xffff, 0xffff, 0xffff, 0xffff },
+        .species = SPECIES_TAILLOW,
+        .form = 0,
+        .item = ITEM_SALAC_BERRY,
+        .moves = { MOVE_FLY, MOVE_QUICK_ATTACK, MOVE_ENDEAVOR, MOVE_FOCUS_ENERGY },
+        .otID = 0x12345678,
+        .personality = 0x98765432,
+        .hpIV = MAX_IVS_SINGLE_STAT,
+        .atkIV = MAX_IVS_SINGLE_STAT,
+        .defIV = MAX_IVS_SINGLE_STAT,
+        .speedIV = MAX_IVS_SINGLE_STAT,
+        .spAtkIV = MAX_IVS_SINGLE_STAT,
+        .spDefIV = MAX_IVS_SINGLE_STAT,
+        .setSpeciesAsNickname = 0,
+        .hpEV = 32,
+        .atkEV = 32,
+        .defEV = 32,
+        .speedEV = 32,
+        .spAtkEV = 32,
+        .spDefEV = 32,
+        .move0PPUps = 0,
+        .move1PPUps = 0,
+        .move2PPUps = 0,
+        .move3PPUps = 0,
+        .language = 0,
+        .ability = 0,
+        .friendship = MAX_FRIENDSHIP_VALUE,
+        .nickname = { CHAR_KATAKANA_SU, CHAR_KATAKANA_BA, CHAR_KATAKANA_ME, CHAR_EOS, CHAR_EOS, CHAR_EOS, CHAR_EOS, CHAR_EOS, CHAR_EOS, CHAR_EOS, CHAR_EOS },
     },
     {
-        0x66,
-        0x0,
-        0x97,
-        { 0x5D, 0xF6, 0x49, 0x71 },
-        0x12345678,
-        0x98765432,
-        0x1F,
-        0x1F,
-        0x1F,
-        0x1F,
-        0x1F,
-        0x1F,
-        0x0,
-        0x20,
-        0x20,
-        0x20,
-        0x20,
-        0x20,
-        0x20,
-        0x0,
-        0x0,
-        0x0,
-        0x0,
-        0x0,
-        0x0,
-        0xFF,
-        { 0x70, 0x8f, 0x70, 0x8f, 0xffff, 0xffff, 0xffff, 0xffff, 0xffff, 0xffff, 0xffff },
+        .species = SPECIES_EXEGGCUTE,
+        .form = 0,
+        .item = ITEM_PECHA_BERRY,
+        .moves = { MOVE_CONFUSION, MOVE_ANCIENT_POWER, MOVE_LEECH_SEED, MOVE_LIGHT_SCREEN },
+        .otID = 0x12345678,
+        .personality = 0x98765432,
+        .hpIV = MAX_IVS_SINGLE_STAT,
+        .atkIV = MAX_IVS_SINGLE_STAT,
+        .defIV = MAX_IVS_SINGLE_STAT,
+        .speedIV = MAX_IVS_SINGLE_STAT,
+        .spAtkIV = MAX_IVS_SINGLE_STAT,
+        .spDefIV = MAX_IVS_SINGLE_STAT,
+        .setSpeciesAsNickname = 0,
+        .hpEV = 32,
+        .atkEV = 32,
+        .defEV = 32,
+        .speedEV = 32,
+        .spAtkEV = 32,
+        .spDefEV = 32,
+        .move0PPUps = 0,
+        .move1PPUps = 0,
+        .move2PPUps = 0,
+        .move3PPUps = 0,
+        .language = 0,
+        .ability = 0,
+        .friendship = MAX_FRIENDSHIP_VALUE,
+        .nickname = { CHAR_KATAKANA_TA, CHAR_KATAKANA_MA, CHAR_KATAKANA_TA, CHAR_KATAKANA_MA, CHAR_EOS, CHAR_EOS, CHAR_EOS, CHAR_EOS, CHAR_EOS, CHAR_EOS, CHAR_EOS },
     },
     {
-        0x4A,
-        0x0,
-        0xE6,
-        { 0xDE, 0x15E, 0x46, 0xB6 },
-        0x12345678,
-        0x98765432,
-        0x1F,
-        0x1F,
-        0x1F,
-        0x1F,
-        0x1F,
-        0x1F,
-        0x0,
-        0x20,
-        0x20,
-        0x20,
-        0x20,
-        0x20,
-        0x20,
-        0x0,
-        0x0,
-        0x0,
-        0x0,
-        0x0,
-        0x0,
-        0xFF,
-        { 0x55, 0x68, 0x75, 0x87, 0x77, 0xffff, 0xffff, 0xffff, 0xffff, 0xffff, 0xffff },
+        .species = SPECIES_GEODUDE,
+        .form = 0,
+        .item = ITEM_FOCUS_BAND,
+        .moves = { MOVE_MAGNITUDE, MOVE_ROCK_BLAST, MOVE_STRENGTH, MOVE_PROTECT },
+        .otID = 0x12345678,
+        .personality = 0x98765432,
+        .hpIV = MAX_IVS_SINGLE_STAT,
+        .atkIV = MAX_IVS_SINGLE_STAT,
+        .defIV = MAX_IVS_SINGLE_STAT,
+        .speedIV = MAX_IVS_SINGLE_STAT,
+        .spAtkIV = MAX_IVS_SINGLE_STAT,
+        .spDefIV = MAX_IVS_SINGLE_STAT,
+        .setSpeciesAsNickname = 0,
+        .hpEV = 32,
+        .atkEV = 32,
+        .defEV = 32,
+        .speedEV = 32,
+        .spAtkEV = 32,
+        .spDefEV = 32,
+        .move0PPUps = 0,
+        .move1PPUps = 0,
+        .move2PPUps = 0,
+        .move3PPUps = 0,
+        .language = 0,
+        .ability = 0,
+        .friendship = MAX_FRIENDSHIP_VALUE,
+        .nickname = { CHAR_KATAKANA_I, CHAR_KATAKANA_SHI, CHAR_KATAKANA_TSU, CHAR_KATAKANA_BU, CHAR_KATAKANA_TE, CHAR_EOS, CHAR_EOS, CHAR_EOS, CHAR_EOS, CHAR_EOS, CHAR_EOS },
     },
     {
-        0xC8,
-        0x0,
-        0xD5,
-        { 0xDC, 0xF7, 0x6D, 0x56 },
-        0x12345678,
-        0x98765432,
-        0x1F,
-        0x1F,
-        0x1F,
-        0x1F,
-        0x1F,
-        0x1F,
-        0x0,
-        0x20,
-        0x20,
-        0x20,
-        0x20,
-        0x20,
-        0x20,
-        0x0,
-        0x0,
-        0x0,
-        0x0,
-        0x0,
-        0x0,
-        0xFF,
-        { 0x91, 0x57, 0x8f, 0xffff, 0xffff, 0xffff, 0xffff, 0xffff, 0xffff, 0xffff, 0xffff },
+        .species = SPECIES_MISDREAVUS,
+        .form = 0,
+        .item = ITEM_BRIGHTPOWDER,
+        .moves = { MOVE_PAIN_SPLIT, MOVE_SHADOW_BALL, MOVE_CONFUSE_RAY, MOVE_THUNDER_WAVE },
+        .otID = 0x12345678,
+        .personality = 0x98765432,
+        .hpIV = MAX_IVS_SINGLE_STAT,
+        .atkIV = MAX_IVS_SINGLE_STAT,
+        .defIV = MAX_IVS_SINGLE_STAT,
+        .speedIV = MAX_IVS_SINGLE_STAT,
+        .spAtkIV = MAX_IVS_SINGLE_STAT,
+        .spDefIV = MAX_IVS_SINGLE_STAT,
+        .setSpeciesAsNickname = 0,
+        .hpEV = 32,
+        .atkEV = 32,
+        .defEV = 32,
+        .speedEV = 32,
+        .spAtkEV = 32,
+        .spDefEV = 32,
+        .move0PPUps = 0,
+        .move1PPUps = 0,
+        .move2PPUps = 0,
+        .move3PPUps = 0,
+        .language = 0,
+        .ability = 0,
+        .friendship = MAX_FRIENDSHIP_VALUE,
+        .nickname = { CHAR_KATAKANA_MU, CHAR_KATAKANA_U, CHAR_KATAKANA_MA, CHAR_EOS, CHAR_EOS, CHAR_EOS, CHAR_EOS, CHAR_EOS, CHAR_EOS, CHAR_EOS, CHAR_EOS },
     },
     {
-        0x173,
-        0x0,
-        0x9D,
-        { 0xE1, 0x1D, 0x118, 0xB8 },
-        0x12345678,
-        0x98765432,
-        0x1F,
-        0x1F,
-        0x1F,
-        0x1F,
-        0x1F,
-        0x1F,
-        0x0,
-        0x20,
-        0x20,
-        0x20,
-        0x20,
-        0x20,
-        0x20,
-        0x0,
-        0x0,
-        0x0,
-        0x0,
-        0x0,
-        0x0,
-        0xFF,
-        { 0x70, 0x75, 0x8A, 0x55, 0xffff, 0xffff, 0xffff, 0xffff, 0xffff, 0xffff, 0xffff },
+        .species = SPECIES_BAGON,
+        .form = 0,
+        .item = ITEM_LUM_BERRY,
+        .moves = { MOVE_DRAGON_BREATH, MOVE_HEADBUTT, MOVE_BRICK_BREAK, MOVE_SCARY_FACE },
+        .otID = 0x12345678,
+        .personality = 0x98765432,
+        .hpIV = MAX_IVS_SINGLE_STAT,
+        .atkIV = MAX_IVS_SINGLE_STAT,
+        .defIV = MAX_IVS_SINGLE_STAT,
+        .speedIV = MAX_IVS_SINGLE_STAT,
+        .spAtkIV = MAX_IVS_SINGLE_STAT,
+        .spDefIV = MAX_IVS_SINGLE_STAT,
+        .setSpeciesAsNickname = 0,
+        .hpEV = 32,
+        .atkEV = 32,
+        .defEV = 32,
+        .speedEV = 32,
+        .spAtkEV = 32,
+        .spDefEV = 32,
+        .move0PPUps = 0,
+        .move1PPUps = 0,
+        .move2PPUps = 0,
+        .move3PPUps = 0,
+        .language = 0,
+        .ability = 0,
+        .friendship = MAX_FRIENDSHIP_VALUE,
+        .nickname = { CHAR_KATAKANA_TA, CHAR_KATAKANA_TSU, CHAR_KATAKANA_BE, CHAR_KATAKANA_I, CHAR_EOS, CHAR_EOS, CHAR_EOS, CHAR_EOS, CHAR_EOS, CHAR_EOS, CHAR_EOS },
     },
     {
-        0xE4,
-        0x0,
-        0xF9,
-        { 0xF2, 0x34, 0x2E, 0xB6 },
-        0x12345678,
-        0x98765432,
-        0x1F,
-        0x1F,
-        0x1F,
-        0x1F,
-        0x1F,
-        0x1F,
-        0x0,
-        0x20,
-        0x20,
-        0x20,
-        0x20,
-        0x20,
-        0x20,
-        0x0,
-        0x0,
-        0x0,
-        0x0,
-        0x0,
-        0x0,
-        0xFF,
-        { 0x78, 0x9C, 0x84, 0x9C, 0xffff, 0xffff, 0xffff, 0xffff, 0xffff, 0xffff, 0xffff },
+        .species = SPECIES_HOUNDOUR,
+        .form = 0,
+        .item = ITEM_CHARCOAL,
+        .moves = { MOVE_CRUNCH, MOVE_EMBER, MOVE_ROAR, MOVE_PROTECT },
+        .otID = 0x12345678,
+        .personality = 0x98765432,
+        .hpIV = MAX_IVS_SINGLE_STAT,
+        .atkIV = MAX_IVS_SINGLE_STAT,
+        .defIV = MAX_IVS_SINGLE_STAT,
+        .speedIV = MAX_IVS_SINGLE_STAT,
+        .spAtkIV = MAX_IVS_SINGLE_STAT,
+        .spDefIV = MAX_IVS_SINGLE_STAT,
+        .setSpeciesAsNickname = 0,
+        .hpEV = 32,
+        .atkEV = 32,
+        .defEV = 32,
+        .speedEV = 32,
+        .spAtkEV = 32,
+        .spDefEV = 32,
+        .move0PPUps = 0,
+        .move1PPUps = 0,
+        .move2PPUps = 0,
+        .move3PPUps = 0,
+        .language = 0,
+        .ability = 0,
+        .friendship = MAX_FRIENDSHIP_VALUE,
+        .nickname = { CHAR_KATAKANA_DE, CHAR_KATAKANA_RU, CHAR_KATAKANA_BI, CHAR_KATAKANA_RU, CHAR_EOS, CHAR_EOS, CHAR_EOS, CHAR_EOS, CHAR_EOS, CHAR_EOS, CHAR_EOS },
     },
     {
-        0x131,
-        0x0,
-        0x9E,
-        { 0xE8, 0x13D, 0x14E, 0x6A },
-        0x12345678,
-        0x98765432,
-        0x1F,
-        0x1F,
-        0x1F,
-        0x1F,
-        0x1F,
-        0x1F,
-        0x0,
-        0x20,
-        0x20,
-        0x20,
-        0x20,
-        0x20,
-        0x20,
-        0x0,
-        0x0,
-        0x0,
-        0x0,
-        0x0,
-        0x0,
-        0xFF,
-        { 0x64, 0x7A, 0x9A, 0xffff, 0xffff, 0xffff, 0xffff, 0xffff, 0xffff, 0xffff, 0xffff },
+        .species = SPECIES_LAIRON,
+        .form = 0,
+        .item = ITEM_SITRUS_BERRY,
+        .moves = { MOVE_METAL_CLAW, MOVE_ROCK_TOMB, MOVE_IRON_DEFENSE, MOVE_HARDEN },
+        .otID = 0x12345678,
+        .personality = 0x98765432,
+        .hpIV = MAX_IVS_SINGLE_STAT,
+        .atkIV = MAX_IVS_SINGLE_STAT,
+        .defIV = MAX_IVS_SINGLE_STAT,
+        .speedIV = MAX_IVS_SINGLE_STAT,
+        .spAtkIV = MAX_IVS_SINGLE_STAT,
+        .spDefIV = MAX_IVS_SINGLE_STAT,
+        .setSpeciesAsNickname = 0,
+        .hpEV = 32,
+        .atkEV = 32,
+        .defEV = 32,
+        .speedEV = 32,
+        .spAtkEV = 32,
+        .spDefEV = 32,
+        .move0PPUps = 0,
+        .move1PPUps = 0,
+        .move2PPUps = 0,
+        .move3PPUps = 0,
+        .language = 0,
+        .ability = 0,
+        .friendship = MAX_FRIENDSHIP_VALUE,
+        .nickname = { CHAR_KATAKANA_KO, CHAR_KATAKANA_DO, CHAR_KATAKANA_RA, CHAR_EOS, CHAR_EOS, CHAR_EOS, CHAR_EOS, CHAR_EOS, CHAR_EOS, CHAR_EOS, CHAR_EOS },
     }
 };
 
-const UnkStruct_ov104_0223A348_sub1 Unk_ov104_0223FCE0[] = {
+const FrontierTrainer sDummyFrontierTrainers[] = {
     {
-        0x12345678,
-        0x2,
-        0x0,
-        { 0x71, 0x90, 0xf1, 0xA2, 0xA3, 0xffff, 0xffff, 0xffff },
-        { 0xFFFF, 0x0, 0x0, 0x0 },
-        { 0xFFFF, 0x1, 0x0, 0x0 },
-        { 0xFFFF, 0x2, 0x0, 0x0 },
+        .trainerID = 0x12345678,
+        .trainerType = 0x2,
+        .unk_06 = 0x0,
+        .trainerName = { CHAR_KATAKANA_DA, CHAR_KATAKANA_MI, CHAR_WIDE_MINUS, CHAR_WIDE_0, CHAR_WIDE_1, CHAR_EOS, CHAR_EOS, CHAR_EOS },
+        .introMsg = { 0xFFFF, 0x0, 0x0, 0x0 },
+        .winMsg = { 0xFFFF, 0x1, 0x0, 0x0 },
+        .loseMsg = { 0xFFFF, 0x2, 0x0, 0x0 },
     },
     {
-        0x12345678,
-        0x9,
-        0x0,
-        { 0x71, 0x90, 0xf1, 0xA2, 0xA4, 0xffff, 0xffff, 0xffff },
-        { 0xFFFF, 0x3, 0x0, 0x0 },
-        { 0xFFFF, 0x1, 0x0, 0x0 },
-        { 0xFFFF, 0x2, 0x0, 0x0 },
+        .trainerID = 0x12345678,
+        .trainerType = 0x9,
+        .unk_06 = 0x0,
+        .trainerName = { CHAR_KATAKANA_DA, CHAR_KATAKANA_MI, CHAR_WIDE_MINUS, CHAR_WIDE_0, CHAR_WIDE_2, CHAR_EOS, CHAR_EOS, CHAR_EOS },
+        .introMsg = { 0xFFFF, 0x3, 0x0, 0x0 },
+        .winMsg = { 0xFFFF, 0x1, 0x0, 0x0 },
+        .loseMsg = { 0xFFFF, 0x2, 0x0, 0x0 },
     },
     {
-        0x12345678,
-        0xB,
-        0x0,
-        { 0x71, 0x90, 0xf1, 0xA2, 0xA5, 0xffff, 0xffff, 0xffff },
-        { 0xFFFF, 0x6, 0x0, 0x0 },
-        { 0xFFFF, 0x1, 0x0, 0x0 },
-        { 0xFFFF, 0x2, 0x0, 0x0 },
+        .trainerID = 0x12345678,
+        .trainerType = 0xB,
+        .unk_06 = 0x0,
+        .trainerName = { CHAR_KATAKANA_DA, CHAR_KATAKANA_MI, CHAR_WIDE_MINUS, CHAR_WIDE_0, CHAR_WIDE_3, CHAR_EOS, CHAR_EOS, CHAR_EOS },
+        .introMsg = { 0xFFFF, 0x6, 0x0, 0x0 },
+        .winMsg = { 0xFFFF, 0x1, 0x0, 0x0 },
+        .loseMsg = { 0xFFFF, 0x2, 0x0, 0x0 },
     },
     {
-        0x12345678,
-        0x1E,
-        0x0,
-        { 0x71, 0x90, 0xf1, 0xA2, 0xA6, 0xffff, 0xffff, 0xffff },
-        { 0xFFFF, 0x9, 0x0, 0x0 },
-        { 0xFFFF, 0x1, 0x0, 0x0 },
-        { 0xFFFF, 0x2, 0x0, 0x0 },
+        .trainerID = 0x12345678,
+        .trainerType = 0x1E,
+        .unk_06 = 0x0,
+        .trainerName = { CHAR_KATAKANA_DA, CHAR_KATAKANA_MI, CHAR_WIDE_MINUS, CHAR_WIDE_0, CHAR_WIDE_4, CHAR_EOS, CHAR_EOS, CHAR_EOS },
+        .introMsg = { 0xFFFF, 0x9, 0x0, 0x0 },
+        .winMsg = { 0xFFFF, 0x1, 0x0, 0x0 },
+        .loseMsg = { 0xFFFF, 0x2, 0x0, 0x0 },
     },
     {
-        0x12345678,
-        0x55,
-        0x0,
-        { 0x71, 0x90, 0xf1, 0xA2, 0xA7, 0xffff, 0xffff, 0xffff },
-        { 0xFFFF, 0xC, 0x0, 0x0 },
-        { 0xFFFF, 0x1, 0x0, 0x0 },
-        { 0xFFFF, 0x2, 0x0, 0x0 },
+        .trainerID = 0x12345678,
+        .trainerType = CHAR_KATAKANA_I,
+        .unk_06 = 0x0,
+        .trainerName = { CHAR_KATAKANA_DA, CHAR_KATAKANA_MI, CHAR_WIDE_MINUS, CHAR_WIDE_0, CHAR_WIDE_5, CHAR_EOS, CHAR_EOS, CHAR_EOS },
+        .introMsg = { 0xFFFF, 0xC, 0x0, 0x0 },
+        .winMsg = { 0xFFFF, 0x1, 0x0, 0x0 },
+        .loseMsg = { 0xFFFF, 0x2, 0x0, 0x0 },
     },
     {
-        0x12345678,
-        0x50,
-        0x0,
-        { 0x71, 0x90, 0xf1, 0xA2, 0xA8, 0xffff, 0xffff, 0xffff },
-        { 0xFFFF, 0xF, 0x0, 0x0 },
-        { 0xFFFF, 0x1, 0x0, 0x0 },
-        { 0xFFFF, 0x2, 0x0, 0x0 },
+        .trainerID = 0x12345678,
+        .trainerType = 0x50,
+        .unk_06 = 0x0,
+        .trainerName = { CHAR_KATAKANA_DA, CHAR_KATAKANA_MI, CHAR_WIDE_MINUS, CHAR_WIDE_0, CHAR_WIDE_6, CHAR_EOS, CHAR_EOS, CHAR_EOS },
+        .introMsg = { 0xFFFF, 0xF, 0x0, 0x0 },
+        .winMsg = { 0xFFFF, 0x1, 0x0, 0x0 },
+        .loseMsg = { 0xFFFF, 0x2, 0x0, 0x0 },
     },
     {
-        0x12345678,
-        0x1D,
-        0x0,
-        { 0x71, 0x90, 0xf1, 0xA2, 0xA9, 0xffff, 0xffff, 0xffff },
-        { 0xFFFF, 0x12, 0x0, 0x0 },
-        { 0xFFFF, 0x1, 0x0, 0x0 },
-        { 0xFFFF, 0x2, 0x0, 0x0 },
+        .trainerID = 0x12345678,
+        .trainerType = 0x1D,
+        .unk_06 = 0x0,
+        .trainerName = { CHAR_KATAKANA_DA, CHAR_KATAKANA_MI, CHAR_WIDE_MINUS, CHAR_WIDE_0, CHAR_WIDE_7, CHAR_EOS, CHAR_EOS, CHAR_EOS },
+        .introMsg = { 0xFFFF, 0x12, 0x0, 0x0 },
+        .winMsg = { 0xFFFF, 0x1, 0x0, 0x0 },
+        .loseMsg = { 0xFFFF, 0x2, 0x0, 0x0 },
     },
 };
 
@@ -627,448 +627,422 @@ static const UnkStruct_ov104_0223FCB4 Unk_ov104_0223FCB4[] = {
     },
 };
 
-void sub_02052894(BattleParams *param0);
-BOOL ov104_0223A0C4(UnkStruct_0204AFC4 *param0, UnkStruct_ov104_0223A348 *param1, u16 param2, int param3, u16 *param4, u16 *param5, UnkStruct_0204B404 *param6, int param7);
-void ov104_0223A30C(SaveData *param0, UnkStruct_ov104_0223A348 *param1, const u8 param2);
-BattleParams *ov104_0223A580(UnkStruct_0204AFC4 *param0, UnkStruct_ov104_02230BE4 *param1);
-void ov104_0223A734(UnkStruct_0204AFC4 *param0, u16 param1);
-u16 ov104_0223A750(UnkStruct_0204AFC4 *param0, const u16 *param1);
-int ov104_0223A768(u8 param0);
-int ov104_0223A77C(u8 param0);
-int ov104_0223A790(u8 param0);
-static BOOL ov104_0223A118(UnkStruct_0204AFC4 *param0, UnkStruct_0204B184 *param1, u16 param2, UnkStruct_ov104_0223A348_sub2 *param3, u8 param4, u16 *param5, u16 *param6, UnkStruct_0204B404 *param7, int param8);
-static void ov104_0223A348(UnkStruct_ov104_0223A348 *param0, const u8 param1);
-static u32 ov104_0223A3A8(UnkStruct_0204AFC4 *param0, UnkStruct_ov104_0223A348_sub2 *param1, u16 param2, u32 param3, u32 param4, u8 param5, u8 param6, BOOL param7, int param8);
-static u32 ov104_0223A700(u8 param0);
-static void ov104_0223A6AC(BattleParams *param0, UnkStruct_ov104_0223A348 *param1, int param2, int param3, int param4);
-static int ov104_0223A7AC(u8 param0);
+void FieldBattleDTO_CopyPlayerInfoToTrainerData(FieldBattleDTO *dto);
+void BattleTower_CreateWiFiTrainerParty(SaveData *saveData, FrontierOpponent *dto, const u8 opponentID);
+void ov104_0223A734(BattleTower *battleTower, u16 param1);
+u16 ov104_0223A750(BattleTower *battleTower, const u16 *param1);
+int BattleTower_GetPokemonDataNarcID(u8 challengeMode);
+int BattleFrontier_GetTrainerDataNarcID(u8 challengeMode);
+int BattleTower_GetTrainerMessagesBankID(u8 challengeMode);
+static BOOL BattleTower_CreateRandomTrainerParty(BattleTower *battleTower, FrontierTrainerBase *trData, u16 battleTowerTrainerID, FrontierPokemon *monDataDTO, u8 partySize, u16 *species, u16 *items, BattleTowerPartnerData *param7, enum HeapID heapID);
+static void BattleTower_CreateDummyWiFiTrainer(FrontierOpponent *dto, const u8 opponentID);
+static u32 BattleTower_CopySetToPokemonDataDTO(BattleTower *battleTower, FrontierPokemon *monDataDTO, u16 setID, u32 otID, u32 givenPersonality, u8 ivs, u8 partyIndex, BOOL giveReservedItem, enum HeapID heapID);
+static u32 BattleTower_GetBattleTypeFromChallengeMode(u8 challengeMode);
+static void FieldBattleDTO_InitBattleTowerTrainer(FieldBattleDTO *battleDTO, FrontierOpponent *frontierDTO, int partySize, int battlerId, enum HeapID heapID);
+static int BattleTower_AreAllConnectedGamesPlatinum(u8 challengeMode);
 
-BOOL ov104_0223A0C4(UnkStruct_0204AFC4 *param0, UnkStruct_ov104_0223A348 *param1, u16 param2, int param3, u16 *param4, u16 *param5, UnkStruct_0204B404 *param6, int param7)
+BOOL BattleTower_CreateTrainerParty(BattleTower *battleTower, FrontierOpponent *opponentDataDTO, u16 battleTowerTrainerID, int partySize, u16 *species, u16 *items, BattleTowerPartnerData *param6, enum HeapID heapID)
 {
     BOOL v0 = 0;
-    UnkStruct_0204B184 *v1;
+    FrontierTrainerBase *trData = BattleFrontier_GetTrainer(&opponentDataDTO->trainer, battleTowerTrainerID, heapID, BattleFrontier_GetTrainerDataNarcID(battleTower->challengeMode));
+    v0 = BattleTower_CreateRandomTrainerParty(battleTower, trData, battleTowerTrainerID, &opponentDataDTO->pokemon[0], partySize, species, items, param6, heapID);
 
-    v1 = ov104_0222DD04(&param1->unk_00, param2, param7, ov104_0223A77C(param0->unk_0F));
-    v0 = ov104_0223A118(param0, v1, param2, &param1->unk_30[0], param3, param4, param5, param6, param7);
-
-    Heap_FreeToHeap(v1);
+    Heap_Free(trData);
 
     return v0;
 }
 
-static BOOL ov104_0223A118(UnkStruct_0204AFC4 *param0, UnkStruct_0204B184 *param1, u16 param2, UnkStruct_ov104_0223A348_sub2 *param3, u8 param4, u16 *param5, u16 *param6, UnkStruct_0204B404 *param7, int param8)
+static BOOL BattleTower_CreateRandomTrainerParty(BattleTower *battleTower, FrontierTrainerBase *trData, u16 battleTowerTrainerID, FrontierPokemon *monDataDTO, u8 partySize, u16 *species, u16 *items, BattleTowerPartnerData *param7, enum HeapID heapID)
 {
-    int v0, v1;
-    u8 v2;
-    u8 v3;
+    int i;
+    u8 ivs;
+    u8 random;
     u32 v4;
-    int v5;
-    int v6[4];
-    u32 v7[4];
-    int v8;
-    int v9;
-    BOOL v10 = 0;
-    UnkStruct_0204B1E8 v11;
-    UnkStruct_0204B1E8 v12;
+    int setID;
+    int setIDs[BT_DOUBLES_PARTY_SIZE];
+    u32 personalities[BT_DOUBLES_PARTY_SIZE];
+    int partyIndex;
+    int dupeItemFailsafeCount;
+    BOOL giveReservedItem = 0;
+    FrontierPokemonBase monDataPrev;
+    FrontierPokemonBase monDataCurr;
 
-    GF_ASSERT(param4 <= 4);
+    GF_ASSERT(partySize <= BT_DOUBLES_PARTY_SIZE);
 
-    v8 = 0;
-    v9 = 0;
+    partyIndex = 0;
+    dupeItemFailsafeCount = 0;
 
-    while (v8 != param4) {
-        v3 = sub_0204AEC0(param0) % param1->unk_02;
-        v5 = param1->unk_04[v3];
+    while (partyIndex != partySize) {
+        random = BattleTower_GetRandom(battleTower) % trData->numSets;
+        setID = trData->setIDs[random];
 
-        ov104_0222DCF4(&v12, v5, ov104_0223A768(param0->unk_0F));
+        BattleFrontier_GetPokemonBase(&monDataCurr, setID, BattleTower_GetPokemonDataNarcID(battleTower->challengeMode));
 
-        for (v0 = 0; v0 < v8; v0++) {
-            ov104_0222DCF4(&v11, v6[v0], ov104_0223A768(param0->unk_0F));
+        for (i = 0; i < partyIndex; i++) {
+            BattleFrontier_GetPokemonBase(&monDataPrev, setIDs[i], BattleTower_GetPokemonDataNarcID(battleTower->challengeMode));
 
-            if (v11.unk_00 == v12.unk_00) {
+            if (monDataPrev.species == monDataCurr.species) {
                 break;
             }
         }
 
-        if (v0 != v8) {
+        if (i != partyIndex) {
             continue;
         }
 
-        if (param5 != NULL) {
-            for (v0 = 0; v0 < param4; v0++) {
-                if (param5[v0] == v12.unk_00) {
+        if (species != NULL) {
+            for (i = 0; i < partySize; i++) {
+                if (species[i] == monDataCurr.species) {
                     break;
                 }
             }
 
-            if (v0 != param4) {
+            if (i != partySize) {
                 continue;
             }
         }
 
-        if (v9 < 50) {
-            for (v0 = 0; v0 < v8; v0++) {
-                ov104_0222DCF4(&v11, v6[v0], ov104_0223A768(param0->unk_0F));
+        if (dupeItemFailsafeCount < 50) {
+            for (i = 0; i < partyIndex; i++) {
+                BattleFrontier_GetPokemonBase(&monDataPrev, setIDs[i], BattleTower_GetPokemonDataNarcID(battleTower->challengeMode));
 
-                if ((v11.unk_0C) && (v11.unk_0C == v12.unk_0C)) {
+                if (monDataPrev.item && monDataPrev.item == monDataCurr.item) {
                     break;
                 }
             }
 
-            if (v0 != v8) {
-                v9++;
+            if (i != partyIndex) {
+                dupeItemFailsafeCount++;
                 continue;
             }
 
-            if (param6 != NULL) {
-                for (v0 = 0; v0 < param4; v0++) {
-                    if ((param6[v0] == v12.unk_0C) && (param6[v0] != 0)) {
+            if (items != NULL) {
+                for (i = 0; i < partySize; i++) {
+                    if (items[i] == monDataCurr.item && items[i] != 0) {
                         break;
                     }
                 }
 
-                if (v0 != param4) {
-                    v9++;
+                if (i != partySize) {
+                    dupeItemFailsafeCount++;
                     continue;
                 }
             }
         }
 
-        v6[v8] = v5;
-        v8++;
+        setIDs[partyIndex] = setID;
+        partyIndex++;
     }
 
-    v2 = sub_0204AE84(param2);
-    v4 = (sub_0204AEC0(param0) | (sub_0204AEC0(param0) << 16));
+    ivs = BattleTower_GetIVsFromTrainerID(battleTowerTrainerID);
+    v4 = BattleTower_GetRandom(battleTower) | (BattleTower_GetRandom(battleTower) << 16);
 
-    if (v9 >= 50) {
-        v10 = 1;
+    if (dupeItemFailsafeCount >= 50) {
+        giveReservedItem = TRUE;
     }
 
-    for (v0 = 0; v0 < v8; v0++) {
-        v7[v0] = ov104_0223A3A8(param0, &(param3[v0]), v6[v0], v4, 0, v2, v0, v10, param8);
+    for (i = 0; i < partyIndex; i++) {
+        personalities[i] = BattleTower_CopySetToPokemonDataDTO(battleTower, &(monDataDTO[i]), setIDs[i], v4, 0, ivs, i, giveReservedItem, heapID);
     }
 
     if (param7 == NULL) {
-        return v10;
+        return giveReservedItem;
     }
 
-    param7->unk_00 = v4;
+    param7->otID = v4;
 
-    for (v0 = 0; v0 < 2; v0++) {
-        param7->unk_04[v0] = v6[v0];
-        param7->unk_08[v0] = v7[v0];
+    for (i = 0; i < 2; i++) {
+        param7->monSetIDs[i] = setIDs[i];
+        param7->personalities[i] = personalities[i];
     }
 
-    return v10;
+    return giveReservedItem;
 }
 
-void ov104_0223A30C(SaveData *param0, UnkStruct_ov104_0223A348 *param1, const u8 param2)
+void BattleTower_CreateWiFiTrainerParty(SaveData *saveData, FrontierOpponent *oppponent, const u8 opponentID)
 {
-    int v0;
-    UnkStruct_0202D764 *v1;
-    const UnkStruct_ov104_0223A348_sub1 *v2;
-    const UnkStruct_ov104_0223A348_sub2 *v3;
+    MI_CpuClear8(oppponent, sizeof(FrontierOpponent));
 
-    MI_CpuClear8(param1, sizeof(UnkStruct_ov104_0223A348));
+    WifiBattleTowerDownloadData *v1 = SaveData_GetWifiBattleTowerDownloadData(saveData);
 
-    v1 = sub_0202D764(param0);
-
-    if (!sub_0202D5E8(v1)) {
-        ov104_0223A348(param1, param2);
+    if (!WifiBattleTowerDownloadData_HasOpponentData(v1)) {
+        BattleTower_CreateDummyWiFiTrainer(oppponent, opponentID);
         return;
     }
 
-    sub_0202D63C(v1, param1, param2);
+    WifiBattleTowerDownloadData_BuildOpponent(v1, oppponent, opponentID);
 }
 
-static void ov104_0223A348(UnkStruct_ov104_0223A348 *param0, const u8 param1)
+static void BattleTower_CreateDummyWiFiTrainer(FrontierOpponent *opponent, const u8 opponentID)
 {
-    int v0;
-    const UnkStruct_ov104_0223A348_sub1 *v1;
-    const UnkStruct_ov104_0223A348_sub2 *v2;
-    const UnkStruct_ov104_0223FCB4 *v3;
+    int i;
+    MI_CpuClear8(opponent, sizeof(FrontierOpponent));
 
-    MI_CpuClear8(param0, sizeof(UnkStruct_ov104_0223A348));
+    const FrontierTrainer *trainer = &(sDummyFrontierTrainers[opponentID]);
+    const FrontierPokemon *mons = sDummyFrontierPokemon;
+    const UnkStruct_ov104_0223FCB4 *v3 = &(Unk_ov104_0223FCB4[opponentID]);
 
-    v1 = &(Unk_ov104_0223FCE0[param1]);
-    v2 = Unk_ov104_0223FE30;
-    v3 = &(Unk_ov104_0223FCB4[param1]);
+    MI_CpuCopy8(trainer, &opponent->trainer, sizeof(FrontierTrainer));
+    opponent->trainer.unk_06 = v3->unk_00;
 
-    MI_CpuCopy8(v1, &param0->unk_00, sizeof(UnkStruct_ov104_0223A348_sub1));
-    param0->unk_00.unk_06 = v3->unk_00;
-
-    for (v0 = 0; v0 < 4; v0++) {
-        MI_CpuCopy8(&(v2[v3->unk_02[v0]]), &(param0->unk_30[v0]), sizeof(UnkStruct_ov104_0223A348_sub2));
+    for (i = 0; i < 4; i++) {
+        MI_CpuCopy8(&(mons[v3->unk_02[i]]), &(opponent->pokemon[i]), sizeof(FrontierPokemon));
     }
 }
 
-static const u16 Unk_ov104_0223FCAC[] = {
-    213,
-    157,
-    234,
-    217,
+static const u16 sBattleTowerReservedItems[] = {
+    ITEM_BRIGHTPOWDER,
+    ITEM_LUM_BERRY,
+    ITEM_LEFTOVERS,
+    ITEM_QUICK_CLAW,
 };
 
-static u32 ov104_0223A3A8(UnkStruct_0204AFC4 *param0, UnkStruct_ov104_0223A348_sub2 *param1, u16 param2, u32 param3, u32 param4, u8 param5, u8 param6, BOOL param7, int param8)
+static u32 BattleTower_CopySetToPokemonDataDTO(BattleTower *battleTower, FrontierPokemon *monDataDTO, u16 setID, u32 otID, u32 givenPersonality, u8 ivs, u8 partyIndex, BOOL giveReservedItem, enum HeapID heapID)
 {
     int v0;
-    int v1;
-    u32 v2;
-    u8 v3;
-    UnkStruct_0204B1E8 v4;
+    int evs;
+    u32 randomPersonality;
+    FrontierPokemonBase monData;
 
-    MI_CpuClear8(param1, sizeof(UnkStruct_ov104_0223A348_sub2));
-    ov104_0222DCF4(&v4, param2, ov104_0223A768(param0->unk_0F));
+    MI_CpuClear8(monDataDTO, sizeof(FrontierPokemon));
+    BattleFrontier_GetPokemonBase(&monData, setID, BattleTower_GetPokemonDataNarcID(battleTower->challengeMode));
 
-    param1->unk_00_val1_0 = v4.unk_00;
-    param1->unk_00_val1_11 = v4.unk_0E;
+    monDataDTO->species = monData.species;
+    monDataDTO->form = monData.form;
 
-    if (param7) {
-        param1->unk_02 = Unk_ov104_0223FCAC[param6];
+    if (giveReservedItem) {
+        monDataDTO->item = sBattleTowerReservedItems[partyIndex];
     } else {
-        param1->unk_02 = v4.unk_0C;
+        monDataDTO->item = monData.item;
     }
 
-    v3 = 255;
+    u8 friendship = MAX_FRIENDSHIP_VALUE;
 
-    for (v0 = 0; v0 < 4; v0++) {
-        param1->unk_04[v0] = v4.unk_02[v0];
+    for (v0 = 0; v0 < LEARNED_MOVES_MAX; v0++) {
+        monDataDTO->moves[v0] = monData.moves[v0];
 
-        if (v4.unk_02[v0] == 218) {
-            v3 = 0;
+        if (monData.moves[v0] == MOVE_FRUSTRATION) {
+            friendship = 0;
         }
     }
 
-    param1->unk_0C = param3;
+    monDataDTO->otID = otID;
 
-    if (param4 == 0) {
+    if (givenPersonality == 0) {
         do {
-            v2 = (sub_0204AEC0(param0) | sub_0204AEC0(param0) << 16);
-        } while ((v4.unk_0B != Pokemon_GetNatureOf(v2)) || (Pokemon_IsPersonalityShiny(param3, v2) == 1));
+            randomPersonality = BattleTower_GetRandom(battleTower) | BattleTower_GetRandom(battleTower) << 16;
+        } while (monData.nature != Pokemon_GetNatureOf(randomPersonality) || Pokemon_IsPersonalityShiny(otID, randomPersonality) == 1);
 
-        param1->unk_10 = v2;
+        monDataDTO->personality = randomPersonality;
     } else {
-        param1->unk_10 = param4;
-        v2 = param4;
+        monDataDTO->personality = givenPersonality;
+        randomPersonality = givenPersonality;
     }
 
-    param1->unk_14_val1_0 = param5;
-    param1->unk_14_val1_5 = param5;
-    param1->unk_14_val1_10 = param5;
-    param1->unk_14_val1_15 = param5;
-    param1->unk_14_val1_20 = param5;
-    param1->unk_14_val1_25 = param5;
+    monDataDTO->hpIV = ivs;
+    monDataDTO->atkIV = ivs;
+    monDataDTO->defIV = ivs;
+    monDataDTO->speedIV = ivs;
+    monDataDTO->spAtkIV = ivs;
+    monDataDTO->spDefIV = ivs;
 
-    v1 = 0;
+    evs = 0;
 
-    for (v0 = 0; v0 < 6; v0++) {
-        if (v4.unk_0A & FlagIndex(v0)) {
-            v1++;
+    for (v0 = 0; v0 < STAT_MAX; v0++) {
+        if (monData.evFlags & FlagIndex(v0)) {
+            evs++;
         }
     }
 
-    if ((510 / v1) > 255) {
-        v1 = 255;
+    if (MAX_EVS_ALL_STATS / evs > MAX_EVS_SINGLE_STAT) {
+        evs = MAX_EVS_SINGLE_STAT;
     } else {
-        v1 = 510 / v1;
+        evs = MAX_EVS_ALL_STATS / evs;
     }
 
-    for (v0 = 0; v0 < 6; v0++) {
-        if (v4.unk_0A & FlagIndex(v0)) {
-            param1->unk_18_val2[v0] = v1;
+    for (v0 = 0; v0 < STAT_MAX; v0++) {
+        if (monData.evFlags & FlagIndex(v0)) {
+            monDataDTO->evList[v0] = evs;
         }
     }
 
-    param1->unk_1E_val2 = 0;
-    param1->unk_1F = Unk_020E4C44;
+    monDataDTO->combinedPPUps = 0;
+    monDataDTO->language = gGameLanguage;
 
-    v0 = PokemonPersonalData_GetSpeciesValue(param1->unk_00_val1_0, 25);
+    v0 = SpeciesData_GetSpeciesValue(monDataDTO->species, SPECIES_DATA_ABILITY_2);
 
     if (v0) {
-        if (param1->unk_10 & 1) {
-            param1->unk_20 = v0;
+        if (monDataDTO->personality & 1) {
+            monDataDTO->ability = v0;
         } else {
-            param1->unk_20 = PokemonPersonalData_GetSpeciesValue(param1->unk_00_val1_0, 24);
+            monDataDTO->ability = SpeciesData_GetSpeciesValue(monDataDTO->species, SPECIES_DATA_ABILITY_1);
         }
     } else {
-        param1->unk_20 = PokemonPersonalData_GetSpeciesValue(param1->unk_00_val1_0, 24);
+        monDataDTO->ability = SpeciesData_GetSpeciesValue(monDataDTO->species, SPECIES_DATA_ABILITY_1);
     }
 
-    param1->unk_21 = v3;
-    MessageLoader_GetSpeciesName(param1->unk_00_val1_0, param8, &(param1->unk_22[0]));
+    monDataDTO->friendship = friendship;
+    MessageLoader_GetSpeciesName(monDataDTO->species, heapID, &(monDataDTO->nickname[0]));
 
-    return v2;
+    return randomPersonality;
 }
 
-BattleParams *ov104_0223A580(UnkStruct_0204AFC4 *param0, UnkStruct_ov104_02230BE4 *param1)
+FieldBattleDTO *FieldBattleDTO_NewBattleTower(BattleTower *battleTower, FieldFrontierDTO *fieldData)
 {
-    int v0;
-    u8 v1;
-    u32 v2;
-    BattleParams *v3;
-    SaveData *v4;
-    Party *v5;
-    Pokemon *v6;
+    int i;
 
-    v3 = sub_02051D8C(param0->unk_04, ov104_0223A700(param0->unk_0F));
-    v4 = param1->unk_08;
-    v5 = Party_GetFromSavedata(v4);
+    FieldBattleDTO *dto = FieldBattleDTO_New(battleTower->heapID, BattleTower_GetBattleTypeFromChallengeMode(battleTower->challengeMode));
+    SaveData *saveData = fieldData->saveData;
+    Party *party = SaveData_GetParty(saveData);
 
-    sub_020521B8(v3, NULL, param1->unk_08, param1->unk_1C, param1->unk_0C, param1->unk_10, param1->unk_20);
+    FieldBattleDTO_InitFromGameState(dto, NULL, fieldData->saveData, fieldData->mapHeaderID, fieldData->journalEntry, fieldData->bagCursor, fieldData->subscreenCursorOn);
 
-    v3->unk_128 = 18;
-    v3->unk_12C = 18;
+    dto->background = BACKGROUND_BATTLE_TOWER;
+    dto->terrain = TERRAIN_BATTLE_TOWER;
 
-    v6 = Pokemon_New(param0->unk_04);
-    v1 = 50;
+    Pokemon *mon = Pokemon_New(battleTower->heapID);
+    u8 level = 50;
 
-    Party_InitWithCapacity(v3->parties[0], param0->unk_0E);
+    Party_InitWithCapacity(dto->parties[BATTLER_PLAYER_1], battleTower->partySize);
 
-    for (v0 = 0; v0 < param0->unk_0E; v0++) {
-        Pokemon_Copy(Party_GetPokemonBySlotIndex(v5, param0->unk_2A[v0]), v6);
+    for (i = 0; i < battleTower->partySize; i++) {
+        Pokemon_Copy(Party_GetPokemonBySlotIndex(party, battleTower->unk_2A[i]), mon);
 
-        if (Pokemon_GetValue(v6, MON_DATA_LEVEL, NULL) > v1) {
-            v2 = Pokemon_GetSpeciesBaseExpAt(Pokemon_GetValue(v6, MON_DATA_SPECIES, NULL), v1);
+        if (Pokemon_GetValue(mon, MON_DATA_LEVEL, NULL) > level) {
+            u32 exp = Pokemon_GetSpeciesBaseExpAt(Pokemon_GetValue(mon, MON_DATA_SPECIES, NULL), level);
 
-            Pokemon_SetValue(v6, 8, &v2);
-            Pokemon_CalcLevelAndStats(v6);
+            Pokemon_SetValue(mon, MON_DATA_EXPERIENCE, &exp);
+            Pokemon_CalcLevelAndStats(mon);
         }
 
-        sub_0205213C(v3, v6, 0);
+        FieldBattleDTO_AddPokemonToBattler(dto, mon, BATTLER_PLAYER_1);
     }
 
-    Heap_FreeToHeap(v6);
-    sub_02052894(v3);
+    Heap_Free(mon);
+    FieldBattleDTO_CopyPlayerInfoToTrainerData(dto);
 
-    ov104_0223A6AC(v3, &(param0->unk_78[0]), param0->unk_0E, 1, param0->unk_04);
+    FieldBattleDTO_InitBattleTowerTrainer(dto, &(battleTower->opponentsDataDTO[0]), battleTower->partySize, BATTLER_ENEMY_1, battleTower->heapID);
 
-    for (v0 = 0; v0 < 4; v0++) {
-        v3->trainerData[v0].aiMask = (0x1 | 0x2 | 0x4);
+    for (i = 0; i < MAX_BATTLERS; i++) {
+        dto->trainer[i].header.aiMask = AI_FLAG_BASIC | AI_FLAG_EVAL_ATTACK | AI_FLAG_EXPERT;
     }
 
-    switch (param0->unk_0F) {
-    case 2:
-        ov104_0223A6AC(v3, &(param0->unk_298[param0->unk_10_5]), param0->unk_0E, 2, param0->unk_04);
-    case 3:
-    case 6:
-        ov104_0223A6AC(v3, &(param0->unk_78[1]), param0->unk_0E, 3, param0->unk_04);
+    switch (battleTower->challengeMode) {
+    case BATTLE_TOWER_MODE_MULTI:
+        FieldBattleDTO_InitBattleTowerTrainer(dto, &(battleTower->partnersDataDTO[battleTower->partnerID]), battleTower->partySize, BATTLER_PLAYER_2, battleTower->heapID);
+        // fall through
+    case BATTLE_TOWER_MODE_LINK_MULTI:
+    case BATTLE_TOWER_MODE_6:
+        FieldBattleDTO_InitBattleTowerTrainer(dto, &(battleTower->opponentsDataDTO[1]), battleTower->partySize, BATTLER_ENEMY_2, battleTower->heapID);
         break;
     default:
         break;
     }
 
-    return v3;
+    return dto;
 }
 
-static void ov104_0223A6AC(BattleParams *param0, UnkStruct_ov104_0223A348 *param1, int param2, int param3, int param4)
+static void FieldBattleDTO_InitBattleTowerTrainer(FieldBattleDTO *battleDTO, FrontierOpponent *frontierDTO, int partySize, int battlerId, enum HeapID heapID)
 {
-    int v0, v1;
-    Pokemon *v2;
+    FieldBattleDTO_InitFrontierTrainer(battleDTO, &frontierDTO->trainer, partySize, battlerId, heapID);
+    Pokemon *mon = Pokemon_New(heapID);
 
-    ov104_0222E284(param0, &param1->unk_00, param2, param3, param4);
-    v2 = Pokemon_New(param4);
-
-    for (v0 = 0; v0 < param2; v0++) {
-        ov104_0222DF40(&param1->unk_30[v0], v2, 120);
-        Party_AddPokemon(param0->parties[param3], v2);
+    for (int i = 0; i < partySize; i++) {
+        FrontierPokemon_InitPokemon(&frontierDTO->pokemon[i], mon, 120);
+        Party_AddPokemon(battleDTO->parties[battlerId], mon);
     }
 
-    Heap_FreeToHeap(v2);
+    Heap_Free(mon);
 }
 
-static u32 ov104_0223A700(u8 param0)
+static u32 BattleTower_GetBattleTypeFromChallengeMode(u8 challengeMode)
 {
-    switch (param0) {
-    case 0:
-    case 4:
-        return (0x0 | 0x1) | 0x80;
-    case 1:
-        return (0x2 | 0x1) | 0x80;
-    case 2:
-        return ((0x2 | 0x1) | 0x8 | 0x40) | 0x80;
-    case 3:
-    case 6:
-        return (((0x4 | 0x1) | 0x2) | 0x8) | 0x80;
+    switch (challengeMode) {
+    case BATTLE_TOWER_MODE_SINGLE:
+    case BATTLE_TOWER_MODE_WIFI:
+        return BATTLE_TYPE_FRONTIER_SINGLES;
+    case BATTLE_TOWER_MODE_DOUBLE:
+        return BATTLE_TYPE_FRONTIER_DOUBLES;
+    case BATTLE_TOWER_MODE_MULTI:
+        return BATTLE_TYPE_FRONTIER_WITH_AI_PARTNER;
+    case BATTLE_TOWER_MODE_LINK_MULTI:
+    case BATTLE_TOWER_MODE_6:
+        return BATTLE_TYPE_FRONTIER_LINK | BATTLE_TYPE_TRAINER_DOUBLES | BATTLE_TYPE_2vs2;
     }
 
-    return (0x0 | 0x1) | 0x80;
+    return BATTLE_TYPE_FRONTIER_SINGLES;
 }
 
-void ov104_0223A734(UnkStruct_0204AFC4 *param0, u16 param1)
+void ov104_0223A734(BattleTower *battleTower, u16 param1)
 {
-    param0->unk_10_3 = param1;
-    param0->unk_83E[0] = param1;
+    battleTower->unk_10_3 = param1;
+    battleTower->unk_83E[0] = param1;
 }
 
-u16 ov104_0223A750(UnkStruct_0204AFC4 *param0, const u16 *param1)
+u16 ov104_0223A750(BattleTower *battleTower, const u16 *param1)
 {
     int v0;
 
-    if (param0->unk_10_3 || param1[0]) {
+    if (battleTower->unk_10_3 || param1[0]) {
         return 1;
     }
 
     return 0;
 }
 
-int ov104_0223A768(u8 param0)
+int BattleTower_GetPokemonDataNarcID(u8 challengeMode)
 {
-    if (ov104_0223A7AC(param0) == 0) {
-        return 135;
+    if (BattleTower_AreAllConnectedGamesPlatinum(challengeMode) == FALSE) {
+        return NARC_INDEX_BATTLE__B_TOWER__BTDPM;
     }
 
-    return 179;
+    return NARC_INDEX_BATTLE__B_PL_TOWER__PL_BTDPM;
 }
 
-int ov104_0223A77C(u8 param0)
+int BattleFrontier_GetTrainerDataNarcID(u8 challengeMode)
 {
-    if (ov104_0223A7AC(param0) == 0) {
-        return 134;
+    if (BattleTower_AreAllConnectedGamesPlatinum(challengeMode) == FALSE) {
+        return NARC_INDEX_BATTLE__B_TOWER__BTDTR;
     }
 
-    return 178;
+    return NARC_INDEX_BATTLE__B_PL_TOWER__PL_BTDTR;
 }
 
-int ov104_0223A790(u8 param0)
+int BattleTower_GetTrainerMessagesBankID(u8 challengeMode)
 {
-    if (ov104_0223A7AC(param0) == 0) {
-        return 613;
+    if (BattleTower_AreAllConnectedGamesPlatinum(challengeMode) == FALSE) {
+        return TEXT_BANK_UNK_0613;
     }
 
-    return 614;
+    return TEXT_BANK_FRONTIER_TRAINER_MESSAGES;
 }
 
-static int ov104_0223A7AC(u8 param0)
+static int BattleTower_AreAllConnectedGamesPlatinum(u8 challengeMode)
 {
-    TrainerInfo *v0;
-    TrainerInfo *v1;
-    u8 v2, v3;
-
-    switch (param0) {
-    case 3:
-    case 6:
-        v0 = CommInfo_TrainerInfo(0);
+    switch (challengeMode) {
+    case BATTLE_TOWER_MODE_LINK_MULTI:
+    case BATTLE_TOWER_MODE_6:
+        TrainerInfo *v0 = CommInfo_TrainerInfo(0);
 
         if (v0 == NULL) {
-            GF_ASSERT(0);
+            GF_ASSERT(FALSE);
         }
 
-        v1 = CommInfo_TrainerInfo(1);
+        TrainerInfo *v1 = CommInfo_TrainerInfo(1);
 
         if (v1 == NULL) {
-            GF_ASSERT(0);
+            GF_ASSERT(FALSE);
         }
 
-        v2 = TrainerInfo_GameCode(v0);
-        v3 = TrainerInfo_GameCode(v1);
+        u8 v2 = TrainerInfo_GameCode(v0);
+        u8 v3 = TrainerInfo_GameCode(v1);
 
-        if ((v2 == 0) || (v3 == 0)) {
-            return 0;
+        if (v2 == 0 || v3 == 0) {
+            return FALSE;
         }
 
-        return 1;
+        return TRUE;
     }
 
-    return 1;
+    return TRUE;
 }

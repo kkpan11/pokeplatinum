@@ -1,211 +1,191 @@
-    .include "macros/scrcmd.inc"
+#include "macros/scrcmd.inc"
+#include "res/text/bank/pastoria_city_northeast_house.h"
+#include "generated/pokemon_contest_types.h"
 
-    .data
 
-    ScriptEntry _000E
-    ScriptEntry _030C
-    ScriptEntry _031F
-    .short 0xFD13
+    ScriptEntry PastoriaCityNortheastHouse_AceTrainerM
+    ScriptEntry PastoriaCityNortheastHouse_BattleGirl
+    ScriptEntry PastoriaCityNortheastHouse_Pachirisu
+    ScriptEntryEnd
 
-_000E:
-    PlayFanfare SEQ_SE_CONFIRM
+PastoriaCityNortheastHouse_AceTrainerM:
+    PlaySE SE_CONFIRM_sseq_3
     LockAll
     FacePlayer
-    ScrCmd_247 0x8000
-    GoToIfUnset 0x140, _005C
-    GoToIfUnset 0x141, _005C
-    GoToIfUnset 0x142, _005C
-    GoToIfUnset 0x143, _005C
-    GoToIfUnset 0x144, _005C
-    Message 10
-    WaitABXPadPress
+    GetFirstNonEggInParty VAR_0x8000
+    GoToIfUnset FLAG_RECEIVED_PASTORIA_CITY_NORTHEAST_HOUSE_RED_SCARF, PastoriaCityNortheastHouse_ExaminePokemon
+    GoToIfUnset FLAG_RECEIVED_PASTORIA_CITY_NORTHEAST_HOUSE_BLUE_SCARF, PastoriaCityNortheastHouse_ExaminePokemon
+    GoToIfUnset FLAG_RECEIVED_PASTORIA_CITY_NORTHEAST_HOUSE_PINK_SCARF, PastoriaCityNortheastHouse_ExaminePokemon
+    GoToIfUnset FLAG_RECEIVED_PASTORIA_CITY_NORTHEAST_HOUSE_GREEN_SCARF, PastoriaCityNortheastHouse_ExaminePokemon
+    GoToIfUnset FLAG_RECEIVED_PASTORIA_CITY_NORTHEAST_HOUSE_YELLOW_SCARF, PastoriaCityNortheastHouse_ExaminePokemon
+    Message PastoriaCityNortheastHouse_Text_OutOfScarves
+    WaitButton
     CloseMessage
     ReleaseAll
     End
 
-_005C:
-    Message 0
-    Message 1
-    Call _021C
-    GoToIfEq 0x800C, 1, _00D7
-    Call _024C
-    GoToIfEq 0x800C, 1, _0118
-    Call _027C
-    GoToIfEq 0x800C, 1, _0159
-    Call _02AC
-    GoToIfEq 0x800C, 1, _019A
-    Call _02DC
-    GoToIfEq 0x800C, 1, _01DB
-    Message 2
-    WaitABXPadPress
+PastoriaCityNortheastHouse_ExaminePokemon:
+    Message PastoriaCityNortheastHouse_Text_LetMeExamine
+    Message PastoriaCityNortheastHouse_Text_HmhmISee
+    Call PastoriaCityNortheastHouse_ExamineStatCool
+    GoToIfEq VAR_RESULT, TRUE, PastoriaCityNortheastHouse_TryGiveRedScarf
+    Call PastoriaCityNortheastHouse_ExamineStatBeauty
+    GoToIfEq VAR_RESULT, TRUE, PastoriaCityNortheastHouse_TryGiveBlueScarf
+    Call PastoriaCityNortheastHouse_ExamineStatCute
+    GoToIfEq VAR_RESULT, TRUE, PastoriaCityNortheastHouse_TryGivePinkScarf
+    Call PastoriaCityNortheastHouse_ExamineStatSmart
+    GoToIfEq VAR_RESULT, TRUE, PastoriaCityNortheastHouse_TryGiveGreenScarf
+    Call PastoriaCityNortheastHouse_ExamineStatTough
+    GoToIfEq VAR_RESULT, TRUE, PastoriaCityNortheastHouse_TryGiveYellowScarf
+    Message PastoriaCityNortheastHouse_Text_ItsNotGood
+    WaitButton
     CloseMessage
     ReleaseAll
     End
 
-_00CC:
-    Message 3
-    WaitABXPadPress
+PastoriaCityNortheastHouse_BagIsFull:
+    Message PastoriaCityNortheastHouse_Text_YourBagsFull
+    WaitButton
     CloseMessage
     ReleaseAll
     End
 
-_00D7:
-    SetVar 0x8004, 0x104
-    SetVar 0x8005, 1
-    ScrCmd_07D 0x8004, 0x8005, 0x800C
-    GoToIfEq 0x800C, 0, _00CC
-    ScrCmd_0D0 0, 0x8000
-    ScrCmd_0D1 1, 0x104
-    Message 4
-    CallCommonScript 0x7FC
-    SetFlag 0x140
-    Message 5
-    WaitABXPadPress
+PastoriaCityNortheastHouse_TryGiveRedScarf:
+    SetVar VAR_0x8004, ITEM_RED_SCARF
+    SetVar VAR_0x8005, 1
+    GoToIfCannotFitItem VAR_0x8004, VAR_0x8005, VAR_RESULT, PastoriaCityNortheastHouse_BagIsFull
+    BufferPartyMonSpecies 0, VAR_0x8000
+    BufferItemName 1, ITEM_RED_SCARF
+    Message PastoriaCityNortheastHouse_Text_PokemonsLookingGood
+    Common_GiveItemQuantity
+    SetFlag FLAG_RECEIVED_PASTORIA_CITY_NORTHEAST_HOUSE_RED_SCARF
+    Message PastoriaCityNortheastHouse_Text_RedScarfCool
+    WaitButton
     CloseMessage
     ReleaseAll
     End
 
-_0118:
-    SetVar 0x8004, 0x105
-    SetVar 0x8005, 1
-    ScrCmd_07D 0x8004, 0x8005, 0x800C
-    GoToIfEq 0x800C, 0, _00CC
-    ScrCmd_0D0 0, 0x8000
-    ScrCmd_0D1 1, 0x105
-    Message 4
-    CallCommonScript 0x7FC
-    SetFlag 0x141
-    Message 6
-    WaitABXPadPress
+PastoriaCityNortheastHouse_TryGiveBlueScarf:
+    SetVar VAR_0x8004, ITEM_BLUE_SCARF
+    SetVar VAR_0x8005, 1
+    GoToIfCannotFitItem VAR_0x8004, VAR_0x8005, VAR_RESULT, PastoriaCityNortheastHouse_BagIsFull
+    BufferPartyMonSpecies 0, VAR_0x8000
+    BufferItemName 1, ITEM_BLUE_SCARF
+    Message PastoriaCityNortheastHouse_Text_PokemonsLookingGood
+    Common_GiveItemQuantity
+    SetFlag FLAG_RECEIVED_PASTORIA_CITY_NORTHEAST_HOUSE_BLUE_SCARF
+    Message PastoriaCityNortheastHouse_Text_BlueScarfBeauty
+    WaitButton
     CloseMessage
     ReleaseAll
     End
 
-_0159:
-    SetVar 0x8004, 0x106
-    SetVar 0x8005, 1
-    ScrCmd_07D 0x8004, 0x8005, 0x800C
-    GoToIfEq 0x800C, 0, _00CC
-    ScrCmd_0D0 0, 0x8000
-    ScrCmd_0D1 1, 0x106
-    Message 4
-    CallCommonScript 0x7FC
-    SetFlag 0x142
-    Message 7
-    WaitABXPadPress
+PastoriaCityNortheastHouse_TryGivePinkScarf:
+    SetVar VAR_0x8004, ITEM_PINK_SCARF
+    SetVar VAR_0x8005, 1
+    GoToIfCannotFitItem VAR_0x8004, VAR_0x8005, VAR_RESULT, PastoriaCityNortheastHouse_BagIsFull
+    BufferPartyMonSpecies 0, VAR_0x8000
+    BufferItemName 1, ITEM_PINK_SCARF
+    Message PastoriaCityNortheastHouse_Text_PokemonsLookingGood
+    Common_GiveItemQuantity
+    SetFlag FLAG_RECEIVED_PASTORIA_CITY_NORTHEAST_HOUSE_PINK_SCARF
+    Message PastoriaCityNortheastHouse_Text_PinkScarfCute
+    WaitButton
     CloseMessage
     ReleaseAll
     End
 
-_019A:
-    SetVar 0x8004, 0x107
-    SetVar 0x8005, 1
-    ScrCmd_07D 0x8004, 0x8005, 0x800C
-    GoToIfEq 0x800C, 0, _00CC
-    ScrCmd_0D0 0, 0x8000
-    ScrCmd_0D1 1, 0x107
-    Message 4
-    CallCommonScript 0x7FC
-    SetFlag 0x143
-    Message 8
-    WaitABXPadPress
+PastoriaCityNortheastHouse_TryGiveGreenScarf:
+    SetVar VAR_0x8004, ITEM_GREEN_SCARF
+    SetVar VAR_0x8005, 1
+    GoToIfCannotFitItem VAR_0x8004, VAR_0x8005, VAR_RESULT, PastoriaCityNortheastHouse_BagIsFull
+    BufferPartyMonSpecies 0, VAR_0x8000
+    BufferItemName 1, ITEM_GREEN_SCARF
+    Message PastoriaCityNortheastHouse_Text_PokemonsLookingGood
+    Common_GiveItemQuantity
+    SetFlag FLAG_RECEIVED_PASTORIA_CITY_NORTHEAST_HOUSE_GREEN_SCARF
+    Message PastoriaCityNortheastHouse_Text_GreenScarfSmart
+    WaitButton
     CloseMessage
     ReleaseAll
     End
 
-_01DB:
-    SetVar 0x8004, 0x108
-    SetVar 0x8005, 1
-    ScrCmd_07D 0x8004, 0x8005, 0x800C
-    GoToIfEq 0x800C, 0, _00CC
-    ScrCmd_0D0 0, 0x8000
-    ScrCmd_0D1 1, 0x108
-    Message 4
-    CallCommonScript 0x7FC
-    SetFlag 0x144
-    Message 9
-    WaitABXPadPress
+PastoriaCityNortheastHouse_TryGiveYellowScarf:
+    SetVar VAR_0x8004, ITEM_YELLOW_SCARF
+    SetVar VAR_0x8005, 1
+    GoToIfCannotFitItem VAR_0x8004, VAR_0x8005, VAR_RESULT, PastoriaCityNortheastHouse_BagIsFull
+    BufferPartyMonSpecies 0, VAR_0x8000
+    BufferItemName 1, ITEM_YELLOW_SCARF
+    Message PastoriaCityNortheastHouse_Text_PokemonsLookingGood
+    Common_GiveItemQuantity
+    SetFlag FLAG_RECEIVED_PASTORIA_CITY_NORTHEAST_HOUSE_YELLOW_SCARF
+    Message PastoriaCityNortheastHouse_Text_YellowScarfTough
+    WaitButton
     CloseMessage
     ReleaseAll
     End
 
-_021C:
-    GoToIfSet 0x140, _0244
-    ScrCmd_281 0x8000, 0, 0x800C
-    GoToIfLt 0x800C, 200, _0244
-    SetVar 0x800C, 1
+PastoriaCityNortheastHouse_ExamineStatCool:
+    GoToIfSet FLAG_RECEIVED_PASTORIA_CITY_NORTHEAST_HOUSE_RED_SCARF, PastoriaCityNortheastHouse_SetResultCoolFalse
+    GetPartyMonContestStat VAR_0x8000, CONTEST_TYPE_COOL, VAR_RESULT
+    GoToIfLt VAR_RESULT, 200, PastoriaCityNortheastHouse_SetResultCoolFalse
+    SetVar VAR_RESULT, TRUE
     Return
 
-_0244:
-    SetVar 0x800C, 0
+PastoriaCityNortheastHouse_SetResultCoolFalse:
+    SetVar VAR_RESULT, FALSE
     Return
 
-_024C:
-    GoToIfSet 0x141, _0274
-    ScrCmd_281 0x8000, 1, 0x800C
-    GoToIfLt 0x800C, 200, _0274
-    SetVar 0x800C, 1
+PastoriaCityNortheastHouse_ExamineStatBeauty:
+    GoToIfSet FLAG_RECEIVED_PASTORIA_CITY_NORTHEAST_HOUSE_BLUE_SCARF, PastoriaCityNortheastHouse_SetResultBeautyFalse
+    GetPartyMonContestStat VAR_0x8000, CONTEST_TYPE_BEAUTY, VAR_RESULT
+    GoToIfLt VAR_RESULT, 200, PastoriaCityNortheastHouse_SetResultBeautyFalse
+    SetVar VAR_RESULT, TRUE
     Return
 
-_0274:
-    SetVar 0x800C, 0
+PastoriaCityNortheastHouse_SetResultBeautyFalse:
+    SetVar VAR_RESULT, FALSE
     Return
 
-_027C:
-    GoToIfSet 0x142, _02A4
-    ScrCmd_281 0x8000, 2, 0x800C
-    GoToIfLt 0x800C, 200, _02A4
-    SetVar 0x800C, 1
+PastoriaCityNortheastHouse_ExamineStatCute:
+    GoToIfSet FLAG_RECEIVED_PASTORIA_CITY_NORTHEAST_HOUSE_PINK_SCARF, PastoriaCityNortheastHouse_SetResultCuteFalse
+    GetPartyMonContestStat VAR_0x8000, CONTEST_TYPE_CUTE, VAR_RESULT
+    GoToIfLt VAR_RESULT, 200, PastoriaCityNortheastHouse_SetResultCuteFalse
+    SetVar VAR_RESULT, TRUE
     Return
 
-_02A4:
-    SetVar 0x800C, 0
+PastoriaCityNortheastHouse_SetResultCuteFalse:
+    SetVar VAR_RESULT, FALSE
     Return
 
-_02AC:
-    GoToIfSet 0x143, _02D4
-    ScrCmd_281 0x8000, 3, 0x800C
-    GoToIfLt 0x800C, 200, _02D4
-    SetVar 0x800C, 1
+PastoriaCityNortheastHouse_ExamineStatSmart:
+    GoToIfSet FLAG_RECEIVED_PASTORIA_CITY_NORTHEAST_HOUSE_GREEN_SCARF, PastoriaCityNortheastHouse_SetResultSmartFalse
+    GetPartyMonContestStat VAR_0x8000, CONTEST_TYPE_SMART, VAR_RESULT
+    GoToIfLt VAR_RESULT, 200, PastoriaCityNortheastHouse_SetResultSmartFalse
+    SetVar VAR_RESULT, TRUE
     Return
 
-_02D4:
-    SetVar 0x800C, 0
+PastoriaCityNortheastHouse_SetResultSmartFalse:
+    SetVar VAR_RESULT, FALSE
     Return
 
-_02DC:
-    GoToIfSet 0x144, _0304
-    ScrCmd_281 0x8000, 4, 0x800C
-    GoToIfLt 0x800C, 200, _0304
-    SetVar 0x800C, 1
+PastoriaCityNortheastHouse_ExamineStatTough:
+    GoToIfSet FLAG_RECEIVED_PASTORIA_CITY_NORTHEAST_HOUSE_YELLOW_SCARF, PastoriaCityNortheastHouse_SetResultToughFalse
+    GetPartyMonContestStat VAR_0x8000, CONTEST_TYPE_TOUGH, VAR_RESULT
+    GoToIfLt VAR_RESULT, 200, PastoriaCityNortheastHouse_SetResultToughFalse
+    SetVar VAR_RESULT, TRUE
     Return
 
-_0304:
-    SetVar 0x800C, 0
+PastoriaCityNortheastHouse_SetResultToughFalse:
+    SetVar VAR_RESULT, FALSE
     Return
 
-_030C:
-    PlayFanfare SEQ_SE_CONFIRM
-    LockAll
-    FacePlayer
-    Message 11
-    WaitABXPadPress
-    CloseMessage
-    ReleaseAll
+PastoriaCityNortheastHouse_BattleGirl:
+    NPCMessage PastoriaCityNortheastHouse_Text_MyInLawIsMassageGirl
     End
 
-_031F:
-    PlayFanfare SEQ_SE_CONFIRM
-    LockAll
-    FacePlayer
-    ScrCmd_04B 0x5DC
-    ScrCmd_04C 0x1A1, 0
-    Message 12
-    ScrCmd_04D
-    WaitABXPadPress
-    CloseMessage
-    ReleaseAll
+PastoriaCityNortheastHouse_Pachirisu:
+    PokemonCryAndMessage SPECIES_PACHIRISU, PastoriaCityNortheastHouse_Text_PachirisuCry
     End
 
-    .byte 0
-    .byte 0
+    .balign 4, 0

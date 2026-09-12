@@ -1,49 +1,25 @@
-    .include "macros/scrcmd.inc"
+#include "macros/scrcmd.inc"
+#include "res/text/bank/hearthome_city_mart.h"
 
-    .data
 
-    ScriptEntry _0012
-    ScriptEntry _0028
-    ScriptEntry _003E
-    ScriptEntry _0051
-    .short 0xFD13
+    ScriptEntry HearthomeCityMart_CommonVendor
+    ScriptEntry HearthomeCityMart_SpecialtyVendor
+    ScriptEntry HearthomeCityMart_Hiker
+    ScriptEntry HearthomeCityMart_Beauty
+    ScriptEntryEnd
 
-_0012:
-    PlayFanfare SEQ_SE_CONFIRM
-    LockAll
-    FacePlayer
-    CallCommonScript 0x7E3
-    ScrCmd_035
-    ScrCmd_147 1
-    ReleaseAll
+HearthomeCityMart_CommonVendor:
+    PokeMartCommonWithGreeting
     End
 
-_0028:
-    PlayFanfare SEQ_SE_CONFIRM
-    LockAll
-    FacePlayer
-    CallCommonScript 0x7E3
-    ScrCmd_035
-    ScrCmd_148 5
-    ReleaseAll
+HearthomeCityMart_SpecialtyVendor:
+    PokeMartSpecialtiesWithGreeting MART_SPECIALTIES_ID_HEARTHOME
     End
 
-_003E:
-    PlayFanfare SEQ_SE_CONFIRM
-    LockAll
-    FacePlayer
-    Message 0
-    WaitABXPadPress
-    CloseMessage
-    ReleaseAll
+HearthomeCityMart_Hiker:
+    NPCMessage HearthomeCityMart_Text_CantBuyRevivesWithTwoBadges
     End
 
-_0051:
-    PlayFanfare SEQ_SE_CONFIRM
-    LockAll
-    FacePlayer
-    Message 1
-    WaitABXPadPress
-    CloseMessage
-    ReleaseAll
+HearthomeCityMart_Beauty:
+    NPCMessage HearthomeCityMart_Text_FindAccessoriesInAmitySquare
     End

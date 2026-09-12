@@ -1,43 +1,23 @@
-    .include "macros/scrcmd.inc"
+#include "macros/scrcmd.inc"
+#include "res/text/bank/pastoria_city_north_house.h"
 
-    .data
 
-    ScriptEntry _000E
-    ScriptEntry _0021
-    ScriptEntry _0040
-    .short 0xFD13
+    ScriptEntry PastoriaCityNorthHouse_ScientistM
+    ScriptEntry PastoriaCityNorthHouse_Psyduck
+    ScriptEntry PastoriaCityNorthHouse_KidWithNDS
+    ScriptEntryEnd
 
-_000E:
-    PlayFanfare SEQ_SE_CONFIRM
-    LockAll
-    FacePlayer
-    Message 0
-    WaitABXPadPress
-    CloseMessage
-    ReleaseAll
+PastoriaCityNorthHouse_ScientistM:
+    NPCMessage PastoriaCityNorthHouse_Text_QuickTramTransportation
     End
 
-_0021:
-    PlayFanfare SEQ_SE_CONFIRM
-    LockAll
-    FacePlayer
-    ScrCmd_04B 0x5DC
-    ScrCmd_04C 54, 0
-    Message 1
-    ScrCmd_04D
-    WaitABXPadPress
-    CloseMessage
-    ReleaseAll
+PastoriaCityNorthHouse_Psyduck:
+    PokemonCryAndMessage SPECIES_PSYDUCK, PastoriaCityNorthHouse_Text_PsyduckCry
     End
 
-_0040:
-    PlayFanfare SEQ_SE_CONFIRM
-    LockAll
-    FacePlayer
-    Message 2
-    WaitABXPadPress
-    CloseMessage
-    ReleaseAll
+PastoriaCityNorthHouse_KidWithNDS:
+    NPCMessage PastoriaCityNorthHouse_Text_QuickTramsAreSlow
     End
 
-    .byte 0
+    .balign 4, 0
+

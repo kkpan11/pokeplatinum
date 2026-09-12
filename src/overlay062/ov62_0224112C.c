@@ -11,11 +11,10 @@
 #include "overlay062/ov62_02239D60.h"
 #include "overlay062/ov62_0223CAEC.h"
 #include "overlay062/ov62_02241204.h"
-#include "overlay062/struct_ov62_022349A8.h"
 #include "overlay062/struct_ov62_02241130.h"
 
 #include "inlines.h"
-#include "unk_02025CB0.h"
+#include "system_data.h"
 
 static inline BOOL inline_ov62_022411B8(UnkStruct_0208C06C *param0);
 
@@ -33,9 +32,9 @@ void ov62_02241130(UnkStruct_0208C06C *param0)
 {
     UnkStruct_ov62_02241130 v0;
 
-    v0.unk_00 = sub_02025D74(sub_02025CCC(param0->unk_830));
-    v0.unk_04 = 102;
-    v0.unk_08 = param0->unk_830;
+    v0.unk_00 = SystemData_GetDWCProfileId(SaveData_GetSystemData(param0->saveData));
+    v0.heapID = HEAP_ID_102;
+    v0.saveData = param0->saveData;
     v0.unk_0C.unk_00 = param0;
     v0.unk_0C.unk_04 = ov62_02239D34;
     v0.unk_0C.unk_08 = ov62_02239D38;

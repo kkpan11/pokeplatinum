@@ -1,11 +1,10 @@
-    .include "macros/btlcmd.inc"
+#include "macros/btlcmd.inc"
 
-    .data
 
 _000:
     Call BATTLE_SUBSCRIPT_HELD_ITEM_HP_RESTORE
     // For {1}, the {0} was {2}!
-    PrintMessage pl_msg_00000368_00594, TAG_ITEM_NICKNAME_FLAVOR, BTLSCR_MSG_TEMP, BTLSCR_MSG_TEMP, BTLSCR_MSG_TEMP
+    PrintMessage BattleStrings_Text_ForPokemonTheItemWasFlavor_Ally, TAG_ITEM_NICKNAME_FLAVOR, BTLSCR_MSG_TEMP, BTLSCR_MSG_TEMP, BTLSCR_MSG_TEMP
     Wait 
     WaitButtonABTime 30
     UpdateVar OPCODE_FLAG_ON, BTLVAR_BATTLE_CTX_STATUS, SYSCTL_SKIP_ATTACK_MESSAGE|SYSCTL_PLAYED_MOVE_ANIMATION

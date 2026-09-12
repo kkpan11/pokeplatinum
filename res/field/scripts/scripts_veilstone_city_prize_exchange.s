@@ -1,176 +1,168 @@
-    .include "macros/scrcmd.inc"
+#include "macros/scrcmd.inc"
+#include "res/text/bank/veilstone_city_prize_exchange.h"
+#include "res/text/bank/menu_entries.h"
 
-    .data
 
-    ScriptEntry _000E
-    ScriptEntry _017C
-    ScriptEntry _027E
-    .short 0xFD13
+    ScriptEntry VeilstoneCityPrizeExchange_Receptionist
+    ScriptEntry VeilstoneCityPrizeExchange_Guitarist
+    ScriptEntry VeilstoneCityPrizeExchange_OldMan
+    ScriptEntryEnd
 
-_000E:
-    PlayFanfare SEQ_SE_CONFIRM
+VeilstoneCityPrizeExchange_Receptionist:
+    PlaySE SE_CONFIRM_sseq_3
     LockAll
     FacePlayer
-    SetVar 0x4001, 19
-    Message 0
-    ScrCmd_075 21, 1
-    SetVar 0x8005, 0
-    SetVar 0x8006, 0
-    GoTo _0039
+    SetVar VAR_MAP_LOCAL_0x01, 19
+    Message VeilstoneCityPrizeExchange_Text_ExchangeCoinsForPrizes
+    ShowCoins 21, 1
+    SetVar VAR_0x8005, 0
+    SetVar VAR_0x8006, 0
+    GoTo VeilstoneCityPrizeExchange_TryBuyPrize
     End
 
-_0039:
-    Message 1
-    Call _0119
-    GoToIfEq 0x800C, -2, _00D8
-    GoToIfEq 0x800C, 0x4001, _00D8
-    ScrCmd_2A6 0x800C, 0x8000, 0x8001
-    CallIfLt 0x8000, 0x148, _0100
-    CallIfGe 0x8000, 0x148, _010A
-    ScrCmd_03E 0x800C
-    GoToIfEq 0x800C, 1, _0039
-    ScrCmd_2A9 0x800C, 0x8001
-    GoToIfEq 0x800C, 0, _00F5
-    ScrCmd_07D 0x8000, 1, 0x800C
-    GoToIfEq 0x800C, 0, _00E5
-    Message 4
-    ScrCmd_07B 0x8000, 1, 0x800C
-    ScrCmd_2A8 0x8001
-    ScrCmd_077
-    PlayFanfare SEQ_SE_DP_REGI
-    ScrCmd_04B 0x644
-    GoTo _0039
+VeilstoneCityPrizeExchange_TryBuyPrize:
+    Message VeilstoneCityPrizeExchange_Text_WhichPrize
+    Call VeilstoneCityPrizeExchange_InitPrizeMenu
+    GoToIfEq VAR_RESULT, MENU_CANCEL, VeilstoneCityPrizeExchange_DontBuyAPrize
+    GoToIfEq VAR_RESULT, VAR_MAP_LOCAL_0x01, VeilstoneCityPrizeExchange_DontBuyAPrize
+    GetGameCornerPrizeData VAR_RESULT, VAR_0x8000, VAR_0x8001
+    CallIfLt VAR_0x8000, ITEM_TM01, VeilstoneCityPrizeExchange_IsYourChoiceThisItem
+    CallIfGe VAR_0x8000, ITEM_TM01, VeilstoneCityPrizeExchange_IsYourChoiceThisTM
+    ShowYesNoMenu VAR_RESULT
+    GoToIfEq VAR_RESULT, MENU_NO, VeilstoneCityPrizeExchange_TryBuyPrize
+    HasCoins VAR_RESULT, VAR_0x8001
+    GoToIfEq VAR_RESULT, FALSE, VeilstoneCityPrizeExchange_NotEnoughCoins
+    GoToIfCannotFitItem VAR_0x8000, 1, VAR_RESULT, VeilstoneCityPrizeExchange_NoRoomAvailable
+    Message VeilstoneCityPrizeExchange_Text_HereYouGo
+    AddItem VAR_0x8000, 1, VAR_RESULT
+    SubtractCoins VAR_0x8001
+    UpdateCoinDisplay
+    PlaySE SEQ_SE_DP_REGI_sseq
+    WaitSE SEQ_SE_DP_REGI_sseq
+    GoTo VeilstoneCityPrizeExchange_TryBuyPrize
     End
 
-_00D8:
-    Message 7
-    WaitABXPadPress
+VeilstoneCityPrizeExchange_DontBuyAPrize:
+    Message VeilstoneCityPrizeExchange_Text_OhIsThatSo
+    WaitButton
     CloseMessage
-    ScrCmd_076
+    HideCoins
     ReleaseAll
     End
 
-_00E5:
-    ScrCmd_0D1 0, 0x8000
-    Message 6
-    GoTo _0039
+VeilstoneCityPrizeExchange_NoRoomAvailable:
+    BufferItemName 0, VAR_0x8000
+    Message VeilstoneCityPrizeExchange_Text_NoRoomAvailable
+    GoTo VeilstoneCityPrizeExchange_TryBuyPrize
     End
 
-_00F5:
-    Message 5
-    GoTo _0039
+VeilstoneCityPrizeExchange_NotEnoughCoins:
+    Message VeilstoneCityPrizeExchange_Text_NotEnoughCoins
+    GoTo VeilstoneCityPrizeExchange_TryBuyPrize
     End
 
-_0100:
-    ScrCmd_0D1 0, 0x8000
-    Message 2
+VeilstoneCityPrizeExchange_IsYourChoiceThisItem:
+    BufferItemName 0, VAR_0x8000
+    Message VeilstoneCityPrizeExchange_Text_IsYourChoiceThisItem
     Return
 
-_010A:
-    ScrCmd_0D1 0, 0x8000
-    ScrCmd_0D3 1, 0x8000
-    Message 3
+VeilstoneCityPrizeExchange_IsYourChoiceThisTM:
+    BufferItemName 0, VAR_0x8000
+    BufferTMHMMoveName 1, VAR_0x8000
+    Message VeilstoneCityPrizeExchange_Text_IsYourChoiceThisTM
     Return
 
-_0119:
-    SetVar 0x8008, 0
-    SetVar 0x8009, 0
-    ScrCmd_044 1, 1, 0, 1, 0x800C
-    GoTo _0135
+VeilstoneCityPrizeExchange_InitPrizeMenu:
+    SetVar VAR_0x8008, 0
+    SetVar VAR_0x8009, 0
+    InitGlobalTextListMenu 1, 1, 0, VAR_RESULT
+    GoTo VeilstoneCityPrizeExchange_AddPrizeToMenu
     End
 
-_0135:
-    ScrCmd_2A6 0x8008, 0x8000, 0x8001
-    ScrCmd_0D1 0, 0x8000
-    ScrCmd_280 1, 0x8001, 1, 5
-    ScrCmd_046 168, 0xFF, 0x8008
-    AddVar 0x8008, 1
-    GoToIfLt 0x8008, 0x4001, _0135
-    GoTo _016C
+VeilstoneCityPrizeExchange_AddPrizeToMenu:
+    GetGameCornerPrizeData VAR_0x8008, VAR_0x8000, VAR_0x8001
+    BufferItemName 0, VAR_0x8000
+    BufferVarPaddingDigits 1, VAR_0x8001, PADDING_MODE_SPACES, 5
+    AddListMenuEntry MenuEntries_Text_PrizeExchange_Prize, VAR_0x8008
+    AddVar VAR_0x8008, 1
+    GoToIfLt VAR_0x8008, VAR_MAP_LOCAL_0x01, VeilstoneCityPrizeExchange_AddPrizeToMenu
+    GoTo VeilstoneCityPrizeExchange_FinishMenu
     End
 
-_016C:
-    ScrCmd_046 169, 0xFF, 0x8008
-    ScrCmd_306 0x8005, 0x8006
+VeilstoneCityPrizeExchange_FinishMenu:
+    AddListMenuEntry MenuEntries_Text_PrizeExchange_NoThanks, VAR_0x8008
+    ShowListMenuRememberCursor VAR_0x8005, VAR_0x8006
     Return
 
-_017C:
-    PlayFanfare SEQ_SE_CONFIRM
+VeilstoneCityPrizeExchange_Guitarist:
+    PlaySE SE_CONFIRM_sseq_3
     LockAll
     FacePlayer
-    GoToIfSet 196, _01AF
-    SetFlag 196
-    Message 8
-    ScrCmd_03E 0x800C
-    GoToIfEq 0x800C, 1, _0250
-    GoTo _01CB
+    GoToIfSet FLAG_TALKED_TO_VEILSTONE_CITY_PRIZE_EXCHANGE_GUITARIST, VeilstoneCityPrizeExchange_AskTellHiddenPowerType
+    SetFlag FLAG_TALKED_TO_VEILSTONE_CITY_PRIZE_EXCHANGE_GUITARIST
+    Message VeilstoneCityPrizeExchange_Text_ICanTellHiddenPowerTypes
+    ShowYesNoMenu VAR_RESULT
+    GoToIfEq VAR_RESULT, MENU_NO, VeilstoneCityPrizeExchange_IfYouWantAskMe
+    GoTo VeilstoneCityPrizeExchange_TryTellHiddenPowerType
     End
 
-_01AF:
-    Message 9
-    ScrCmd_03E 0x800C
-    GoToIfEq 0x800C, 1, _0250
-    GoTo _01CB
+VeilstoneCityPrizeExchange_AskTellHiddenPowerType:
+    Message VeilstoneCityPrizeExchange_Text_IllTellHiddenPowerTypes
+    ShowYesNoMenu VAR_RESULT
+    GoToIfEq VAR_RESULT, MENU_NO, VeilstoneCityPrizeExchange_IfYouWantAskMe
+    GoTo VeilstoneCityPrizeExchange_TryTellHiddenPowerType
     End
 
-_01CB:
+VeilstoneCityPrizeExchange_TryTellHiddenPowerType:
     CloseMessage
-    FadeScreen 6, 1, 0, 0
+    FadeScreenOut
     WaitFadeScreen
-    ScrCmd_191
-    ScrCmd_193 0x8000
-    ScrCmd_0A1
-    FadeScreen 6, 1, 1, 0
+    SelectMoveTutorPokemon
+    GetSelectedPartySlot VAR_0x8000
+    ReturnToField
+    FadeScreenIn
     WaitFadeScreen
-    GoToIfEq 0x8000, 0xFF, _0250
-    ScrCmd_198 0x8000, 0x8001
-    GoToIfEq 0x8001, 0, _025B
-    ScrCmd_2FF 0x8000, 0x8004
-    GoToIfEq 0x8004, -1, _0245
-    ScrCmd_099 0x800C, 237, 0x8000
-    GoToIfEq 0x800C, 0, _0266
-    ScrCmd_2FD 0, 0x8004
-    Message 11
-    GoTo _0276
+    GoToIfEq VAR_0x8000, PARTY_SLOT_NONE, VeilstoneCityPrizeExchange_IfYouWantAskMe
+    GetPartyMonSpecies VAR_0x8000, VAR_0x8001
+    GoToIfEq VAR_0x8001, 0, VeilstoneCityPrizeExchange_EggsCantLearnMoves
+    CalcHiddenPowerType VAR_0x8000, VAR_0x8004
+    GoToIfEq VAR_0x8004, -1, VeilstoneCityPrizeExchange_PokemonCantLearnHiddenPower
+    CheckPartyMonHasMove VAR_RESULT, MOVE_HIDDEN_POWER, VAR_0x8000
+    GoToIfEq VAR_RESULT, 0, VeilstoneCityPrizeExchange_PokemonsHiddenPowerWouldBeType
+    BufferTypeName 0, VAR_0x8004
+    Message VeilstoneCityPrizeExchange_Text_PokemonsHiddenPowerIsType
+    GoTo VeilstoneCityPrizeExchange_GuitaristEnd
     End
 
-_0245:
-    Message 14
-    GoTo _0276
+VeilstoneCityPrizeExchange_PokemonCantLearnHiddenPower:
+    Message VeilstoneCityPrizeExchange_Text_PokemonCantLearnHiddenPower
+    GoTo VeilstoneCityPrizeExchange_GuitaristEnd
     End
 
-_0250:
-    Message 12
-    GoTo _0276
+VeilstoneCityPrizeExchange_IfYouWantAskMe:
+    Message VeilstoneCityPrizeExchange_Text_IfYouWantAskMe
+    GoTo VeilstoneCityPrizeExchange_GuitaristEnd
     End
 
-_025B:
-    Message 13
-    GoTo _0276
+VeilstoneCityPrizeExchange_EggsCantLearnMoves:
+    Message VeilstoneCityPrizeExchange_Text_EggsCantLearnMoves
+    GoTo VeilstoneCityPrizeExchange_GuitaristEnd
     End
 
-_0266:
-    ScrCmd_2FD 0, 0x8004
-    Message 10
-    GoTo _0276
+VeilstoneCityPrizeExchange_PokemonsHiddenPowerWouldBeType:
+    BufferTypeName 0, VAR_0x8004
+    Message VeilstoneCityPrizeExchange_Text_PokemonsHiddenPowerWouldBeType
+    GoTo VeilstoneCityPrizeExchange_GuitaristEnd
     End
 
-_0276:
-    WaitABXPadPress
+VeilstoneCityPrizeExchange_GuitaristEnd:
+    WaitButton
     CloseMessage
     ReleaseAll
     End
 
-_027E:
-    PlayFanfare SEQ_SE_CONFIRM
-    LockAll
-    FacePlayer
-    Message 15
-    WaitABXPadPress
-    CloseMessage
-    ReleaseAll
+VeilstoneCityPrizeExchange_OldMan:
+    NPCMessage VeilstoneCityPrizeExchange_Text_IHaveNoCoins
     End
 
-    .byte 0
-    .byte 0
-    .byte 0
+    .balign 4, 0

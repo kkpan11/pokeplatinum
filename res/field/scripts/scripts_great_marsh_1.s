@@ -1,25 +1,15 @@
-    .include "macros/scrcmd.inc"
+#include "macros/scrcmd.inc"
+#include "res/text/bank/great_marsh_1.h"
 
-    .data
 
-    ScriptEntry _001D
-    ScriptEntry _000A
-    .short 0xFD13
+    ScriptEntry GreatMarsh1_SignboardArea1
+    ScriptEntry GreatMarsh1_RuinManiac
+    ScriptEntryEnd
 
-_000A:
-    PlayFanfare SEQ_SE_CONFIRM
-    LockAll
-    FacePlayer
-    Message 0
-    WaitABXPadPress
-    CloseMessage
-    ReleaseAll
+GreatMarsh1_RuinManiac:
+    NPCMessage GreatMarsh1_Text_ThisIsHowYouWin
     End
 
-_001D:
-    ScrCmd_036 1, 2, 0, 0x800C
-    ScrCmd_038 3
-    ScrCmd_039
-    ScrCmd_03B 0x800C
-    CallCommonScript 0x7D0
+GreatMarsh1_SignboardArea1:
+    ShowLandmarkSign GreatMarsh1_Text_SignArea1
     End

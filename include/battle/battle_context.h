@@ -1,20 +1,29 @@
-#ifndef POKEPLATINUM_BATTLE_CONTEXT_H
-#define POKEPLATINUM_BATTLE_CONTEXT_H
+#ifndef POKEPLATINUM_BATTLE_BATTLE_CONTEXT_H
+#define POKEPLATINUM_BATTLE_BATTLE_CONTEXT_H
 
 #include "constants/battle.h"
 #include "constants/pokemon.h"
 
 #include "struct_decls/battle_system.h"
-#include "struct_decls/cell_actor_data.h"
 #include "struct_decls/font_oam.h"
-#include "struct_defs/sprite_manager_allocation.h"
 
 #include "battle/ai_context.h"
-#include "battle/battle_message.h"
 #include "battle/battle_mon.h"
-#include "overlay012/struct_ball_rotation_decl.h"
+#include "battle_anim/struct_ball_rotation_decl.h"
+
+#include "char_transfer.h"
+#include "sprite_system.h"
 
 typedef struct BattleContext BattleContext;
+
+typedef struct BattleMessage {
+    u8 commandCode;
+    u8 tags;
+    u16 id;
+    int params[6];
+    int digits;
+    int battler;
+} BattleMessage;
 
 typedef struct FieldConditions {
     u32 weatherTurns;
@@ -106,9 +115,9 @@ typedef struct BattleScriptTaskData {
     BattleSystem *battleSys;
     BattleContext *battleCtx;
     BallRotation *ballRotation;
-    CellActorData *cellActorData[2];
+    ManagedSprite *sprites[2];
     FontOAM *fontOAM;
-    SpriteManagerAllocation spriteMgrAlloc;
+    CharTransferAllocation charTransferAllocation;
     int flag;
     int seqNum;
     int ball;
@@ -166,11 +175,11 @@ struct BattleContext {
     int sharedExp;
     u32 sideGetExpMask[2];
 
-    int scriptNarc;
+    enum NarcID scriptNarc;
     int scriptFile;
     int scriptCursor;
     int scriptStackPointer;
-    int scriptStackNarc[BATTLE_SCRIPT_STACK_MAX];
+    enum NarcID scriptStackNarc[BATTLE_SCRIPT_STACK_MAX];
     int scriptStackFile[BATTLE_SCRIPT_STACK_MAX];
     int scriptStackCursor[BATTLE_SCRIPT_STACK_MAX];
 
@@ -311,4 +320,4 @@ struct BattleContext {
     u32 padding3154_01 : 31;
 };
 
-#endif // POKEPLATINUM_BATTLE_CONTEXT_H
+#endif // POKEPLATINUM_BATTLE_BATTLE_CONTEXT_H

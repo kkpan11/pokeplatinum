@@ -1,17 +1,16 @@
 #ifndef POKEPLATINUM_STRUCT_OV17_0224E1F4_H
 #define POKEPLATINUM_STRUCT_OV17_0224E1F4_H
 
-#include "struct_decls/sprite_decl.h"
-
 #include "overlay017/struct_ov17_0224B09C.h"
 
 #include "pokemon.h"
+#include "pokemon_sprite.h"
 
 typedef struct {
-    Pokemon *unk_00;
-    Sprite *unk_04;
+    Pokemon *mon;
+    PokemonSprite *unk_04;
     UnkStruct_ov17_0224B09C *unk_08;
-    u8 unk_0C;
+    u8 contestantID;
     u8 unk_0D;
     u16 unk_0E;
     s32 unk_10;

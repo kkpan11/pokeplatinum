@@ -1,40 +1,28 @@
-    .include "macros/scrcmd.inc"
+#include "macros/scrcmd.inc"
+#include "res/text/bank/hearthome_city_east_gate_to_amity_square.h"
 
-    .data
 
-    ScriptEntry _002D
-    ScriptEntry _0040
-    ScriptEntry _000E
-    .short 0xFD13
+    ScriptEntry HearthomeCityEastGateToAmitySquare_Receptionist
+    ScriptEntry HearthomeCityEastGateToAmitySquare_BlackBelt
+    ScriptEntry HearthomeCityEastGateToAmitySquare_OnTransition
+    ScriptEntryEnd
 
-_000E:
-    ScrCmd_238 13, 0x4000
-    GoToIfEq 0x4000, 0, _0027
-    ClearFlag 0x219
+HearthomeCityEastGateToAmitySquare_OnTransition:
+    CheckTVInterviewEligible TV_PROGRAM_SEGMENT_AMITY_SQUARE_WATCH, VAR_MAP_LOCAL_0x00
+    GoToIfEq VAR_MAP_LOCAL_0x00, FALSE, HearthomeCityEastGateToAmitySquare_HideReporter
+    ClearFlag FLAG_HIDE_HEARTHOME_CITY_GATE_TO_AMITY_SQUARE_REPORTER
     End
 
-_0027:
-    SetFlag 0x219
+HearthomeCityEastGateToAmitySquare_HideReporter:
+    SetFlag FLAG_HIDE_HEARTHOME_CITY_GATE_TO_AMITY_SQUARE_REPORTER
     End
 
-_002D:
-    PlayFanfare SEQ_SE_CONFIRM
-    LockAll
-    FacePlayer
-    Message 0
-    WaitABXPadPress
-    CloseMessage
-    ReleaseAll
+HearthomeCityEastGateToAmitySquare_Receptionist:
+    NPCMessage HearthomeCityEastGateToAmitySquare_Text_TakeCutePokemonForAStroll
     End
 
-_0040:
-    PlayFanfare SEQ_SE_CONFIRM
-    LockAll
-    FacePlayer
-    Message 1
-    WaitABXPadPress
-    CloseMessage
-    ReleaseAll
+HearthomeCityEastGateToAmitySquare_BlackBelt:
+    NPCMessage HearthomeCityEastGateToAmitySquare_Text_TheyRefusedEntryToMyPokemon
     End
 
-    .byte 0
+    .balign 4, 0

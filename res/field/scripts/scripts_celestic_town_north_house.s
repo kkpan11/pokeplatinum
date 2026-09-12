@@ -1,95 +1,78 @@
-    .include "macros/scrcmd.inc"
+#include "macros/scrcmd.inc"
+#include "res/text/bank/celestic_town_north_house.h"
 
-    .data
 
-    ScriptEntry _001C
-    ScriptEntry _0056
-    ScriptEntry _00A1
-    ScriptEntry _00B4
-    ScriptEntry _001A
-    ScriptEntry _00C5
-    .short 0xFD13
+    ScriptEntry CelesticTownNorthHouse_ExpertM
+    ScriptEntry CelesticTownNorthHouse_Elder
+    ScriptEntry CelesticTownNorthHouse_Lass
+    ScriptEntry CelesticTownNorthHouse_Scroll
+    ScriptEntry CelesticTownNorthHouse_OnTransition
+    ScriptEntry CelesticTownNorthHouse_Book
+    ScriptEntryEnd
 
-_001A:
+CelesticTownNorthHouse_OnTransition:
     End
 
-_001C:
-    PlayFanfare SEQ_SE_CONFIRM
+CelesticTownNorthHouse_ExpertM:
+    PlaySE SE_CONFIRM_sseq_3
     LockAll
     FacePlayer
-    Message 0
-    ScrCmd_03E 0x800C
-    GoToIfEq 0x800C, 1, _0043
-    Message 1
-    GoTo _004E
+    Message CelesticTownNorthHouse_Text_LikeToKnowMesprit
+    ShowYesNoMenu VAR_RESULT
+    GoToIfEq VAR_RESULT, MENU_NO, CelesticTownNorthHouse_YouWouldnt
+    Message CelesticTownNorthHouse_Text_MespritInfo
+    GoTo CelesticTownNorthHouse_ExpertMEnd
     End
 
-_0043:
-    Message 2
-    GoTo _004E
+CelesticTownNorthHouse_YouWouldnt:
+    Message CelesticTownNorthHouse_Text_YouWouldnt
+    GoTo CelesticTownNorthHouse_ExpertMEnd
     End
 
-_004E:
-    WaitABXPadPress
+CelesticTownNorthHouse_ExpertMEnd:
+    WaitButton
     CloseMessage
     ReleaseAll
     End
 
-_0056:
-    PlayFanfare SEQ_SE_CONFIRM
+CelesticTownNorthHouse_Elder:
+    PlaySE SE_CONFIRM_sseq_3
     LockAll
     FacePlayer
-    GoToIfSet 0x964, _007F
-    GoToIfSet 0x9B8, _008E
-    Message 3
-    GoTo _0099
+    GoToIfSet FLAG_GAME_COMPLETED, CelesticTownNorthHouse_IDidSomeResearch
+    GoToIfSet FLAG_FIRST_ARRIVAL_CANALAVE_CITY, CelesticTownNorthHouse_CelesticOldestTown
+    Message CelesticTownNorthHouse_Text_UsingSurfGoPlaces
+    GoTo CelesticTownNorthHouse_ElderEnd
     End
 
-_007F:
-    SetFlag 0x145
-    Message 5
-    GoTo _0099
+CelesticTownNorthHouse_IDidSomeResearch:
+    SetFlag FLAG_UNLOCKED_DIALGA_PALKIA_SPEAR_PILLAR
+    Message CelesticTownNorthHouse_Text_IDidSomeResearch
+    GoTo CelesticTownNorthHouse_ElderEnd
     End
 
-_008E:
-    Message 4
-    GoTo _0099
+CelesticTownNorthHouse_CelesticOldestTown:
+    Message CelesticTownNorthHouse_Text_CelesticOldestTown
+    GoTo CelesticTownNorthHouse_ElderEnd
     End
 
-_0099:
-    WaitABXPadPress
+CelesticTownNorthHouse_ElderEnd:
+    WaitButton
     CloseMessage
     ReleaseAll
     End
 
-_00A1:
-    PlayFanfare SEQ_SE_CONFIRM
-    LockAll
-    FacePlayer
-    Message 9
-    WaitABXPadPress
-    CloseMessage
-    ReleaseAll
+CelesticTownNorthHouse_Lass:
+    NPCMessage CelesticTownNorthHouse_Text_MySisterStudiesMyths
     End
 
-_00B4:
-    PlayFanfare SEQ_SE_CONFIRM
-    LockAll
-    Message 10
-    WaitABXPadPress
-    CloseMessage
-    ReleaseAll
+CelesticTownNorthHouse_Scroll:
+    EventMessage CelesticTownNorthHouse_Text_InvaluableScroll
     End
 
-_00C5:
-    ScrCmd_0CD 0
-    PlayFanfare SEQ_SE_CONFIRM
-    LockAll
-    FacePlayer
-    Message 11
-    WaitABXPadPress
-    CloseMessage
-    ReleaseAll
+CelesticTownNorthHouse_Book:
+    BufferPlayerName 0
+    NPCMessage CelesticTownNorthHouse_Text_OldBook
     End
 
-    .byte 0
+    .balign 4, 0

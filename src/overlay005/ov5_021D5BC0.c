@@ -12,14 +12,14 @@
 
 FS_EXTERN_OVERLAY(overlay56);
 
-typedef struct {
+typedef struct BottomScreenHandlers {
     // clang-format off
-    void (* unk_00)(FieldSystem *);
-    BOOL (* unk_04)(FieldSystem *);
-    void (* unk_08)(FieldSystem *);
-    BOOL (* unk_0C)(FieldSystem *);
+    void (* initFn)(FieldSystem *);
+    BOOL (* isRunningDummyFn)(FieldSystem *);
+    void (* endFn)(FieldSystem *);
+    BOOL (* isDoneFn)(FieldSystem *);
     // clang-format on
-} UnkStruct_ov5_021F8C7C;
+} BottomScreenHandlers;
 
 static void ov5_021D5C4C(FieldSystem *fieldSystem);
 static void ov5_021D5C54(FieldSystem *fieldSystem);
@@ -31,51 +31,51 @@ static BOOL ov5_021D5CA0(FieldSystem *fieldSystem);
 static BOOL ov5_021D5CAC(FieldSystem *fieldSystem);
 static BOOL ov5_021D5CA8(FieldSystem *fieldSystem);
 
-static const UnkStruct_ov5_021F8C7C Unk_ov5_021F8C7C[] = {
+static const BottomScreenHandlers sBottomScreenHandlers[] = {
     { ov5_021D5C4C, NULL, ov5_021D5C78, ov5_021D5CA0 },
     { ov5_021D5C54, NULL, ov5_021D5C80, ov5_021D5CAC },
     { ov5_021D5C5C, NULL, ov5_021D5C88, ov5_021D5CA8 },
     { ov5_021EA830, NULL, ov5_021EA848, ov5_021EA854 }
 };
 
-static int ov5_021D5BC0(FieldSystem *fieldSystem)
+static int FieldSystem_GetBottomScreenIndex(FieldSystem *fieldSystem)
 {
-    int v0 = fieldSystem->unk_18;
+    int fieldBottomScreen = fieldSystem->bottomScreen;
 
-    GF_ASSERT(v0 != 0);
-    GF_ASSERT(v0 < 5);
+    GF_ASSERT(fieldBottomScreen != 0);
+    GF_ASSERT(fieldBottomScreen < 5);
 
-    return v0 - 1;
+    return fieldBottomScreen - 1;
 }
 
-void ov5_021D5BD8(FieldSystem *fieldSystem)
+void FieldSystem_InitBottomScreen(FieldSystem *fieldSystem)
 {
-    Unk_ov5_021F8C7C[ov5_021D5BC0(fieldSystem)].unk_00(fieldSystem);
+    sBottomScreenHandlers[FieldSystem_GetBottomScreenIndex(fieldSystem)].initFn(fieldSystem);
 }
 
-BOOL ov5_021D5BF4(FieldSystem *fieldSystem)
+BOOL FieldSystem_IsBottomScreenRunningDummy(FieldSystem *fieldSystem)
 {
     // clang-format off
-    BOOL (* v0)(FieldSystem *);
+    BOOL (* isRunningDummyFn)(FieldSystem *);
     // clang-format on
 
-    v0 = Unk_ov5_021F8C7C[ov5_021D5BC0(fieldSystem)].unk_04;
+    isRunningDummyFn = sBottomScreenHandlers[FieldSystem_GetBottomScreenIndex(fieldSystem)].isRunningDummyFn;
 
-    if (v0 == NULL) {
+    if (isRunningDummyFn == NULL) {
         return 1;
     }
 
-    return v0(fieldSystem);
+    return isRunningDummyFn(fieldSystem);
 }
 
-void ov5_021D5C14(FieldSystem *fieldSystem)
+void FieldSystem_EndBottomScreen(FieldSystem *fieldSystem)
 {
-    Unk_ov5_021F8C7C[ov5_021D5BC0(fieldSystem)].unk_08(fieldSystem);
+    sBottomScreenHandlers[FieldSystem_GetBottomScreenIndex(fieldSystem)].endFn(fieldSystem);
 }
 
-BOOL ov5_021D5C30(FieldSystem *fieldSystem)
+BOOL FieldSystem_IsBottomScreenDone(FieldSystem *fieldSystem)
 {
-    return Unk_ov5_021F8C7C[ov5_021D5BC0(fieldSystem)].unk_0C(fieldSystem);
+    return sBottomScreenHandlers[FieldSystem_GetBottomScreenIndex(fieldSystem)].isDoneFn(fieldSystem);
 }
 
 static void ov5_021D5C4C(FieldSystem *fieldSystem)
@@ -85,7 +85,7 @@ static void ov5_021D5C4C(FieldSystem *fieldSystem)
 
 static void ov5_021D5C54(FieldSystem *fieldSystem)
 {
-    sub_0205A0BC();
+    FieldCommManager_UnpauseUndergroundResources();
 }
 
 static void ov5_021D5C5C(FieldSystem *fieldSystem)
@@ -101,7 +101,7 @@ static void ov5_021D5C78(FieldSystem *fieldSystem)
 
 static void ov5_021D5C80(FieldSystem *fieldSystem)
 {
-    sub_0205A0A0();
+    FieldCommManager_PauseUndergroundResources();
 }
 
 static void ov5_021D5C88(FieldSystem *fieldSystem)

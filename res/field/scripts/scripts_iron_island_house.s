@@ -1,80 +1,80 @@
-    .include "macros/scrcmd.inc"
+#include "macros/scrcmd.inc"
+#include "res/text/bank/iron_island_house.h"
+#include "res/field/events/events_iron_island_house.h"
 
-    .data
 
-    ScriptEntry _000A
-    ScriptEntry _0035
-    .short 0xFD13
+    ScriptEntry IronIslandHouse_OnTransition
+    ScriptEntry IronIslandHouse_Byron
+    ScriptEntryEnd
 
-_000A:
-    GoToIfSet 0x11D, _0029
-    ScrCmd_22D 2, 0x4000
-    CallIfEq 0x4000, 1, _002F
+IronIslandHouse_OnTransition:
+    GoToIfSet FLAG_RECEIVED_IRON_ISLAND_HOUSE_METAL_COAT, IronIslandHouse_HideByron
+    GetNationalDexEnabled VAR_MAP_LOCAL_0x00
+    CallIfEq VAR_MAP_LOCAL_0x00, TRUE, IronIslandHouse_ShowByron
     End
 
-_0029:
-    SetFlag 0x24D
+IronIslandHouse_HideByron:
+    SetFlag FLAG_HIDE_IRON_ISLAND_HOUSE_BYRON
     End
 
-_002F:
-    ClearFlag 0x24D
+IronIslandHouse_ShowByron:
+    ClearFlag FLAG_HIDE_IRON_ISLAND_HOUSE_BYRON
     Return
 
-_0035:
-    PlayFanfare SEQ_SE_CONFIRM
+IronIslandHouse_Byron:
+    PlaySE SE_CONFIRM_sseq_3
     LockAll
     FacePlayer
-    Message 0
-    SetVar 0x8004, 233
-    SetVar 0x8005, 1
-    ScrCmd_07D 0x8004, 0x8005, 0x800C
-    GoToIfEq 0x800C, 0, _00A8
-    CallCommonScript 0x7FC
-    SetFlag 0x11D
-    Message 1
+    Message IronIslandHouse_Text_TakeApology
+    SetVar VAR_0x8004, ITEM_METAL_COAT
+    SetVar VAR_0x8005, 1
+    GoToIfCannotFitItem VAR_0x8004, VAR_0x8005, VAR_RESULT, IronIslandHouse_BagIsFull
+    Common_GiveItemQuantity
+    SetFlag FLAG_RECEIVED_IRON_ISLAND_HOUSE_METAL_COAT
+    Message IronIslandHouse_Text_EvolveUsingMetalCoat
     CloseMessage
-    ScrCmd_1BD 0x8004
-    GoToIfEq 0x8004, 2, _00B2
-    GoToIfEq 0x8004, 3, _00D0
-    GoToIfEq 0x8004, 0, _00B2
-    GoToIfEq 0x8004, 1, _00D0
+    GetPlayerDir VAR_0x8004
+    GoToIfEq VAR_0x8004, DIR_WEST, IronIslandHouse_ByronLeaveNorthWest
+    GoToIfEq VAR_0x8004, DIR_EAST, IronIslandHouse_ByronLeaveSouthEast
+    GoToIfEq VAR_0x8004, DIR_NORTH, IronIslandHouse_ByronLeaveNorthWest
+    GoToIfEq VAR_0x8004, DIR_SOUTH, IronIslandHouse_ByronLeaveSouthEast
     End
 
-_00A8:
-    CallCommonScript 0x7E1
+IronIslandHouse_BagIsFull:
+    Common_MessageBagIsFull
     CloseMessage
     ReleaseAll
     End
 
-_00B2:
-    ApplyMovement 0, _00F0
+IronIslandHouse_ByronLeaveNorthWest:
+    ApplyMovement LOCALID_BYRON, IronIslandHouse_Movement_ByronLeaveNorthWest
     WaitMovement
-    PlayFanfare SEQ_SE_DP_KAIDAN2
-    ScrCmd_065 0
-    ScrCmd_04B 0x603
-    ScrCmd_04A 0x603
+    PlaySE SEQ_SE_DP_KAIDAN2_sseq
+    RemoveObject LOCALID_BYRON
+    WaitSE SEQ_SE_DP_KAIDAN2_sseq
+    StopSE SEQ_SE_DP_KAIDAN2_sseq
     ReleaseAll
     End
 
-_00D0:
-    ApplyMovement 0, _00FC
+IronIslandHouse_ByronLeaveSouthEast:
+    ApplyMovement LOCALID_BYRON, IronIslandHouse_Movement_ByronLeaveSouthEast
     WaitMovement
-    PlayFanfare SEQ_SE_DP_KAIDAN2
-    ScrCmd_065 0
-    ScrCmd_04B 0x603
-    ScrCmd_04A 0x603
+    PlaySE SEQ_SE_DP_KAIDAN2_sseq
+    RemoveObject LOCALID_BYRON
+    WaitSE SEQ_SE_DP_KAIDAN2_sseq
+    StopSE SEQ_SE_DP_KAIDAN2_sseq
     ReleaseAll
     End
 
     .balign 4, 0
-_00F0:
-    MoveAction_00E
-    MoveAction_00D 3
+IronIslandHouse_Movement_ByronLeaveNorthWest:
+    WalkNormalWest
+    WalkNormalSouth 3
     EndMovement
 
     .balign 4, 0
-_00FC:
-    MoveAction_00D 2
-    MoveAction_00E
-    MoveAction_00D
+IronIslandHouse_Movement_ByronLeaveSouthEast:
+    WalkNormalSouth 2
+    WalkNormalWest
+    WalkNormalSouth
     EndMovement

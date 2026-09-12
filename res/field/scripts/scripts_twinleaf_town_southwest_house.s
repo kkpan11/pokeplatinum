@@ -1,46 +1,46 @@
-    .include "macros/scrcmd.inc"
+#include "macros/scrcmd.inc"
+#include "res/text/bank/twinleaf_town_southwest_house.h"
 
-    .data
 
-    ScriptEntry _000A
-    ScriptEntry _0033
-    .short 0xFD13
+    ScriptEntry TwinleafTownSouthwestHouse_ExpertF
+    ScriptEntry TwinleafTownSouthwestHouse_Twin
+    ScriptEntryEnd
 
-_000A:
-    PlayFanfare SEQ_SE_CONFIRM
+TwinleafTownSouthwestHouse_ExpertF:
+    PlaySE SE_CONFIRM_sseq_3
     LockAll
     FacePlayer
-    GoToIfSet 144, _0028
-    Message 0
-    WaitABXPadPress
+    GoToIfSet FLAG_HAS_POKEDEX, TwinleafTownSouthwestHouse_ProfRowanGavePokedex
+    Message TwinleafTownSouthwestHouse_Text_PokemonProfessorReturned
+    WaitButton
     CloseMessage
     ReleaseAll
     End
 
-_0028:
-    Message 1
-    WaitABXPadPress
+TwinleafTownSouthwestHouse_ProfRowanGavePokedex:
+    Message TwinleafTownSouthwestHouse_Text_ProfRowanGavePokedex
+    WaitButton
     CloseMessage
     ReleaseAll
     End
 
-_0033:
-    PlayFanfare SEQ_SE_CONFIRM
+TwinleafTownSouthwestHouse_Twin:
+    PlaySE SE_CONFIRM_sseq_3
     LockAll
     FacePlayer
-    ScrCmd_0CD 0
-    GoToIfSet 144, _0054
-    Message 2
-    WaitABXPadPress
+    BufferPlayerName 0
+    GoToIfSet FLAG_HAS_POKEDEX, TwinleafTownSouthwestHouse_CanIBeFriendsWithPokemon
+    Message TwinleafTownSouthwestHouse_Text_IWantACutePokemon
+    WaitButton
     CloseMessage
     ReleaseAll
     End
 
-_0054:
-    Message 3
-    WaitABXPadPress
+TwinleafTownSouthwestHouse_CanIBeFriendsWithPokemon:
+    Message TwinleafTownSouthwestHouse_Text_CanIBeFriendsWithPokemon
+    WaitButton
     CloseMessage
     ReleaseAll
     End
 
-    .byte 0
+    .balign 4, 0

@@ -1,22 +1,21 @@
-    .include "macros/scrcmd.inc"
+#include "macros/scrcmd.inc"
 
-    .data
 
-    ScriptEntry _0029
-    ScriptEntry _000A
-    .short 0xFD13
+    ScriptEntry CanalaveCityWestHouse_Dummy1
+    ScriptEntry CanalaveCityWestHouse_OnTransition
+    ScriptEntryEnd
 
-_000A:
-    ScrCmd_238 10, 0x4000
-    GoToIfEq 0x4000, 0, _0023
-    ClearFlag 0x216
+CanalaveCityWestHouse_OnTransition:
+    CheckTVInterviewEligible TV_PROGRAM_SEGMENT_STREET_CORNER_PERSONALITY_CHECKUP, VAR_MAP_LOCAL_0x00
+    GoToIfEq VAR_MAP_LOCAL_0x00, FALSE, CanalaveCityWestHouse_HideReporter
+    ClearFlag FLAG_HIDE_CANALAVE_CITY_WEST_HOUSE_REPORTER
     End
 
-_0023:
-    SetFlag 0x216
+CanalaveCityWestHouse_HideReporter:
+    SetFlag FLAG_HIDE_CANALAVE_CITY_WEST_HOUSE_REPORTER
     End
 
-_0029:
+CanalaveCityWestHouse_Dummy1:
     End
 
-    .byte 0
+    .balign 4, 0

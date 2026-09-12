@@ -1,32 +1,32 @@
-    .include "macros/scrcmd.inc"
+#include "macros/scrcmd.inc"
+#include "res/text/bank/ruin_maniac_cave_short.h"
 
-    .data
 
-    ScriptEntry _000A
-    ScriptEntry _0010
-    .short 0xFD13
+    ScriptEntry RuinManiacCaveShort_OnTransition
+    ScriptEntry RuinManiacCaveShort_RuinManiac
+    ScriptEntryEnd
 
-_000A:
-    SetFlag 0x9D8
+RuinManiacCaveShort_OnTransition:
+    SetFlag FLAG_FIRST_ARRIVAL_RUIN_MANIAC_CAVE
     End
 
-_0010:
-    PlayFanfare SEQ_SE_CONFIRM
+RuinManiacCaveShort_RuinManiac:
+    PlaySE SE_CONFIRM_sseq_3
     LockAll
     FacePlayer
-    ScrCmd_284 0x800C
-    GoToIfGe 0x800C, 10, _0034
-    Message 0
-    WaitABXPadPress
+    GetUnownFormsSeenCount VAR_RESULT
+    GoToIfGe VAR_RESULT, 10, RuinManiacCaveShort_IWantRareUnown
+    Message RuinManiacCaveShort_Text_GoCatchUnown
+    WaitButton
     CloseMessage
     ReleaseAll
     End
 
-_0034:
-    Message 1
-    WaitABXPadPress
+RuinManiacCaveShort_IWantRareUnown:
+    Message RuinManiacCaveShort_Text_IWantRareUnown
+    WaitButton
     CloseMessage
     ReleaseAll
     End
 
-    .byte 0
+    .balign 4, 0

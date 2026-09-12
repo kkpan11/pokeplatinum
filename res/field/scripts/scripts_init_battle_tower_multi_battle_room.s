@@ -1,18 +1,14 @@
-    .include "macros/scrcmd.inc"
+#include "macros/scrcmd.inc"
 
-    .data
 
-    .byte 2
-    .short 1, 0
-    .byte 3
-    .short 2, 0
-    .byte 1
-    ScriptEntry _0010
-    .byte 0
+    InitScriptEntry_OnTransition 1
+    InitScriptEntry_OnResume 2
+    InitScriptEntry_OnFrameTable InitScriptFrameTable
+    InitScriptEntryEnd
 
-_0010:
-    .short 0x40DE, 1, 3
-    .short 0x40DE, 2, 4
-    .short 0
+InitScriptFrameTable:
+    InitScriptGoToIfEqual VAR_BATTLE_TOWER_MULTI_BATTLE_ROOM_LOAD_ACTION, 1, 3
+    InitScriptGoToIfEqual VAR_BATTLE_TOWER_MULTI_BATTLE_ROOM_LOAD_ACTION, 2, 4
+    InitScriptFrameTableEnd
 
-    .balign 4, 0
+    InitScriptEnd

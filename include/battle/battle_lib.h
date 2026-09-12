@@ -7,7 +7,6 @@
 #include "struct_decls/battle_system.h"
 
 #include "battle/battle_context.h"
-#include "battle/battle_message.h"
 #include "battle/battle_mon.h"
 #include "battle/btlcmd.h"
 
@@ -60,20 +59,20 @@ void BattleSystem_ReloadPokemon(BattleSystem *battleSys, BattleContext *battleCt
  * @brief Load a script file from the specified NARC.
  *
  * @param battleCtx
- * @param narc          Which NARC to open for the script
+ * @param narcID        Which NARC to open for the script
  * @param file          Which file in the NARC to load
  */
-void BattleSystem_LoadScript(BattleContext *battleCtx, int narc, int file);
+void BattleSystem_LoadScript(BattleContext *battleCtx, enum NarcID narcID, int file);
 
 /**
  * @brief Load a script file from the specified NARC and invoke it as a call,
  * returning to the previous script once finished processing.
  *
  * @param battleCtx
- * @param narc          Which NARC to open for the script
+ * @param narcID        Which NARC to open for the script
  * @param file          Which file in the NARC to load
  */
-void BattleSystem_CallScript(BattleContext *battleCtx, int narc, int file);
+void BattleSystem_CallScript(BattleContext *battleCtx, enum NarcID narcID, int file);
 
 /**
  * @brief Pop a script from the stack, if one is present, and load it for
@@ -193,7 +192,7 @@ void BattleMon_AddVal(BattleMon *mon, enum BattleMonParam paramID, int val);
  *                          flags will NOT be set after determining if they
  *                          should activate.
  * @return A value representing the speed-ordering of the two battlers,
- * relative to the first of the two. See enum CompareSpeedResult.
+ * relative to the first of the two. See COMPARE_SPEED constants.
  */
 u8 BattleSystem_CompareBattlerSpeed(BattleSystem *battleSys, BattleContext *battleCtx, int battler1, int battler2, BOOL ignoreQuickClaw);
 
@@ -323,7 +322,7 @@ void Battler_UnlockMoveChoice(BattleSystem *battleSys, BattleContext *battleCtx,
  * @param battler
  * @return A value representing the battler's status non-volatile status.
  */
-enum BattleAnimation Battler_StatusCondition(BattleContext *battleCtx, int battler);
+enum BattleSubAnimation Battler_StatusCondition(BattleContext *battleCtx, int battler);
 
 /**
  * @brief Check if the given trainer has a trainer message to be shown.
@@ -1416,7 +1415,7 @@ void BattleSystem_DecPPForPressure(BattleContext *battleCtx, int attacker, int d
  * @param battleCtx
  * @return TRUE if the recording has stopped, FALSE otherwise.
  */
-BOOL Battle_RecordingStopped(BattleSystem *battleSys, BattleContext *battleCtx);
+BOOL BattleSystem_IsRecordingStopped(BattleSystem *battleSys, BattleContext *battleCtx);
 
 /**
  * @brief Get an accessible field from the BattleContext struct.

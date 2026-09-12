@@ -1,54 +1,42 @@
-    .include "macros/scrcmd.inc"
+#include "macros/scrcmd.inc"
+#include "generated/items.h"
+#include "res/text/bank/canalave_city_mart.h"
 
-    .data
 
-    ScriptEntry _0012
-    ScriptEntry _0028
-    ScriptEntry _003E
-    ScriptEntry _0056
-    .short 0xFD13
+    ScriptEntry CanalaveCityMart_CommonVendor
+    ScriptEntry CanalaveCityMart_SpecialtyVendor
+    ScriptEntry CanalaveCityMart_Lady
+    ScriptEntry CanalaveCityMart_Pokefan
+    ScriptEntryEnd
 
-_0012:
-    PlayFanfare SEQ_SE_CONFIRM
-    LockAll
-    FacePlayer
-    CallCommonScript 0x7E3
-    ScrCmd_035
-    ScrCmd_147 1
-    ReleaseAll
+CanalaveCityMart_CommonVendor:
+    PokeMartCommonWithGreeting
     End
 
-_0028:
-    PlayFanfare SEQ_SE_CONFIRM
-    LockAll
-    FacePlayer
-    CallCommonScript 0x7E3
-    ScrCmd_035
-    ScrCmd_148 16
-    ReleaseAll
+CanalaveCityMart_SpecialtyVendor:
+    PokeMartSpecialtiesWithGreeting MART_SPECIALTIES_ID_CANALAVE
     End
 
-_003E:
-    PlayFanfare SEQ_SE_CONFIRM
+CanalaveCityMart_Lady:
+    PlaySE SE_CONFIRM_sseq_3
     LockAll
     FacePlayer
-    ScrCmd_0D1 0, 24
-    Message 0
-    WaitABXPadPress
+    BufferItemName 0, ITEM_MAX_POTION //Unused?
+    Message CanalaveCityMart_Text_ThatsTheRepeatBall
+    WaitButton
     CloseMessage
     ReleaseAll
     End
 
-_0056:
-    PlayFanfare SEQ_SE_CONFIRM
+CanalaveCityMart_Pokefan:
+    PlaySE SE_CONFIRM_sseq_3
     LockAll
     FacePlayer
-    ScrCmd_0D1 0, 57
-    Message 1
-    WaitABXPadPress
+    BufferItemName 0, ITEM_X_ATTACK //Unused?
+    Message CanalaveCityMart_Text_ShouldTakeReviveToIronIsland
+    WaitButton
     CloseMessage
     ReleaseAll
     End
 
-    .byte 0
-    .byte 0
+    .balign 4, 0

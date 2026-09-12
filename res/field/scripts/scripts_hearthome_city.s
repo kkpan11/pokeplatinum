@@ -1,745 +1,582 @@
-    .include "macros/scrcmd.inc"
+#include "macros/scrcmd.inc"
+#include "res/text/bank/hearthome_city.h"
+#include "res/field/events/events_hearthome_city.h"
+#include "generated/goods.h"
 
-    .data
 
-    ScriptEntry _0082
-    ScriptEntry _0084
-    ScriptEntry _0097
-    ScriptEntry _00AA
-    ScriptEntry _00BD
-    ScriptEntry _00D0
-    ScriptEntry _00E3
-    ScriptEntry _00F6
-    ScriptEntry _0109
-    ScriptEntry _011C
-    ScriptEntry _013B
-    ScriptEntry _02E4
-    ScriptEntry _02F7
-    ScriptEntry _030A
-    ScriptEntry _031B
-    ScriptEntry _0984
-    ScriptEntry _0709
-    ScriptEntry _071C
-    ScriptEntry _072D
-    ScriptEntry _0740
-    ScriptEntry _0753
-    ScriptEntry _08A4
-    ScriptEntry _08BB
-    ScriptEntry _08D0
-    ScriptEntry _08E7
-    ScriptEntry _08FE
-    ScriptEntry _0915
-    ScriptEntry _092C
-    ScriptEntry _0943
-    ScriptEntry _095A
-    ScriptEntry _0971
-    ScriptEntry _0997
-    .short 0xFD13
+    ScriptEntry HearthomeCity_OnTransition
+    ScriptEntry HearthomeCity_PokefanM2
+    ScriptEntry HearthomeCity_Hiker2
+    ScriptEntry HearthomeCity_Hiker3
+    ScriptEntry HearthomeCity_PokefanM1
+    ScriptEntry HearthomeCity_PokemonBreederM1
+    ScriptEntry HearthomeCity_BattleGirl1
+    ScriptEntry HearthomeCity_BattleGirl2
+    ScriptEntry HearthomeCity_Hiker1
+    ScriptEntry HearthomeCity_Pachirisu
+    ScriptEntry HearthomeCity_Fisherman
+    ScriptEntry HearthomeCity_PokemonBreederF1
+    ScriptEntry HearthomeCity_PokefanF
+    ScriptEntry HearthomeCity_BabyInPram1
+    ScriptEntry HearthomeCity_MrGoods
+    ScriptEntry HearthomeCity_Artist
+    ScriptEntry HearthomeCity_PokemonBreederM2
+    ScriptEntry HearthomeCity_BabyInPram2
+    ScriptEntry HearthomeCity_BlackBelt1
+    ScriptEntry HearthomeCity_PokemonBreederF2
+    ScriptEntry HearthomeCity_CoordEvent_BunearyAndKeira
+    ScriptEntry HearthomeCity_MapSignpost
+    ScriptEntry HearthomeCity_GymSignpost
+    ScriptEntry HearthomeCity_SignboardPokemonContestHall
+    ScriptEntry HearthomeCity_SignboardPokemonFanClub
+    ScriptEntry HearthomeCity_ArrowSignpostWest
+    ScriptEntry HearthomeCity_ArrowSignpostEast
+    ScriptEntry HearthomeCity_SignboardAmitySquareWestGate
+    ScriptEntry HearthomeCity_SignboardAmitySquareEastGate
+    ScriptEntry HearthomeCity_SignboardPoffinHouse
+    ScriptEntry HearthomeCity_GymGuide
+    ScriptEntry HearthomeCity_BlackBelt2
+    ScriptEntryEnd
 
-_0082:
+HearthomeCity_OnTransition:
     End
 
-_0084:
-    PlayFanfare SEQ_SE_CONFIRM
+HearthomeCity_PokefanM2:
+    NPCMessage HearthomeCity_Text_FoundAnEggAtDayCare
+    End
+
+HearthomeCity_Hiker2:
+    NPCMessage HearthomeCity_Text_EggsInJohtoToo
+    End
+
+HearthomeCity_Hiker3:
+    NPCMessage HearthomeCity_Text_SometimesEggsAtDayCare
+    End
+
+HearthomeCity_PokefanM1:
+    NPCMessage HearthomeCity_Text_EitherTheGymOrAContest
+    End
+
+HearthomeCity_PokemonBreederM1:
+    NPCMessage HearthomeCity_Text_PeopleUnburdenThemselves
+    End
+
+HearthomeCity_BattleGirl1:
+    NPCMessage HearthomeCity_Text_ICantDecideWhatAccessories
+    End
+
+HearthomeCity_BattleGirl2:
+    NPCMessage HearthomeCity_Text_UsedFireStoneToEvolve
+    End
+
+HearthomeCity_Hiker1:
+    NPCMessage HearthomeCity_Text_StrollWithPachirisu
+    End
+
+HearthomeCity_Pachirisu:
+    PokemonCryAndMessage SPECIES_PACHIRISU, HearthomeCity_Text_PachirisuCryKyukyuuh
+    End
+
+HearthomeCity_Fisherman:
+    PlaySE SE_CONFIRM_sseq_3
     LockAll
     FacePlayer
-    Message 6
-    WaitABXPadPress
+    GoToIfSet FLAG_MAP_LOCAL_0x01, HearthomeCity_ItMakesMeHappy
+    Message HearthomeCity_Text_ShowYouToContestHall
+    ShowYesNoMenu VAR_RESULT
+    GoToIfEq VAR_RESULT, MENU_NO, HearthomeCity_IDoApologize
+    Message HearthomeCity_Text_PleaseFollowMe
+    CloseMessage
+    WaitTime 15, VAR_RESULT
+    GetPlayerDir VAR_0x8004
+    GoToIfEq VAR_0x8004, DIR_NORTH, HearthomeCity_WalkToContestHallNorth
+    GoToIfEq VAR_0x8004, DIR_SOUTH, HearthomeCity_WalkToContestHallSouth
+    GoToIfEq VAR_0x8004, DIR_WEST, HearthomeCity_WalkToContestHallWest
+    GoToIfEq VAR_0x8004, DIR_EAST, HearthomeCity_WalkToContestHallEast
+    End
+
+HearthomeCity_ItMakesMeHappy:
+    Message HearthomeCity_Text_ItMakesMeHappy
+    WaitButton
     CloseMessage
     ReleaseAll
     End
 
-_0097:
-    PlayFanfare SEQ_SE_CONFIRM
-    LockAll
-    FacePlayer
-    Message 7
-    WaitABXPadPress
+HearthomeCity_IDoApologize:
+    Message HearthomeCity_Text_IDoApologize
+    WaitButton
     CloseMessage
     ReleaseAll
     End
 
-_00AA:
-    PlayFanfare SEQ_SE_CONFIRM
-    LockAll
-    FacePlayer
-    Message 23
-    WaitABXPadPress
-    CloseMessage
-    ReleaseAll
-    End
-
-_00BD:
-    PlayFanfare SEQ_SE_CONFIRM
-    LockAll
-    FacePlayer
-    Message 8
-    WaitABXPadPress
-    CloseMessage
-    ReleaseAll
-    End
-
-_00D0:
-    PlayFanfare SEQ_SE_CONFIRM
-    LockAll
-    FacePlayer
-    Message 9
-    WaitABXPadPress
-    CloseMessage
-    ReleaseAll
-    End
-
-_00E3:
-    PlayFanfare SEQ_SE_CONFIRM
-    LockAll
-    FacePlayer
-    Message 11
-    WaitABXPadPress
-    CloseMessage
-    ReleaseAll
-    End
-
-_00F6:
-    PlayFanfare SEQ_SE_CONFIRM
-    LockAll
-    FacePlayer
-    Message 13
-    WaitABXPadPress
-    CloseMessage
-    ReleaseAll
-    End
-
-_0109:
-    PlayFanfare SEQ_SE_CONFIRM
-    LockAll
-    FacePlayer
-    Message 21
-    WaitABXPadPress
-    CloseMessage
-    ReleaseAll
-    End
-
-_011C:
-    PlayFanfare SEQ_SE_CONFIRM
-    LockAll
-    FacePlayer
-    ScrCmd_04B 0x5DC
-    ScrCmd_04C 0x1A1, 0
-    Message 22
-    ScrCmd_04D
-    WaitABXPadPress
-    CloseMessage
-    ReleaseAll
-    End
-
-_013B:
-    PlayFanfare SEQ_SE_CONFIRM
-    LockAll
-    FacePlayer
-    GoToIfSet 1, _01A7
-    Message 14
-    ScrCmd_03E 0x800C
-    GoToIfEq 0x800C, 1, _01B2
-    Message 15
-    CloseMessage
-    WaitTime 15, 0x800C
-    ScrCmd_1BD 0x8004
-    GoToIfEq 0x8004, 0, _01BD
-    GoToIfEq 0x8004, 1, _01D7
-    GoToIfEq 0x8004, 2, _01F1
-    GoToIfEq 0x8004, 3, _020B
-    End
-
-_01A7:
-    Message 17
-    WaitABXPadPress
-    CloseMessage
-    ReleaseAll
-    End
-
-_01B2:
-    Message 18
-    WaitABXPadPress
-    CloseMessage
-    ReleaseAll
-    End
-
-_01BD:
-    ApplyMovement 0, _0240
-    ApplyMovement 0xFF, _027C
+HearthomeCity_WalkToContestHallNorth:
+    ApplyMovement LOCALID_FISHERMAN, HearthomeCity_Movement_FishermanWalkToContestHallNorthSouthWest
+    ApplyMovement LOCALID_PLAYER, HearthomeCity_Movement_PlayerWalkToContestHallNorth
     WaitMovement
-    GoTo _0225
+    GoTo HearthomeCity_ThisIsTheContestHall
     End
 
-_01D7:
-    ApplyMovement 0, _0240
-    ApplyMovement 0xFF, _0294
+HearthomeCity_WalkToContestHallSouth:
+    ApplyMovement LOCALID_FISHERMAN, HearthomeCity_Movement_FishermanWalkToContestHallNorthSouthWest
+    ApplyMovement LOCALID_PLAYER, HearthomeCity_Movement_PlayerWalkToContestHallSouth
     WaitMovement
-    GoTo _0225
+    GoTo HearthomeCity_ThisIsTheContestHall
     End
 
-_01F1:
-    ApplyMovement 0, _0240
-    ApplyMovement 0xFF, _02AC
+HearthomeCity_WalkToContestHallWest:
+    ApplyMovement LOCALID_FISHERMAN, HearthomeCity_Movement_FishermanWalkToContestHallNorthSouthWest
+    ApplyMovement LOCALID_PLAYER, HearthomeCity_Movement_PlayerWalkToContestHallWest
     WaitMovement
-    GoTo _0225
+    GoTo HearthomeCity_ThisIsTheContestHall
     End
 
-_020B:
-    ApplyMovement 0, _0258
-    ApplyMovement 0xFF, _02C4
+HearthomeCity_WalkToContestHallEast:
+    ApplyMovement LOCALID_FISHERMAN, HearthomeCity_Movement_FishermanWalkToContestHallEast
+    ApplyMovement LOCALID_PLAYER, HearthomeCity_Movement_PlayerWalkToContestHallEast
     WaitMovement
-    GoTo _0225
+    GoTo HearthomeCity_ThisIsTheContestHall
     End
 
-_0225:
-    SetFlag 1
-    Message 16
-    WaitABXPadPress
+HearthomeCity_ThisIsTheContestHall:
+    SetFlag FLAG_MAP_LOCAL_0x01
+    Message HearthomeCity_Text_ThisIsTheContestHall
+    WaitButton
     CloseMessage
     ReleaseAll
     End
 
-    .byte 75
-    .byte 0
-    .byte 1
-    .byte 0
-    .byte 65
-    .byte 0
-    .byte 1
-    .byte 0
-    .byte 254
-    .byte 0
-    .byte 0
-    .byte 0
-
-    .balign 4, 0
-_0240:
-    MoveAction_00E 20
-    MoveAction_00C 13
-    MoveAction_00F 12
-    MoveAction_00C 4
-    MoveAction_021
+HearthomeCity_Movement_Unused:
+    EmoteExclamationMark
+    Delay16
     EndMovement
 
     .balign 4, 0
-_0258:
-    MoveAction_00C
-    MoveAction_00E 2
-    MoveAction_00D
-    MoveAction_00E 18
-    MoveAction_00C 13
-    MoveAction_00F 12
-    MoveAction_00C 4
-    MoveAction_021
+HearthomeCity_Movement_FishermanWalkToContestHallNorthSouthWest:
+    WalkNormalWest 20
+    WalkNormalNorth 13
+    WalkNormalEast 12
+    WalkNormalNorth 4
+    WalkOnSpotNormalSouth
     EndMovement
 
     .balign 4, 0
-_027C:
-    MoveAction_00C
-    MoveAction_00E 20
-    MoveAction_00C 13
-    MoveAction_00F 12
-    MoveAction_00C 3
+HearthomeCity_Movement_FishermanWalkToContestHallEast:
+    WalkNormalNorth
+    WalkNormalWest 2
+    WalkNormalSouth
+    WalkNormalWest 18
+    WalkNormalNorth 13
+    WalkNormalEast 12
+    WalkNormalNorth 4
+    WalkOnSpotNormalSouth
     EndMovement
 
     .balign 4, 0
-_0294:
-    MoveAction_00D
-    MoveAction_00E 20
-    MoveAction_00C 13
-    MoveAction_00F 12
-    MoveAction_00C 3
+HearthomeCity_Movement_PlayerWalkToContestHallNorth:
+    WalkNormalNorth
+    WalkNormalWest 20
+    WalkNormalNorth 13
+    WalkNormalEast 12
+    WalkNormalNorth 3
     EndMovement
 
     .balign 4, 0
-_02AC:
-    MoveAction_00E
-    MoveAction_00E 20
-    MoveAction_00C 13
-    MoveAction_00F 12
-    MoveAction_00C 3
+HearthomeCity_Movement_PlayerWalkToContestHallSouth:
+    WalkNormalSouth
+    WalkNormalWest 20
+    WalkNormalNorth 13
+    WalkNormalEast 12
+    WalkNormalNorth 3
     EndMovement
 
     .balign 4, 0
-_02C4:
-    MoveAction_03F 2
-    MoveAction_03E
-    MoveAction_022
-    MoveAction_00E 19
-    MoveAction_00C 13
-    MoveAction_00F 12
-    MoveAction_00C 3
+HearthomeCity_Movement_PlayerWalkToContestHallWest:
+    WalkNormalWest
+    WalkNormalWest 20
+    WalkNormalNorth 13
+    WalkNormalEast 12
+    WalkNormalNorth 3
     EndMovement
 
-_02E4:
-    PlayFanfare SEQ_SE_CONFIRM
+    .balign 4, 0
+HearthomeCity_Movement_PlayerWalkToContestHallEast:
+    Delay8 2
+    Delay4
+    WalkOnSpotNormalWest
+    WalkNormalWest 19
+    WalkNormalNorth 13
+    WalkNormalEast 12
+    WalkNormalNorth 3
+    EndMovement
+
+HearthomeCity_PokemonBreederF1:
+    NPCMessage HearthomeCity_Text_INoticeThingsLikeStairs
+    End
+
+HearthomeCity_PokefanF:
+    NPCMessage HearthomeCity_Text_HowManyPokemonAreThere
+    End
+
+HearthomeCity_BabyInPram1:
+    EventMessage HearthomeCity_Text_Apapapu
+    End
+
+HearthomeCity_MrGoods:
+    PlaySE SE_CONFIRM_sseq_3
     LockAll
     FacePlayer
-    Message 19
-    WaitABXPadPress
+    Message HearthomeCity_Text_TheyCallMeMrGoods
+    Message HearthomeCity_Text_Hmhmhmhm
+    GoToIfUnset FLAG_RECEIVED_HEARTHOME_CITY_GLOBE, HearthomeCity_TryGiveGlobe
+    GoToIfUnset FLAG_RECEIVED_HEARTHOME_CITY_GYM_STATUE, HearthomeCity_TryGiveGlobe
+    GoToIfUnset FLAG_RECEIVED_HEARTHOME_CITY_CUTE_CUP, HearthomeCity_TryGiveGlobe
+    GoToIfUnset FLAG_RECEIVED_HEARTHOME_CITY_COOL_CUP, HearthomeCity_TryGiveGlobe
+    GoToIfUnset FLAG_RECEIVED_HEARTHOME_CITY_BEAUTY_CUP, HearthomeCity_TryGiveGlobe
+    GoToIfUnset FLAG_RECEIVED_HEARTHOME_CITY_TOUGH_CUP, HearthomeCity_TryGiveGlobe
+    GoToIfUnset FLAG_RECEIVED_HEARTHOME_CITY_CLEVER_CUP, HearthomeCity_TryGiveGlobe
+    GoToIfUnset FLAG_RECEIVED_HEARTHOME_CITY_BLUE_CRYSTAL, HearthomeCity_TryGiveGlobe
+    GoToIfUnset FLAG_RECEIVED_HEARTHOME_CITY_PINK_CRYSTAL, HearthomeCity_TryGiveGlobe
+    GoToIfUnset FLAG_RECEIVED_HEARTHOME_CITY_RED_CRYSTAL, HearthomeCity_TryGiveGlobe
+    GoToIfUnset FLAG_RECEIVED_HEARTHOME_CITY_YELLOW_CRYSTAL, HearthomeCity_TryGiveGlobe
+    SetFlag FLAG_RECEIVED_ALL_HEARTHOME_CITY_GOODS
+    GoTo HearthomeCity_TalkToMeSomeOtherTime
+
+HearthomeCity_TryGiveGlobe:
+    GoToIfSet FLAG_RECEIVED_HEARTHOME_CITY_GLOBE, HearthomeCity_TryGiveGymStatue
+    GoToIfUnset FLAG_CONNECTED_TO_WIFI, HearthomeCity_TryGiveGymStatue
+    Message HearthomeCity_Text_YourAdventureHasGoneGlobal
+    SetVar VAR_0x8004, UG_GOOD_GLOBE
+    SetVar VAR_0x8005, 1
+    CheckHasRoomForGoodsInPC VAR_0x8004, VAR_0x8005, VAR_RESULT
+    GoToIfEq VAR_RESULT, FALSE, HearthomeCity_YourUndergroundPCIsFull
+    Common_SendToUndergroundPC
+    SetFlag FLAG_RECEIVED_HEARTHOME_CITY_GLOBE
     CloseMessage
     ReleaseAll
     End
 
-_02F7:
-    PlayFanfare SEQ_SE_CONFIRM
+HearthomeCity_TryGiveGymStatue:
+    GoToIfSet FLAG_RECEIVED_HEARTHOME_CITY_GYM_STATUE, HearthomeCity_TryGiveCuteCup
+    CountBadgesAcquired VAR_RESULT
+    GoToIfLt VAR_RESULT, 8, HearthomeCity_TryGiveCuteCup
+    Message HearthomeCity_Text_ConqueredAllGyms
+    SetVar VAR_0x8004, UG_GOOD_GYM_STATUE
+    SetVar VAR_0x8005, 1
+    CheckHasRoomForGoodsInPC VAR_0x8004, VAR_0x8005, VAR_RESULT
+    GoToIfEq VAR_RESULT, FALSE, HearthomeCity_YourUndergroundPCIsFull
+    Common_SendToUndergroundPC
+    SetFlag FLAG_RECEIVED_HEARTHOME_CITY_GYM_STATUE
+    CloseMessage
+    ReleaseAll
+    End
+
+HearthomeCity_TryGiveCuteCup:
+    GoToIfSet FLAG_RECEIVED_HEARTHOME_CITY_CUTE_CUP, HearthomeCity_TryGiveCoolCup
+    GoToIfUnset FLAG_CONTEST_MASTER_CUTE, HearthomeCity_TryGiveCoolCup
+    Message HearthomeCity_Text_ConqueredMasterRankCuteContest
+    SetVar VAR_0x8004, UG_GOOD_CUTE_CUP
+    SetVar VAR_0x8005, 1
+    CheckHasRoomForGoodsInPC VAR_0x8004, VAR_0x8005, VAR_RESULT
+    GoToIfEq VAR_RESULT, FALSE, HearthomeCity_YourUndergroundPCIsFull
+    Common_SendToUndergroundPC
+    SetFlag FLAG_RECEIVED_HEARTHOME_CITY_CUTE_CUP
+    CloseMessage
+    ReleaseAll
+    End
+
+HearthomeCity_TryGiveCoolCup:
+    GoToIfSet FLAG_RECEIVED_HEARTHOME_CITY_COOL_CUP, HearthomeCity_TryGiveBeautyCup
+    GoToIfUnset FLAG_CONTEST_MASTER_COOL, HearthomeCity_TryGiveBeautyCup
+    Message HearthomeCity_Text_ConqueredMasterRankCoolContest
+    SetVar VAR_0x8004, UG_GOOD_COOL_CUP
+    SetVar VAR_0x8005, 1
+    CheckHasRoomForGoodsInPC VAR_0x8004, VAR_0x8005, VAR_RESULT
+    GoToIfEq VAR_RESULT, FALSE, HearthomeCity_YourUndergroundPCIsFull
+    Common_SendToUndergroundPC
+    SetFlag FLAG_RECEIVED_HEARTHOME_CITY_COOL_CUP
+    CloseMessage
+    ReleaseAll
+    End
+
+HearthomeCity_TryGiveBeautyCup:
+    GoToIfSet FLAG_RECEIVED_HEARTHOME_CITY_BEAUTY_CUP, HearthomeCity_TryGiveToughCup
+    GoToIfUnset FLAG_CONTEST_MASTER_BEAUTY, HearthomeCity_TryGiveToughCup
+    Message HearthomeCity_Text_ConqueredMasterRankBeautyContest
+    SetVar VAR_0x8004, UG_GOOD_BEAUTY_CUP
+    SetVar VAR_0x8005, 1
+    CheckHasRoomForGoodsInPC VAR_0x8004, VAR_0x8005, VAR_RESULT
+    GoToIfEq VAR_RESULT, FALSE, HearthomeCity_YourUndergroundPCIsFull
+    Common_SendToUndergroundPC
+    SetFlag FLAG_RECEIVED_HEARTHOME_CITY_BEAUTY_CUP
+    CloseMessage
+    ReleaseAll
+    End
+
+HearthomeCity_TryGiveToughCup:
+    GoToIfSet FLAG_RECEIVED_HEARTHOME_CITY_TOUGH_CUP, HearthomeCity_TryGiveSmartCup
+    GoToIfUnset FLAG_CONTEST_MASTER_TOUGH, HearthomeCity_TryGiveSmartCup
+    Message HearthomeCity_Text_ConqueredMasterRankToughContest
+    SetVar VAR_0x8004, UG_GOOD_TOUGH_CUP
+    SetVar VAR_0x8005, 1
+    CheckHasRoomForGoodsInPC VAR_0x8004, VAR_0x8005, VAR_RESULT
+    GoToIfEq VAR_RESULT, FALSE, HearthomeCity_YourUndergroundPCIsFull
+    Common_SendToUndergroundPC
+    SetFlag FLAG_RECEIVED_HEARTHOME_CITY_TOUGH_CUP
+    CloseMessage
+    ReleaseAll
+    End
+
+HearthomeCity_TryGiveSmartCup:
+    GoToIfSet FLAG_RECEIVED_HEARTHOME_CITY_CLEVER_CUP, HearthomeCity_TryGiveBlueCrystal
+    GoToIfUnset FLAG_CONTEST_MASTER_SMART, HearthomeCity_TryGiveBlueCrystal
+    Message HearthomeCity_Text_ConqueredMasterRankSmartContest
+    SetVar VAR_0x8004, UG_GOOD_CLEVER_CUP
+    SetVar VAR_0x8005, 1
+    CheckHasRoomForGoodsInPC VAR_0x8004, VAR_0x8005, VAR_RESULT
+    GoToIfEq VAR_RESULT, FALSE, HearthomeCity_YourUndergroundPCIsFull
+    Common_SendToUndergroundPC
+    SetFlag FLAG_RECEIVED_HEARTHOME_CITY_CLEVER_CUP
+    CloseMessage
+    ReleaseAll
+    End
+
+HearthomeCity_TryGiveBlueCrystal:
+    GoToIfSet FLAG_RECEIVED_HEARTHOME_CITY_BLUE_CRYSTAL, HearthomeCity_TryGivePinkCrystal
+    GetUndergroundTalkCounter VAR_RESULT
+    GoToIfLt VAR_RESULT, 100, HearthomeCity_TryGivePinkCrystal
+    Message HearthomeCity_Text_YouveMetManyPeopleUnderground
+    SetVar VAR_0x8004, UG_GOOD_BLUE_CRYSTAL
+    SetVar VAR_0x8005, 1
+    CheckHasRoomForGoodsInPC VAR_0x8004, VAR_0x8005, VAR_RESULT
+    GoToIfEq VAR_RESULT, FALSE, HearthomeCity_YourUndergroundPCIsFull
+    Common_SendToUndergroundPC
+    SetFlag FLAG_RECEIVED_HEARTHOME_CITY_BLUE_CRYSTAL
+    CloseMessage
+    ReleaseAll
+    End
+
+HearthomeCity_TryGivePinkCrystal:
+    GoToIfSet FLAG_RECEIVED_HEARTHOME_CITY_PINK_CRYSTAL, HearthomeCity_TryGiveRedCrystal
+    GetUndergroundItemsGivenAway VAR_RESULT
+    GoToIfLt VAR_RESULT, 100, HearthomeCity_TryGiveRedCrystal
+    Message HearthomeCity_Text_YouveGivenAwayManyItemsUnderground
+    SetVar VAR_0x8004, UG_GOOD_PINK_CRYSTAL
+    SetVar VAR_0x8005, 1
+    CheckHasRoomForGoodsInPC VAR_0x8004, VAR_0x8005, VAR_RESULT
+    GoToIfEq VAR_RESULT, FALSE, HearthomeCity_YourUndergroundPCIsFull
+    Common_SendToUndergroundPC
+    SetFlag FLAG_RECEIVED_HEARTHOME_CITY_PINK_CRYSTAL
+    CloseMessage
+    ReleaseAll
+    End
+
+HearthomeCity_TryGiveRedCrystal:
+    GoToIfSet FLAG_RECEIVED_HEARTHOME_CITY_RED_CRYSTAL, HearthomeCity_TryGiveYellowCrystal
+    GetUndergroundFossilsUnearthed VAR_RESULT
+    GoToIfLt VAR_RESULT, 100, HearthomeCity_TryGiveYellowCrystal
+    Message HearthomeCity_Text_YouveDugUpManyFossilsUnderground
+    SetVar VAR_0x8004, UG_GOOD_RED_CRYSTAL
+    SetVar VAR_0x8005, 1
+    CheckHasRoomForGoodsInPC VAR_0x8004, VAR_0x8005, VAR_RESULT
+    GoToIfEq VAR_RESULT, FALSE, HearthomeCity_YourUndergroundPCIsFull
+    Common_SendToUndergroundPC
+    SetFlag FLAG_RECEIVED_HEARTHOME_CITY_RED_CRYSTAL
+    CloseMessage
+    ReleaseAll
+    End
+
+HearthomeCity_TryGiveYellowCrystal:
+    GoToIfSet FLAG_RECEIVED_HEARTHOME_CITY_YELLOW_CRYSTAL, HearthomeCity_NoGoodsToGive
+    GetUndergroundTrapsSet VAR_RESULT
+    GoToIfLt VAR_RESULT, 100, HearthomeCity_NoGoodsToGive
+    Message HearthomeCity_Text_YouveSetManyTrapsUnderground
+    SetVar VAR_0x8004, UG_GOOD_YELLOW_CRYSTAL
+    SetVar VAR_0x8005, 1
+    CheckHasRoomForGoodsInPC VAR_0x8004, VAR_0x8005, VAR_RESULT
+    GoToIfEq VAR_RESULT, FALSE, HearthomeCity_YourUndergroundPCIsFull
+    Common_SendToUndergroundPC
+    SetFlag FLAG_RECEIVED_HEARTHOME_CITY_YELLOW_CRYSTAL
+    CloseMessage
+    ReleaseAll
+    End
+
+HearthomeCity_NoGoodsToGive:
+    GoTo HearthomeCity_TalkToMeSomeOtherTime2
+
+HearthomeCity_TalkToMeSomeOtherTime:
+    Message HearthomeCity_Text_TalkToMeSomeOtherTime
+    WaitButton
+    CloseMessage
+    ReleaseAll
+    End
+
+HearthomeCity_YourUndergroundPCIsFull:
+    Message HearthomeCity_Text_YourUndergroundPCIsFull
+    WaitButton
+    CloseMessage
+    ReleaseAll
+    End
+
+HearthomeCity_TalkToMeSomeOtherTime2:
+    Message HearthomeCity_Text_TalkToMeSomeOtherTime2
+    WaitButton
+    CloseMessage
+    ReleaseAll
+    End
+
+HearthomeCity_PokemonBreederM2:
+    NPCMessage HearthomeCity_Text_WhatWillMyChildBefriend
+    End
+
+HearthomeCity_BabyInPram2:
+    EventMessage HearthomeCity_Text_PapaMama
+    End
+
+HearthomeCity_BlackBelt1:
+    NPCMessage HearthomeCity_Text_ILivedInTotalSeclusion
+    End
+
+HearthomeCity_PokemonBreederF2:
+    NPCMessage HearthomeCity_Text_IdLikeToLiveInHearthome
+    End
+
+HearthomeCity_CoordEvent_BunearyAndKeira:
     LockAll
-    FacePlayer
-    Message 12
-    WaitABXPadPress
-    CloseMessage
-    ReleaseAll
-    End
-
-_030A:
-    PlayFanfare SEQ_SE_CONFIRM
-    LockAll
-    Message 20
-    WaitABXPadPress
-    CloseMessage
-    ReleaseAll
-    End
-
-_031B:
-    PlayFanfare SEQ_SE_CONFIRM
-    LockAll
-    FacePlayer
-    Message 24
-    Message 25
-    GoToIfUnset 0x14A, _03AC
-    GoToIfUnset 0x14B, _03AC
-    GoToIfUnset 0x14C, _03AC
-    GoToIfUnset 0x14D, _03AC
-    GoToIfUnset 0x14E, _03AC
-    GoToIfUnset 0x14F, _03AC
-    GoToIfUnset 0x150, _03AC
-    GoToIfUnset 0x151, _03AC
-    GoToIfUnset 0x152, _03AC
-    GoToIfUnset 0x153, _03AC
-    GoToIfUnset 0x154, _03AC
-    SetFlag 0x15B
-    GoTo _06E8
-
-_03AC:
-    GoToIfSet 0x14A, _03F4
-    GoToIfUnset 0x98C, _03F4
-    Message 33
-    SetVar 0x8004, 46
-    SetVar 0x8005, 1
-    ScrCmd_085 0x8004, 0x8005, 0x800C
-    GoToIfEq 0x800C, 0, _06F3
-    CallCommonScript 0x7DC
-    SetFlag 0x14A
-    CloseMessage
-    ReleaseAll
-    End
-
-_03F4:
-    GoToIfSet 0x14B, _0442
-    ScrCmd_15D 0x800C
-    GoToIfLt 0x800C, 8, _0442
-    Message 34
-    SetVar 0x8004, 47
-    SetVar 0x8005, 1
-    ScrCmd_085 0x8004, 0x8005, 0x800C
-    GoToIfEq 0x800C, 0, _06F3
-    CallCommonScript 0x7DC
-    SetFlag 0x14B
-    CloseMessage
-    ReleaseAll
-    End
-
-_0442:
-    GoToIfSet 0x14C, _048A
-    GoToIfUnset 0x96A, _048A
-    Message 35
-    SetVar 0x8004, 72
-    SetVar 0x8005, 1
-    ScrCmd_085 0x8004, 0x8005, 0x800C
-    GoToIfEq 0x800C, 0, _06F3
-    CallCommonScript 0x7DC
-    SetFlag 0x14C
-    CloseMessage
-    ReleaseAll
-    End
-
-_048A:
-    GoToIfSet 0x14D, _04D2
-    GoToIfUnset 0x968, _04D2
-    Message 36
-    SetVar 0x8004, 73
-    SetVar 0x8005, 1
-    ScrCmd_085 0x8004, 0x8005, 0x800C
-    GoToIfEq 0x800C, 0, _06F3
-    CallCommonScript 0x7DC
-    SetFlag 0x14D
-    CloseMessage
-    ReleaseAll
-    End
-
-_04D2:
-    GoToIfSet 0x14E, _051A
-    GoToIfUnset 0x969, _051A
-    Message 37
-    SetVar 0x8004, 74
-    SetVar 0x8005, 1
-    ScrCmd_085 0x8004, 0x8005, 0x800C
-    GoToIfEq 0x800C, 0, _06F3
-    CallCommonScript 0x7DC
-    SetFlag 0x14E
-    CloseMessage
-    ReleaseAll
-    End
-
-_051A:
-    GoToIfSet 0x14F, _0562
-    GoToIfUnset 0x96C, _0562
-    Message 38
-    SetVar 0x8004, 75
-    SetVar 0x8005, 1
-    ScrCmd_085 0x8004, 0x8005, 0x800C
-    GoToIfEq 0x800C, 0, _06F3
-    CallCommonScript 0x7DC
-    SetFlag 0x14F
-    CloseMessage
-    ReleaseAll
-    End
-
-_0562:
-    GoToIfSet 0x150, _05AA
-    GoToIfUnset 0x96B, _05AA
-    Message 39
-    SetVar 0x8004, 76
-    SetVar 0x8005, 1
-    ScrCmd_085 0x8004, 0x8005, 0x800C
-    GoToIfEq 0x800C, 0, _06F3
-    CallCommonScript 0x7DC
-    SetFlag 0x150
-    CloseMessage
-    ReleaseAll
-    End
-
-_05AA:
-    GoToIfSet 0x151, _05F8
-    ScrCmd_293 0x800C
-    GoToIfLt 0x800C, 100, _05F8
-    Message 40
-    SetVar 0x8004, 77
-    SetVar 0x8005, 1
-    ScrCmd_085 0x8004, 0x8005, 0x800C
-    GoToIfEq 0x800C, 0, _06F3
-    CallCommonScript 0x7DC
-    SetFlag 0x151
-    CloseMessage
-    ReleaseAll
-    End
-
-_05F8:
-    GoToIfSet 0x152, _0646
-    ScrCmd_286 0x800C
-    GoToIfLt 0x800C, 100, _0646
-    Message 41
-    SetVar 0x8004, 78
-    SetVar 0x8005, 1
-    ScrCmd_085 0x8004, 0x8005, 0x800C
-    GoToIfEq 0x800C, 0, _06F3
-    CallCommonScript 0x7DC
-    SetFlag 0x152
-    CloseMessage
-    ReleaseAll
-    End
-
-_0646:
-    GoToIfSet 0x153, _0694
-    ScrCmd_287 0x800C
-    GoToIfLt 0x800C, 100, _0694
-    Message 42
-    SetVar 0x8004, 79
-    SetVar 0x8005, 1
-    ScrCmd_085 0x8004, 0x8005, 0x800C
-    GoToIfEq 0x800C, 0, _06F3
-    CallCommonScript 0x7DC
-    SetFlag 0x153
-    CloseMessage
-    ReleaseAll
-    End
-
-_0694:
-    GoToIfSet 0x154, _06E2
-    ScrCmd_288 0x800C
-    GoToIfLt 0x800C, 100, _06E2
-    Message 43
-    SetVar 0x8004, 80
-    SetVar 0x8005, 1
-    ScrCmd_085 0x8004, 0x8005, 0x800C
-    GoToIfEq 0x800C, 0, _06F3
-    CallCommonScript 0x7DC
-    SetFlag 0x154
-    CloseMessage
-    ReleaseAll
-    End
-
-_06E2:
-    GoTo _06FE
-
-_06E8:
-    Message 27
-    WaitABXPadPress
-    CloseMessage
-    ReleaseAll
-    End
-
-_06F3:
-    Message 30
-    WaitABXPadPress
-    CloseMessage
-    ReleaseAll
-    End
-
-_06FE:
-    Message 32
-    WaitABXPadPress
-    CloseMessage
-    ReleaseAll
-    End
-
-_0709:
-    PlayFanfare SEQ_SE_CONFIRM
-    LockAll
-    FacePlayer
-    Message 47
-    WaitABXPadPress
-    CloseMessage
-    ReleaseAll
-    End
-
-_071C:
-    PlayFanfare SEQ_SE_CONFIRM
-    LockAll
-    Message 48
-    WaitABXPadPress
-    CloseMessage
-    ReleaseAll
-    End
-
-_072D:
-    PlayFanfare SEQ_SE_CONFIRM
-    LockAll
-    FacePlayer
-    Message 49
-    WaitABXPadPress
-    CloseMessage
-    ReleaseAll
-    End
-
-_0740:
-    PlayFanfare SEQ_SE_CONFIRM
-    LockAll
-    FacePlayer
-    Message 50
-    WaitABXPadPress
-    CloseMessage
-    ReleaseAll
-    End
-
-_0753:
-    LockAll
-    ApplyMovement 0xFF, _087C
+    ApplyMovement LOCALID_PLAYER, HearthomeCity_Movement_PlayerExclamationMark
     WaitMovement
-    ScrCmd_069 0x8004, 0x8005
-    GoToIfEq 0x8005, 0x2D5, _07A8
-    GoToIfEq 0x8005, 0x2D6, _07C0
-    GoToIfEq 0x8005, 0x2D7, _07D8
-    GoToIfEq 0x8005, 0x2D8, _07F0
-    GoToIfEq 0x8005, 0x2D9, _0808
+    GetPlayerMapPos VAR_0x8004, VAR_0x8005
+    GoToIfEq VAR_0x8005, 725, HearthomeCity_SetBunearyAndKeiraPositionsZ725
+    GoToIfEq VAR_0x8005, 726, HearthomeCity_SetBunearyAndKeiraPositionsZ726
+    GoToIfEq VAR_0x8005, 727, HearthomeCity_SetBunearyAndKeiraPositionsZ727
+    GoToIfEq VAR_0x8005, 728, HearthomeCity_SetBunearyAndKeiraPositionsZ728
+    GoToIfEq VAR_0x8005, 729, HearthomeCity_SetBunearyAndKeiraPositionsZ729
     End
 
-_07A8:
-    ScrCmd_186 32, 0x1D7, 0x2D5
-    ScrCmd_186 31, 0x1D7, 0x2D5
-    GoTo _0820
+HearthomeCity_SetBunearyAndKeiraPositionsZ725:
+    SetObjectEventPos LOCALID_KEIRA, 471, 725
+    SetObjectEventPos LOCALID_BUNEARY, 471, 725
+    GoTo HearthomeCity_BunearyAndKeira
     End
 
-_07C0:
-    ScrCmd_186 32, 0x1D7, 0x2D6
-    ScrCmd_186 31, 0x1D7, 0x2D6
-    GoTo _0820
+HearthomeCity_SetBunearyAndKeiraPositionsZ726:
+    SetObjectEventPos LOCALID_KEIRA, 471, 726
+    SetObjectEventPos LOCALID_BUNEARY, 471, 726
+    GoTo HearthomeCity_BunearyAndKeira
     End
 
-_07D8:
-    ScrCmd_186 32, 0x1D7, 0x2D7
-    ScrCmd_186 31, 0x1D7, 0x2D7
-    GoTo _0820
+HearthomeCity_SetBunearyAndKeiraPositionsZ727:
+    SetObjectEventPos LOCALID_KEIRA, 471, 727
+    SetObjectEventPos LOCALID_BUNEARY, 471, 727
+    GoTo HearthomeCity_BunearyAndKeira
     End
 
-_07F0:
-    ScrCmd_186 32, 0x1D7, 0x2D8
-    ScrCmd_186 31, 0x1D7, 0x2D8
-    GoTo _0820
+HearthomeCity_SetBunearyAndKeiraPositionsZ728:
+    SetObjectEventPos LOCALID_KEIRA, 471, 728
+    SetObjectEventPos LOCALID_BUNEARY, 471, 728
+    GoTo HearthomeCity_BunearyAndKeira
     End
 
-_0808:
-    ScrCmd_186 32, 0x1D7, 0x2D9
-    ScrCmd_186 31, 0x1D7, 0x2D9
-    GoTo _0820
+HearthomeCity_SetBunearyAndKeiraPositionsZ729:
+    SetObjectEventPos LOCALID_KEIRA, 471, 729
+    SetObjectEventPos LOCALID_BUNEARY, 471, 729
+    GoTo HearthomeCity_BunearyAndKeira
     End
 
-_0820:
-    ClearFlag 0x23C
-    ClearFlag 0x23D
-    ScrCmd_064 32
-    ScrCmd_064 31
-    ApplyMovement 31, _0884
+HearthomeCity_BunearyAndKeira:
+    ClearFlag FLAG_HIDE_HEARTHOME_CITY_KEIRA
+    ClearFlag FLAG_HIDE_HEARTHOME_CITY_BUNEARY
+    AddObject LOCALID_KEIRA
+    AddObject LOCALID_BUNEARY
+    ApplyMovement LOCALID_BUNEARY, HearthomeCity_Movement_BunearyEnter
     WaitMovement
-    ScrCmd_04C 0x1AB, 0
-    ScrCmd_04D
-    ApplyMovement 32, _0894
+    PlayCry SPECIES_BUNEARY
+    WaitCry
+    ApplyMovement LOCALID_KEIRA, HearthomeCity_Movement_KeiraEnter
     WaitMovement
-    Message 0
-    Message 1
-    ScrCmd_04C 0x1AB, 0
-    ScrCmd_04D
-    ScrCmd_065 31
-    Message 2
+    Message HearthomeCity_Text_ThankGoodnessYoureHere
+    Message HearthomeCity_Text_BackIntoThePokeBall
+    PlayCry SPECIES_BUNEARY
+    WaitCry
+    RemoveObject LOCALID_BUNEARY
+    Message HearthomeCity_Text_ImKeira
     CloseMessage
-    ApplyMovement 32, _089C
+    ApplyMovement LOCALID_KEIRA, HearthomeCity_Movement_KeiraLeave
     WaitMovement
-    ScrCmd_065 32
-    SetVar 0x40F6, 1
+    RemoveObject LOCALID_KEIRA
+    SetVar VAR_HEARTHOME_CITY_STATE, 1
     ReleaseAll
     End
 
     .balign 4, 0
-_087C:
-    MoveAction_04B
+HearthomeCity_Movement_PlayerExclamationMark:
+    EmoteExclamationMark
     EndMovement
 
     .balign 4, 0
-_0884:
-    MoveAction_012 9
+HearthomeCity_Movement_BunearyEnter:
+    WalkFastWest 9
     EndMovement
 
-    .byte 19
-    .byte 0
-    .byte 8
-    .byte 0
-    .byte 254
-    .byte 0
-    .byte 0
-    .byte 0
-
-    .balign 4, 0
-_0894:
-    MoveAction_012 8
+HearthomeCity_Movement_Unused2:
+    WalkFastEast 8
     EndMovement
 
     .balign 4, 0
-_089C:
-    MoveAction_00F 8
+HearthomeCity_Movement_KeiraEnter:
+    WalkFastWest 8
     EndMovement
 
-_08A4:
-    ScrCmd_036 52, 0, 0, 0x800C
-    ScrCmd_038 3
-    ScrCmd_039
-    ScrCmd_03B 0x800C
-    CallCommonScript 0x7D0
+    .balign 4, 0
+HearthomeCity_Movement_KeiraLeave:
+    WalkNormalEast 8
+    EndMovement
+
+HearthomeCity_MapSignpost:
+    ShowMapSign HearthomeCity_Text_MapSign
     End
 
-_08BB:
-    ScrCmd_037 3, 0
-    ScrCmd_038 3
-    ScrCmd_039
-    ScrCmd_03A 53, 0x800C
-    CallCommonScript 0x7D0
+HearthomeCity_GymSignpost:
+    ShowScrollingSign HearthomeCity_Text_SignPokemonGym
     End
 
-_08D0:
-    ScrCmd_036 54, 2, 0, 0x800C
-    ScrCmd_038 3
-    ScrCmd_039
-    ScrCmd_03B 0x800C
-    CallCommonScript 0x7D0
+HearthomeCity_SignboardPokemonContestHall:
+    ShowLandmarkSign HearthomeCity_Text_SignPokemonContestHall
     End
 
-_08E7:
-    ScrCmd_036 55, 2, 0, 0x800C
-    ScrCmd_038 3
-    ScrCmd_039
-    ScrCmd_03B 0x800C
-    CallCommonScript 0x7D0
+HearthomeCity_SignboardPokemonFanClub:
+    ShowLandmarkSign HearthomeCity_Text_SignPokemonFanClub
     End
 
-_08FE:
-    ScrCmd_036 56, 1, 0, 0x800C
-    ScrCmd_038 3
-    ScrCmd_039
-    ScrCmd_03B 0x800C
-    CallCommonScript 0x7D0
+HearthomeCity_ArrowSignpostWest:
+    ShowArrowSign HearthomeCity_Text_SignRt208Rt212
     End
 
-_0915:
-    ScrCmd_036 57, 1, 0, 0x800C
-    ScrCmd_038 3
-    ScrCmd_039
-    ScrCmd_03B 0x800C
-    CallCommonScript 0x7D0
+HearthomeCity_ArrowSignpostEast:
+    ShowArrowSign HearthomeCity_Text_SignRt209SolaceonTown
     End
 
-_092C:
-    ScrCmd_036 58, 2, 0, 0x800C
-    ScrCmd_038 3
-    ScrCmd_039
-    ScrCmd_03B 0x800C
-    CallCommonScript 0x7D0
+HearthomeCity_SignboardAmitySquareWestGate:
+    ShowLandmarkSign HearthomeCity_Text_SignAmitySquareWestGate
     End
 
-_0943:
-    ScrCmd_036 59, 2, 0, 0x800C
-    ScrCmd_038 3
-    ScrCmd_039
-    ScrCmd_03B 0x800C
-    CallCommonScript 0x7D0
+HearthomeCity_SignboardAmitySquareEastGate:
+    ShowLandmarkSign HearthomeCity_Text_SignAmitySquareEastGate
     End
 
-_095A:
-    ScrCmd_036 60, 2, 0, 0x800C
-    ScrCmd_038 3
-    ScrCmd_039
-    ScrCmd_03B 0x800C
-    CallCommonScript 0x7D0
+HearthomeCity_SignboardPoffinHouse:
+    ShowLandmarkSign HearthomeCity_Text_SignPoffinHouse
     End
 
-_0971:
-    PlayFanfare SEQ_SE_CONFIRM
-    LockAll
-    FacePlayer
-    Message 3
-    WaitABXPadPress
-    CloseMessage
-    ReleaseAll
+HearthomeCity_GymGuide:
+    NPCMessage HearthomeCity_Text_ComeBackAnotherTime
     End
 
-_0984:
-    PlayFanfare SEQ_SE_CONFIRM
-    LockAll
-    FacePlayer
-    Message 10
-    WaitABXPadPress
-    CloseMessage
-    ReleaseAll
+HearthomeCity_Artist:
+    NPCMessage HearthomeCity_Text_ThisPlaceIsBeautiful
     End
 
-_0997:
-    PlayFanfare SEQ_SE_CONFIRM
-    LockAll
-    FacePlayer
-    Message 51
-    WaitABXPadPress
-    CloseMessage
-    ReleaseAll
+HearthomeCity_BlackBelt2:
+    NPCMessage HearthomeCity_Text_UsedVsSeekerALot
     End
 
-    .byte 0
-    .byte 0
+    .balign 4, 0

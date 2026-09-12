@@ -3,32 +3,32 @@
 #include <nitro.h>
 #include <string.h>
 
-#include "struct_decls/struct_020508D4_decl.h"
-#include "struct_decls/struct_02061AB4_decl.h"
-#include "struct_defs/struct_02055130.h"
+#include "generated/movement_actions.h"
+
+#include "struct_decls/map_object.h"
 
 #include "field/field_system.h"
-#include "overlay005/ov5_021D0D80.h"
-#include "overlay005/ov5_021D37AC.h"
-#include "overlay005/ov5_021E15F4.h"
-#include "overlay005/ov5_021EF75C.h"
-#include "overlay005/struct_ov5_021D3CE4_decl.h"
-#include "overlay005/struct_ov5_021E1890_decl.h"
+#include "overlay005/area_data.h"
+#include "overlay005/fieldmap.h"
+#include "overlay005/map_prop.h"
+#include "overlay005/map_prop_animation.h"
 
 #include "camera.h"
+#include "field_task.h"
 #include "heap.h"
 #include "map_object.h"
 #include "player_avatar.h"
-#include "unk_02005474.h"
-#include "unk_0200F174.h"
-#include "unk_020508D4.h"
-#include "unk_02054D00.h"
+#include "screen_fade.h"
+#include "sound_playback.h"
+#include "terrain_collision_manager.h"
 #include "unk_02056B30.h"
 #include "unk_020655F4.h"
 
+#include "res/field/props/models/prop_models.naix"
+
 typedef struct UnkStruct_ov5_021D432C_t {
     int unk_00;
-    UnkStruct_02055130 unk_04;
+    TerrainCollisionHitbox unk_04;
     int unk_14;
     int unk_18;
     u8 unk_1C;
@@ -47,13 +47,11 @@ typedef struct UnkStruct_ov5_021D4E00_t {
 
 static void ov5_021D4798(Camera *camera, u8 *param1);
 static void ov5_021D47DC(Camera *camera, u8 *param1);
-static u8 ov5_021D481C(const int param0);
+static u8 DoorAnimation_GetSoundEffectType(const int doorModelID);
 
 UnkStruct_ov5_021D432C *ov5_021D431C(void)
 {
-    UnkStruct_ov5_021D432C *v0;
-
-    v0 = Heap_AllocFromHeapAtEnd(4, sizeof(UnkStruct_ov5_021D432C));
+    UnkStruct_ov5_021D432C *v0 = Heap_AllocAtEnd(HEAP_ID_FIELD1, sizeof(UnkStruct_ov5_021D432C));
     v0->unk_00 = 0;
 
     return v0;
@@ -61,7 +59,7 @@ UnkStruct_ov5_021D432C *ov5_021D431C(void)
 
 void ov5_021D432C(UnkStruct_ov5_021D432C *param0)
 {
-    Heap_FreeToHeap(param0);
+    Heap_Free(param0);
 }
 
 void ov5_021D4334(const int param0, const int param1, UnkStruct_ov5_021D432C *param2)
@@ -77,51 +75,51 @@ BOOL ov5_021D433C(FieldSystem *fieldSystem, UnkStruct_ov5_021D432C *param1)
     switch (param1->unk_00) {
     case 0: {
         BOOL v1;
-        UnkStruct_ov5_021E1890 *v2;
-        UnkStruct_02055130 v3;
+        MapProp *v2;
+        TerrainCollisionHitbox v3;
         int v4;
         int v5[] = {
-            66,
-            67,
-            68,
-            69,
-            246,
-            70,
-            427,
-            456,
-            260,
-            312,
-            313,
-            438,
-            444,
-            441,
-            442,
-            298,
-            484,
-            128,
-            527,
-            75
+            door01_nsbmd,
+            brown_wooden_door_nsbmd,
+            green_wooden_door_nsbmd,
+            iron_door_nsbmd,
+            jubilife_city_building_door_nsbmd,
+            pokecenter_door_nsbmd,
+            pokecenter_inside_door_nsbmd,
+            gts_inside_door_nsbmd,
+            hearthome_gym_inside_door_nsbmd,
+            blue_door_nsbmd,
+            iron_door_2_nsbmd,
+            yellow_wooden_door_nsbmd,
+            blue_wooden_door_nsbmd,
+            mansion_door_nsbmd,
+            veilstone_dpt_store_door_nsbmd,
+            gym_door_nsbmd,
+            card_door_nsbmd,
+            pokecenter_inside_counter_door_nsbmd,
+            hotel_grand_lake_door_nsbmd,
+            elevator_door_nsbmd
         };
 
         param1->unk_20 = 0;
         param1->unk_1D = 0;
 
-        sub_020550F4(param1->unk_14, param1->unk_18, -1, -1, 3, 1, &v3);
+        TerrainCollisionHitbox_Init(param1->unk_14, param1->unk_18, -1, -1, 3, 1, &v3);
 
         param1->unk_1C = 1;
 
-        v1 = sub_02055208(fieldSystem, v5, NELEMS(v5), &v3, &v2, &v4);
+        v1 = FieldSystem_FindCollidingLoadedMapPropByModelIDs(fieldSystem, v5, NELEMS(v5), &v3, &v2, &v4);
 
         if (v1) {
             u8 v6;
             u8 v7;
             NNSG3dResTex *v8;
 
-            v7 = ov5_021D3F94(fieldSystem->unk_50, v4);
+            v7 = MapPropAnimationManager_GetPropAnimationCount(fieldSystem->mapPropAnimMan, v4);
             param1->unk_1E = v7;
-            v8 = ov5_021EFAA0(fieldSystem->unk_30);
+            v8 = AreaDataManager_GetMapPropTexture(fieldSystem->areaDataManager);
 
-            ov5_021D41C8(fieldSystem->unk_50, fieldSystem->unk_54, 1, v4, ov5_021E18BC(v2), ov5_021E18C0(v2), v8, v7, 1, 0);
+            MapPropOneShotAnimationManager_LoadPropAnimations(fieldSystem->mapPropAnimMan, fieldSystem->mapPropOneShotAnimMan, 1, v4, MapProp_GetRenderObj(v2), MapProp_GetModel(v2), v8, v7, 1, 0);
         } else {
             GF_ASSERT(FALSE);
             return 1;
@@ -133,19 +131,19 @@ BOOL ov5_021D433C(FieldSystem *fieldSystem, UnkStruct_ov5_021D432C *param1)
         int v10;
         int v11;
 
-        v9 = ov5_021D4310(fieldSystem->unk_54, 1);
+        v9 = MapPropOneShotAnimationManager_GetAnimationMapPropModelID(fieldSystem->mapPropOneShotAnimMan, 1);
 
         if (v9 != 75) {
             Camera_ReleaseTarget(fieldSystem->camera);
             param1->unk_20 = 1;
         }
 
-        if (ov5_021D481C(v9) == 1) {
-            v10 = 1544;
-        } else if (ov5_021D481C(v9) == 2) {
-            v10 = 1492;
+        if (DoorAnimation_GetSoundEffectType(v9) == DOOR_SOUND_EFFECT_TYPE_SLIDING) {
+            v10 = SEQ_SE_DP_DOOR10_sseq;
+        } else if (DoorAnimation_GetSoundEffectType(v9) == DOOR_SOUND_EFFECT_TYPE_VEILSTONE_DPT_STORE_CHIME) {
+            v10 = SEQ_SE_PL_DOOR_OPEN5_sseq;
         } else {
-            v10 = 1541;
+            v10 = SEQ_SE_DP_DOOR_OPEN_sseq;
         }
 
         if (param1->unk_1E == 2) {
@@ -153,30 +151,30 @@ BOOL ov5_021D433C(FieldSystem *fieldSystem, UnkStruct_ov5_021D432C *param1)
         } else if (param1->unk_1E == 4) {
             v11 = 0;
         } else {
-            GF_ASSERT(0);
+            GF_ASSERT(FALSE);
             v11 = 0;
         }
 
-        ov5_021D4278(fieldSystem->unk_54, 1, v11, v10);
+        MapPropOneShotAnimationManager_PlayAnimationWithSoundEffect(fieldSystem->mapPropOneShotAnimMan, 1, v11, v10);
     }
         (param1->unk_00)++;
         break;
     case 2: {
         BOOL v12;
 
-        v12 = ov5_021D42F0(fieldSystem->unk_54, 1);
+        v12 = MapPropOneShotAnimationManager_IsAnimationLoopFinished(fieldSystem->mapPropOneShotAnimMan, 1);
 
         if (v12) {
             (param1->unk_00)++;
         }
     } break;
     case 3:
-        v0 = Player_MapObject(fieldSystem->playerAvatar);
-        LocalMapObj_SetAnimationCode(v0, 0xc);
+        v0 = PlayerAvatar_GetMapObject(fieldSystem->playerAvatar);
+        LocalMapObj_SetAnimationCode(v0, MOVEMENT_ACTION_WALK_NORMAL_NORTH);
         (param1->unk_00)++;
         break;
     case 4:
-        v0 = Player_MapObject(fieldSystem->playerAvatar);
+        v0 = PlayerAvatar_GetMapObject(fieldSystem->playerAvatar);
 
         if (LocalMapObj_CheckAnimationFinished(v0) == 1) {
             sub_020656AC(v0);
@@ -186,14 +184,14 @@ BOOL ov5_021D433C(FieldSystem *fieldSystem, UnkStruct_ov5_021D432C *param1)
                 int v14;
                 int v15;
 
-                v13 = ov5_021D4310(fieldSystem->unk_54, 1);
+                v13 = MapPropOneShotAnimationManager_GetAnimationMapPropModelID(fieldSystem->mapPropOneShotAnimMan, 1);
 
-                if (ov5_021D481C(v13) == 1) {
+                if (DoorAnimation_GetSoundEffectType(v13) == DOOR_SOUND_EFFECT_TYPE_SLIDING) {
                     v14 = 0;
-                } else if (ov5_021D481C(v13) == 2) {
+                } else if (DoorAnimation_GetSoundEffectType(v13) == DOOR_SOUND_EFFECT_TYPE_VEILSTONE_DPT_STORE_CHIME) {
                     v14 = 0;
                 } else {
-                    v14 = 1543;
+                    v14 = SEQ_SE_DP_DOOR_CLOSE2_sseq;
                 }
 
                 if (param1->unk_1E == 2) {
@@ -201,11 +199,11 @@ BOOL ov5_021D433C(FieldSystem *fieldSystem, UnkStruct_ov5_021D432C *param1)
                 } else if (param1->unk_1E == 4) {
                     v15 = 1;
                 } else {
-                    GF_ASSERT(0);
+                    GF_ASSERT(FALSE);
                     v15 = 1;
                 }
 
-                ov5_021D4278(fieldSystem->unk_54, 1, v15, v14);
+                MapPropOneShotAnimationManager_PlayAnimationWithSoundEffect(fieldSystem->mapPropOneShotAnimMan, 1, v15, v14);
             }
             (param1->unk_00)++;
         }
@@ -213,10 +211,10 @@ BOOL ov5_021D433C(FieldSystem *fieldSystem, UnkStruct_ov5_021D432C *param1)
     case 5: {
         BOOL v16;
 
-        v16 = ov5_021D42F0(fieldSystem->unk_54, 1);
+        v16 = MapPropOneShotAnimationManager_IsAnimationLoopFinished(fieldSystem->mapPropOneShotAnimMan, 1);
 
         if (v16) {
-            ov5_021D42B0(fieldSystem->unk_50, fieldSystem->unk_54, 1);
+            MapPropOneShotAnimationManager_UnloadAnimation(fieldSystem->mapPropAnimMan, fieldSystem->mapPropOneShotAnimMan, 1);
             return 1;
         }
     } break;
@@ -236,53 +234,53 @@ BOOL ov5_021D453C(FieldSystem *fieldSystem, UnkStruct_ov5_021D432C *param1)
     switch (param1->unk_00) {
     case 0: {
         BOOL v1;
-        UnkStruct_ov5_021E1890 *v2;
-        UnkStruct_02055130 v3;
+        MapProp *v2;
+        TerrainCollisionHitbox v3;
         int v4;
         int v5[] = {
-            66,
-            67,
-            68,
-            69,
-            246,
-            70,
-            427,
-            456,
-            260,
-            312,
-            313,
-            438,
-            444,
-            441,
-            442,
-            298,
-            484,
-            128,
-            527,
-            75
+            door01_nsbmd,
+            brown_wooden_door_nsbmd,
+            green_wooden_door_nsbmd,
+            iron_door_nsbmd,
+            jubilife_city_building_door_nsbmd,
+            pokecenter_door_nsbmd,
+            pokecenter_inside_door_nsbmd,
+            gts_inside_door_nsbmd,
+            hearthome_gym_inside_door_nsbmd,
+            blue_door_nsbmd,
+            iron_door_2_nsbmd,
+            yellow_wooden_door_nsbmd,
+            blue_wooden_door_nsbmd,
+            mansion_door_nsbmd,
+            veilstone_dpt_store_door_nsbmd,
+            gym_door_nsbmd,
+            card_door_nsbmd,
+            pokecenter_inside_counter_door_nsbmd,
+            hotel_grand_lake_door_nsbmd,
+            elevator_door_nsbmd
         };
 
         param1->unk_20 = 0;
         param1->unk_1D = 0;
-        sub_020550F4(param1->unk_14, param1->unk_18, -1, 0, 3, 1, &v3);
+        TerrainCollisionHitbox_Init(param1->unk_14, param1->unk_18, -1, 0, 3, 1, &v3);
         param1->unk_1C = 1;
 
-        v1 = sub_02055208(fieldSystem, v5, NELEMS(v5), &v3, &v2, &v4);
+        v1 = FieldSystem_FindCollidingLoadedMapPropByModelIDs(fieldSystem, v5, NELEMS(v5), &v3, &v2, &v4);
 
         if (v1) {
             u8 v6;
             u8 v7;
             NNSG3dResTex *v8;
 
-            v7 = ov5_021D3F94(fieldSystem->unk_50, v4);
+            v7 = MapPropAnimationManager_GetPropAnimationCount(fieldSystem->mapPropAnimMan, v4);
             param1->unk_1E = v7;
-            v8 = ov5_021EFAA0(fieldSystem->unk_30);
+            v8 = AreaDataManager_GetMapPropTexture(fieldSystem->areaDataManager);
 
-            ov5_021D41C8(fieldSystem->unk_50, fieldSystem->unk_54, 1, v4, ov5_021E18BC(v2), ov5_021E18C0(v2), v8, v7, 1, 0);
+            MapPropOneShotAnimationManager_LoadPropAnimations(fieldSystem->mapPropAnimMan, fieldSystem->mapPropOneShotAnimMan, 1, v4, MapProp_GetRenderObj(v2), MapProp_GetModel(v2), v8, v7, 1, 0);
         } else {
             GF_ASSERT(FALSE);
 
-            ov5_021D1744(1);
+            FieldMap_FadeScreen(FADE_TYPE_BRIGHTNESS_IN);
             (param1->unk_00) = 6;
             return 0;
         }
@@ -296,24 +294,24 @@ BOOL ov5_021D453C(FieldSystem *fieldSystem, UnkStruct_ov5_021D432C *param1)
         (param1->unk_00)++;
     } break;
     case 1:
-        sub_02056B30(fieldSystem->unk_10, 0, 9, 1, 0x0, 6, 1, 11);
+        sub_02056B30(fieldSystem->task, 0, 9, 1, 0x0, 6, 1, HEAP_ID_FIELD2);
         {
             int v9;
             int v10;
             int v11;
 
-            v9 = ov5_021D4310(fieldSystem->unk_54, 1);
+            v9 = MapPropOneShotAnimationManager_GetAnimationMapPropModelID(fieldSystem->mapPropOneShotAnimMan, 1);
 
             if (v9 != 75) {
                 param1->unk_20 = 1;
             }
 
-            if (ov5_021D481C(v9) == 1) {
-                v10 = 1544;
-            } else if (ov5_021D481C(v9) == 2) {
-                v10 = 1492;
+            if (DoorAnimation_GetSoundEffectType(v9) == DOOR_SOUND_EFFECT_TYPE_SLIDING) {
+                v10 = SEQ_SE_DP_DOOR10_sseq;
+            } else if (DoorAnimation_GetSoundEffectType(v9) == DOOR_SOUND_EFFECT_TYPE_VEILSTONE_DPT_STORE_CHIME) {
+                v10 = SEQ_SE_PL_DOOR_OPEN5_sseq;
             } else {
-                v10 = 1541;
+                v10 = SEQ_SE_DP_DOOR_OPEN_sseq;
             }
 
             if (param1->unk_1E == 2) {
@@ -321,11 +319,11 @@ BOOL ov5_021D453C(FieldSystem *fieldSystem, UnkStruct_ov5_021D432C *param1)
             } else if (param1->unk_1E == 4) {
                 v11 = 2;
             } else {
-                GF_ASSERT(0);
+                GF_ASSERT(FALSE);
                 v11 = 0;
             }
 
-            ov5_021D4278(fieldSystem->unk_54, 1, v11, v10);
+            MapPropOneShotAnimationManager_PlayAnimationWithSoundEffect(fieldSystem->mapPropOneShotAnimMan, 1, v11, v10);
         }
 
         (param1->unk_00)++;
@@ -333,21 +331,21 @@ BOOL ov5_021D453C(FieldSystem *fieldSystem, UnkStruct_ov5_021D432C *param1)
     case 2: {
         BOOL v12;
 
-        v12 = ov5_021D42F0(fieldSystem->unk_54, 1);
+        v12 = MapPropOneShotAnimationManager_IsAnimationLoopFinished(fieldSystem->mapPropOneShotAnimMan, 1);
 
         if (v12) {
-            v0 = Player_MapObject(fieldSystem->playerAvatar);
+            v0 = PlayerAvatar_GetMapObject(fieldSystem->playerAvatar);
             MapObject_SetHidden(v0, 0);
             (param1->unk_00)++;
         }
     } break;
     case 3:
-        v0 = Player_MapObject(fieldSystem->playerAvatar);
-        LocalMapObj_SetAnimationCode(v0, 0xd);
+        v0 = PlayerAvatar_GetMapObject(fieldSystem->playerAvatar);
+        LocalMapObj_SetAnimationCode(v0, MOVEMENT_ACTION_WALK_NORMAL_SOUTH);
         (param1->unk_00)++;
         break;
     case 4:
-        v0 = Player_MapObject(fieldSystem->playerAvatar);
+        v0 = PlayerAvatar_GetMapObject(fieldSystem->playerAvatar);
 
         if (LocalMapObj_CheckAnimationFinished(v0) == 1) {
             sub_020656AC(v0);
@@ -357,11 +355,11 @@ BOOL ov5_021D453C(FieldSystem *fieldSystem, UnkStruct_ov5_021D432C *param1)
                 int v14;
                 int v15;
 
-                v13 = ov5_021D4310(fieldSystem->unk_54, 1);
+                v13 = MapPropOneShotAnimationManager_GetAnimationMapPropModelID(fieldSystem->mapPropOneShotAnimMan, 1);
 
-                if (ov5_021D481C(v13) == 1) {
+                if (DoorAnimation_GetSoundEffectType(v13) == DOOR_SOUND_EFFECT_TYPE_SLIDING) {
                     v14 = 0;
-                } else if (ov5_021D481C(v13) == 2) {
+                } else if (DoorAnimation_GetSoundEffectType(v13) == DOOR_SOUND_EFFECT_TYPE_VEILSTONE_DPT_STORE_CHIME) {
                     v14 = 0;
                 } else {
                     v14 = 1543;
@@ -372,11 +370,11 @@ BOOL ov5_021D453C(FieldSystem *fieldSystem, UnkStruct_ov5_021D432C *param1)
                 } else if (param1->unk_1E == 4) {
                     v15 = 3;
                 } else {
-                    GF_ASSERT(0);
+                    GF_ASSERT(FALSE);
                     v15 = 1;
                 }
 
-                ov5_021D4278(fieldSystem->unk_54, 1, v15, v14);
+                MapPropOneShotAnimationManager_PlayAnimationWithSoundEffect(fieldSystem->mapPropOneShotAnimMan, 1, v15, v14);
             }
             (param1->unk_00)++;
         }
@@ -384,15 +382,15 @@ BOOL ov5_021D453C(FieldSystem *fieldSystem, UnkStruct_ov5_021D432C *param1)
     case 5: {
         BOOL v16;
 
-        v16 = ov5_021D42F0(fieldSystem->unk_54, 1);
+        v16 = MapPropOneShotAnimationManager_IsAnimationLoopFinished(fieldSystem->mapPropOneShotAnimMan, 1);
 
-        if (v16 && ScreenWipe_Done() && (param1->unk_24 == Camera_GetFOV(fieldSystem->camera))) {
-            ov5_021D42B0(fieldSystem->unk_50, fieldSystem->unk_54, 1);
+        if (v16 && IsScreenFadeDone() && (param1->unk_24 == Camera_GetFOV(fieldSystem->camera))) {
+            MapPropOneShotAnimationManager_UnloadAnimation(fieldSystem->mapPropAnimMan, fieldSystem->mapPropOneShotAnimMan, 1);
             return 1;
         }
     } break;
     case 6:
-        if (ScreenWipe_Done()) {
+        if (IsScreenFadeDone()) {
             return 1;
         }
         break;
@@ -465,17 +463,17 @@ static void ov5_021D47DC(Camera *camera, u8 *param1)
     }
 }
 
-static u8 ov5_021D481C(const int param0)
+static u8 DoorAnimation_GetSoundEffectType(const int doorModelID)
 {
-    if (param0 == 442) {
-        return 2;
+    if (doorModelID == veilstone_dpt_store_door_nsbmd) {
+        return DOOR_SOUND_EFFECT_TYPE_VEILSTONE_DPT_STORE_CHIME;
     }
 
-    if ((param0 == 70) || (param0 == 298) || (param0 == 456) || (param0 == 427) || (param0 == 484) || (param0 == 75)) {
-        return 1;
+    if ((doorModelID == pokecenter_door_nsbmd) || (doorModelID == gym_door_nsbmd) || (doorModelID == gts_inside_door_nsbmd) || (doorModelID == pokecenter_inside_door_nsbmd) || (doorModelID == card_door_nsbmd) || (doorModelID == elevator_door_nsbmd)) {
+        return DOOR_SOUND_EFFECT_TYPE_SLIDING;
     }
 
-    return 0;
+    return DOOR_SOUND_EFFECT_TYPE_HINGED;
 }
 
 BOOL ov5_021D4858(FieldSystem *fieldSystem, UnkStruct_ov5_021D432C *param1, const u8 param2)
@@ -485,35 +483,40 @@ BOOL ov5_021D4858(FieldSystem *fieldSystem, UnkStruct_ov5_021D432C *param1, cons
     switch (param1->unk_00) {
     case 0: {
         BOOL v1;
-        UnkStruct_ov5_021E1890 *v2;
-        UnkStruct_02055130 v3;
+        MapProp *v2;
+        TerrainCollisionHitbox v3;
         int v4;
-        int v5[] = { 130, 131, 425, 426 };
+        int v5[] = {
+            pokecenter_stair_up_left_nsbmd,
+            pokecenter_stair_down_left_nsbmd,
+            pokecenter_stair_up_right_nsbmd,
+            pokecenter_stair_down_right_nsbmd
+        };
 
         if (param2 == 2) {
-            sub_020550F4(param1->unk_14, param1->unk_18, -1, 0, 2, 1, &v3);
+            TerrainCollisionHitbox_Init(param1->unk_14, param1->unk_18, -1, 0, 2, 1, &v3);
         } else {
-            sub_020550F4(param1->unk_14, param1->unk_18, 0, 0, 2, 1, &v3);
+            TerrainCollisionHitbox_Init(param1->unk_14, param1->unk_18, 0, 0, 2, 1, &v3);
         }
 
         param1->unk_1C = 2;
-        v1 = sub_02055208(fieldSystem, v5, NELEMS(v5), &v3, &v2, &v4);
+        v1 = FieldSystem_FindCollidingLoadedMapPropByModelIDs(fieldSystem, v5, NELEMS(v5), &v3, &v2, &v4);
 
         if (v1) {
             u8 v6;
             NNSG3dResTex *v7;
 
-            v7 = ov5_021EFAA0(fieldSystem->unk_30);
-            ov5_021D41C8(fieldSystem->unk_50, fieldSystem->unk_54, 2, v4, ov5_021E18BC(v2), ov5_021E18C0(v2), v7, 1, 1, 1);
+            v7 = AreaDataManager_GetMapPropTexture(fieldSystem->areaDataManager);
+            MapPropOneShotAnimationManager_LoadPropAnimations(fieldSystem->mapPropAnimMan, fieldSystem->mapPropOneShotAnimMan, 2, v4, MapProp_GetRenderObj(v2), MapProp_GetModel(v2), v7, 1, 1, 1);
         } else {
             GF_ASSERT(FALSE);
             return 1;
         }
 
-        v0 = Player_MapObject(fieldSystem->playerAvatar);
+        v0 = PlayerAvatar_GetMapObject(fieldSystem->playerAvatar);
 
         if (LocalMapObj_IsAnimationSet(v0) == 1) {
-            LocalMapObj_SetAnimationCode(v0, 0x49);
+            LocalMapObj_SetAnimationCode(v0, MOVEMENT_ACTION_PAUSE_ANIMATION);
         } else {
             GF_ASSERT(FALSE);
         }
@@ -521,10 +524,10 @@ BOOL ov5_021D4858(FieldSystem *fieldSystem, UnkStruct_ov5_021D432C *param1, cons
         (param1->unk_00)++;
     } break;
     case 1:
-        ov5_021D1744(1);
-        ov5_021D4278(fieldSystem->unk_54, 2, 0, 1557);
+        FieldMap_FadeScreen(FADE_TYPE_BRIGHTNESS_IN);
+        MapPropOneShotAnimationManager_PlayAnimationWithSoundEffect(fieldSystem->mapPropOneShotAnimMan, 2, 0, 1557);
 
-        v0 = Player_MapObject(fieldSystem->playerAvatar);
+        v0 = PlayerAvatar_GetMapObject(fieldSystem->playerAvatar);
 
         if (LocalMapObj_IsAnimationSet(v0) == 1) {
             int v8;
@@ -543,15 +546,15 @@ BOOL ov5_021D4858(FieldSystem *fieldSystem, UnkStruct_ov5_021D432C *param1, cons
         (param1->unk_00)++;
         break;
     case 2:
-        v0 = Player_MapObject(fieldSystem->playerAvatar);
+        v0 = PlayerAvatar_GetMapObject(fieldSystem->playerAvatar);
 
         if (LocalMapObj_IsAnimationSet(v0) == 1) {
-            LocalMapObj_SetAnimationCode(v0, 0x4a);
+            LocalMapObj_SetAnimationCode(v0, MOVEMENT_ACTION_RESUME_ANIMATION);
             (param1->unk_00)++;
         }
         break;
     case 3:
-        v0 = Player_MapObject(fieldSystem->playerAvatar);
+        v0 = PlayerAvatar_GetMapObject(fieldSystem->playerAvatar);
 
         if (LocalMapObj_IsAnimationSet(v0) == 1) {
             int v9;
@@ -567,7 +570,7 @@ BOOL ov5_021D4858(FieldSystem *fieldSystem, UnkStruct_ov5_021D432C *param1, cons
         }
         break;
     case 4:
-        v0 = Player_MapObject(fieldSystem->playerAvatar);
+        v0 = PlayerAvatar_GetMapObject(fieldSystem->playerAvatar);
 
         if (LocalMapObj_CheckAnimationFinished(v0) == 1) {
             sub_020656AC(v0);
@@ -577,11 +580,11 @@ BOOL ov5_021D4858(FieldSystem *fieldSystem, UnkStruct_ov5_021D432C *param1, cons
     case 5: {
         BOOL v10;
 
-        v10 = ov5_021D42F0(fieldSystem->unk_54, 2);
+        v10 = MapPropOneShotAnimationManager_IsAnimationLoopFinished(fieldSystem->mapPropOneShotAnimMan, 2);
 
-        if (v10 && ScreenWipe_Done()) {
-            ov5_021D42B0(fieldSystem->unk_50, fieldSystem->unk_54, 2);
-            sub_020057A4(1557, 0);
+        if (v10 && IsScreenFadeDone()) {
+            MapPropOneShotAnimationManager_UnloadAnimation(fieldSystem->mapPropAnimMan, fieldSystem->mapPropOneShotAnimMan, 2);
+            Sound_StopEffect(1557, 0);
             return 1;
         }
     } break;
@@ -597,35 +600,40 @@ BOOL ov5_021D4A24(FieldSystem *fieldSystem, UnkStruct_ov5_021D432C *param1, cons
     switch (param1->unk_00) {
     case 0: {
         BOOL v1;
-        UnkStruct_ov5_021E1890 *v2;
-        UnkStruct_02055130 v3;
+        MapProp *v2;
+        TerrainCollisionHitbox v3;
         int v4;
-        int v5[] = { 130, 131, 425, 426 };
+        int v5[] = {
+            pokecenter_stair_up_left_nsbmd,
+            pokecenter_stair_down_left_nsbmd,
+            pokecenter_stair_up_right_nsbmd,
+            pokecenter_stair_down_right_nsbmd
+        };
 
         if (param2 == 2) {
-            sub_020550F4(param1->unk_14, param1->unk_18, -1, 0, 2, 1, &v3);
+            TerrainCollisionHitbox_Init(param1->unk_14, param1->unk_18, -1, 0, 2, 1, &v3);
         } else {
-            sub_020550F4(param1->unk_14, param1->unk_18, 0, 0, 2, 1, &v3);
+            TerrainCollisionHitbox_Init(param1->unk_14, param1->unk_18, 0, 0, 2, 1, &v3);
         }
 
         param1->unk_1C = 2;
-        v1 = sub_02055208(fieldSystem, v5, NELEMS(v5), &v3, &v2, &v4);
+        v1 = FieldSystem_FindCollidingLoadedMapPropByModelIDs(fieldSystem, v5, NELEMS(v5), &v3, &v2, &v4);
 
         if (v1) {
             u8 v6;
             NNSG3dResTex *v7;
 
-            v7 = ov5_021EFAA0(fieldSystem->unk_30);
-            ov5_021D41C8(fieldSystem->unk_50, fieldSystem->unk_54, 2, v4, ov5_021E18BC(v2), ov5_021E18C0(v2), v7, 1, 1, 0);
+            v7 = AreaDataManager_GetMapPropTexture(fieldSystem->areaDataManager);
+            MapPropOneShotAnimationManager_LoadPropAnimations(fieldSystem->mapPropAnimMan, fieldSystem->mapPropOneShotAnimMan, 2, v4, MapProp_GetRenderObj(v2), MapProp_GetModel(v2), v7, 1, 1, 0);
         } else {
             GF_ASSERT(FALSE);
             return 1;
         }
 
-        v0 = Player_MapObject(fieldSystem->playerAvatar);
+        v0 = PlayerAvatar_GetMapObject(fieldSystem->playerAvatar);
 
         if (LocalMapObj_IsAnimationSet(v0) == 1) {
-            LocalMapObj_SetAnimationCode(v0, 0x49);
+            LocalMapObj_SetAnimationCode(v0, MOVEMENT_ACTION_PAUSE_ANIMATION);
         } else {
             GF_ASSERT(FALSE);
         }
@@ -633,8 +641,8 @@ BOOL ov5_021D4A24(FieldSystem *fieldSystem, UnkStruct_ov5_021D432C *param1, cons
         (param1->unk_00)++;
     } break;
     case 1:
-        ov5_021D4278(fieldSystem->unk_54, 2, 0, 1557);
-        v0 = Player_MapObject(fieldSystem->playerAvatar);
+        MapPropOneShotAnimationManager_PlayAnimationWithSoundEffect(fieldSystem->mapPropOneShotAnimMan, 2, 0, 1557);
+        v0 = PlayerAvatar_GetMapObject(fieldSystem->playerAvatar);
 
         if (LocalMapObj_IsAnimationSet(v0) == 1) {
             int v8;
@@ -653,17 +661,17 @@ BOOL ov5_021D4A24(FieldSystem *fieldSystem, UnkStruct_ov5_021D432C *param1, cons
         (param1->unk_00)++;
         break;
     case 2:
-        v0 = Player_MapObject(fieldSystem->playerAvatar);
+        v0 = PlayerAvatar_GetMapObject(fieldSystem->playerAvatar);
 
         if (LocalMapObj_IsAnimationSet(v0) == 1) {
-            LocalMapObj_SetAnimationCode(v0, 0x4a);
+            LocalMapObj_SetAnimationCode(v0, MOVEMENT_ACTION_RESUME_ANIMATION);
 
-            ov5_021D1744(0);
+            FieldMap_FadeScreen(FADE_TYPE_BRIGHTNESS_OUT);
             (param1->unk_00)++;
         }
         break;
     case 3:
-        v0 = Player_MapObject(fieldSystem->playerAvatar);
+        v0 = PlayerAvatar_GetMapObject(fieldSystem->playerAvatar);
 
         if (LocalMapObj_CheckAnimationFinished(v0) == 1) {
             sub_020656AC(v0);
@@ -673,12 +681,12 @@ BOOL ov5_021D4A24(FieldSystem *fieldSystem, UnkStruct_ov5_021D432C *param1, cons
     case 4: {
         BOOL v9;
 
-        v9 = ov5_021D42F0(fieldSystem->unk_54, 2);
+        v9 = MapPropOneShotAnimationManager_IsAnimationLoopFinished(fieldSystem->mapPropOneShotAnimMan, 2);
 
-        if (v9 && ScreenWipe_Done()) {
-            ov5_021D42B0(fieldSystem->unk_50, fieldSystem->unk_54, 2);
+        if (v9 && IsScreenFadeDone()) {
+            MapPropOneShotAnimationManager_UnloadAnimation(fieldSystem->mapPropAnimMan, fieldSystem->mapPropOneShotAnimMan, 2);
 
-            sub_020057A4(1557, 0);
+            Sound_StopEffect(1557, 0);
             return 1;
         }
     } break;
@@ -687,193 +695,194 @@ BOOL ov5_021D4A24(FieldSystem *fieldSystem, UnkStruct_ov5_021D432C *param1, cons
     return 0;
 }
 
-static BOOL ov5_021D4BC8(TaskManager *param0)
+static BOOL FieldTask_WaitForAnimation(FieldTask *task)
 {
-    BOOL v0;
-    FieldSystem *fieldSystem = TaskManager_FieldSystem(param0);
-    u8 *v2 = TaskManager_Environment(param0);
+    BOOL finished;
+    FieldSystem *fieldSystem = FieldTask_GetFieldSystem(task);
+    u8 *taskEnv = FieldTask_GetEnv(task);
 
-    v0 = ov5_021D42F0(fieldSystem->unk_54, *v2);
+    finished = MapPropOneShotAnimationManager_IsAnimationLoopFinished(fieldSystem->mapPropOneShotAnimMan, *taskEnv);
 
-    if (v0) {
-        Heap_FreeToHeap(v2);
-        return 1;
+    if (finished) {
+        Heap_Free(taskEnv);
+        return TRUE;
     }
 
-    return 0;
+    return FALSE;
 }
 
-void ov5_021D4BF4(FieldSystem *fieldSystem, const int param1, const int param2, const u8 param3)
+void DoorAnimation_FindDoorAndLoad(FieldSystem *fieldSystem, const int x, const int z, const u8 tag)
 {
-    BOOL v0;
-    UnkStruct_ov5_021E1890 *v1;
-    UnkStruct_02055130 v2;
-    int v3;
-    int v4[] = {
-        66,
-        67,
-        68,
-        69,
-        246,
-        70,
-        427,
-        456,
-        260,
-        312,
-        313,
-        438,
-        444,
-        441,
-        442,
-        298,
-        484,
-        128,
-        527,
-        75
+    BOOL doorFound;
+    MapProp *door;
+    TerrainCollisionHitbox hitbox;
+    int doorModelID;
+    int doorModelIDs[] = {
+        door01_nsbmd,
+        brown_wooden_door_nsbmd,
+        green_wooden_door_nsbmd,
+        iron_door_nsbmd,
+        jubilife_city_building_door_nsbmd,
+        pokecenter_door_nsbmd,
+        pokecenter_inside_door_nsbmd,
+        gts_inside_door_nsbmd,
+        hearthome_gym_inside_door_nsbmd,
+        blue_door_nsbmd,
+        iron_door_2_nsbmd,
+        yellow_wooden_door_nsbmd,
+        blue_wooden_door_nsbmd,
+        mansion_door_nsbmd,
+        veilstone_dpt_store_door_nsbmd,
+        gym_door_nsbmd,
+        card_door_nsbmd,
+        pokecenter_inside_counter_door_nsbmd,
+        hotel_grand_lake_door_nsbmd,
+        elevator_door_nsbmd
     };
 
-    sub_020550F4(param1, param2, -1, 0, 3, 1, &v2);
-    v0 = sub_02055208(fieldSystem, v4, NELEMS(v4), &v2, &v1, &v3);
+    TerrainCollisionHitbox_Init(x, z, -1, 0, 3, 1, &hitbox);
+    doorFound = FieldSystem_FindCollidingLoadedMapPropByModelIDs(fieldSystem, doorModelIDs, NELEMS(doorModelIDs), &hitbox, &door, &doorModelID);
 
-    if (v0) {
-        u8 v5;
-        u8 v6;
-        NNSG3dResTex *v7;
+    if (doorFound) {
+        u8 unused;
+        u8 animationCount;
+        NNSG3dResTex *texture;
 
-        v6 = ov5_021D3F94(fieldSystem->unk_50, v3);
-        v7 = ov5_021EFAA0(fieldSystem->unk_30);
+        animationCount = MapPropAnimationManager_GetPropAnimationCount(fieldSystem->mapPropAnimMan, doorModelID);
+        texture = AreaDataManager_GetMapPropTexture(fieldSystem->areaDataManager);
 
-        ov5_021D41C8(fieldSystem->unk_50, fieldSystem->unk_54, param3, v3, ov5_021E18BC(v1), ov5_021E18C0(v1), v7, v6, 1, 0);
+        MapPropOneShotAnimationManager_LoadPropAnimations(fieldSystem->mapPropAnimMan, fieldSystem->mapPropOneShotAnimMan, tag, doorModelID, MapProp_GetRenderObj(door), MapProp_GetModel(door), texture, animationCount, 1, FALSE);
     } else {
         GF_ASSERT(FALSE);
     }
 }
 
-void ov5_021D4C88(FieldSystem *fieldSystem, const u8 param1)
+void DoorAnimation_PlayOpenAnimation(FieldSystem *fieldSystem, const u8 tag)
 {
-    int v0;
-    int v1;
-    int v2;
-    u8 v3;
+    int doorModelID;
+    int soundEffectID;
+    int animationIndex;
+    u8 animationCount;
 
-    v0 = ov5_021D4310(fieldSystem->unk_54, param1);
-    v3 = ov5_021D3F94(fieldSystem->unk_50, v0);
+    doorModelID = MapPropOneShotAnimationManager_GetAnimationMapPropModelID(fieldSystem->mapPropOneShotAnimMan, tag);
+    animationCount = MapPropAnimationManager_GetPropAnimationCount(fieldSystem->mapPropAnimMan, doorModelID);
 
-    if (ov5_021D481C(v0) == 1) {
-        v1 = 1544;
-    } else if (ov5_021D481C(v0) == 2) {
-        v1 = 1492;
+    if (DoorAnimation_GetSoundEffectType(doorModelID) == DOOR_SOUND_EFFECT_TYPE_SLIDING) {
+        soundEffectID = SEQ_SE_DP_DOOR10_sseq;
+    } else if (DoorAnimation_GetSoundEffectType(doorModelID) == DOOR_SOUND_EFFECT_TYPE_VEILSTONE_DPT_STORE_CHIME) {
+        soundEffectID = SEQ_SE_PL_DOOR_OPEN5_sseq;
     } else {
-        v1 = 1541;
+        soundEffectID = SEQ_SE_DP_DOOR_OPEN_sseq;
     }
 
-    if (v3 == 2) {
-        v2 = 0;
-    } else if (v3 == 4) {
-        v2 = 0;
+    if (animationCount == 2) {
+        animationIndex = 0;
+    } else if (animationCount == 4) {
+        animationIndex = 0;
     } else {
-        GF_ASSERT(0);
-        v2 = 0;
+        GF_ASSERT(FALSE);
+        animationIndex = 0;
     }
 
-    ov5_021D4278(fieldSystem->unk_54, param1, v2, v1);
+    MapPropOneShotAnimationManager_PlayAnimationWithSoundEffect(fieldSystem->mapPropOneShotAnimMan, tag, animationIndex, soundEffectID);
 }
 
-void ov5_021D4CEC(FieldSystem *fieldSystem, const u8 param1)
+void DoorAnimation_PlayCloseAnimation(FieldSystem *fieldSystem, const u8 tag)
 {
-    int v0;
-    int v1;
-    int v2;
-    u8 v3;
+    int doorModelID;
+    int soundEffectID;
+    int animationIndex;
+    u8 animationCount;
 
-    v0 = ov5_021D4310(fieldSystem->unk_54, param1);
-    v3 = ov5_021D3F94(fieldSystem->unk_50, v0);
+    doorModelID = MapPropOneShotAnimationManager_GetAnimationMapPropModelID(fieldSystem->mapPropOneShotAnimMan, tag);
+    animationCount = MapPropAnimationManager_GetPropAnimationCount(fieldSystem->mapPropAnimMan, doorModelID);
 
-    if (ov5_021D481C(v0) == 1) {
-        v1 = 0;
-    } else if (ov5_021D481C(v0) == 2) {
-        v1 = 0;
+    if (DoorAnimation_GetSoundEffectType(doorModelID) == DOOR_SOUND_EFFECT_TYPE_SLIDING) {
+        soundEffectID = 0;
+    } else if (DoorAnimation_GetSoundEffectType(doorModelID) == DOOR_SOUND_EFFECT_TYPE_VEILSTONE_DPT_STORE_CHIME) {
+        soundEffectID = 0;
     } else {
-        v1 = 1543;
+        soundEffectID = SEQ_SE_DP_DOOR_CLOSE2_sseq;
     }
 
-    if (v3 == 2) {
-        v2 = 1;
-    } else if (v3 == 4) {
-        v2 = 1;
+    if (animationCount == 2) {
+        animationIndex = 1;
+    } else if (animationCount == 4) {
+        animationIndex = 1;
     } else {
-        GF_ASSERT(0);
-        v2 = 1;
+        GF_ASSERT(FALSE);
+        animationIndex = 1;
     }
 
-    ov5_021D4278(fieldSystem->unk_54, param1, v2, v1);
+    MapPropOneShotAnimationManager_PlayAnimationWithSoundEffect(fieldSystem->mapPropOneShotAnimMan, tag, animationIndex, soundEffectID);
 }
 
-void ov5_021D4D48(FieldSystem *fieldSystem, const u8 param1)
+void FieldSystem_WaitForAnimation(FieldSystem *fieldSystem, const u8 tag)
 {
-    u8 *v0 = Heap_AllocFromHeapAtEnd(4, sizeof(u8));
+    u8 *taskEnv = Heap_AllocAtEnd(HEAP_ID_FIELD1, sizeof(u8));
 
-    *v0 = param1;
-    FieldTask_Start(fieldSystem->unk_10, ov5_021D4BC8, v0);
+    *taskEnv = tag;
+    FieldTask_InitCall(fieldSystem->task, FieldTask_WaitForAnimation, taskEnv);
 }
 
-void ov5_021D4D68(FieldSystem *fieldSystem, const u8 param1)
+void FieldSystem_UnloadAnimation(FieldSystem *fieldSystem, const u8 tag)
 {
-    ov5_021D42B0(fieldSystem->unk_50, fieldSystem->unk_54, param1);
+    MapPropOneShotAnimationManager_UnloadAnimation(fieldSystem->mapPropAnimMan, fieldSystem->mapPropOneShotAnimMan, tag);
 }
 
 void ov5_021D4D78(const int param0, const int param1, const int param2, FieldSystem *fieldSystem)
 {
     BOOL v0;
-    UnkStruct_ov5_021E1890 *v1;
-    UnkStruct_02055130 v2;
+    MapProp *v1;
+    TerrainCollisionHitbox v2;
     int v3;
-    int v4[] = { 303, 304 };
+    int v4[] = {
+        bike_muddy_slope_nsbmd,
+        bike_dungeon_muddy_slope_nsbmd
+    };
 
-    sub_020550F4(param0, param1, 0, -1, 1, 3, &v2);
+    TerrainCollisionHitbox_Init(param0, param1, 0, -1, 1, 3, &v2);
 
-    v0 = sub_02055208(fieldSystem, v4, NELEMS(v4), &v2, &v1, &v3);
+    v0 = FieldSystem_FindCollidingLoadedMapPropByModelIDs(fieldSystem, v4, NELEMS(v4), &v2, &v1, &v3);
     GF_ASSERT(v0);
 
     {
         NNSG3dRenderObj *v5;
 
-        v5 = ov5_021E18BC(v1);
-        v0 = ov5_021D3B24(v3, param2, 1, v5, fieldSystem->unk_50);
+        v5 = MapProp_GetRenderObj(v1);
+        v0 = MapPropAnimationManager_AddAnimationToRenderObj(v3, param2, 1, v5, fieldSystem->mapPropAnimMan);
         GF_ASSERT(v0);
     }
     {
-        UnkStruct_ov5_021D3CE4 *v6;
+        MapPropAnimation *v6;
 
-        v6 = ov5_021D3DE4(v3, param2, fieldSystem->unk_50);
+        v6 = MapPropAnimationManager_GetAnimation(v3, param2, fieldSystem->mapPropAnimMan);
 
-        ov5_021D3E7C(v6);
-        ov5_021D3E40(v6, 0);
-        ov5_021D3E44(v6);
+        MapPropAnimation_GoToFirstFrame(v6);
+        MapPropAnimation_SetAnimationPaused(v6, 0);
+        MapPropAnimation_StartLoop(v6);
     }
 }
 
 UnkStruct_ov5_021D4E00 *ov5_021D4E00(void)
 {
-    UnkStruct_ov5_021D4E00 *v0;
-
-    v0 = Heap_AllocFromHeapAtEnd(4, sizeof(UnkStruct_ov5_021D4E00));
+    UnkStruct_ov5_021D4E00 *v0 = Heap_AllocAtEnd(HEAP_ID_FIELD1, sizeof(UnkStruct_ov5_021D4E00));
     v0->unk_00 = 0;
 
     return v0;
 }
 
-BOOL ov5_021D4E10(TaskManager *param0)
+BOOL ov5_021D4E10(FieldTask *param0)
 {
     MapObject *v0;
-    FieldSystem *fieldSystem = TaskManager_FieldSystem(param0);
-    UnkStruct_ov5_021D4E00 *v2 = TaskManager_Environment(param0);
+    FieldSystem *fieldSystem = FieldTask_GetFieldSystem(param0);
+    UnkStruct_ov5_021D4E00 *v2 = FieldTask_GetEnv(param0);
 
     switch (v2->unk_00) {
     case 0:
-        v0 = Player_MapObject(fieldSystem->playerAvatar);
+        v0 = PlayerAvatar_GetMapObject(fieldSystem->playerAvatar);
 
-        if (PlayerAvatar_GetDir(fieldSystem->playerAvatar) == 1) {
+        if (PlayerAvatar_GetFacingDir(fieldSystem->playerAvatar) == 1) {
             MapObject_SetHidden(v0, 1);
             (v2->unk_00) = 1;
         } else {
@@ -889,17 +898,17 @@ BOOL ov5_021D4E10(TaskManager *param0)
             Camera_AdjustFOV(-96, fieldSystem->camera);
         }
 
-        sub_0200F174(0, 1, 1, 0x7fff, 6, 1, 11);
+        StartScreenFade(FADE_BOTH_SCREENS, FADE_TYPE_BRIGHTNESS_IN, FADE_TYPE_BRIGHTNESS_IN, COLOR_WHITE, 6, 1, HEAP_ID_FIELD2);
         v2->unk_08 = 1;
         break;
     case 1:
-        v0 = Player_MapObject(fieldSystem->playerAvatar);
+        v0 = PlayerAvatar_GetMapObject(fieldSystem->playerAvatar);
         MapObject_SetHidden(v0, 0);
-        LocalMapObj_SetAnimationCode(v0, 0xd);
+        LocalMapObj_SetAnimationCode(v0, MOVEMENT_ACTION_WALK_NORMAL_SOUTH);
         (v2->unk_00)++;
         break;
     case 2:
-        v0 = Player_MapObject(fieldSystem->playerAvatar);
+        v0 = PlayerAvatar_GetMapObject(fieldSystem->playerAvatar);
 
         if (LocalMapObj_CheckAnimationFinished(v0) == 1) {
             sub_020656AC(v0);
@@ -907,8 +916,8 @@ BOOL ov5_021D4E10(TaskManager *param0)
         }
         break;
     case 3:
-        if (ScreenWipe_Done() && (v2->unk_0C == Camera_GetFOV(fieldSystem->camera))) {
-            Heap_FreeToHeap(v2);
+        if (IsScreenFadeDone() && (v2->unk_0C == Camera_GetFOV(fieldSystem->camera))) {
+            Heap_Free(v2);
             return 1;
         }
         break;
@@ -921,31 +930,31 @@ BOOL ov5_021D4E10(TaskManager *param0)
     return 0;
 }
 
-BOOL ov5_021D4F14(TaskManager *param0)
+BOOL ov5_021D4F14(FieldTask *param0)
 {
-    FieldSystem *fieldSystem = TaskManager_FieldSystem(param0);
-    UnkStruct_ov5_021D4E00 *v1 = TaskManager_Environment(param0);
+    FieldSystem *fieldSystem = FieldTask_GetFieldSystem(param0);
+    UnkStruct_ov5_021D4E00 *v1 = FieldTask_GetEnv(param0);
 
     switch (v1->unk_00) {
     case 0: {
         MapObject *v2;
 
-        v2 = Player_MapObject(fieldSystem->playerAvatar);
+        v2 = PlayerAvatar_GetMapObject(fieldSystem->playerAvatar);
 
         MapObject_SetHidden(v2, 1);
 
         v1->unk_08 = 0;
         v1->unk_04 = 0;
 
-        Sound_PlayEffect(1539);
-        sub_0200F174(0, 0, 0, 0x7fff, 6, 1, 11);
+        Sound_PlayEffect(SEQ_SE_DP_KAIDAN2_sseq);
+        StartScreenFade(FADE_BOTH_SCREENS, FADE_TYPE_BRIGHTNESS_OUT, FADE_TYPE_BRIGHTNESS_OUT, COLOR_WHITE, 6, 1, HEAP_ID_FIELD2);
 
         v1->unk_08 = 1;
         (v1->unk_00)++;
     } break;
     case 1:
-        if (ScreenWipe_Done()) {
-            Heap_FreeToHeap(v1);
+        if (IsScreenFadeDone()) {
+            Heap_Free(v1);
             return 1;
         }
         break;
@@ -958,25 +967,25 @@ BOOL ov5_021D4F14(TaskManager *param0)
     return 0;
 }
 
-BOOL ov5_021D4FA0(TaskManager *param0)
+BOOL ov5_021D4FA0(FieldTask *param0)
 {
-    FieldSystem *fieldSystem = TaskManager_FieldSystem(param0);
-    UnkStruct_ov5_021D4E00 *v1 = TaskManager_Environment(param0);
+    FieldSystem *fieldSystem = FieldTask_GetFieldSystem(param0);
+    UnkStruct_ov5_021D4E00 *v1 = FieldTask_GetEnv(param0);
 
     switch (v1->unk_00) {
     case 0: {
         v1->unk_08 = 0;
         v1->unk_04 = 0;
 
-        Sound_PlayEffect(1539);
-        sub_02056B30(param0, 0, 16, 0, 0x0, 6, 1, 11);
+        Sound_PlayEffect(SEQ_SE_DP_KAIDAN2_sseq);
+        sub_02056B30(param0, 0, 16, 0, 0x0, 6, 1, HEAP_ID_FIELD2);
 
         v1->unk_08 = 1;
         (v1->unk_00)++;
     } break;
     case 1:
-        if (ScreenWipe_Done()) {
-            Heap_FreeToHeap(v1);
+        if (IsScreenFadeDone()) {
+            Heap_Free(v1);
             return 1;
         }
         break;
@@ -989,19 +998,19 @@ BOOL ov5_021D4FA0(TaskManager *param0)
     return 0;
 }
 
-BOOL ov5_021D5020(TaskManager *param0)
+BOOL ov5_021D5020(FieldTask *param0)
 {
     MapObject *v0;
-    FieldSystem *fieldSystem = TaskManager_FieldSystem(param0);
-    UnkStruct_ov5_021D4E00 *v2 = TaskManager_Environment(param0);
+    FieldSystem *fieldSystem = FieldTask_GetFieldSystem(param0);
+    UnkStruct_ov5_021D4E00 *v2 = FieldTask_GetEnv(param0);
 
     switch (v2->unk_00) {
     case 0: {
         u8 v3;
         u8 v4;
 
-        v0 = Player_MapObject(fieldSystem->playerAvatar);
-        v3 = PlayerAvatar_GetDir(fieldSystem->playerAvatar);
+        v0 = PlayerAvatar_GetMapObject(fieldSystem->playerAvatar);
+        v3 = PlayerAvatar_GetFacingDir(fieldSystem->playerAvatar);
 
         if (v3 == 1) {
             MapObject_SetHidden(v0, 1);
@@ -1033,20 +1042,20 @@ BOOL ov5_021D5020(TaskManager *param0)
             v4 = 39;
             break;
         default:
-            GF_ASSERT(0);
+            GF_ASSERT(FALSE);
         }
 
-        sub_02056B30(param0, 0, v4, 1, 0x0, 6, 1, 11);
+        sub_02056B30(param0, 0, v4, 1, 0x0, 6, 1, HEAP_ID_FIELD2);
         v2->unk_08 = 1;
     } break;
     case 1:
-        v0 = Player_MapObject(fieldSystem->playerAvatar);
+        v0 = PlayerAvatar_GetMapObject(fieldSystem->playerAvatar);
         MapObject_SetHidden(v0, 0);
-        LocalMapObj_SetAnimationCode(v0, 0xd);
+        LocalMapObj_SetAnimationCode(v0, MOVEMENT_ACTION_WALK_NORMAL_SOUTH);
         (v2->unk_00)++;
         break;
     case 2:
-        v0 = Player_MapObject(fieldSystem->playerAvatar);
+        v0 = PlayerAvatar_GetMapObject(fieldSystem->playerAvatar);
 
         if (LocalMapObj_CheckAnimationFinished(v0) == 1) {
             sub_020656AC(v0);
@@ -1054,8 +1063,8 @@ BOOL ov5_021D5020(TaskManager *param0)
         }
         break;
     case 3:
-        if (ScreenWipe_Done() && (v2->unk_0C == Camera_GetFOV(fieldSystem->camera))) {
-            Heap_FreeToHeap(v2);
+        if (IsScreenFadeDone() && (v2->unk_0C == Camera_GetFOV(fieldSystem->camera))) {
+            Heap_Free(v2);
             return 1;
         }
         break;
@@ -1068,19 +1077,19 @@ BOOL ov5_021D5020(TaskManager *param0)
     return 0;
 }
 
-BOOL ov5_021D5150(TaskManager *param0)
+BOOL ov5_021D5150(FieldTask *param0)
 {
     MapObject *v0;
-    FieldSystem *fieldSystem = TaskManager_FieldSystem(param0);
-    UnkStruct_ov5_021D4E00 *v2 = TaskManager_Environment(param0);
+    FieldSystem *fieldSystem = FieldTask_GetFieldSystem(param0);
+    UnkStruct_ov5_021D4E00 *v2 = FieldTask_GetEnv(param0);
 
     switch (v2->unk_00) {
     case 0: {
         u8 v3;
         u8 v4;
 
-        v0 = Player_MapObject(fieldSystem->playerAvatar);
-        v3 = PlayerAvatar_GetDir(fieldSystem->playerAvatar);
+        v0 = PlayerAvatar_GetMapObject(fieldSystem->playerAvatar);
+        v3 = PlayerAvatar_GetFacingDir(fieldSystem->playerAvatar);
 
         if (v3 == 1) {
             MapObject_SetHidden(v0, 1);
@@ -1090,16 +1099,16 @@ BOOL ov5_021D5150(TaskManager *param0)
             (v2->unk_00) = 3;
         }
 
-        sub_02056B30(param0, 0, 1, 1, 0x0, 6, 1, 11);
+        sub_02056B30(param0, 0, 1, 1, 0x0, 6, 1, HEAP_ID_FIELD2);
     } break;
     case 1:
-        v0 = Player_MapObject(fieldSystem->playerAvatar);
+        v0 = PlayerAvatar_GetMapObject(fieldSystem->playerAvatar);
         MapObject_SetHidden(v0, 0);
-        LocalMapObj_SetAnimationCode(v0, 0xd);
+        LocalMapObj_SetAnimationCode(v0, MOVEMENT_ACTION_WALK_NORMAL_SOUTH);
         (v2->unk_00)++;
         break;
     case 2:
-        v0 = Player_MapObject(fieldSystem->playerAvatar);
+        v0 = PlayerAvatar_GetMapObject(fieldSystem->playerAvatar);
 
         if (LocalMapObj_CheckAnimationFinished(v0) == 1) {
             sub_020656AC(v0);
@@ -1107,8 +1116,8 @@ BOOL ov5_021D5150(TaskManager *param0)
         }
         break;
     case 3:
-        if (ScreenWipe_Done()) {
-            Heap_FreeToHeap(v2);
+        if (IsScreenFadeDone()) {
+            Heap_Free(v2);
             return 1;
         }
         break;

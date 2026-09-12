@@ -1,32 +1,26 @@
-    .include "macros/scrcmd.inc"
+#include "macros/scrcmd.inc"
+#include "res/text/bank/solaceon_town_northeast_house.h"
 
-    .data
 
-    ScriptEntry _000A
-    ScriptEntry _002C
-    .short 0xFD13
+    ScriptEntry SolaceonTownNortheastHouse_PokemonBreederF
+    ScriptEntry SolaceonTownNortheastHouse_Cowgirl
+    ScriptEntryEnd
 
-_000A:
-    PlayFanfare SEQ_SE_CONFIRM
+SolaceonTownNortheastHouse_PokemonBreederF:
+    PlaySE SE_CONFIRM_sseq_3
     LockAll
     FacePlayer
-    ScrCmd_247 0x800C
-    ScrCmd_212 0x8004, 0x800C
-    ScrCmd_17C 0, 0x8004
-    Message 0
-    WaitABXPadPress
+    GetFirstNonEggInParty VAR_RESULT
+    GetPartyMonNature VAR_0x8004, VAR_RESULT
+    BufferNatureName 0, VAR_0x8004
+    Message SolaceonTownNortheastHouse_Text_YourPokemonHasThisNature
+    WaitButton
     CloseMessage
     ReleaseAll
     End
 
-_002C:
-    PlayFanfare SEQ_SE_CONFIRM
-    LockAll
-    FacePlayer
-    Message 1
-    WaitABXPadPress
-    CloseMessage
-    ReleaseAll
+SolaceonTownNortheastHouse_Cowgirl:
+    NPCMessage SolaceonTownNortheastHouse_Text_ThisAreaHadManyPokemon
     End
 
-    .byte 0
+    .balign 4, 0

@@ -11,9 +11,9 @@ argparser = argparse.ArgumentParser(
 argparser.add_argument('-n', '--nitrogfx',
                        required=True,
                        help='Path to nitrogfx executable')
-argparser.add_argument('-k', '--knarc',
+argparser.add_argument('-k', '--narc',
                        required=True,
-                       help='Path to knarc executable')
+                       help='Path to narc executable')
 argparser.add_argument('-p', '--private-dir',
                        required=True,
                        help='Path to the private directory (where binaries will be made)')
@@ -44,7 +44,8 @@ for i in range(args.sprite_entries):
         args.nitrogfx,
         infile,
         target,
-        '-scanfronttoback'
+        '-encodefronttoback',
+        '-scan',
     ])
 
 # The next batch of files should all be palettes
@@ -72,13 +73,15 @@ subprocess.run([
     args.nitrogfx,
     sub_back,
     private_dir / f'pl_otherpoke_{i:04}.NCGR',
-    '-scanfronttoback'
+    '-encodefronttoback',
+    '-scan',
 ])
 subprocess.run([
     args.nitrogfx,
     sub_front,
     private_dir / f'pl_otherpoke_{(i+1):04}.NCGR',
-    '-scanfronttoback'
+    '-encodefronttoback',
+    '-scan',
 ])
 subprocess.run([
     args.nitrogfx,
@@ -91,16 +94,23 @@ subprocess.run([
 subprocess.run([
     args.nitrogfx,
     shadows,
-    private_dir / f'pl_otherpoke_{(i+3):04}.NCGR',
-    '-scanfronttoback'
+    private_dir / f'pokemon_shadows.NCGR',
+    '-encodefronttoback',
+    '-scan',
 ])
 subprocess.run([
     args.nitrogfx,
     shadows_pal,
-    private_dir / f'pl_otherpoke_{(i+4):04}.NCLR',
+    private_dir / f'pokemon_shadows_pal.NCLR',
     '-bitdepth', '8',
     '-nopad',
     '-comp', '10'
 ])
 
-subprocess.run([args.knarc, '-d', private_dir, '-p', output_dir / 'pl_otherpoke.narc'])
+subprocess.run([
+    args.narc,
+    '--create',
+    '--index',
+    '--file', output_dir / 'pl_otherpoke.narc',
+    private_dir
+])

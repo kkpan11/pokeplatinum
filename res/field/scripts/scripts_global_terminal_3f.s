@@ -1,172 +1,107 @@
-    .include "macros/scrcmd.inc"
+#include "macros/scrcmd.inc"
+#include "res/text/bank/global_terminal_3f.h"
 
-    .data
 
-    ScriptEntry _0103
-    ScriptEntry _0036
-    ScriptEntry _0049
-    ScriptEntry _005C
-    ScriptEntry _006F
-    ScriptEntry _0082
-    ScriptEntry _0095
-    ScriptEntry _00A8
-    ScriptEntry _00BB
-    ScriptEntry _00CE
-    ScriptEntry _00E1
-    ScriptEntry _00F2
-    ScriptEntry _0105
-    .short 0xFD13
+    ScriptEntry GlobalTerminal3F_Dummy1
+    ScriptEntry GlobalTerminal3F_Youngster
+    ScriptEntry GlobalTerminal3F_SchoolKidF
+    ScriptEntry GlobalTerminal3F_AceTrainerM
+    ScriptEntry GlobalTerminal3F_PokefanM
+    ScriptEntry GlobalTerminal3F_Camper
+    ScriptEntry GlobalTerminal3F_Gentleman
+    ScriptEntry GlobalTerminal3F_Clown
+    ScriptEntry GlobalTerminal3F_Guitarist
+    ScriptEntry GlobalTerminal3F_Hiker
+    ScriptEntry GlobalTerminal3F_BgSignWarp1F
+    ScriptEntry GlobalTerminal3F_BgSignWarp2F
+    ScriptEntry GlobalTerminal3F_BattleVideosMachine
+    ScriptEntryEnd
 
-_0036:
-    PlayFanfare SEQ_SE_CONFIRM
+GlobalTerminal3F_Youngster:
+    NPCMessage GlobalTerminal3F_Text_SeePeopleLovePokemon
+    End
+
+GlobalTerminal3F_SchoolKidF:
+    NPCMessage GlobalTerminal3F_Text_ThisIsAGreatIdea
+    End
+
+GlobalTerminal3F_AceTrainerM:
+    NPCMessage GlobalTerminal3F_Text_ThisBattleVideoRocks
+    End
+
+GlobalTerminal3F_PokefanM:
+    NPCMessage GlobalTerminal3F_Text_BattleVideosOfClefairy
+    End
+
+GlobalTerminal3F_Camper:
+    NPCMessage GlobalTerminal3F_Text_WhatAnAmazingCollection
+    End
+
+GlobalTerminal3F_Gentleman:
+    NPCMessage GlobalTerminal3F_Text_TreatToBattleVideos
+    End
+
+GlobalTerminal3F_Clown:
+    NPCMessage GlobalTerminal3F_Text_MyFavoriteBattleVideo
+    End
+
+GlobalTerminal3F_Guitarist:
+    NPCMessage GlobalTerminal3F_Text_AlphabetRapJubilife
+    End
+
+GlobalTerminal3F_Hiker:
+    NPCMessage GlobalTerminal3F_Text_Hiker2FIsBrother
+    End
+
+GlobalTerminal3F_BgSignWarp1F:
+    EventMessage GlobalTerminal3F_Text_WarpsTo1F
+    End
+
+GlobalTerminal3F_BgSignWarp2F:
+    EventMessage GlobalTerminal3F_Text_WarpsTo2F
+    End
+
+GlobalTerminal3F_Dummy1:
+    End
+
+GlobalTerminal3F_BattleVideosMachine:
+    PlaySE SE_CONFIRM_sseq_3
     LockAll
-    FacePlayer
-    Message 0
-    WaitABXPadPress
+    SetVar VAR_0x8005, 2
+    GoTo GlobalTerminal3F_BattleVideosMenu
+    End
+
+GlobalTerminal3F_BattleVideosMenu:
+    Message GlobalTerminal3F_Text_ConnectForBattleVideos
+    InitLocalTextMenu 31, 11, 0, VAR_RESULT
+    SetMenuXOriginToRight
+    AddMenuEntryImm GlobalTerminal3F_Text_Use, 0
+    AddMenuEntryImm GlobalTerminal3F_Text_Info, 1
+    AddMenuEntryImm GlobalTerminal3F_Text_Cancel, 2
+    ShowMenu
+    SetVar VAR_0x8008, VAR_RESULT
+    GoToIfEq VAR_0x8008, 0, GlobalTerminal3F_UseBattleVideosMachine
+    GoToIfEq VAR_0x8008, 1, GlobalTerminal3F_ExplainBattleVideos
+    GoTo GlobalTerminal3F_BattleVideosMachineEnd
+    End
+
+GlobalTerminal3F_BattleVideosMachineEnd:
     CloseMessage
     ReleaseAll
     End
 
-_0049:
-    PlayFanfare SEQ_SE_CONFIRM
-    LockAll
-    FacePlayer
-    Message 1
-    WaitABXPadPress
-    CloseMessage
-    ReleaseAll
-    End
-
-_005C:
-    PlayFanfare SEQ_SE_CONFIRM
-    LockAll
-    FacePlayer
-    Message 2
-    WaitABXPadPress
-    CloseMessage
-    ReleaseAll
-    End
-
-_006F:
-    PlayFanfare SEQ_SE_CONFIRM
-    LockAll
-    FacePlayer
-    Message 3
-    WaitABXPadPress
-    CloseMessage
-    ReleaseAll
-    End
-
-_0082:
-    PlayFanfare SEQ_SE_CONFIRM
-    LockAll
-    FacePlayer
-    Message 4
-    WaitABXPadPress
-    CloseMessage
-    ReleaseAll
-    End
-
-_0095:
-    PlayFanfare SEQ_SE_CONFIRM
-    LockAll
-    FacePlayer
-    Message 5
-    WaitABXPadPress
-    CloseMessage
-    ReleaseAll
-    End
-
-_00A8:
-    PlayFanfare SEQ_SE_CONFIRM
-    LockAll
-    FacePlayer
-    Message 6
-    WaitABXPadPress
-    CloseMessage
-    ReleaseAll
-    End
-
-_00BB:
-    PlayFanfare SEQ_SE_CONFIRM
-    LockAll
-    FacePlayer
-    Message 7
-    WaitABXPadPress
-    CloseMessage
-    ReleaseAll
-    End
-
-_00CE:
-    PlayFanfare SEQ_SE_CONFIRM
-    LockAll
-    FacePlayer
-    Message 8
-    WaitABXPadPress
-    CloseMessage
-    ReleaseAll
-    End
-
-_00E1:
-    PlayFanfare SEQ_SE_CONFIRM
-    LockAll
-    Message 9
-    WaitABXPadPress
-    CloseMessage
-    ReleaseAll
-    End
-
-_00F2:
-    PlayFanfare SEQ_SE_CONFIRM
-    LockAll
-    Message 10
-    WaitABXPadPress
-    CloseMessage
-    ReleaseAll
-    End
-
-_0103:
-    End
-
-_0105:
-    PlayFanfare SEQ_SE_CONFIRM
-    LockAll
-    SetVar 0x8005, 2
-    GoTo _0119
-    End
-
-_0119:
-    Message 11
-    ScrCmd_041 31, 11, 0, 1, 0x800C
-    ScrCmd_33A 1
-    ScrCmd_042 13, 0
-    ScrCmd_042 14, 1
-    ScrCmd_042 15, 2
-    ScrCmd_043
-    SetVar 0x8008, 0x800C
-    GoToIfEq 0x8008, 0, _0163
-    GoToIfEq 0x8008, 1, _0184
-    GoTo _015D
-    End
-
-_015D:
-    CloseMessage
-    ReleaseAll
-    End
-
-_0163:
-    CallCommonScript 0x7D6
-    SetVar 0x800C, 0x4000
-    GoToIfEq 0x800C, 0, _015D
+GlobalTerminal3F_UseBattleVideosMachine:
+    Common_SaveGame
+    SetVar VAR_RESULT, VAR_MAP_LOCAL_0x00
+    GoToIfEq VAR_RESULT, 0, GlobalTerminal3F_BattleVideosMachineEnd
     CloseMessage
     CallCommonScript 0x802
     ReleaseAll
     End
 
-_0184:
-    Message 12
-    GoTo _0119
+GlobalTerminal3F_ExplainBattleVideos:
+    Message GlobalTerminal3F_Text_ExplainBattleVideos
+    GoTo GlobalTerminal3F_BattleVideosMenu
+    End
 
-    .byte 2
-    .byte 0
-    .byte 0
+    .balign 4, 0

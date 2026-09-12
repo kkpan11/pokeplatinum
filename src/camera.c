@@ -4,14 +4,10 @@
 #include <nnsys.h>
 #include <string.h>
 
-#include "overlay115/camera_angle.h"
-
+#include "fx_util.h"
 #include "heap.h"
-#include "unk_0201E190.h"
 
 #define CAMERA_DEFAULT_ASPECT_RATIO (FX32_ONE * 4 / 3)
-#define CAMERA_DEFAULT_NEAR_CLIP    (FX32_ONE * 150)
-#define CAMERA_DEFAULT_FAR_CLIP     (FX32_ONE * 900)
 
 GXBufferMode gBufferMode = GX_BUFFERMODE_W;
 
@@ -108,7 +104,7 @@ static void Camera_UpdateHistory(Camera const *camera, const VecFx32 *inPos, Vec
     }
 }
 
-void Camera_InitHistory(int historySize, int delay, int delayMask, enum HeapId heapID, Camera *camera)
+void Camera_InitHistory(int historySize, int delay, int delayMask, enum HeapID heapID, Camera *camera)
 {
     if (camera->targetPos == NULL) {
         return;
@@ -116,8 +112,8 @@ void Camera_InitHistory(int historySize, int delay, int delayMask, enum HeapId h
 
     GF_ASSERT(delay + 1 <= historySize);
 
-    CameraPositionHistory *history = Heap_AllocFromHeap(heapID, sizeof(CameraPositionHistory));
-    history->positions = Heap_AllocFromHeap(heapID, sizeof(VecFx32) * historySize);
+    CameraPositionHistory *history = Heap_Alloc(heapID, sizeof(CameraPositionHistory));
+    history->positions = Heap_Alloc(heapID, sizeof(VecFx32) * historySize);
 
     for (int i = 0; i < historySize; i++) {
         history->positions[i].x = 0;
@@ -152,20 +148,20 @@ void Camera_InitHistory(int historySize, int delay, int delayMask, enum HeapId h
 void Camera_DeleteHistory(Camera *camera)
 {
     if (camera->history != NULL) {
-        Heap_FreeToHeap(camera->history->positions);
-        Heap_FreeToHeap(camera->history);
+        Heap_Free(camera->history->positions);
+        Heap_Free(camera->history);
         camera->history = NULL;
     }
 }
 
-Camera *Camera_Alloc(const enum HeapId heapID)
+Camera *Camera_Alloc(const enum HeapID heapID)
 {
-    return Heap_AllocFromHeap(heapID, sizeof(Camera));
+    return Heap_Alloc(heapID, sizeof(Camera));
 }
 
 void Camera_Delete(Camera *camera)
 {
-    Heap_FreeToHeap(camera);
+    Heap_Free(camera);
 }
 
 void Camera_Copy(Camera const *src, Camera *dst)

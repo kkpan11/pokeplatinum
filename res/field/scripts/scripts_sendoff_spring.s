@@ -1,89 +1,90 @@
-    .include "macros/scrcmd.inc"
+#include "macros/scrcmd.inc"
+#include "res/text/bank/sendoff_spring.h"
+#include "res/field/events/events_sendoff_spring.h"
 
-    .data
 
-    ScriptEntry _0021
-    ScriptEntry _00C0
-    ScriptEntry _000E
-    .short 0xFD13
+    ScriptEntry SendoffSpring_OnFrame_Cynthia
+    ScriptEntry SendoffSpring_Cynthia
+    ScriptEntry SendoffSpring_OnTransition
+    ScriptEntryEnd
 
-_000E:
-    CallIfSet 0x121, _001B
+SendoffSpring_OnTransition:
+    CallIfSet FLAG_CAUGHT_GIRATINA, SendoffSpring_ShowTurnbackCaveItem
     End
 
-_001B:
-    ClearFlag 0x278
+SendoffSpring_ShowTurnbackCaveItem:
+    ClearFlag FLAG_HIDE_TURNBACK_CAVE_GIRATINA_ROOM_ITEM
     Return
 
-_0021:
+SendoffSpring_OnFrame_Cynthia:
     LockAll
-    ScrCmd_328 0
-    ScrCmd_2B5 0x10A, 0x2FA, 0x2CA
-    Message 0
+    SetPartyGiratinaForm GIRATINA_FORM_ALTERED
+    ScrCmd_2B5 MAP_HEADER_UNKNOWN_266, 762, 714
+    Message SendoffSpring_Text_ThisPlace
     CloseMessage
-    ApplyMovement 0, _00A0
+    ApplyMovement LOCALID_CYNTHIA, SendoffSpring_Movement_CynthiaLookAround
     WaitMovement
-    ApplyMovement 0xFF, _0098
+    ApplyMovement LOCALID_PLAYER, SendoffSpring_Movement_PlayerWalkOnSpotWest
     WaitMovement
-    Message 1
+    Message SendoffSpring_Text_ItsTheSendoffSpring
     CloseMessage
-    ApplyMovement 0, _00B8
+    ApplyMovement LOCALID_CYNTHIA, SendoffSpring_Movement_CynthiaWalkOnSpotEast
     WaitMovement
-    ScrCmd_0CD 0
-    Message 2
-    WaitABXPadPress
+    BufferPlayerName 0
+    Message SendoffSpring_Text_YouShouldVisitProfRowan
+    WaitButton
     CloseMessage
-    SetVar 0x40AA, 2
-    SetVar 0x40A6, 2
-    SetFlag 0x1C7
-    ClearFlag 0x132
-    SetFlag 0x28F
-    SetFlag 0x295
-    SetFlag 0x29F
-    SetFlag 0x986
-    ClearFlag 0x292
-    SetFlag 0x15E
-    SetFlag 0x295
+    SetVar VAR_EXITED_DISTORTION_WORLD_STATE, 2
+    SetVar VAR_SANDGEM_TOWN_LAB_STATE, 2
+    SetFlag FLAG_HIDE_SPEAR_PILLAR_DISTORTED_TEAM_GALACTIC
+    ClearFlag FLAG_SPEAR_PILLAR_IS_DISTORTED
+    SetFlag FLAG_HIDE_MT_CORONET_GALACTIC_GRUNTS
+    SetFlag FLAG_HIDE_MT_CORONET_1F_NORTH_ROOM_1_GRUNT_F
+    SetFlag FLAG_HIDE_MT_CORONET_2F_LOOKER
+    SetFlag FLAG_ALT_MUSIC_GALACTIC_HQ_1F
+    ClearFlag FLAG_HIDE_GALACTIC_HQ_1F_SATURN
+    SetFlag FLAG_GALACTIC_LEFT_LAKE_VALOR
+    SetFlag FLAG_HIDE_MT_CORONET_1F_NORTH_ROOM_1_GRUNT_F
     ReleaseAll
     End
 
     .balign 4, 0
-_0098:
-    MoveAction_022
+SendoffSpring_Movement_PlayerWalkOnSpotWest:
+    WalkOnSpotNormalWest
     EndMovement
 
     .balign 4, 0
-_00A0:
-    MoveAction_026
-    MoveAction_03F
-    MoveAction_027
-    MoveAction_03F 2
-    MoveAction_024
+SendoffSpring_Movement_CynthiaLookAround:
+    WalkOnSpotFastWest
+    Delay8
+    WalkOnSpotFastEast
+    Delay8 2
+    WalkOnSpotFastNorth
     EndMovement
 
     .balign 4, 0
-_00B8:
-    MoveAction_023
+SendoffSpring_Movement_CynthiaWalkOnSpotEast:
+    WalkOnSpotNormalEast
     EndMovement
 
-_00C0:
-    PlayFanfare SEQ_SE_CONFIRM
+SendoffSpring_Cynthia:
+    PlaySE SE_CONFIRM_sseq_3
     LockAll
     FacePlayer
-    GoToIfGe 0x40AA, 3, _00E0
-    Message 3
-    GoTo _00EB
+    GoToIfGe VAR_EXITED_DISTORTION_WORLD_STATE, 3, SendoffSpring_IWishIBattledGiratina
+    Message SendoffSpring_Text_GoTellProfRowan
+    GoTo SendoffSpring_CynthiaEnd
     End
 
-_00E0:
-    Message 4
-    GoTo _00EB
+SendoffSpring_IWishIBattledGiratina:
+    Message SendoffSpring_Text_IWishIBattledGiratina
+    GoTo SendoffSpring_CynthiaEnd
     End
 
-_00EB:
-    WaitABXPadPress
+SendoffSpring_CynthiaEnd:
+    WaitButton
     CloseMessage
     ReleaseAll
     End
 
-    .byte 0
+    .balign 4, 0

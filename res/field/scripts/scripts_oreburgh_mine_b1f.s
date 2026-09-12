@@ -1,119 +1,103 @@
-    .include "macros/scrcmd.inc"
+#include "macros/scrcmd.inc"
+#include "res/text/bank/oreburgh_mine_b1f.h"
+#include "res/field/events/events_oreburgh_mine_b1f.h"
 
-    .data
 
-    ScriptEntry _0012
-    ScriptEntry _002F
-    ScriptEntry _0042
-    ScriptEntry _0055
-    .short 0xFD13
+    ScriptEntry OreburghMineB1F_OnTransition
+    ScriptEntry OreburghMineB1F_Worker
+    ScriptEntry OreburghMineB1F_Twin
+    ScriptEntry OreburghMineB1F_Hiker
+    ScriptEntryEnd
 
-_0012:
-    SetFlag 0x9C2
-    SetFlag 0x2C8
-    CallIfEq 0x4056, 1, _0029
+OreburghMineB1F_OnTransition:
+    SetFlag FLAG_FIRST_ARRIVAL_OREBURGH_MINE
+    SetFlag FLAG_HIDE_OREBURGH_MINE_B1F_HIKER
+    CallIfEq VAR_ARCEUS_EVENT_STATE, 1, OreburghMineB1F_ShowHiker
     End
 
-_0029:
-    ClearFlag 0x2C8
+OreburghMineB1F_ShowHiker:
+    ClearFlag FLAG_HIDE_OREBURGH_MINE_B1F_HIKER
     Return
 
-_002F:
-    PlayFanfare SEQ_SE_CONFIRM
+OreburghMineB1F_Worker:
+    NPCMessage OreburghMineB1F_Text_EveryoneKeepsTheirOwnPokemon
+    End
+
+OreburghMineB1F_Twin:
+    NPCMessage OreburghMineB1F_Text_SomeRocksStartedMoving
+    End
+
+OreburghMineB1F_Hiker:
+    PlaySE SE_CONFIRM_sseq_3
     LockAll
     FacePlayer
-    Message 0
-    WaitABXPadPress
+    GoToIfSet FLAG_COULD_NOT_RECEIVE_OREBURGH_MINE_B1F_FLAME_PLATE, OreburghMineB1F_TryGiveFlamePlateAgain
+    Message OreburghMineB1F_Text_IFoundSomethingInteresting
+    GoTo OreburghMineB1F_TryGiveFlamePlate
+    End
+
+OreburghMineB1F_TryGiveFlamePlate:
+    SetVar VAR_0x8004, ITEM_FLAME_PLATE
+    SetVar VAR_0x8005, 1
+    GoToIfCannotFitItem VAR_0x8004, VAR_0x8005, VAR_RESULT, OreburghMineB1F_YouHaveAnOverabundance
+    Common_GiveItemQuantity
+    Message OreburghMineB1F_Text_CreatedAtSameTimeAsSinnoh
     CloseMessage
-    ReleaseAll
+    GetPlayerMapPos VAR_0x8004, VAR_0x8005
+    GoToIfEq VAR_0x8005, 3, OreburghMineB1F_HikerLeaveZ3
+    GoToIfEq VAR_0x8005, 4, OreburghMineB1F_HikerLeaveZ4
+    GoToIfEq VAR_0x8005, 5, OreburghMineB1F_HikerLeaveZ5
     End
 
-_0042:
-    PlayFanfare SEQ_SE_CONFIRM
-    LockAll
-    FacePlayer
-    Message 1
-    WaitABXPadPress
-    CloseMessage
-    ReleaseAll
-    End
-
-_0055:
-    PlayFanfare SEQ_SE_CONFIRM
-    LockAll
-    FacePlayer
-    GoToIfSet 165, _012B
-    Message 2
-    GoTo _0073
-    End
-
-_0073:
-    SetVar 0x8004, 0x12A
-    SetVar 0x8005, 1
-    ScrCmd_07D 0x8004, 0x8005, 0x800C
-    GoToIfEq 0x800C, 0, _0114
-    CallCommonScript 0x7FC
-    Message 5
-    CloseMessage
-    ScrCmd_069 0x8004, 0x8005
-    GoToIfEq 0x8005, 3, _00CC
-    GoToIfEq 0x8005, 4, _00DE
-    GoToIfEq 0x8005, 5, _00F0
-    End
-
-_00CC:
-    ApplyMovement 3, _0138
+OreburghMineB1F_HikerLeaveZ3:
+    ApplyMovement LOCALID_HIKER, OreburghMineB1F_Movement_HikerLeaveZ3
     WaitMovement
-    GoTo _0102
+    GoTo OreburghMineB1F_RemoveHiker
     End
 
-_00DE:
-    ApplyMovement 3, _0144
+OreburghMineB1F_HikerLeaveZ4:
+    ApplyMovement LOCALID_HIKER, OreburghMineB1F_Movement_HikerLeaveZ4Or5
     WaitMovement
-    GoTo _0102
+    GoTo OreburghMineB1F_RemoveHiker
     End
 
-_00F0:
-    ApplyMovement 3, _0144
+OreburghMineB1F_HikerLeaveZ5:
+    ApplyMovement LOCALID_HIKER, OreburghMineB1F_Movement_HikerLeaveZ4Or5
     WaitMovement
-    GoTo _0102
+    GoTo OreburghMineB1F_RemoveHiker
     End
 
-_0102:
-    PlayFanfare SEQ_SE_DP_KAIDAN2
-    ScrCmd_065 3
-    SetVar 0x4056, 2
+OreburghMineB1F_RemoveHiker:
+    PlaySE SEQ_SE_DP_KAIDAN2_sseq
+    RemoveObject LOCALID_HIKER
+    SetVar VAR_ARCEUS_EVENT_STATE, 2
     ReleaseAll
     End
 
-_0114:
-    SetFlag 165
-    Message 3
-    GoTo _0123
+OreburghMineB1F_YouHaveAnOverabundance:
+    SetFlag FLAG_COULD_NOT_RECEIVE_OREBURGH_MINE_B1F_FLAME_PLATE
+    Message OreburghMineB1F_Text_YouHaveAnOverabundance
+    GoTo OreburghMineB1F_HikerEnd
     End
 
-_0123:
-    WaitABXPadPress
+OreburghMineB1F_HikerEnd:
+    WaitButton
     CloseMessage
     ReleaseAll
     End
 
-_012B:
-    Message 4
-    GoTo _0073
-
-    .byte 2
-    .byte 0
-    .byte 0
-    .byte 0
+OreburghMineB1F_TryGiveFlamePlateAgain:
+    Message OreburghMineB1F_Text_YouMayHaveItIfYoudLike
+    GoTo OreburghMineB1F_TryGiveFlamePlate
+    End
 
     .balign 4, 0
-_0138:
-    MoveAction_00E
-    MoveAction_00C 3
+OreburghMineB1F_Movement_HikerLeaveZ3:
+    WalkNormalWest
+    WalkNormalNorth 3
     EndMovement
 
     .balign 4, 0
-_0144:
-    MoveAction_00C 3
+OreburghMineB1F_Movement_HikerLeaveZ4Or5:
+    WalkNormalNorth 3
     EndMovement

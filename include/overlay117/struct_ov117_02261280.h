@@ -3,14 +3,7 @@
 
 #include <nnsys.h>
 
-#include "struct_decls/struct_02002F38_decl.h"
-#include "struct_decls/struct_0200C6E4_decl.h"
-#include "struct_decls/struct_0200C704_decl.h"
 #include "struct_decls/struct_02012744_decl.h"
-#include "struct_decls/struct_02014014_decl.h"
-#include "struct_decls/struct_02018340_decl.h"
-#include "struct_defs/struct_0205AA50.h"
-#include "struct_defs/struct_0207C690.h"
 
 #include "overlay114/struct_ov114_0225CAD4_decl.h"
 #include "overlay117/struct_ov117_022605C0.h"
@@ -31,9 +24,14 @@
 #include "overlay117/struct_ov117_02265EC8.h"
 #include "overlay117/struct_ov117_02266274.h"
 
+#include "bg_window.h"
 #include "camera.h"
+#include "g3d_pipeline.h"
 #include "message.h"
-#include "strbuf.h"
+#include "palette.h"
+#include "particle_system.h"
+#include "sprite_system.h"
+#include "string_gf.h"
 #include "string_template.h"
 #include "sys_task_manager.h"
 
@@ -44,20 +42,20 @@ typedef struct UnkStruct_ov117_02261280_t {
     u32 unk_0C[4];
     UnkStruct_ov114_0225CAD4 *unk_1C;
     int unk_20;
-    SpriteRenderer *unk_24;
-    SpriteGfxHandler *unk_28;
-    BGL *unk_2C;
+    SpriteSystem *unk_24;
+    SpriteManager *unk_28;
+    BgConfig *unk_2C;
     Window unk_30[5];
     MessageLoader *unk_80;
     StringTemplate *unk_84;
-    Strbuf *unk_88;
+    String *unk_88;
     PaletteData *unk_8C;
     UnkStruct_02012744 *unk_90;
     SysTask *unk_94;
-    GenericPointerData *unk_98;
+    G3DPipelineBuffers *unk_98;
     Camera *camera1;
     Camera *camera2;
-    UnkStruct_02014014 *unk_A4;
+    ParticleSystem *unk_A4;
     NNSFndAllocator unk_A8;
     UnkStruct_ov117_02262664 unk_B8;
     UnkStruct_ov117_022626B0 *unk_D4;

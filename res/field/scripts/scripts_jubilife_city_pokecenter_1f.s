@@ -1,46 +1,28 @@
-    .include "macros/scrcmd.inc"
+#include "macros/scrcmd.inc"
+#include "res/text/bank/jubilife_city_pokecenter_1f.h"
+#include "res/field/events/events_jubilife_city_pokecenter_1f.h"
 
-    .data
 
-    ScriptEntry _0012
-    ScriptEntry _001E
-    ScriptEntry _0031
-    ScriptEntry _0044
-    .short 0xFD13
+    ScriptEntry JubilifeCityPokecenter1F_Nurse
+    ScriptEntry JubilifeCityPokecenter1F_Twin
+    ScriptEntry JubilifeCityPokecenter1F_SchoolKidM
+    ScriptEntry JubilifeCityPokecenter1F_TrainerF
+    ScriptEntryEnd
 
-_0012:
-    SetVar 0x8007, 3
-    CallCommonScript 0x7D2
+JubilifeCityPokecenter1F_Nurse:
+    Common_CallPokecenterNurse LOCALID_JUBILIFE_NURSE
     End
 
-_001E:
-    PlayFanfare SEQ_SE_CONFIRM
-    LockAll
-    FacePlayer
-    Message 0
-    WaitABXPadPress
-    CloseMessage
-    ReleaseAll
+JubilifeCityPokecenter1F_Twin:
+    NPCMessage JubilifeCityPokecenter1F_Text_StrengthsAndWeaknesses
     End
 
-_0031:
-    PlayFanfare SEQ_SE_CONFIRM
-    LockAll
-    FacePlayer
-    Message 1
-    WaitABXPadPress
-    CloseMessage
-    ReleaseAll
+JubilifeCityPokecenter1F_SchoolKidM:
+    NPCMessage JubilifeCityPokecenter1F_Text_ChatAndTradeInUnionRoom
     End
 
-_0044:
-    PlayFanfare SEQ_SE_CONFIRM
-    LockAll
-    FacePlayer
-    Message 2
-    WaitABXPadPress
-    CloseMessage
-    ReleaseAll
+JubilifeCityPokecenter1F_TrainerF:
+    NPCMessage JubilifeCityPokecenter1F_Text_CanStillCatchWithSixPokemon
     End
 
-    .byte 0
+    .balign 4, 0

@@ -1,6 +1,5 @@
-    .include "macros/btlcmd.inc"
+#include "macros/btlcmd.inc"
 
-    .data
 
 _000:
     CheckIgnorableAbility CHECK_HAVE, BTLSCR_ALL_BATTLERS, ABILITY_DAMP, _038
@@ -24,7 +23,7 @@ _038:
     Wait 
     WaitButtonABTime 30
     // {0}’s {1} prevents {2} from using {3}!
-    PrintMessage pl_msg_00000368_00628, TAG_NICKNAME_ABILITY_NICKNAME_MOVE, BTLSCR_ABILITY_MON, BTLSCR_ABILITY_MON, BTLSCR_ATTACKER, BTLSCR_ATTACKER
+    PrintMessage BattleStrings_Text_PokemonsAbilityPreventsPokemonFromUsingMove_AllyAlly, TAG_NICKNAME_ABILITY_NICKNAME_MOVE, BTLSCR_ABILITY_MON, BTLSCR_ABILITY_MON, BTLSCR_ATTACKER, BTLSCR_ATTACKER
     Wait 
     WaitButtonABTime 30
     UpdateVar OPCODE_FLAG_ON, BTLVAR_BATTLE_CTX_STATUS, SYSCTL_CHECK_LOOP_ONLY_ONCE

@@ -1,36 +1,22 @@
-    .include "macros/scrcmd.inc"
+#include "macros/scrcmd.inc"
+#include "res/text/bank/route_204_south.h"
 
-    .data
 
-    ScriptEntry _000E
-    ScriptEntry _0021
-    ScriptEntry _0038
-    .short 0xFD13
+    ScriptEntry Route204South_Youngster
+    ScriptEntry Route204South_ArrowSignpostJubilifeCity
+    ScriptEntry Route204South_SignboardRavagedPath
+    ScriptEntryEnd
 
-_000E:
-    PlayFanfare SEQ_SE_CONFIRM
-    LockAll
-    FacePlayer
-    Message 0
-    WaitABXPadPress
-    CloseMessage
-    ReleaseAll
+Route204South_Youngster:
+    NPCMessage Route204South_Text_BouldersBlockingInsideCavern
     End
 
-_0021:
-    ScrCmd_036 1, 1, 0, 0x800C
-    ScrCmd_038 3
-    ScrCmd_039
-    ScrCmd_03B 0x800C
-    CallCommonScript 0x7D0
+Route204South_ArrowSignpostJubilifeCity:
+    ShowArrowSign Route204South_Text_SignJubilifeCity
     End
 
-_0038:
-    ScrCmd_036 2, 2, 0, 0x800C
-    ScrCmd_038 3
-    ScrCmd_039
-    ScrCmd_03B 0x800C
-    CallCommonScript 0x7D0
+Route204South_SignboardRavagedPath:
+    ShowLandmarkSign Route204South_Text_SignRavagedPath
     End
 
-    .byte 0
+    .balign 4, 0

@@ -1,55 +1,43 @@
-    .include "macros/scrcmd.inc"
+#include "macros/scrcmd.inc"
+#include "res/text/bank/hearthome_city_southeast_house_2f.h"
 
-    .data
 
-    ScriptEntry _000A
-    ScriptEntry _006E
-    .short 0xFD13
+    ScriptEntry HearthomeCitySoutheastHouse2F_AceTrainerF
+    ScriptEntry HearthomeCitySoutheastHouse2F_Clefairy
+    ScriptEntryEnd
 
-_000A:
-    PlayFanfare SEQ_SE_CONFIRM
+HearthomeCitySoutheastHouse2F_AceTrainerF:
+    PlaySE SE_CONFIRM_sseq_3
     LockAll
     FacePlayer
-    GoToIfSet 140, _0054
-    ScrCmd_0D1 0, 253
-    Message 0
-    SetVar 0x8004, 253
-    SetVar 0x8005, 1
-    ScrCmd_07D 0x8004, 0x8005, 0x800C
-    GoToIfEq 0x800C, 0, _0064
-    SetFlag 140
-    CallCommonScript 0x7E0
+    GoToIfSet FLAG_RECEIVED_HEARTHOME_CITY_SOUTHEAST_HOUSE_2F_SHELL_BELL, HearthomeCitySoutheastHouse2F_ExplainShellBell
+    BufferItemName 0, ITEM_SHELL_BELL
+    Message HearthomeCitySoutheastHouse2F_Text_SomethingForYourPokemon
+    SetVar VAR_0x8004, ITEM_SHELL_BELL
+    SetVar VAR_0x8005, 1
+    GoToIfCannotFitItem VAR_0x8004, VAR_0x8005, VAR_RESULT, HearthomeCitySoutheastHouse2F_BagIsFull
+    SetFlag FLAG_RECEIVED_HEARTHOME_CITY_SOUTHEAST_HOUSE_2F_SHELL_BELL
+    Common_GiveItemQuantityNoLineFeed
     CloseMessage
     ReleaseAll
     End
 
-_0054:
-    ScrCmd_0D1 0, 253
-    Message 1
-    WaitABXPadPress
+HearthomeCitySoutheastHouse2F_ExplainShellBell:
+    BufferItemName 0, ITEM_SHELL_BELL
+    Message HearthomeCitySoutheastHouse2F_Text_RegainHPWhenInflictingDamage
+    WaitButton
     CloseMessage
     ReleaseAll
     End
 
-_0064:
-    CallCommonScript 0x7E1
+HearthomeCitySoutheastHouse2F_BagIsFull:
+    Common_MessageBagIsFull
     CloseMessage
     ReleaseAll
     End
 
-_006E:
-    PlayFanfare SEQ_SE_CONFIRM
-    LockAll
-    FacePlayer
-    ScrCmd_04B 0x5DC
-    ScrCmd_04C 35, 0
-    Message 2
-    ScrCmd_04D
-    WaitABXPadPress
-    CloseMessage
-    ReleaseAll
+HearthomeCitySoutheastHouse2F_Clefairy:
+    PokemonCryAndMessage SPECIES_CLEFAIRY, HearthomeCitySoutheastHouse2F_Text_ClefairyCryPippi
     End
 
-    .byte 0
-    .byte 0
-    .byte 0
+    .balign 4, 0

@@ -8,8 +8,8 @@
 
 typedef struct {
     UnkStruct_0205C22C *unk_00;
-    Journal *unk_04;
-    Options *unk_08;
+    JournalEntry *unk_04;
+    Options *options;
 } UnkStruct_0203DDFC;
 
 #endif // POKEPLATINUM_STRUCT_0203DDFC_H

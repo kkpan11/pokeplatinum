@@ -1,401 +1,384 @@
-    .include "macros/scrcmd.inc"
+#include "macros/scrcmd.inc"
+#include "res/text/bank/galactic_hq_control_room.h"
+#include "res/field/events/events_galactic_hq_control_room.h"
 
-    .data
 
-    ScriptEntry _003E
-    ScriptEntry _0055
-    ScriptEntry _0059
-    ScriptEntry _014C
-    ScriptEntry _0173
-    ScriptEntry _019A
-    ScriptEntry _01C1
-    ScriptEntry _01C3
-    ScriptEntry _01C5
-    ScriptEntry _01C7
-    ScriptEntry _03C4
-    ScriptEntry _03D7
-    ScriptEntry _03EA
-    ScriptEntry _0394
-    ScriptEntry _03FD
-    .short 0xFD13
+    ScriptEntry GalacticHQControlRoom_OnTransition
+    ScriptEntry GalacticHQControlRoom_OnResume
+    ScriptEntry GalacticHQControlRoom_Saturn
+    ScriptEntry GalacticHQControlRoom_MachineUxie
+    ScriptEntry GalacticHQControlRoom_MachineMesprit
+    ScriptEntry GalacticHQControlRoom_MachineAzelf
+    ScriptEntry GalacticHQControlRoom_Dummy7
+    ScriptEntry GalacticHQControlRoom_Dummy8
+    ScriptEntry GalacticHQControlRoom_Dummy9
+    ScriptEntry GalacticHQControlRoom_Button
+    ScriptEntry GalacticHQControlRoom_Uxie
+    ScriptEntry GalacticHQControlRoom_Mesprit
+    ScriptEntry GalacticHQControlRoom_Azelf
+    ScriptEntry GalacticHQControlRoom_CoordEvent_Saturn
+    ScriptEntry GalacticHQControlRoom_Charon
+    ScriptEntryEnd
 
-_003E:
-    GoToIfSet 0x97D, _004B
+GalacticHQControlRoom_OnTransition:
+    GoToIfSet FLAG_FREED_GALACTIC_HQ_POKEMON, GalacticHQControlRoom_SetSaturnPositionEastOfButton
     End
 
-_004B:
-    ScrCmd_186 0, 9, 6
+GalacticHQControlRoom_SetSaturnPositionEastOfButton:
+    SetObjectEventPos LOCALID_SATURN, 9, 6
     End
 
-_0055:
-    ScrCmd_25E
+GalacticHQControlRoom_OnResume:
+    InitLakeGuardianContainmentUnits
     End
 
-_0059:
-    PlayFanfare SEQ_SE_CONFIRM
+GalacticHQControlRoom_Saturn:
+    PlaySE SE_CONFIRM_sseq_3
     LockAll
     FacePlayer
-    GoToIfSet 0x97D, _0109
-    GoToIfSet 173, _0114
-    Message 0
+    GoToIfSet FLAG_FREED_GALACTIC_HQ_POKEMON, GalacticHQControlRoom_BossCraftedRedChain
+    GoToIfSet FLAG_DEFEATED_GALACTIC_HQ_CONTROL_ROOM_SATURN, GalacticHQControlRoom_PressButtonAndFreePokemon
+    Message GalacticHQControlRoom_Text_SaturnIntro
     CloseMessage
-    ScrCmd_0E5 0x199, 0
-    ScrCmd_0EC 0x800C
-    GoToIfEq 0x800C, 0, _011F
-    SetFlag 173
-    SetVar 0x410D, 1
-    Message 1
+    StartTrainerBattle TRAINER_COMMANDER_SATURN_GALACTIC_HQ
+    CheckWonBattle VAR_RESULT
+    GoToIfEq VAR_RESULT, FALSE, GalacticHQControlRoom_BlackOut
+    SetFlag FLAG_DEFEATED_GALACTIC_HQ_CONTROL_ROOM_SATURN
+    SetVar VAR_GALACTIC_HQ_CONTROL_ROOM_STATE, 1
+    Message GalacticHQControlRoom_Text_WhatMakesYouSoTough
     CloseMessage
-    ScrCmd_1BD 0x8004
-    SetVar 0x4002, 0x8004
-    GoToIfEq 0x8004, 0, _00D5
-    GoToIfEq 0x8004, 2, _00E5
-    GoToIfEq 0x8004, 3, _00F5
+    GetPlayerDir VAR_0x8004
+    SetVar VAR_MAP_LOCAL_0x02, VAR_0x8004
+    GoToIfEq VAR_0x8004, DIR_NORTH, GalacticHQControlRoom_SaturnMoveAsideNorth
+    GoToIfEq VAR_0x8004, DIR_WEST, GalacticHQControlRoom_SaturnMoveAsideWest
+    GoToIfEq VAR_0x8004, DIR_EAST, GalacticHQControlRoom_SaturnMoveAsideEast
     End
 
-_00D5:
-    ApplyMovement 0, _0128
+GalacticHQControlRoom_SaturnMoveAsideNorth:
+    ApplyMovement LOCALID_SATURN, GalacticHQControlRoom_Movement_SaturnWalkEastOnSpotSouth
     WaitMovement
-    GoTo _0105
+    GoTo GalacticHQControlRoom_SaturnEnd
 
-_00E5:
-    ApplyMovement 0, _0134
+GalacticHQControlRoom_SaturnMoveAsideWest:
+    ApplyMovement LOCALID_SATURN, GalacticHQControlRoom_Movement_SaturnWalkSouthOnSpotNorth
     WaitMovement
-    GoTo _0105
+    GoTo GalacticHQControlRoom_SaturnEnd
 
-_00F5:
-    ApplyMovement 0, _0140
+GalacticHQControlRoom_SaturnMoveAsideEast:
+    ApplyMovement LOCALID_SATURN, GalacticHQControlRoom_Movement_SaturnWalkEastOnSpotWest
     WaitMovement
-    GoTo _0105
+    GoTo GalacticHQControlRoom_SaturnEnd
 
-_0105:
+GalacticHQControlRoom_SaturnEnd:
     ReleaseAll
     End
 
-_0109:
-    Message 3
-    WaitABXPadPress
-    CloseMessage
-    ReleaseAll
-    End
-
-_0114:
-    Message 2
-    WaitABXPadPress
+GalacticHQControlRoom_BossCraftedRedChain:
+    Message GalacticHQControlRoom_Text_BossCraftedRedChain
+    WaitButton
     CloseMessage
     ReleaseAll
     End
 
-_011F:
-    ScrCmd_0EB
+GalacticHQControlRoom_PressButtonAndFreePokemon:
+    Message GalacticHQControlRoom_Text_PressButtonAndFreePokemon
+    WaitButton
+    CloseMessage
+    ReleaseAll
+    End
+
+GalacticHQControlRoom_BlackOut:
+    BlackOutFromBattle
     ReleaseAll
     End
 
     .balign 4, 0
-_0128:
-    MoveAction_00F
-    MoveAction_021
+GalacticHQControlRoom_Movement_SaturnWalkEastOnSpotSouth:
+    WalkNormalEast
+    WalkOnSpotNormalSouth
     EndMovement
 
     .balign 4, 0
-_0134:
-    MoveAction_00D
-    MoveAction_020
+GalacticHQControlRoom_Movement_SaturnWalkSouthOnSpotNorth:
+    WalkNormalSouth
+    WalkOnSpotNormalNorth
     EndMovement
 
     .balign 4, 0
-_0140:
-    MoveAction_00F
-    MoveAction_022
+GalacticHQControlRoom_Movement_SaturnWalkEastOnSpotWest:
+    WalkNormalEast
+    WalkOnSpotNormalWest
     EndMovement
 
-_014C:
-    PlayFanfare SEQ_SE_CONFIRM
+GalacticHQControlRoom_MachineUxie:
+    PlaySE SE_CONFIRM_sseq_3
     LockAll
-    GoToIfSet 0x97D, _0168
-    Message 13
-    WaitABXPadPress
+    GoToIfSet FLAG_FREED_GALACTIC_HQ_POKEMON, GalacticHQControlRoom_UxieWasSealedInside
+    Message GalacticHQControlRoom_Text_UxieIsSealedInside
+    WaitButton
     CloseMessage
     ReleaseAll
     End
 
-_0168:
-    Message 16
-    WaitABXPadPress
+GalacticHQControlRoom_UxieWasSealedInside:
+    Message GalacticHQControlRoom_Text_UxieWasSealedInside
+    WaitButton
     CloseMessage
     ReleaseAll
     End
 
-_0173:
-    PlayFanfare SEQ_SE_CONFIRM
+GalacticHQControlRoom_MachineMesprit:
+    PlaySE SE_CONFIRM_sseq_3
     LockAll
-    GoToIfSet 0x97D, _018F
-    Message 14
-    WaitABXPadPress
+    GoToIfSet FLAG_FREED_GALACTIC_HQ_POKEMON, GalacticHQControlRoom_MespritWasSealedInside
+    Message GalacticHQControlRoom_Text_MespritIsSealedInside
+    WaitButton
     CloseMessage
     ReleaseAll
     End
 
-_018F:
-    Message 17
-    WaitABXPadPress
+GalacticHQControlRoom_MespritWasSealedInside:
+    Message GalacticHQControlRoom_Text_MespritWasSealedInside
+    WaitButton
     CloseMessage
     ReleaseAll
     End
 
-_019A:
-    PlayFanfare SEQ_SE_CONFIRM
+GalacticHQControlRoom_MachineAzelf:
+    PlaySE SE_CONFIRM_sseq_3
     LockAll
-    GoToIfSet 0x97D, _01B6
-    Message 15
-    WaitABXPadPress
+    GoToIfSet FLAG_FREED_GALACTIC_HQ_POKEMON, GalacticHQControlRoom_AzelfWasSealedInside
+    Message GalacticHQControlRoom_Text_AzelfIsSealedInside
+    WaitButton
     CloseMessage
     ReleaseAll
     End
 
-_01B6:
-    Message 18
-    WaitABXPadPress
+GalacticHQControlRoom_AzelfWasSealedInside:
+    Message GalacticHQControlRoom_Text_AzelfWasSealedInside
+    WaitButton
     CloseMessage
     ReleaseAll
     End
 
-_01C1:
+GalacticHQControlRoom_Dummy7:
     End
 
-_01C3:
+GalacticHQControlRoom_Dummy8:
     End
 
-_01C5:
+GalacticHQControlRoom_Dummy9:
     End
 
-_01C7:
-    PlayFanfare SEQ_SE_CONFIRM
+GalacticHQControlRoom_Button:
+    PlaySE SE_CONFIRM_sseq_3
     LockAll
-    GoToIfSet 0x97D, _0347
-    Message 10
-    ScrCmd_03E 0x800C
-    GoToIfEq 0x800C, 0, _01FB
-    GoToIfEq 0x800C, 1, _0341
+    GoToIfSet FLAG_FREED_GALACTIC_HQ_POKEMON, GalacticHQControlRoom_AlreadyPressedButton
+    Message GalacticHQControlRoom_Text_AskPressButton
+    ShowYesNoMenu VAR_RESULT
+    GoToIfEq VAR_RESULT, MENU_YES, GalacticHQControlRoom_FreePokemon
+    GoToIfEq VAR_RESULT, MENU_NO, GalacticHQControlRoom_DontPressButton
     End
 
-_01FB:
-    SetVar 0x410D, 0
-    PlayFanfare SEQ_SE_DP_BUTTON3
-    ScrCmd_0CD 0
-    Message 11
+GalacticHQControlRoom_FreePokemon:
+    SetVar VAR_GALACTIC_HQ_CONTROL_ROOM_STATE, 0
+    PlaySE SEQ_SE_DP_BUTTON3_sseq
+    BufferPlayerName 0
+    Message GalacticHQControlRoom_Text_PlayerPressedButton
     CloseMessage
-    ClearFlag 0x295
-    SetFlag 0x97D
-    ScrCmd_25F
-    WaitTime 30, 0x800C
-    ApplyMovement 2, _036C
-    ApplyMovement 1, _0374
-    ApplyMovement 3, _037C
+    ClearFlag FLAG_HIDE_MT_CORONET_1F_NORTH_ROOM_1_GRUNT_F
+    SetFlag FLAG_FREED_GALACTIC_HQ_POKEMON
+    DeactivateLakeGuardianContainmentUnits
+    WaitTime 30, VAR_RESULT
+    ApplyMovement LOCALID_MESPRIT, GalacticHQControlRoom_Movement_MespritMoveSouth
+    ApplyMovement LOCALID_AZELF, GalacticHQControlRoom_Movement_AzelfMoveSouth
+    ApplyMovement LOCALID_UXIE, GalacticHQControlRoom_Movement_UxieMoveSouth
     WaitMovement
-    ScrCmd_186 2, 2, 6
-    ScrCmd_186 1, 14, 6
-    ScrCmd_186 3, 8, 12
-    Call _0296
-    Call _0296
-    Call _0296
-    ScrCmd_065 2
-    ScrCmd_065 1
-    ScrCmd_065 3
-    GoToIfEq 0x4002, 0, _02C0
-    GoToIfEq 0x4002, 2, _02DA
-    GoToIfEq 0x4002, 3, _02F4
+    SetObjectEventPos LOCALID_MESPRIT, 2, 6
+    SetObjectEventPos LOCALID_AZELF, 14, 6
+    SetObjectEventPos LOCALID_UXIE, 8, 12
+    Call GalacticHQControlRoom_FlickerLakeGuardians
+    Call GalacticHQControlRoom_FlickerLakeGuardians
+    Call GalacticHQControlRoom_FlickerLakeGuardians
+    RemoveObject LOCALID_MESPRIT
+    RemoveObject LOCALID_AZELF
+    RemoveObject LOCALID_UXIE
+    GoToIfEq VAR_MAP_LOCAL_0x02, DIR_NORTH, GalacticHQControlRoom_SaturnPlayerFaceEachOtherNorth
+    GoToIfEq VAR_MAP_LOCAL_0x02, DIR_WEST, GalacticHQControlRoom_SaturnPlayerFaceEachOtherWest
+    GoToIfEq VAR_MAP_LOCAL_0x02, DIR_EAST, GalacticHQControlRoom_SaturnPlayerFaceEachOtherEast
     End
 
-_0296:
-    ScrCmd_065 2
-    ScrCmd_065 1
-    ScrCmd_065 3
-    WaitTime 2, 0x800C
-    ClearFlag 0x236
-    ScrCmd_064 2
-    ScrCmd_064 1
-    ScrCmd_064 3
-    WaitTime 2, 0x800C
+GalacticHQControlRoom_FlickerLakeGuardians:
+    RemoveObject LOCALID_MESPRIT
+    RemoveObject LOCALID_AZELF
+    RemoveObject LOCALID_UXIE
+    WaitTime 2, VAR_RESULT
+    ClearFlag FLAG_HIDE_GALACTIC_HQ_CONTROL_ROOM_LAKE_GUARDIANS
+    AddObject LOCALID_MESPRIT
+    AddObject LOCALID_AZELF
+    AddObject LOCALID_UXIE
+    WaitTime 2, VAR_RESULT
     Return
 
-_02C0:
-    ApplyMovement 0, _0354
-    ApplyMovement 0xFF, _0384
+GalacticHQControlRoom_SaturnPlayerFaceEachOtherNorth:
+    ApplyMovement LOCALID_SATURN, GalacticHQControlRoom_Movement_SaturnFacePlayerWest
+    ApplyMovement LOCALID_PLAYER, GalacticHQControlRoom_Movement_PlayerWalkOnSpotEast
     WaitMovement
-    GoTo _030E
+    GoTo GalacticHQControlRoom_RemoveSaturn
     End
 
-_02DA:
-    ApplyMovement 0, _0360
-    ApplyMovement 0xFF, _038C
+GalacticHQControlRoom_SaturnPlayerFaceEachOtherWest:
+    ApplyMovement LOCALID_SATURN, GalacticHQControlRoom_Movement_SaturnFacePlayerNorth
+    ApplyMovement LOCALID_PLAYER, GalacticHQControlRoom_Movement_PlayerWalkOnSpotSouth
     WaitMovement
-    GoTo _030E
+    GoTo GalacticHQControlRoom_RemoveSaturn
     End
 
-_02F4:
-    ApplyMovement 0, _0354
-    ApplyMovement 0xFF, _0384
+GalacticHQControlRoom_SaturnPlayerFaceEachOtherEast:
+    ApplyMovement LOCALID_SATURN, GalacticHQControlRoom_Movement_SaturnFacePlayerWest
+    ApplyMovement LOCALID_PLAYER, GalacticHQControlRoom_Movement_PlayerWalkOnSpotEast
     WaitMovement
-    GoTo _030E
+    GoTo GalacticHQControlRoom_RemoveSaturn
     End
 
-_030E:
-    Message 3
+GalacticHQControlRoom_RemoveSaturn:
+    Message GalacticHQControlRoom_Text_BossCraftedRedChain
     CloseMessage
-    FadeScreen 6, 1, 0, 0
+    FadeScreenOut
     WaitFadeScreen
-    ScrCmd_065 0
-    FadeScreen 6, 1, 1, 0
+    RemoveObject LOCALID_SATURN
+    FadeScreenIn
     WaitFadeScreen
-    SetFlag 0x235
-    ClearFlag 0x182
-    SetVar 0x40A9, 1
+    SetFlag FLAG_HIDE_MT_CORONET_2F_CAVE_PAINTING
+    ClearFlag FLAG_HIDE_MT_CORONET_2F_CAVE_PAINTING_SHARDS
+    SetVar VAR_MT_CORONET_2F_STATE, 1
     ReleaseAll
     End
 
-_0341:
+GalacticHQControlRoom_DontPressButton:
     CloseMessage
     ReleaseAll
     End
 
-_0347:
-    Message 12
-    WaitABXPadPress
+GalacticHQControlRoom_AlreadyPressedButton:
+    Message GalacticHQControlRoom_Text_AlreadyPressedButton
+    WaitButton
     CloseMessage
     ReleaseAll
     End
 
     .balign 4, 0
-_0354:
-    MoveAction_03F
-    MoveAction_022
+GalacticHQControlRoom_Movement_SaturnFacePlayerWest:
+    Delay8
+    WalkOnSpotNormalWest
     EndMovement
 
     .balign 4, 0
-_0360:
-    MoveAction_03F
-    MoveAction_020
+GalacticHQControlRoom_Movement_SaturnFacePlayerNorth:
+    Delay8
+    WalkOnSpotNormalNorth
     EndMovement
 
     .balign 4, 0
-_036C:
-    MoveAction_00D 2
+GalacticHQControlRoom_Movement_MespritMoveSouth:
+    WalkNormalSouth 2
     EndMovement
 
     .balign 4, 0
-_0374:
-    MoveAction_00D 2
+GalacticHQControlRoom_Movement_AzelfMoveSouth:
+    WalkNormalSouth 2
     EndMovement
 
     .balign 4, 0
-_037C:
-    MoveAction_00D 2
+GalacticHQControlRoom_Movement_UxieMoveSouth:
+    WalkNormalSouth 2
     EndMovement
 
     .balign 4, 0
-_0384:
-    MoveAction_023
+GalacticHQControlRoom_Movement_PlayerWalkOnSpotEast:
+    WalkOnSpotNormalEast
     EndMovement
 
     .balign 4, 0
-_038C:
-    MoveAction_021
+GalacticHQControlRoom_Movement_PlayerWalkOnSpotSouth:
+    WalkOnSpotNormalSouth
     EndMovement
 
-_0394:
+GalacticHQControlRoom_CoordEvent_Saturn:
     LockAll
-    ApplyMovement 0, _03BC
+    ApplyMovement LOCALID_SATURN, GalacticHQControlRoom_Movement_SaturnWalkOnSpotSouth
     WaitMovement
-    Message 4
+    Message GalacticHQControlRoom_Text_PressButtonAndFreePokemon2
     CloseMessage
-    ApplyMovement 0xFF, _03B4
+    ApplyMovement LOCALID_PLAYER, GalacticHQControlRoom_Movement_PlayerWalkNorth
     WaitMovement
     ReleaseAll
     End
 
     .balign 4, 0
-_03B4:
-    MoveAction_00C
+GalacticHQControlRoom_Movement_PlayerWalkNorth:
+    WalkNormalNorth
     EndMovement
 
     .balign 4, 0
-_03BC:
-    MoveAction_021
+GalacticHQControlRoom_Movement_SaturnWalkOnSpotSouth:
+    WalkOnSpotNormalSouth
     EndMovement
 
-_03C4:
-    PlayFanfare SEQ_SE_CONFIRM
+GalacticHQControlRoom_Uxie:
+    NPCMessage GalacticHQControlRoom_Text_UxieIsSealedInside
+    End
+
+GalacticHQControlRoom_Mesprit:
+    NPCMessage GalacticHQControlRoom_Text_MespritIsSealedInside
+    End
+
+GalacticHQControlRoom_Azelf:
+    NPCMessage GalacticHQControlRoom_Text_AzelfIsSealedInside
+    End
+
+GalacticHQControlRoom_Charon:
+    PlaySE SE_CONFIRM_sseq_3
     LockAll
+    GoToIfSet FLAG_DEFEATED_GALACTIC_HQ_CONTROL_ROOM_SATURN, GalacticHQControlRoom_PerhapsAnotherOption
+    ApplyMovement LOCALID_CHARON, GalacticHQControlRoom_Movement_CharonWalkOnSpotNorth
+    WaitMovement
+    Message GalacticHQControlRoom_Text_WhereWouldTheyGo
+    CloseMessage
+    ApplyMovement LOCALID_SATURN, GalacticHQControlRoom_Movement_SaturnWalkOnSpotWest
+    WaitMovement
+    WaitTime 20, VAR_RESULT
+    Message GalacticHQControlRoom_Text_WhatAreYouSaying
+    Message GalacticHQControlRoom_Text_ILookForwardToPlan
+    CloseMessage
+    WaitTime 20, VAR_RESULT
+    ApplyMovement LOCALID_SATURN, GalacticHQControlRoom_Movement_SaturnWalkOnSpotNorth
+    WaitMovement
+    Message GalacticHQControlRoom_Text_BossCanDoWithoutSupport
+    WaitButton
+    CloseMessage
+    ReleaseAll
+    End
+
+GalacticHQControlRoom_PerhapsAnotherOption:
     FacePlayer
-    Message 13
-    WaitABXPadPress
-    CloseMessage
-    ReleaseAll
-    End
-
-_03D7:
-    PlayFanfare SEQ_SE_CONFIRM
-    LockAll
-    FacePlayer
-    Message 14
-    WaitABXPadPress
-    CloseMessage
-    ReleaseAll
-    End
-
-_03EA:
-    PlayFanfare SEQ_SE_CONFIRM
-    LockAll
-    FacePlayer
-    Message 15
-    WaitABXPadPress
-    CloseMessage
-    ReleaseAll
-    End
-
-_03FD:
-    PlayFanfare SEQ_SE_CONFIRM
-    LockAll
-    GoToIfSet 173, _0450
-    ApplyMovement 4, _0470
-    WaitMovement
-    Message 5
-    CloseMessage
-    ApplyMovement 0, _0460
-    WaitMovement
-    WaitTime 20, 0x800C
-    Message 6
-    Message 7
-    CloseMessage
-    WaitTime 20, 0x800C
-    ApplyMovement 0, _0468
-    WaitMovement
-    Message 8
-    WaitABXPadPress
-    CloseMessage
-    ReleaseAll
-    End
-
-_0450:
-    FacePlayer
-    Message 9
-    WaitABXPadPress
+    Message GalacticHQControlRoom_Text_PerhapsAnotherOption
+    WaitButton
     CloseMessage
     ReleaseAll
     End
 
     .balign 4, 0
-_0460:
-    MoveAction_022
+GalacticHQControlRoom_Movement_SaturnWalkOnSpotWest:
+    WalkOnSpotNormalWest
     EndMovement
 
     .balign 4, 0
-_0468:
-    MoveAction_020
+GalacticHQControlRoom_Movement_SaturnWalkOnSpotNorth:
+    WalkOnSpotNormalNorth
     EndMovement
 
     .balign 4, 0
-_0470:
-    MoveAction_020
+GalacticHQControlRoom_Movement_CharonWalkOnSpotNorth:
+    WalkOnSpotNormalNorth
     EndMovement

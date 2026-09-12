@@ -1,276 +1,271 @@
-    .include "macros/scrcmd.inc"
+#include "macros/scrcmd.inc"
+#include "res/text/bank/veilstone_city_galactic_warehouse.h"
+#include "res/field/events/events_veilstone_city_galactic_warehouse.h"
 
-    .data
 
-    ScriptEntry _003B
-    ScriptEntry _00D8
-    ScriptEntry _0184
-    ScriptEntry _0016
-    ScriptEntry _0197
-    .short 0xFD13
+    ScriptEntry VeilstoneCityGalacticWarehouse_GalacticHQDoor
+    ScriptEntry VeilstoneCityGalacticWarehouse_OnFrame_EnterWithLooker
+    ScriptEntry VeilstoneCityGalacticWarehouse_Looker
+    ScriptEntry VeilstoneCityGalacticWarehouse_OnTransition
+    ScriptEntry VeilstoneCityGalacticWarehouse_CoordEvent_LookerOpenDoor
+    ScriptEntryEnd
 
-_0016:
-    CallIfLt 0x411F, 2, _0025
+VeilstoneCityGalacticWarehouse_OnTransition:
+    CallIfLt VAR_VEILSTONE_CITY_GALACTIC_WAREHOUSE_STATE, 2, VeilstoneCityGalacticWarehouse_SetLookerPosition
     End
 
-_0025:
-    ScrCmd_186 4, 8, 10
-    ScrCmd_188 4, 14
-    ScrCmd_189 4, 0
+VeilstoneCityGalacticWarehouse_SetLookerPosition:
+    SetObjectEventPos LOCALID_LOOKER, 8, 10
+    SetObjectEventMovementType LOCALID_LOOKER, MOVEMENT_TYPE_LOOK_NORTH
+    SetObjectEventDir LOCALID_LOOKER, DIR_NORTH
     Return
 
-_003B:
-    PlayFanfare SEQ_SE_CONFIRM
+VeilstoneCityGalacticWarehouse_GalacticHQDoor:
+    PlaySE SE_CONFIRM_sseq_3
     LockAll
     FacePlayer
-    ScrCmd_07E 0x1CF, 1, 0x800C
-    GoToIfEq 0x800C, 1, _0063
-    Message 7
-    WaitABXPadPress
+    CheckItem ITEM_STORAGE_KEY, 1, VAR_RESULT
+    GoToIfEq VAR_RESULT, TRUE, VeilstoneCityGalacticWarehouse_AskUseTheStorageKey
+    Message VeilstoneCityGalacticWarehouse_Text_ItNeedsASpecialKey
+    WaitButton
     CloseMessage
     ReleaseAll
     End
 
-_0063:
-    Message 8
-    ScrCmd_03E 0x800C
-    GoToIfEq 0x800C, 0, _0086
-    GoToIfEq 0x800C, 1, _00C2
+VeilstoneCityGalacticWarehouse_AskUseTheStorageKey:
+    Message VeilstoneCityGalacticWarehouse_Text_AskUseTheStorageKey
+    ShowYesNoMenu VAR_RESULT
+    GoToIfEq VAR_RESULT, MENU_YES, VeilstoneCityGalacticWarehouse_UseTheStorageKey
+    GoToIfEq VAR_RESULT, MENU_NO, VeilstoneCityGalacticWarehouse_DontUseTheStorageKey
     End
 
-_0086:
-    SetFlag 0x10E
-    ScrCmd_07C 0x1CF, 1, 0x800C
-    ScrCmd_0CD 0
-    Message 9
-    WaitABXPadPress
-    ScrCmd_04B 0x5DC
-    PlayFanfare SEQ_SE_DP_DOOR10
-    ApplyMovement 2, _00C8
-    ApplyMovement 3, _00D0
+VeilstoneCityGalacticWarehouse_UseTheStorageKey:
+    SetFlag FLAG_USED_STORAGE_KEY
+    RemoveItem ITEM_STORAGE_KEY, 1, VAR_RESULT
+    BufferPlayerName 0
+    Message VeilstoneCityGalacticWarehouse_Text_PlayerUsedTheStorageKey
+    WaitButton
+    WaitSE SE_CONFIRM_sseq_3
+    PlaySE SEQ_SE_DP_DOOR10_sseq
+    ApplyMovement LOCALID_GALACTIC_HQ_DOOR_WEST, VeilstoneCityGalacticWarehouse_Movement_GalacticHQDoorWestOpen
+    ApplyMovement LOCALID_GALACTIC_HQ_DOOR_EAST, VeilstoneCityGalacticWarehouse_Movement_GalacticHQDoorEastOpen
     WaitMovement
-    ScrCmd_065 2
-    ScrCmd_065 3
+    RemoveObject LOCALID_GALACTIC_HQ_DOOR_WEST
+    RemoveObject LOCALID_GALACTIC_HQ_DOOR_EAST
     CloseMessage
     ReleaseAll
     End
 
-_00C2:
+VeilstoneCityGalacticWarehouse_DontUseTheStorageKey:
     CloseMessage
     ReleaseAll
     End
 
     .balign 4, 0
-_00C8:
-    MoveAction_012
+VeilstoneCityGalacticWarehouse_Movement_GalacticHQDoorWestOpen:
+    WalkFastWest
     EndMovement
 
     .balign 4, 0
-_00D0:
-    MoveAction_013
+VeilstoneCityGalacticWarehouse_Movement_GalacticHQDoorEastOpen:
+    WalkFastEast
     EndMovement
 
-_00D8:
+VeilstoneCityGalacticWarehouse_OnFrame_EnterWithLooker:
     LockAll
-    ApplyMovement 4, _012C
+    ApplyMovement LOCALID_LOOKER, VeilstoneCityGalacticWarehouse_Movement_LookerWalkToDoor
     WaitMovement
-    Message 0
+    Message VeilstoneCityGalacticWarehouse_Text_AKeyIsNecessary
     CloseMessage
-    ApplyMovement 0xFF, _0168
-    ApplyMovement 4, _0134
+    ApplyMovement LOCALID_PLAYER, VeilstoneCityGalacticWarehouse_Movement_PlayerWatchLookerWalkToHMs
+    ApplyMovement LOCALID_LOOKER, VeilstoneCityGalacticWarehouse_Movement_LookerWalkToHM
     WaitMovement
-    ScrCmd_0CD 0
-    Message 1
+    BufferPlayerName 0
+    Message VeilstoneCityGalacticWarehouse_Text_ThisHMIsFly
     CloseMessage
-    ApplyMovement 0xFF, _0174
-    ApplyMovement 4, _015C
+    ApplyMovement LOCALID_PLAYER, VeilstoneCityGalacticWarehouse_Movement_PlayerFaceLookerNorth
+    ApplyMovement LOCALID_LOOKER, VeilstoneCityGalacticWarehouse_Movement_LookerWalkToPlayer
     WaitMovement
-    SetVar 0x407C, 1
-    SetVar 0x411F, 2
-    Message 2
-    WaitABXPadPress
+    SetVar VAR_PASTORIA_CITY_STATE, 1
+    SetVar VAR_VEILSTONE_CITY_GALACTIC_WAREHOUSE_STATE, 2
+    Message VeilstoneCityGalacticWarehouse_Text_WeDidntLearnMuch
+    WaitButton
     CloseMessage
     ReleaseAll
     End
 
     .balign 4, 0
-_012C:
-    MoveAction_00C 2
+VeilstoneCityGalacticWarehouse_Movement_LookerWalkToDoor:
+    WalkNormalNorth 2
     EndMovement
 
     .balign 4, 0
-_0134:
-    MoveAction_00D 2
-    MoveAction_022
-    MoveAction_03F 2
-    MoveAction_023
-    MoveAction_03F 2
-    MoveAction_00F 5
-    MoveAction_020
-    MoveAction_04B
-    MoveAction_022
+VeilstoneCityGalacticWarehouse_Movement_LookerWalkToHM:
+    WalkNormalSouth 2
+    WalkOnSpotNormalWest
+    Delay8 2
+    WalkOnSpotNormalEast
+    Delay8 2
+    WalkNormalEast 5
+    WalkOnSpotNormalNorth
+    EmoteExclamationMark
+    WalkOnSpotNormalWest
     EndMovement
 
     .balign 4, 0
-_015C:
-    MoveAction_00E 5
-    MoveAction_021
+VeilstoneCityGalacticWarehouse_Movement_LookerWalkToPlayer:
+    WalkNormalWest 5
+    WalkOnSpotNormalSouth
     EndMovement
 
     .balign 4, 0
-_0168:
-    MoveAction_03F 9
-    MoveAction_023
+VeilstoneCityGalacticWarehouse_Movement_PlayerWatchLookerWalkToHMs:
+    Delay8 9
+    WalkOnSpotNormalEast
     EndMovement
 
     .balign 4, 0
-_0174:
-    MoveAction_03F 4
-    MoveAction_03D
-    MoveAction_020
+VeilstoneCityGalacticWarehouse_Movement_PlayerFaceLookerNorth:
+    Delay8 4
+    Delay2
+    WalkOnSpotNormalNorth
     EndMovement
 
-_0184:
-    PlayFanfare SEQ_SE_CONFIRM
+VeilstoneCityGalacticWarehouse_Looker:
+    NPCMessage VeilstoneCityGalacticWarehouse_Text_GalacticTransportedToPastoria
+    End
+
+VeilstoneCityGalacticWarehouse_CoordEvent_LookerOpenDoor:
     LockAll
-    FacePlayer
-    Message 3
-    WaitABXPadPress
+    SetObjectEventPos LOCALID_LOOKER, 8, 11
+    SetObjectEventMovementType LOCALID_LOOKER, MOVEMENT_TYPE_LOOK_NORTH
+    SetObjectEventDir LOCALID_LOOKER, DIR_NORTH
+    ClearFlag FLAG_HIDE_VEILSTONE_CITY_GALACTIC_WAREHOUSE_LOOKER
+    AddObject LOCALID_LOOKER
+    GetPlayerMapPos VAR_0x8004, VAR_0x8005
+    CallIfEq VAR_0x8004, 8, VeilstoneCityGalacticWarehouse_LookerWalkToPlayerX8
+    CallIfEq VAR_0x8004, 9, VeilstoneCityGalacticWarehouse_LookerWalkToPlayerX9
+    Message VeilstoneCityGalacticWarehouse_Text_IHaveKeptYouWaiting
     CloseMessage
+    ApplyMovement LOCALID_LOOKER, VeilstoneCityGalacticWarehouse_Movement_LookerWalkOnSpotNorth
+    WaitMovement
+    Message VeilstoneCityGalacticWarehouse_Text_IWillUseTheStorageKey
+    CloseMessage
+    SetFlag FLAG_USED_STORAGE_KEY
+    WaitSE SE_CONFIRM_sseq_3
+    PlaySE SEQ_SE_DP_DOOR10_sseq
+    ApplyMovement LOCALID_GALACTIC_HQ_DOOR_WEST, VeilstoneCityGalacticWarehouse_Movement_GalacticHQDoorWestOpen
+    ApplyMovement LOCALID_GALACTIC_HQ_DOOR_EAST, VeilstoneCityGalacticWarehouse_Movement_GalacticHQDoorEastOpen
+    WaitMovement
+    RemoveObject LOCALID_GALACTIC_HQ_DOOR_WEST
+    RemoveObject LOCALID_GALACTIC_HQ_DOOR_EAST
+    CallIfEq VAR_0x8004, 8, VeilstoneCityGalacticWarehouse_LookerFacePlayerWest
+    CallIfEq VAR_0x8004, 9, VeilstoneCityGalacticWarehouse_LookerFacePlayerEast
+    Message VeilstoneCityGalacticWarehouse_Text_IWillGoOnAhead
+    CloseMessage
+    CallIfEq VAR_0x8004, 8, VeilstoneCityGalacticWarehouse_LookerEnterGalacticHQX8
+    CallIfEq VAR_0x8004, 9, VeilstoneCityGalacticWarehouse_LookerEnterGalacticHQX9
+    RemoveObject LOCALID_LOOKER
+    SetFlag FLAG_HIDE_VEILSTONE_CITY_LOOKER
+    SetVar VAR_VEILSTONE_CITY_GALACTIC_WAREHOUSE_STATE, 4
     ReleaseAll
     End
 
-_0197:
-    LockAll
-    ScrCmd_186 4, 8, 11
-    ScrCmd_188 4, 14
-    ScrCmd_189 4, 0
-    ClearFlag 0x20D
-    ScrCmd_064 4
-    ScrCmd_069 0x8004, 0x8005
-    CallIfEq 0x8004, 8, _025A
-    CallIfEq 0x8004, 9, _026E
-    Message 4
-    CloseMessage
-    ApplyMovement 4, _0308
-    WaitMovement
-    Message 5
-    CloseMessage
-    SetFlag 0x10E
-    ScrCmd_04B 0x5DC
-    PlayFanfare SEQ_SE_DP_DOOR10
-    ApplyMovement 2, _00C8
-    ApplyMovement 3, _00D0
-    WaitMovement
-    ScrCmd_065 2
-    ScrCmd_065 3
-    CallIfEq 0x8004, 8, _0282
-    CallIfEq 0x8004, 9, _028E
-    Message 6
-    CloseMessage
-    CallIfEq 0x8004, 8, _029A
-    CallIfEq 0x8004, 9, _02AE
-    ScrCmd_065 4
-    SetFlag 0x28A
-    SetVar 0x411F, 4
-    ReleaseAll
-    End
-
-_025A:
-    ApplyMovement 4, _02E8
-    ApplyMovement 0xFF, _02C4
+VeilstoneCityGalacticWarehouse_LookerWalkToPlayerX8:
+    ApplyMovement LOCALID_LOOKER, VeilstoneCityGalacticWarehouse_Movement_LookerWalkToPlayerX8
+    ApplyMovement LOCALID_PLAYER, VeilstoneCityGalacticWarehouse_Movement_PlayerFaceLookerEast
     WaitMovement
     Return
 
-_026E:
-    ApplyMovement 4, _02FC
-    ApplyMovement 0xFF, _02D0
+VeilstoneCityGalacticWarehouse_LookerWalkToPlayerX9:
+    ApplyMovement LOCALID_LOOKER, VeilstoneCityGalacticWarehouse_Movement_LookerWalkToPlayerX9
+    ApplyMovement LOCALID_PLAYER, VeilstoneCityGalacticWarehouse_Movement_PlayerFaceLookerWest
     WaitMovement
     Return
 
-_0282:
-    ApplyMovement 4, _0318
+VeilstoneCityGalacticWarehouse_LookerFacePlayerWest:
+    ApplyMovement LOCALID_LOOKER, VeilstoneCityGalacticWarehouse_Movement_LookerFacePlayerWest
     WaitMovement
     Return
 
-_028E:
-    ApplyMovement 4, _0310
+VeilstoneCityGalacticWarehouse_LookerFacePlayerEast:
+    ApplyMovement LOCALID_LOOKER, VeilstoneCityGalacticWarehouse_Movement_LookerFacePlayerEast
     WaitMovement
     Return
 
-_029A:
-    ApplyMovement 4, _0320
-    ApplyMovement 0xFF, _02DC
+VeilstoneCityGalacticWarehouse_LookerEnterGalacticHQX8:
+    ApplyMovement LOCALID_LOOKER, VeilstoneCityGalacticWarehouse_Movement_LookerEnterGalacticHQX8
+    ApplyMovement LOCALID_PLAYER, VeilstoneCityGalacticWarehouse_Movement_PlayerWatchLookerEnterGalacticHQ
     WaitMovement
     Return
 
-_02AE:
-    ApplyMovement 4, _0338
-    ApplyMovement 0xFF, _02DC
+VeilstoneCityGalacticWarehouse_LookerEnterGalacticHQX9:
+    ApplyMovement LOCALID_LOOKER, VeilstoneCityGalacticWarehouse_Movement_LookerEnterGalacticHQX9
+    ApplyMovement LOCALID_PLAYER, VeilstoneCityGalacticWarehouse_Movement_PlayerWatchLookerEnterGalacticHQ
     WaitMovement
     Return
 
     .balign 4, 0
-_02C4:
-    MoveAction_03F 4
-    MoveAction_023
+VeilstoneCityGalacticWarehouse_Movement_PlayerFaceLookerEast:
+    Delay8 4
+    WalkOnSpotNormalEast
     EndMovement
 
     .balign 4, 0
-_02D0:
-    MoveAction_03F 3
-    MoveAction_022
+VeilstoneCityGalacticWarehouse_Movement_PlayerFaceLookerWest:
+    Delay8 3
+    WalkOnSpotNormalWest
     EndMovement
 
     .balign 4, 0
-_02DC:
-    MoveAction_03F
-    MoveAction_020
+VeilstoneCityGalacticWarehouse_Movement_PlayerWatchLookerEnterGalacticHQ:
+    Delay8
+    WalkOnSpotNormalNorth
     EndMovement
 
     .balign 4, 0
-_02E8:
-    MoveAction_00C 2
-    MoveAction_00F
-    MoveAction_00C
-    MoveAction_022
+VeilstoneCityGalacticWarehouse_Movement_LookerWalkToPlayerX8:
+    WalkNormalNorth 2
+    WalkNormalEast
+    WalkNormalNorth
+    WalkOnSpotNormalWest
     EndMovement
 
     .balign 4, 0
-_02FC:
-    MoveAction_00C 3
-    MoveAction_023
+VeilstoneCityGalacticWarehouse_Movement_LookerWalkToPlayerX9:
+    WalkNormalNorth 3
+    WalkOnSpotNormalEast
     EndMovement
 
     .balign 4, 0
-_0308:
-    MoveAction_020
+VeilstoneCityGalacticWarehouse_Movement_LookerWalkOnSpotNorth:
+    WalkOnSpotNormalNorth
     EndMovement
 
     .balign 4, 0
-_0310:
-    MoveAction_023
+VeilstoneCityGalacticWarehouse_Movement_LookerFacePlayerEast:
+    WalkOnSpotNormalEast
     EndMovement
 
     .balign 4, 0
-_0318:
-    MoveAction_022
+VeilstoneCityGalacticWarehouse_Movement_LookerFacePlayerWest:
+    WalkOnSpotNormalWest
     EndMovement
 
     .balign 4, 0
-_0320:
-    MoveAction_00C 5
-    MoveAction_026
-    MoveAction_027
-    MoveAction_03F 2
-    MoveAction_013 6
+VeilstoneCityGalacticWarehouse_Movement_LookerEnterGalacticHQX8:
+    WalkNormalNorth 5
+    WalkOnSpotFastWest
+    WalkOnSpotFastEast
+    Delay8 2
+    WalkFastEast 6
     EndMovement
 
     .balign 4, 0
-_0338:
-    MoveAction_00C 5
-    MoveAction_026
-    MoveAction_027
-    MoveAction_03F 2
-    MoveAction_013 7
+VeilstoneCityGalacticWarehouse_Movement_LookerEnterGalacticHQX9:
+    WalkNormalNorth 5
+    WalkOnSpotFastWest
+    WalkOnSpotFastEast
+    Delay8 2
+    WalkFastEast 7
     EndMovement

@@ -1,59 +1,57 @@
-    .include "macros/scrcmd.inc"
+#include "macros/scrcmd.inc"
+#include "res/text/bank/old_chateau_back_middle_west_room.h"
 
-    .data
 
-    ScriptEntry _0006
-    .short 0xFD13
+    ScriptEntry OldChateauBackMiddleWestRoom_TV
+    ScriptEntryEnd
 
-_0006:
-    PlayFanfare SEQ_SE_CONFIRM
+OldChateauBackMiddleWestRoom_TV:
+    PlaySE SE_CONFIRM_sseq_3
     LockAll
-    GoToIfSet 0x149, _009C
-    GoToIfSet 0xAB0, _009C
-    GetTimeOfDay 0x800C
-    GoToIfLt 0x800C, 3, _009C
-    Message 1
-    ScrCmd_03E 0x800C
-    GoToIfEq 0x800C, 1, _0096
-    ScrCmd_0CD 0
-    Message 2
+    GoToIfSet FLAG_CAUGHT_OLD_CHATEAU_ROTOM, OldChateauBackMiddleWestRoom_TVHasMalevolentFeel
+    GoToIfSet FLAG_DAILY_BATTLED_OLD_CHATEAU_ROTOM, OldChateauBackMiddleWestRoom_TVHasMalevolentFeel
+    GetTimeOfDay VAR_RESULT
+    GoToIfLt VAR_RESULT, TIMEOFDAY_NIGHT, OldChateauBackMiddleWestRoom_TVHasMalevolentFeel
+    Message OldChateauBackMiddleWestRoom_Text_WantToThumpTheTV
+    ShowYesNoMenu VAR_RESULT
+    GoToIfEq VAR_RESULT, MENU_NO, OldChateauBackMiddleWestRoom_End
+    BufferPlayerName 0
+    Message OldChateauBackMiddleWestRoom_Text_PlayerThumpedTheTVSet
     CloseMessage
-    ScrCmd_04C 0x1DF, 0
-    ScrCmd_04D
-    SetFlag 0xAB0
-    ScrCmd_124 0x1DF, 20
-    ScrCmd_0EC 0x800C
-    GoToIfEq 0x800C, 0, _00A7
-    ScrCmd_2BC 0x800C
-    GoToIfEq 0x800C, 1, _008B
-    SetFlag 0x149
+    PlayCry SPECIES_ROTOM
+    WaitCry
+    SetFlag FLAG_DAILY_BATTLED_OLD_CHATEAU_ROTOM
+    StartWildBattle SPECIES_ROTOM, 20
+    CheckWonBattle VAR_RESULT
+    GoToIfEq VAR_RESULT, FALSE, OldChateauBackMiddleWestRoom_BlackOut
+    CheckDidNotCapture VAR_RESULT
+    GoToIfEq VAR_RESULT, TRUE, OldChateauBackMiddleWestRoom_RotomDisappearedIntoTV
+    SetFlag FLAG_CAUGHT_OLD_CHATEAU_ROTOM
     ReleaseAll
     End
 
-_008B:
-    Message 3
-    WaitABXPadPress
-    CloseMessage
-    ReleaseAll
-    End
-
-_0096:
+OldChateauBackMiddleWestRoom_RotomDisappearedIntoTV:
+    Message OldChateauBackMiddleWestRoom_Text_RotomDisappearedIntoTV
+    WaitButton
     CloseMessage
     ReleaseAll
     End
 
-_009C:
-    Message 0
-    WaitABXPadPress
+OldChateauBackMiddleWestRoom_End:
     CloseMessage
     ReleaseAll
     End
 
-_00A7:
-    ScrCmd_0EB
+OldChateauBackMiddleWestRoom_TVHasMalevolentFeel:
+    Message OldChateauBackMiddleWestRoom_Text_TVHasMalevolentFeel
+    WaitButton
+    CloseMessage
     ReleaseAll
     End
 
-    .byte 0
-    .byte 0
-    .byte 0
+OldChateauBackMiddleWestRoom_BlackOut:
+    BlackOutFromBattle
+    ReleaseAll
+    End
+
+    .balign 4, 0

@@ -1,6 +1,5 @@
-    .include "macros/btlcmd.inc"
+#include "macros/btlcmd.inc"
 
-    .data
 
 _000:
     TryRestoreStatusOnSwitch BTLSCR_SWITCHED_MON, _007
@@ -16,7 +15,7 @@ _007:
 _020:
     RecallPokemon BTLSCR_SWITCHED_MON
     Wait 
-    HealthbarSlideOut BTLSCR_SWITCHED_MON
+    HealthBoxSlideOut BTLSCR_SWITCHED_MON
     Wait 
 
 _026:
@@ -30,7 +29,7 @@ _026:
 
 _041:
     // Go! {0}!
-    PrintMessage pl_msg_00000368_00979, TAG_NICKNAME, BTLSCR_SWITCHED_MON
+    PrintMessage BattleStrings_Text_GoPokemon, TAG_NICKNAME, BTLSCR_SWITCHED_MON
 
 _045:
     Wait 
@@ -39,10 +38,10 @@ _045:
     FreePartyGaugeGraphics 
     PokemonSendOut BTLSCR_SWITCHED_MON
     WaitTime 72
-    HealthbarSlideIn BTLSCR_SWITCHED_MON
+    HealthBoxSlideIn BTLSCR_SWITCHED_MON
     Wait 
     Call BATTLE_SUBSCRIPT_HAZARDS_CHECK
-    CompareVarToValue OPCODE_GT, BTLVAR_FAINTED_MON, BATTLER_ENEMY_SLOT_2, _079
+    CompareVarToValue OPCODE_GT, BTLVAR_FAINTED_MON, BATTLER_ENEMY_2, _079
     UpdateVarFromVar OPCODE_FLAG_INDEX, BTLVAR_SCRIPT_TEMP, BTLVAR_FAINTED_MON
     UpdateVar OPCODE_LEFT_SHIFT, BTLVAR_SCRIPT_TEMP, 24
     CompareVarToVar OPCODE_FLAG_NOT, BTLVAR_BATTLE_CTX_STATUS, BTLVAR_SCRIPT_TEMP, _079

@@ -1,78 +1,52 @@
-    .include "macros/scrcmd.inc"
+#include "macros/scrcmd.inc"
+#include "res/text/bank/jubilife_city_condominiums_1f.h"
 
-    .data
 
-    ScriptEntry _0012
-    ScriptEntry _0025
-    ScriptEntry _0044
-    ScriptEntry _0063
-    .short 0xFD13
+    ScriptEntry JubilifeCityCondominiums1F_ExpertF
+    ScriptEntry JubilifeCityCondominiums1F_Pikachu
+    ScriptEntry JubilifeCityCondominiums1F_Pachirisu
+    ScriptEntry JubilifeCityCondominiums1F_Beauty
+    ScriptEntryEnd
 
-_0012:
-    PlayFanfare SEQ_SE_CONFIRM
+JubilifeCityCondominiums1F_ExpertF:
+    NPCMessage JubilifeCityCondominiums1F_Text_IsntMyPoketchQuiteFetching
+    End
+
+JubilifeCityCondominiums1F_Pikachu:
+    PokemonCryAndMessage SPECIES_PIKACHU, JubilifeCityCondominiums1F_Text_PikachuCry
+    End
+
+JubilifeCityCondominiums1F_Pachirisu:
+    PokemonCryAndMessage SPECIES_PACHIRISU, JubilifeCityCondominiums1F_Text_PachirisuCry
+    End
+
+JubilifeCityCondominiums1F_Beauty:
+    PlaySE SE_CONFIRM_sseq_3
     LockAll
     FacePlayer
-    Message 0
-    WaitABXPadPress
+    GoToIfSet FLAG_RECEIVED_JUBILIFE_CITY_CONDOMINIUMS_1F_QUICK_CLAW, JubilifeCityCondominiums1F_ObtainedQuickClaw
+    BufferItemName 0, ITEM_QUICK_CLAW
+    Message JubilifeCityCondominiums1F_Text_MakePokemonHoldThis
+    SetVar VAR_0x8004, ITEM_QUICK_CLAW
+    SetVar VAR_0x8005, 1
+    GoToIfCannotFitItem VAR_0x8004, VAR_0x8005, VAR_RESULT, JubilifeCityCondominiums1F_BagIsFull
+    SetFlag FLAG_RECEIVED_JUBILIFE_CITY_CONDOMINIUMS_1F_QUICK_CLAW
+    Common_GiveItemQuantityNoLineFeed
     CloseMessage
     ReleaseAll
     End
 
-_0025:
-    PlayFanfare SEQ_SE_CONFIRM
-    LockAll
-    FacePlayer
-    ScrCmd_04B 0x5DC
-    ScrCmd_04C 25, 0
-    Message 1
-    ScrCmd_04D
-    WaitABXPadPress
+JubilifeCityCondominiums1F_BagIsFull:
+    Common_MessageBagIsFull
     CloseMessage
     ReleaseAll
     End
 
-_0044:
-    PlayFanfare SEQ_SE_CONFIRM
-    LockAll
-    FacePlayer
-    ScrCmd_04B 0x5DC
-    ScrCmd_04C 0x1A1, 0
-    Message 2
-    ScrCmd_04D
-    WaitABXPadPress
+JubilifeCityCondominiums1F_ObtainedQuickClaw:
+    Message JubilifeCityCondominiums1F_Text_SometimesAttackFirst
+    WaitButton
     CloseMessage
     ReleaseAll
     End
 
-_0063:
-    PlayFanfare SEQ_SE_CONFIRM
-    LockAll
-    FacePlayer
-    GoToIfSet 191, _00B7
-    ScrCmd_0D1 0, 217
-    Message 3
-    SetVar 0x8004, 217
-    SetVar 0x8005, 1
-    ScrCmd_07D 0x8004, 0x8005, 0x800C
-    GoToIfEq 0x800C, 0, _00AD
-    SetFlag 191
-    CallCommonScript 0x7E0
-    CloseMessage
-    ReleaseAll
-    End
-
-_00AD:
-    CallCommonScript 0x7E1
-    CloseMessage
-    ReleaseAll
-    End
-
-_00B7:
-    Message 4
-    WaitABXPadPress
-    CloseMessage
-    ReleaseAll
-    End
-
-    .byte 0
-    .byte 0
+    .balign 4, 0

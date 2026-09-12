@@ -1,96 +1,57 @@
-    .include "macros/scrcmd.inc"
+#include "macros/scrcmd.inc"
+#include "res/text/bank/route_212_south.h"
 
-    .data
 
-    ScriptEntry _007D
-    ScriptEntry _0090
-    ScriptEntry _00A3
-    ScriptEntry _00B6
-    ScriptEntry _00CD
-    ScriptEntry _00F9
-    ScriptEntry _0022
-    ScriptEntry _00E4
-    .short 0xFD13
+    ScriptEntry Route212South_SchoolKidM
+    ScriptEntry Route212South_Lady
+    ScriptEntry Route212South_Collector
+    ScriptEntry Route212South_ArrowSignpostPastoriaCity
+    ScriptEntry Route212South_SignboardShardsWanted
+    ScriptEntry Route212South_PolicemanDanny
+    ScriptEntry Route212South_OnTransition
+    ScriptEntry Route212South_TrainerTipsSignpost
+    ScriptEntryEnd
 
-_0022:
-    GetTimeOfDay 0x4000
-    GoToIfEq 0x4000, 0, _0069
-    GoToIfEq 0x4000, 1, _0069
-    GoToIfEq 0x4000, 2, _0069
-    GoToIfEq 0x4000, 3, _0073
-    GoToIfEq 0x4000, 4, _0073
+Route212South_OnTransition:
+    GetTimeOfDay VAR_MAP_LOCAL_0x00
+    GoToIfInRange VAR_MAP_LOCAL_0x00, TIMEOFDAY_MORNING, TIMEOFDAY_TWILIGHT, Route212South_SetPolicemanNoBattle
+    GoToIfInRange VAR_MAP_LOCAL_0x00, TIMEOFDAY_NIGHT, TIMEOFDAY_LATE_NIGHT, Route212South_SetPolicemanBattle
     End
 
-_0069:
-    ClearFlag 0x268
-    SetFlag 0x269
+Route212South_SetPolicemanNoBattle:
+    ClearFlag FLAG_HIDE_ROUTE_212_SOUTH_POLICEMAN_DANNY_NO_BATTLE
+    SetFlag FLAG_HIDE_ROUTE_212_SOUTH_POLICEMAN_DANNY
     End
 
-_0073:
-    ClearFlag 0x269
-    SetFlag 0x268
+Route212South_SetPolicemanBattle:
+    ClearFlag FLAG_HIDE_ROUTE_212_SOUTH_POLICEMAN_DANNY
+    SetFlag FLAG_HIDE_ROUTE_212_SOUTH_POLICEMAN_DANNY_NO_BATTLE
     End
 
-_007D:
-    PlayFanfare SEQ_SE_CONFIRM
-    LockAll
-    FacePlayer
-    Message 0
-    WaitABXPadPress
-    CloseMessage
-    ReleaseAll
+Route212South_SchoolKidM:
+    NPCMessage Route212South_Text_CrossLogsOnBike
     End
 
-_0090:
-    PlayFanfare SEQ_SE_CONFIRM
-    LockAll
-    FacePlayer
-    Message 1
-    WaitABXPadPress
-    CloseMessage
-    ReleaseAll
+Route212South_Lady:
+    NPCMessage Route212South_Text_ImNotStuck
     End
 
-_00A3:
-    PlayFanfare SEQ_SE_CONFIRM
-    LockAll
-    FacePlayer
-    Message 2
-    WaitABXPadPress
-    CloseMessage
-    ReleaseAll
+Route212South_Collector:
+    NPCMessage Route212South_Text_HowAboutPokemonMansion
     End
 
-_00B6:
-    ScrCmd_036 4, 1, 0, 0x800C
-    ScrCmd_038 3
-    ScrCmd_039
-    ScrCmd_03B 0x800C
-    CallCommonScript 0x7D0
+Route212South_ArrowSignpostPastoriaCity:
+    ShowArrowSign Route212South_Text_SignPastoriaCity
     End
 
-_00CD:
-    ScrCmd_036 5, 2, 0, 0x800C
-    ScrCmd_038 3
-    ScrCmd_039
-    ScrCmd_03B 0x800C
-    CallCommonScript 0x7D0
+Route212South_SignboardShardsWanted:
+    ShowLandmarkSign Route212South_Text_SignShardsWanted
     End
 
-_00E4:
-    ScrCmd_037 3, 0
-    ScrCmd_038 3
-    ScrCmd_039
-    ScrCmd_03A 6, 0x800C
-    CallCommonScript 0x7D0
+Route212South_TrainerTipsSignpost:
+    ShowScrollingSign Route212South_Text_TrainerTipsBog
     End
 
-_00F9:
-    PlayFanfare SEQ_SE_CONFIRM
-    LockAll
-    FacePlayer
-    Message 3
-    WaitABXPadPress
-    CloseMessage
-    ReleaseAll
+Route212South_PolicemanDanny:
+    NPCMessage Route212South_Text_ConstantPatrol
     End

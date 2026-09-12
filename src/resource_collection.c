@@ -6,7 +6,7 @@
 #include "constants/heap.h"
 
 #include "heap.h"
-#include "unk_02017728.h"
+#include "system.h"
 
 #define RESOURCE_ID_INVALID (-1)
 
@@ -20,15 +20,15 @@ static NNSG3dResTex *TextureResource_GetTexResWithData(const TextureResource *te
 static void TexRes_UploadToVRam(NNSG3dResTex *texRes, TextureResource *texResource);
 static void TexRes_AssignVRamKeys(NNSG3dResTex *texRes, NNSGfdTexKey texKey, NNSGfdTexKey tex4x4Key, NNSGfdPlttKey paletteKey);
 static void TexRes_ReleaseVRamKeys(NNSG3dResTex *texRes);
-static void *CreateStrippedTexture(void *resFile, enum HeapId heapID);
+static void *CreateStrippedTexture(void *resFile, enum HeapID heapID);
 static u32 GetStrippedTextureResourceSize(const void *resFile);
 
-ResourceCollection *ResourceCollection_New(s32 capacity, enum HeapId heapID)
+ResourceCollection *ResourceCollection_New(s32 capacity, enum HeapID heapID)
 {
-    ResourceCollection *resMgr = Heap_AllocFromHeap(heapID, sizeof(ResourceCollection));
+    ResourceCollection *resMgr = Heap_Alloc(heapID, sizeof(ResourceCollection));
     GF_ASSERT(resMgr);
 
-    resMgr->resources = Heap_AllocFromHeap(heapID, sizeof(Resource) * capacity);
+    resMgr->resources = Heap_Alloc(heapID, sizeof(Resource) * capacity);
     GF_ASSERT(resMgr->resources);
 
     for (int i = 0; i < capacity; i++) {
@@ -46,8 +46,8 @@ void ResourceCollection_Delete(ResourceCollection *collection)
     GF_ASSERT(collection);
 
     ResourceCollection_Clear(collection);
-    Heap_FreeToHeap(collection->resources);
-    Heap_FreeToHeap(collection);
+    Heap_Free(collection->resources);
+    Heap_Free(collection);
 }
 
 BOOL ResourceCollection_IsIDUnused(ResourceCollection *collection, int id)
@@ -72,7 +72,7 @@ Resource *ResourceCollection_Add(ResourceCollection *collection, void *data, int
     return resource;
 }
 
-Resource *ResourceCollection_AddFromFile(ResourceCollection *collection, const char *filename, int id, enum HeapId heapID)
+Resource *ResourceCollection_AddFromFile(ResourceCollection *collection, const char *filename, int id, enum HeapID heapID)
 {
     GF_ASSERT(collection);
     GF_ASSERT(filename);
@@ -97,7 +97,7 @@ void ResourceCollection_Remove(ResourceCollection *collection, Resource *resourc
     GF_ASSERT(resource);
 
     if (resource->data) {
-        Heap_FreeToHeap(resource->data);
+        Heap_Free(resource->data);
         resource->data = NULL;
     }
 
@@ -141,7 +141,7 @@ void Resource_SetData(Resource *resource, void *data)
     GF_ASSERT(resource);
 
     if (resource->data) {
-        Heap_FreeToHeap(resource->data);
+        Heap_Free(resource->data);
     }
 
     resource->data = data;
@@ -174,12 +174,12 @@ static void Resource_Init(Resource *resource)
     resource->data = NULL;
 }
 
-TextureResourceManager *TextureResourceManager_New(s32 maxTextures, enum HeapId heapID)
+TextureResourceManager *TextureResourceManager_New(s32 maxTextures, enum HeapID heapID)
 {
-    TextureResourceManager *texMgr = Heap_AllocFromHeap(heapID, sizeof(TextureResourceManager));
+    TextureResourceManager *texMgr = Heap_Alloc(heapID, sizeof(TextureResourceManager));
 
     texMgr->resources = ResourceCollection_New(maxTextures, heapID);
-    texMgr->textures = Heap_AllocFromHeap(heapID, sizeof(TextureResource) * maxTextures);
+    texMgr->textures = Heap_Alloc(heapID, sizeof(TextureResource) * maxTextures);
 
     for (int i = 0; i < maxTextures; i++) {
         TextureResource_Init(texMgr->textures + i);
@@ -194,8 +194,8 @@ void TextureResourceManager_Delete(TextureResourceManager *texMgr)
 
     TextureResourceManager_Clear(texMgr);
     ResourceCollection_Delete(texMgr->resources);
-    Heap_FreeToHeap(texMgr->textures);
-    Heap_FreeToHeap(texMgr);
+    Heap_Free(texMgr->textures);
+    Heap_Free(texMgr);
 }
 
 BOOL TextureResourceManager_IsIDUnused(const TextureResourceManager *texMgr, int id)
@@ -204,7 +204,7 @@ BOOL TextureResourceManager_IsIDUnused(const TextureResourceManager *texMgr, int
     return ResourceCollection_IsIDUnused(texMgr->resources, id);
 }
 
-TextureResource *TextureResourceManager_AddTexture(const TextureResourceManager *texMgr, void *data, int id, enum TextureResourceMode mode, enum HeapId heapID)
+TextureResource *TextureResourceManager_AddTexture(const TextureResourceManager *texMgr, void *data, int id, enum TextureResourceMode mode, enum HeapID heapID)
 {
     TextureResource *texResource;
     void *resourceData;
@@ -227,7 +227,7 @@ TextureResource *TextureResourceManager_AddTexture(const TextureResourceManager 
     return texResource;
 }
 
-TextureResource *TextureResourceManager_AddTextureAndAllocVRam(TextureResourceManager *texMgr, void *data, int id, enum TextureResourceMode mode, enum HeapId heapID)
+TextureResource *TextureResourceManager_AddTextureAndAllocVRam(TextureResourceManager *texMgr, void *data, int id, enum TextureResourceMode mode, enum HeapID heapID)
 {
     TextureResource *texResource = TextureResourceManager_AddTexture(texMgr, data, id, mode, heapID);
     TextureResource_AllocVRam(texResource);
@@ -241,7 +241,7 @@ void TextureResourceManager_RemoveTexture(TextureResourceManager *texMgr, Textur
     GF_ASSERT(texResource);
 
     if (texResource->mode == TEX_RESOURCE_MODE_SEPARATED && (texResource->texDataDiscarded == 0)) {
-        Heap_FreeToHeap(texResource->textureData);
+        Heap_Free(texResource->textureData);
         texResource->mode = NULL;
     }
 
@@ -354,7 +354,7 @@ void TextureResource_DiscardTextureData(TextureResource *texResource)
         texResource->texKey,
         texResource->tex4x4Key,
         texResource->paletteKey);
-    Heap_FreeToHeap(texResource->textureData);
+    Heap_Free(texResource->textureData);
 
     texResource->textureData = NULL;
     texResource->texDataDiscarded = TRUE;
@@ -484,10 +484,10 @@ static void TexRes_ReleaseVRamKeys(NNSG3dResTex *texRes)
 }
 
 // Duplicates a texture resource without the actual texture data
-static void *CreateStrippedTexture(void *resFile, enum HeapId heapID)
+static void *CreateStrippedTexture(void *resFile, enum HeapID heapID)
 {
     u32 size = GetStrippedTextureResourceSize(resFile);
-    void *stripped = Heap_AllocFromHeap(heapID, size);
+    void *stripped = Heap_Alloc(heapID, size);
     memcpy(stripped, resFile, size);
 
     return stripped;

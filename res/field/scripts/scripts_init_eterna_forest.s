@@ -1,15 +1,12 @@
-    .include "macros/scrcmd.inc"
+#include "macros/scrcmd.inc"
 
-    .data
 
-    .byte 2
-    .short 11, 0
-    .byte 1
-    ScriptEntry _000B
-    .byte 0
+    InitScriptEntry_OnTransition 11
+    InitScriptEntry_OnFrameTable InitScriptFrameTable
+    InitScriptEntryEnd
 
-_000B:
-    .short 0x40CD, 1, 12
-    .short 0
+InitScriptFrameTable:
+    InitScriptGoToIfEqual VAR_ETERNA_FOREST_CHERYL_OLD_CHATEAU_CUTSCENE_STATE, 1, 12
+    InitScriptFrameTableEnd
 
-    .balign 4, 0
+    InitScriptEnd

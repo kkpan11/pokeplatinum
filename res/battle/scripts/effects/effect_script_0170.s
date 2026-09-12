@@ -1,6 +1,5 @@
-    .include "macros/btlcmd.inc"
+#include "macros/btlcmd.inc"
 
-    .data
 
 _000:
     CompareVarToValue OPCODE_NEQ, BTLVAR_ATTACKER_PHYSICAL_DAMAGE_MASK, 0, _016
@@ -13,5 +12,5 @@ _000:
 _016:
     UpdateVar OPCODE_FLAG_ON, BTLVAR_MOVE_STATUS_FLAGS, MOVE_STATUS_LOST_FOCUS
     // {0} lost its focus and couldn’t move!
-    BufferMessage pl_msg_00000368_00600, TAG_NICKNAME, BTLSCR_ATTACKER
+    BufferMessage BattleStrings_Text_PokemonLostItsFocusAndCouldntMove_Ally, TAG_NICKNAME, BTLSCR_ATTACKER
     End 

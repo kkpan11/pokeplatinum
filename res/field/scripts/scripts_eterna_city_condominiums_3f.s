@@ -1,52 +1,27 @@
-    .include "macros/scrcmd.inc"
+#include "macros/scrcmd.inc"
+#include "res/text/bank/eterna_city_condominiums_3f.h"
 
-    .data
 
-    ScriptEntry _0012
-    ScriptEntry _0025
-    ScriptEntry _0038
-    ScriptEntry _004B
-    .short 0xFD13
+    ScriptEntry EternaCityCondominiums3F_BugCatcher
+    ScriptEntry EternaCityCondominiums3F_PokefanM
+    ScriptEntry EternaCityCondominiums3F_SchoolKidM
+    ScriptEntry EternaCityCondominiums3F_NinjaBoy
+    ScriptEntryEnd
 
-_0012:
-    PlayFanfare SEQ_SE_CONFIRM
-    LockAll
-    FacePlayer
-    Message 0
-    WaitABXPadPress
-    CloseMessage
-    ReleaseAll
+EternaCityCondominiums3F_BugCatcher:
+    NPCMessage EternaCityCondominiums3F_Text_GatheredUpBerries
     End
 
-_0025:
-    PlayFanfare SEQ_SE_CONFIRM
-    LockAll
-    FacePlayer
-    Message 1
-    WaitABXPadPress
-    CloseMessage
-    ReleaseAll
+EternaCityCondominiums3F_PokefanM:
+    NPCMessage EternaCityCondominiums3F_Text_BadgesFromGymsOrContestWins
     End
 
-_0038:
-    PlayFanfare SEQ_SE_CONFIRM
-    LockAll
-    FacePlayer
-    Message 2
-    WaitABXPadPress
-    CloseMessage
-    ReleaseAll
+EternaCityCondominiums3F_SchoolKidM:
+    NPCMessage EternaCityCondominiums3F_Text_ImGonnaTakeYourFlag
     End
 
-_004B:
-    PlayFanfare SEQ_SE_CONFIRM
-    LockAll
-    FacePlayer
-    Message 3
-    WaitABXPadPress
-    CloseMessage
-    ReleaseAll
+EternaCityCondominiums3F_NinjaBoy:
+    NPCMessage EternaCityCondominiums3F_Text_ISetSomeTraps
     End
 
-    .byte 0
-    .byte 0
+    .balign 4, 0

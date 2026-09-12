@@ -1,140 +1,119 @@
-    .include "macros/scrcmd.inc"
+#include "macros/scrcmd.inc"
+#include "generated/distribution_events.h"
+#include "res/text/bank/team_galactic_eterna_building_1f.h"
+#include "res/field/events/events_team_galactic_eterna_building_1f.h"
 
-    .data
 
-    ScriptEntry _0020
-    ScriptEntry _0033
-    ScriptEntry _0046
-    ScriptEntry _0057
-    ScriptEntry _006A
-    ScriptEntry _0134
-    ScriptEntry _001E
-    .short 0xFD13
+    ScriptEntry TeamGalacticEternaBuilding1F_GruntM1
+    ScriptEntry TeamGalacticEternaBuilding1F_GruntM2
+    ScriptEntry TeamGalacticEternaBuilding1F_BgSign
+    ScriptEntry TeamGalacticEternaBuilding1F_Looker
+    ScriptEntry TeamGalacticEternaBuilding1F_OnFrame_Looker
+    ScriptEntry TeamGalacticEternaBuilding1F_WallBlockingRotomsRoom
+    ScriptEntry TeamGalacticEternaBuilding1F_OnTransition
+    ScriptEntryEnd
 
-_001E:
+TeamGalacticEternaBuilding1F_OnTransition:
     End
 
-_0020:
-    PlayFanfare SEQ_SE_CONFIRM
-    LockAll
-    FacePlayer
-    Message 3
-    WaitABXPadPress
-    CloseMessage
-    ReleaseAll
+TeamGalacticEternaBuilding1F_GruntM1:
+    NPCMessage TeamGalacticEternaBuilding1F_Text_WelcomeToTeamGalactic
     End
 
-_0033:
-    PlayFanfare SEQ_SE_CONFIRM
-    LockAll
-    FacePlayer
-    Message 4
-    WaitABXPadPress
-    CloseMessage
-    ReleaseAll
+TeamGalacticEternaBuilding1F_GruntM2:
+    NPCMessage TeamGalacticEternaBuilding1F_Text_SightsSetOnTheStars
     End
 
-_0046:
-    PlayFanfare SEQ_SE_CONFIRM
-    LockAll
-    Message 5
-    WaitABXPadPress
-    CloseMessage
-    ReleaseAll
+TeamGalacticEternaBuilding1F_BgSign:
+    EventMessage TeamGalacticEternaBuilding1F_Text_PathLeadsToGlory
     End
 
-_0057:
-    PlayFanfare SEQ_SE_CONFIRM
-    LockAll
-    FacePlayer
-    Message 2
-    WaitABXPadPress
-    CloseMessage
-    ReleaseAll
+TeamGalacticEternaBuilding1F_Looker:
+    NPCMessage TeamGalacticEternaBuilding1F_Text_InvestigationIntoTeamGalactic
     End
 
-_006A:
+TeamGalacticEternaBuilding1F_OnFrame_Looker:
     LockAll
-    ApplyMovement 4, _00FC
-    ApplyMovement 0xFF, _00F0
+    ApplyMovement LOCALID_GRUNT_M_LOOKER, TeamGalacticEternaBuilding1F_Movement_LookerNoticeAndWalkToPlayer
+    ApplyMovement LOCALID_PLAYER, TeamGalacticEternaBuilding1F_Movement_PlayerFaceLooker
     WaitMovement
-    Message 0
+    Message TeamGalacticEternaBuilding1F_Text_HelloItIsMe
     CloseMessage
-    ApplyMovement 4, _0110
+    ApplyMovement LOCALID_GRUNT_M_LOOKER, TeamGalacticEternaBuilding1F_Movement_LookerSpin
     WaitMovement
-    ClearFlag 0x1BB
-    ScrCmd_186 5, 12, 15
-    ScrCmd_188 5, 16
-    ScrCmd_189 5, 2
-    ScrCmd_064 5
-    ScrCmd_065 4
-    SetFlag 113
-    SetVar 0x411D, 1
-    WaitTime 30, 0x800C
-    Message 1
-    ApplyMovement 5, _0110
+    ClearFlag FLAG_HIDE_TEAM_GALACTIC_ETERNA_BUILDING_1F_LOOKER
+    SetObjectEventPos LOCALID_LOOKER, 12, 15
+    SetObjectEventMovementType LOCALID_LOOKER, MOVEMENT_TYPE_LOOK_WEST
+    SetObjectEventDir LOCALID_LOOKER, DIR_WEST
+    AddObject LOCALID_LOOKER
+    RemoveObject LOCALID_GRUNT_M_LOOKER
+    SetFlag FLAG_DUMMY_0x0071
+    SetVar VAR_TEAM_GALACTIC_ETERNA_BUILDING_1F_STATE, 1
+    WaitTime 30, VAR_RESULT
+    Message TeamGalacticEternaBuilding1F_Text_FirstRateTrainer
+    ApplyMovement LOCALID_LOOKER, TeamGalacticEternaBuilding1F_Movement_LookerSpin
     WaitMovement
-    ClearFlag 0x1C2
-    ScrCmd_186 4, 12, 15
-    ScrCmd_188 4, 16
-    ScrCmd_189 4, 2
-    ScrCmd_064 4
-    ScrCmd_065 5
+    ClearFlag FLAG_HIDE_TEAM_GALACTIC_ETERNA_BUILDING_1F_GRUNT_M_LOOKER
+    SetObjectEventPos LOCALID_GRUNT_M_LOOKER, 12, 15
+    SetObjectEventMovementType LOCALID_GRUNT_M_LOOKER, MOVEMENT_TYPE_LOOK_WEST
+    SetObjectEventDir LOCALID_GRUNT_M_LOOKER, DIR_WEST
+    AddObject LOCALID_GRUNT_M_LOOKER
+    RemoveObject LOCALID_LOOKER
     CloseMessage
     ReleaseAll
     End
 
     .balign 4, 0
-_00F0:
-    MoveAction_03F 9
-    MoveAction_023
+TeamGalacticEternaBuilding1F_Movement_PlayerFaceLooker:
+    Delay8 9
+    WalkOnSpotNormalEast
     EndMovement
 
     .balign 4, 0
-_00FC:
-    MoveAction_026
-    MoveAction_04B
-    MoveAction_03F 2
-    MoveAction_00E 2
+TeamGalacticEternaBuilding1F_Movement_LookerNoticeAndWalkToPlayer:
+    WalkOnSpotFastWest
+    EmoteExclamationMark
+    Delay8 2
+    WalkNormalWest 2
     EndMovement
 
     .balign 4, 0
-_0110:
-    MoveAction_001
-    MoveAction_03D
-    MoveAction_003
-    MoveAction_03E
-    MoveAction_000
-    MoveAction_03E
-    MoveAction_002
-    MoveAction_03D
+TeamGalacticEternaBuilding1F_Movement_LookerSpin:
+    FaceSouth
+    Delay2
+    FaceEast
+    Delay4
+    FaceNorth
+    Delay4
+    FaceWest
+    Delay2
     EndMovement
 
-_0134:
-    ScrCmd_07E 0x1D3, 1, 0x800C
-    GoToIfEq 0x800C, 0, _01AA
-    ScrCmd_28B 3, 0x800C
-    GoToIfEq 0x800C, 0, _01AA
-    GoToIfUnset 129, _01AA
-    PlayFanfare SEQ_SE_CONFIRM
+TeamGalacticEternaBuilding1F_WallBlockingRotomsRoom:
+    CheckItem ITEM_SECRET_KEY, 1, VAR_RESULT
+    GoToIfEq VAR_RESULT, FALSE, TeamGalacticEternaBuilding1F_WallBlockingRotomsRoomEnd
+    CheckDistributionEvent DISTRIBUTION_EVENT_ROTOM, VAR_RESULT
+    GoToIfEq VAR_RESULT, FALSE, TeamGalacticEternaBuilding1F_WallBlockingRotomsRoomEnd
+    GoToIfUnset FLAG_TEAM_GALACTIC_LEFT_ETERNA_BUILDING, TeamGalacticEternaBuilding1F_WallBlockingRotomsRoomEnd
+    PlaySE SE_CONFIRM_sseq_3
     LockAll
     FacePlayer
-    ScrCmd_0CD 0
-    ScrCmd_0D1 1, 0x1D3
-    Message 6
+    BufferPlayerName 0
+    BufferItemName 1, ITEM_SECRET_KEY
+    Message TeamGalacticEternaBuilding1F_Text_PlayerUsedTheSecretKey
     CloseMessage
-    PlayFanfare SEQ_SE_DP_W062
-    FadeScreen 6, 1, 0, 0x7FFF
+    PlaySE SEQ_SE_DP_W062_sseq
+    FadeScreenOut FADE_SCREEN_SPEED_FAST, COLOR_WHITE
     WaitFadeScreen
-    ScrCmd_065 6
-    ScrCmd_04B 0x5FB
-    FadeScreen 6, 1, 1, 0x7FFF
+    RemoveObject LOCALID_WALL_BLOCKING_ROTOMS_ROOM
+    WaitSE SEQ_SE_DP_W062_sseq
+    FadeScreenIn FADE_SCREEN_SPEED_FAST, COLOR_WHITE
     WaitFadeScreen
-    Message 7
-    WaitABXPadPress
+    Message TeamGalacticEternaBuilding1F_Text_EntranceToASecretRoom
+    WaitButton
     CloseMessage
     ReleaseAll
     End
 
-_01AA:
+TeamGalacticEternaBuilding1F_WallBlockingRotomsRoomEnd:
     End

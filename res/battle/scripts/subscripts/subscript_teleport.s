@@ -1,13 +1,12 @@
-    .include "macros/btlcmd.inc"
+#include "macros/btlcmd.inc"
 
-    .data
 
 _000:
     CompareVarToValue OPCODE_EQU, BTLVAR_BATTLE_TYPE, BATTLE_TYPE_DOUBLES|BATTLE_TYPE_2vs2|BATTLE_TYPE_AI, _026
     TryTeleport _026
     Call BATTLE_SUBSCRIPT_ATTACK_MESSAGE_AND_ANIMATION
     // {0} fled from battle!
-    PrintMessage pl_msg_00000368_00469, TAG_NICKNAME, BTLSCR_ATTACKER
+    PrintMessage BattleStrings_Text_PokemonFledFromBattle_Ally, TAG_NICKNAME, BTLSCR_ATTACKER
     Wait 
     WaitButtonABTime 30
     FadeOutBattle 

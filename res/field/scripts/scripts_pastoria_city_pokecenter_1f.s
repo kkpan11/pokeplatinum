@@ -1,33 +1,21 @@
-    .include "macros/scrcmd.inc"
+#include "macros/scrcmd.inc"
+#include "res/text/bank/pastoria_city_pokecenter_1f.h"
+#include "res/field/events/events_pastoria_city_pokecenter_1f.h"
 
-    .data
 
-    ScriptEntry _000E
-    ScriptEntry _001A
-    ScriptEntry _002D
-    .short 0xFD13
+    ScriptEntry PastoriaCityPokecenter1F_Nurse
+    ScriptEntry PastoriaCityPokecenter1F_BlackBelt
+    ScriptEntry PastoriaCityPokecenter1F_SchoolKidF
+    ScriptEntryEnd
 
-_000E:
-    SetVar 0x8007, 0
-    CallCommonScript 0x7D2
+PastoriaCityPokecenter1F_Nurse:
+    Common_CallPokecenterNurse LOCALID_PASTORIA_NURSE
     End
 
-_001A:
-    PlayFanfare SEQ_SE_CONFIRM
-    LockAll
-    FacePlayer
-    Message 0
-    WaitABXPadPress
-    CloseMessage
-    ReleaseAll
+PastoriaCityPokecenter1F_BlackBelt:
+    NPCMessage PastoriaCityPokecenter1F_Text_GreatMarshIsVast
     End
 
-_002D:
-    PlayFanfare SEQ_SE_CONFIRM
-    LockAll
-    FacePlayer
-    Message 1
-    WaitABXPadPress
-    CloseMessage
-    ReleaseAll
+PastoriaCityPokecenter1F_SchoolKidF:
+    NPCMessage PastoriaCityPokecenter1F_Text_GreatMarshWasSea
     End

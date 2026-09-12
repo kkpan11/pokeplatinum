@@ -1,20 +1,15 @@
-    .include "macros/scrcmd.inc"
+#include "macros/scrcmd.inc"
 
-    .data
 
-    ScriptEntry _000A
-    ScriptEntry _000C
-    .short 0xFD13
+    ScriptEntry Unk276_Dummy1
+    ScriptEntry Unk276_Dummy2
+    ScriptEntryEnd
 
-_000A:
+Unk276_Dummy1:
     End
 
-_000C:
-    ScrCmd_036 3, 2, 0, 0x800C
-    ScrCmd_038 3
-    ScrCmd_039
-    ScrCmd_03B 0x800C
-    CallCommonScript 0x7D0
+Unk276_Dummy2:
+    ShowLandmarkSign 3
     End
 
-    .byte 0
+    .balign 4, 0

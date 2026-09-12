@@ -1,60 +1,46 @@
-    .include "macros/scrcmd.inc"
+#include "macros/scrcmd.inc"
+#include "res/text/bank/eterna_city_condominiums_2f.h"
 
-    .data
 
-    ScriptEntry _000E
-    ScriptEntry _0068
-    ScriptEntry _007B
-    .short 0xFD13
+    ScriptEntry EternaCityCondominiums2F_ExpertF
+    ScriptEntry EternaCityCondominiums2F_Twin
+    ScriptEntry EternaCityCondominiums2F_ExpertM
+    ScriptEntryEnd
 
-_000E:
-    PlayFanfare SEQ_SE_CONFIRM
+EternaCityCondominiums2F_ExpertF:
+    PlaySE SE_CONFIRM_sseq_3
     LockAll
     FacePlayer
-    GoToIfSet 194, _005D
-    Message 0
-    SetVar 0x8004, 0x18A
-    SetVar 0x8005, 1
-    ScrCmd_07D 0x8004, 0x8005, 0x800C
-    GoToIfEq 0x800C, 0, _0053
-    SetFlag 194
-    CallCommonScript 0x7E0
+    GoToIfSet FLAG_RECEIVED_ETERNA_CITY_CONDOMINIUMS_2F_TM67, EternaCityCondominiums2F_LongHistory
+    Message EternaCityCondominiums2F_Text_HadTMLongTimeNow
+    SetVar VAR_0x8004, ITEM_TM67
+    SetVar VAR_0x8005, 1
+    GoToIfCannotFitItem VAR_0x8004, VAR_0x8005, VAR_RESULT, EternaCityCondominiums2F_BagIsFull
+    SetFlag FLAG_RECEIVED_ETERNA_CITY_CONDOMINIUMS_2F_TM67
+    Common_GiveItemQuantityNoLineFeed
     CloseMessage
     ReleaseAll
     End
 
-_0053:
-    CallCommonScript 0x7E1
+EternaCityCondominiums2F_BagIsFull:
+    Common_MessageBagIsFull
     CloseMessage
     ReleaseAll
     End
 
-_005D:
-    Message 1
-    WaitABXPadPress
+EternaCityCondominiums2F_LongHistory:
+    Message EternaCityCondominiums2F_Text_LongHistory
+    WaitButton
     CloseMessage
     ReleaseAll
     End
 
-_0068:
-    PlayFanfare SEQ_SE_CONFIRM
-    LockAll
-    FacePlayer
-    Message 2
-    WaitABXPadPress
-    CloseMessage
-    ReleaseAll
+EternaCityCondominiums2F_Twin:
+    NPCMessage EternaCityCondominiums2F_Text_GardeniaGoesToEternaForest
     End
 
-_007B:
-    PlayFanfare SEQ_SE_CONFIRM
-    LockAll
-    FacePlayer
-    Message 3
-    WaitABXPadPress
-    CloseMessage
-    ReleaseAll
+EternaCityCondominiums2F_ExpertM:
+    NPCMessage EternaCityCondominiums2F_Text_RecycleUsedDuringBattle
     End
 
-    .byte 0
-    .byte 0
+    .balign 4, 0

@@ -1,14 +1,14 @@
 #ifndef POKEPLATINUM_OV104_022394A4_H
 #define POKEPLATINUM_OV104_022394A4_H
 
-#include "struct_defs/struct_0204AFC4.h"
+#include "struct_defs/battle_tower.h"
 
 #include "savedata.h"
 
-void ov104_022394A4(UnkStruct_0204AFC4 *param0, SaveData *param1);
-u16 ov104_02239588(UnkStruct_0204AFC4 *param0, u16 param1);
-void ov104_022395A0(UnkStruct_0204AFC4 *param0, u16 param1);
-u16 ov104_022395B4(UnkStruct_0204AFC4 *param0);
-u16 ov104_022395D8(UnkStruct_0204AFC4 *param0);
+void BattleTower_CreateOpponentParties(BattleTower *battleTower, SaveData *saveData);
+u16 BattleTower_GetObjectIDFromOpponentIDInFrontierScript(BattleTower *battleTower, u16 opponentID);
+void BattleTower_SetBeatPalmer(BattleTower *battleTower, u16 value);
+u16 ov104_022395B4(BattleTower *battleTower);
+u16 ov104_022395D8(BattleTower *battleTower);
 
 #endif // POKEPLATINUM_OV104_022394A4_H

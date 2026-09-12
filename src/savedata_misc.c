@@ -4,13 +4,15 @@
 #include <string.h>
 
 #include "constants/charcode.h"
+#include "generated/text_banks.h"
 
-#include "struct_defs/sentence.h"
+#include "berry_patches.h"
+#include "easy_chat_sentence.h"
+#include "easy_chat_words.h"
+#include "persisted_map_features.h"
 
-#include "unk_02014A84.h"
-#include "unk_02014D38.h"
-#include "unk_02027B70.h"
-#include "unk_02027F50.h"
+#include "res/text/bank/greetings.h"
+#include "res/text/bank/union_room_sentences.h"
 
 int MiscSaveBlock_SaveSize(void)
 {
@@ -21,17 +23,17 @@ void MiscSaveBlock_Init(MiscSaveBlock *miscSave)
 {
     MI_CpuClearFast(miscSave, sizeof(MiscSaveBlock));
 
-    sub_02027B70(miscSave->unk_00);
-    sub_02027F50(&miscSave->unk_680);
+    BerryPatches_Clear(miscSave->berryPatches);
+    PersistedMapFeatures_Init(&miscSave->persistedMapFeatures);
 
     MI_CpuFill16(miscSave->rivalName, CHAR_EOS, TRAINER_NAME_LEN + 1);
     MI_CpuFill16(miscSave->tabletName, CHAR_EOS, TABLET_NAME_LEN + 1);
 
-    sub_02014A9C(&miscSave->introMsg, 4);
+    EasyChatSentence_InitWithType(&miscSave->introMsg, EASY_CHAT_SENTENCE_TYPE_UNION_ROOM);
 
-    miscSave->introMsg.id = 0;
-    miscSave->introMsg.words[0] = sub_02014DFC(441, 99);
-    miscSave->introMsg.words[1] = 0xffff;
+    miscSave->introMsg.id = UnionRoomSentences_Text_BlankHello;
+    miscSave->introMsg.words[0] = EasyChatWord_FromBankAndEntry(TEXT_BANK_GREETINGS, Greetings_Text_Regards);
+    miscSave->introMsg.words[1] = WORD_NONE;
 
     for (int i = 0; i < EXTRA_SAVE_TABLE_ENTRY_MAX - 1; i++) {
         miscSave->extraKey.keys[i] = EXTRA_SAVE_TABLE_ENTRY_NONE;
@@ -49,16 +51,16 @@ const MiscSaveBlock *SaveData_MiscSaveBlockConst(const SaveData *saveData)
     return SaveData_SaveTableConst(saveData, SAVE_TABLE_ENTRY_MISC);
 }
 
-UnkStruct_02027854 *sub_02027854(SaveData *saveData)
+BerryPatch *MiscSaveBlock_GetBerryPatches(SaveData *saveData)
 {
     MiscSaveBlock *miscSave = SaveData_SaveTable(saveData, SAVE_TABLE_ENTRY_MISC);
-    return miscSave->unk_00;
+    return miscSave->berryPatches;
 }
 
-UnkStruct_02027860 *sub_02027860(SaveData *saveData)
+PersistedMapFeatures *MiscSaveBlock_GetPersistedMapFeatures(SaveData *saveData)
 {
     MiscSaveBlock *miscSave = SaveData_SaveTable(saveData, SAVE_TABLE_ENTRY_MISC);
-    return &miscSave->unk_680;
+    return &miscSave->persistedMapFeatures;
 }
 
 const u16 *MiscSaveBlock_RivalName(const MiscSaveBlock *miscSave)
@@ -66,9 +68,9 @@ const u16 *MiscSaveBlock_RivalName(const MiscSaveBlock *miscSave)
     return miscSave->rivalName;
 }
 
-void MiscSaveBlock_SetRivalName(MiscSaveBlock *miscSave, Strbuf *name)
+void MiscSaveBlock_SetRivalName(MiscSaveBlock *miscSave, String *name)
 {
-    Strbuf_ToChars(name, miscSave->rivalName, TRAINER_NAME_LEN + 1);
+    String_ToChars(name, miscSave->rivalName, TRAINER_NAME_LEN + 1);
 }
 
 const u16 *MiscSaveBlock_TabletName(const MiscSaveBlock *miscSave)
@@ -76,9 +78,9 @@ const u16 *MiscSaveBlock_TabletName(const MiscSaveBlock *miscSave)
     return miscSave->tabletName;
 }
 
-void MiscSaveBlock_SetTabletName(MiscSaveBlock *miscSave, Strbuf *name)
+void MiscSaveBlock_SetTabletName(MiscSaveBlock *miscSave, String *name)
 {
-    Strbuf_ToChars(name, miscSave->tabletName, TABLET_NAME_LEN + 1);
+    String_ToChars(name, miscSave->tabletName, TABLET_NAME_LEN + 1);
 }
 
 void MiscSaveBlock_SetInitFlag(MiscSaveBlock *miscSave)
@@ -98,19 +100,19 @@ void MiscSaveBlock_SetFavoriteMon(MiscSaveBlock *miscSave, int species, int form
     miscSave->favoriteMonIsEgg = isEgg;
 }
 
-void MiscSaveBlock_FavoriteMon(const MiscSaveBlock *miscSave, int *species, int *form, int *isEgg)
+void MiscSaveBlock_GetFavoriteMon(const MiscSaveBlock *miscSave, int *species, int *form, int *isEgg)
 {
     *species = miscSave->favoriteMon;
     *form = miscSave->favoriteMonForm;
     *isEgg = miscSave->favoriteMonIsEgg;
 }
 
-void MiscSaveBlock_IntroMsg(const MiscSaveBlock *miscSave, Sentence *message)
+void MiscSaveBlock_IntroMsg(const MiscSaveBlock *miscSave, EasyChatSentence *message)
 {
     *message = miscSave->introMsg;
 }
 
-void MiscSaveBlock_SetIntroMsg(MiscSaveBlock *miscSave, const Sentence *message)
+void MiscSaveBlock_SetIntroMsg(MiscSaveBlock *miscSave, const EasyChatSentence *message)
 {
     miscSave->introMsg = *message;
 }

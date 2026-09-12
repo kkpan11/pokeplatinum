@@ -1,172 +1,155 @@
-    .include "macros/scrcmd.inc"
+#include "macros/scrcmd.inc"
+#include "res/text/bank/poketch_co_1f.h"
+#include "res/field/events/events_poketch_co_1f.h"
 
-    .data
 
-    ScriptEntry _0042
-    ScriptEntry _01C3
-    ScriptEntry _01D6
-    ScriptEntry _01E9
-    ScriptEntry _0016
-    .short 0xFD13
+    ScriptEntry PoketchCo1F_PoketchCoPresident
+    ScriptEntry PoketchCo1F_ScientistM
+    ScriptEntry PoketchCo1F_Receptionist
+    ScriptEntry PoketchCo1F_Lass
+    ScriptEntry PoketchCo1F_OnTransition
+    ScriptEntryEnd
 
-_0016:
-    ScrCmd_238 6, 0x4000
-    GoToIfEq 0x4000, 0, _003C
-    GoToIfLt 0x4077, 2, _003C
-    ClearFlag 0x212
+PoketchCo1F_OnTransition:
+    CheckTVInterviewEligible TV_PROGRAM_SEGMENT_THE_POKETCH_WATCH, VAR_MAP_LOCAL_0x00
+    GoToIfEq VAR_MAP_LOCAL_0x00, 0, PoketchCo1F_HideReporter
+    GoToIfLt VAR_JUBILIFE_CITY_STATE, 2, PoketchCo1F_HideReporter
+    ClearFlag FLAG_HIDE_POKETCH_CO_1F_REPORTER
     End
 
-_003C:
-    SetFlag 0x212
+PoketchCo1F_HideReporter:
+    SetFlag FLAG_HIDE_POKETCH_CO_1F_REPORTER
     End
 
-_0042:
-    PlayFanfare SEQ_SE_CONFIRM
+PoketchCo1F_PoketchCoPresident:
+    PlaySE SE_CONFIRM_sseq_3
     LockAll
     FacePlayer
-    Message 0
-    ScrCmd_15D 0x8000
-    GoToIfEq 0x8000, 0, _0181
-    ScrCmd_134 2, 0x800C
-    GoToIfEq 0x800C, 0, _00C5
-    ScrCmd_134 12, 0x800C
-    GoToIfEq 0x800C, 0, _00DC
-    ScrCmd_134 13, 0x800C
-    GoToIfEq 0x800C, 0, _00F3
-    ScrCmd_134 15, 0x800C
-    GoToIfEq 0x800C, 0, _010A
-    ScrCmd_07E 0x1AF, 1, 0x800C
-    GoToIfEq 0x800C, 1, _01B8
-    GoTo _01AD
+    Message PoketchCo1F_Text_PresidentOfPoketchCompany
+    CountBadgesAcquired VAR_0x8000
+    GoToIfEq VAR_0x8000, 0, PoketchCo1F_NewAppWhenYouGetAGymBadge
+    CheckPoketchAppRegistered POKETCH_APPID_MEMOPAD, VAR_RESULT
+    GoToIfEq VAR_RESULT, FALSE, PoketchCo1F_CheckBadgesForMemoPadApp
+    CheckPoketchAppRegistered POKETCH_APPID_MARKINGMAP, VAR_RESULT
+    GoToIfEq VAR_RESULT, FALSE, PoketchCo1F_CheckBadgesForMarkingMapApp
+    CheckPoketchAppRegistered POKETCH_APPID_LINKSEARCHER, VAR_RESULT
+    GoToIfEq VAR_RESULT, FALSE, PoketchCo1F_CheckBadgesForLinkSearcherApp
+    CheckPoketchAppRegistered POKETCH_APPID_MOVETESTER, VAR_RESULT
+    GoToIfEq VAR_RESULT, FALSE, PoketchCo1F_CheckBadgesForMoveTesterApp
+    CheckItem ITEM_POKE_RADAR, 1, VAR_RESULT
+    GoToIfEq VAR_RESULT, TRUE, PoketchCo1F_ShouldISolicitNewPoketchIdeas
+    GoTo PoketchCo1F_AllSortsOfPeopleGivePoketchApps
 
-_00C5:
-    ScrCmd_15D 0x800C
-    GoToIfGe 0x800C, 1, _0121
-    GoTo _0181
+PoketchCo1F_CheckBadgesForMemoPadApp:
+    CountBadgesAcquired VAR_RESULT
+    GoToIfGe VAR_RESULT, 1, PoketchCo1F_GiveMemoPadApp
+    GoTo PoketchCo1F_NewAppWhenYouGetAGymBadge
 
-_00DC:
-    ScrCmd_15D 0x800C
-    GoToIfGe 0x800C, 3, _0139
-    GoTo _018C
+PoketchCo1F_CheckBadgesForMarkingMapApp:
+    CountBadgesAcquired VAR_RESULT
+    GoToIfGe VAR_RESULT, 3, PoketchCo1F_GiveMarkingMapApp
+    GoTo PoketchCo1F_NewAppWhenYouGetThreeBadges
 
-_00F3:
-    ScrCmd_15D 0x800C
-    GoToIfGe 0x800C, 5, _0151
-    GoTo _0197
+PoketchCo1F_CheckBadgesForLinkSearcherApp:
+    CountBadgesAcquired VAR_RESULT
+    GoToIfGe VAR_RESULT, 5, PoketchCo1F_GiveLinkSearcherApp
+    GoTo PoketchCo1F_NewAppWhenYouGetFiveBadges
 
-_010A:
-    ScrCmd_15D 0x800C
-    GoToIfGe 0x800C, 7, _0169
-    GoTo _01A2
+PoketchCo1F_CheckBadgesForMoveTesterApp:
+    CountBadgesAcquired VAR_RESULT
+    GoToIfGe VAR_RESULT, 7, PoketchCo1F_GiveMoveTesterApp
+    GoTo PoketchCo1F_NewAppWhenYouGetSevenBadges
 
-_0121:
-    Message 2
-    SetVar 0x8004, 2
-    CallCommonScript 0x7D9
-    Message 3
-    WaitABXPadPress
+PoketchCo1F_GiveMemoPadApp:
+    Message PoketchCo1F_Text_IveDevelopedANewApp
+    SetVar VAR_0x8004, POKETCH_APPID_MEMOPAD
+    Common_GivePoketchApp
+    Message PoketchCo1F_Text_ThatsTheMemoPad
+    WaitButton
     CloseMessage
     ReleaseAll
     End
 
-_0139:
-    Message 5
-    SetVar 0x8004, 12
-    CallCommonScript 0x7D9
-    Message 6
-    WaitABXPadPress
+PoketchCo1F_GiveMarkingMapApp:
+    Message PoketchCo1F_Text_IveDevelopedAnotherApp
+    SetVar VAR_0x8004, POKETCH_APPID_MARKINGMAP
+    Common_GivePoketchApp
+    Message PoketchCo1F_Text_MapDisplayedIsConvenient
+    WaitButton
     CloseMessage
     ReleaseAll
     End
 
-_0151:
-    Message 8
-    SetVar 0x8004, 13
-    CallCommonScript 0x7D9
-    Message 9
-    WaitABXPadPress
+PoketchCo1F_GiveLinkSearcherApp:
+    Message PoketchCo1F_Text_IveDevelopedYetAnotherApp
+    SetVar VAR_0x8004, POKETCH_APPID_LINKSEARCHER
+    Common_GivePoketchApp
+    Message PoketchCo1F_Text_KnowHowManyPeopleAreCommunicating
+    WaitButton
     CloseMessage
     ReleaseAll
     End
 
-_0169:
-    Message 11
-    SetVar 0x8004, 15
-    CallCommonScript 0x7D9
-    Message 12
-    WaitABXPadPress
+PoketchCo1F_GiveMoveTesterApp:
+    Message PoketchCo1F_Text_IveDevelopedStillYetAnotherApp
+    SetVar VAR_0x8004, POKETCH_APPID_MOVETESTER
+    Common_GivePoketchApp
+    Message PoketchCo1F_Text_CheckTypeMatchups
+    WaitButton
     CloseMessage
     ReleaseAll
     End
 
-_0181:
-    Message 1
-    WaitABXPadPress
+PoketchCo1F_NewAppWhenYouGetAGymBadge:
+    Message PoketchCo1F_Text_NewAppWhenYouGetAGymBadge
+    WaitButton
     CloseMessage
     ReleaseAll
     End
 
-_018C:
-    Message 4
-    WaitABXPadPress
+PoketchCo1F_NewAppWhenYouGetThreeBadges:
+    Message PoketchCo1F_Text_NewAppWhenYouGetThreeBadges
+    WaitButton
     CloseMessage
     ReleaseAll
     End
 
-_0197:
-    Message 7
-    WaitABXPadPress
+PoketchCo1F_NewAppWhenYouGetFiveBadges:
+    Message PoketchCo1F_Text_NewAppWhenYouGetFiveBadges
+    WaitButton
     CloseMessage
     ReleaseAll
     End
 
-_01A2:
-    Message 10
-    WaitABXPadPress
+PoketchCo1F_NewAppWhenYouGetSevenBadges:
+    Message PoketchCo1F_Text_NewAppWhenYouGetSevenBadges
+    WaitButton
     CloseMessage
     ReleaseAll
     End
 
-_01AD:
-    Message 13
-    WaitABXPadPress
+PoketchCo1F_AllSortsOfPeopleGivePoketchApps:
+    Message PoketchCo1F_Text_AllSortsOfPeopleGivePoketchApps
+    WaitButton
     CloseMessage
     ReleaseAll
     End
 
-_01B8:
-    Message 14
-    WaitABXPadPress
+PoketchCo1F_ShouldISolicitNewPoketchIdeas:
+    Message PoketchCo1F_Text_ShouldISolicitNewPoketchIdeas
+    WaitButton
     CloseMessage
     ReleaseAll
     End
 
-_01C3:
-    PlayFanfare SEQ_SE_CONFIRM
-    LockAll
-    FacePlayer
-    Message 15
-    WaitABXPadPress
-    CloseMessage
-    ReleaseAll
+PoketchCo1F_ScientistM:
+    NPCMessage PoketchCo1F_Text_IWillKeepDeveloping
     End
 
-_01D6:
-    PlayFanfare SEQ_SE_CONFIRM
-    LockAll
-    FacePlayer
-    Message 16
-    WaitABXPadPress
-    CloseMessage
-    ReleaseAll
+PoketchCo1F_Receptionist:
+    NPCMessage PoketchCo1F_Text_WelcomeToThePoketchCompany
     End
 
-_01E9:
-    PlayFanfare SEQ_SE_CONFIRM
-    LockAll
-    FacePlayer
-    Message 17
-    WaitABXPadPress
-    CloseMessage
-    ReleaseAll
+PoketchCo1F_Lass:
+    NPCMessage PoketchCo1F_Text_HeyDoYouWatchTV
     End

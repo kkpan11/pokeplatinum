@@ -3,7 +3,7 @@
 #include <nitro.h>
 #include <string.h>
 
-#include "struct_defs/struct_02039A58.h"
+#include "struct_defs/comm_cmd_table.h"
 #include "struct_defs/struct_0209BDF8.h"
 #include "struct_defs/struct_0209BF64.h"
 #include "struct_defs/struct_0209C0F0.h"
@@ -15,15 +15,15 @@
 #include "overlay109/struct_ov109_021D1048.h"
 #include "overlay109/struct_ov109_021D17EC.h"
 
+#include "comm_manager.h"
 #include "communication_information.h"
 #include "communication_system.h"
 #include "heap.h"
-#include "unk_02030EE0.h"
 #include "unk_02032798.h"
-#include "unk_020366A0.h"
 #include "unk_0205B33C.h"
 #include "unk_0205C22C.h"
 #include "unk_02099500.h"
+#include "wireless_manager.h"
 
 typedef struct {
     u32 unk_00;
@@ -35,26 +35,24 @@ static BOOL sub_0209BE84(UnkStruct_0209BDF8 *param0, u32 param1, const void *par
 static const CommCmdTable Unk_020F8EA8[135];
 static const UnkFuncPtr_020F8E60 Unk_020F8E60[18];
 
-UnkStruct_0209BDF8 *sub_0209BDF8(UnkStruct_0209C194 *param0, u32 param1)
+UnkStruct_0209BDF8 *sub_0209BDF8(UnkStruct_0209C194 *param0, enum HeapID heapID)
 {
-    UnkStruct_0209BDF8 *v0;
-
-    v0 = Heap_AllocFromHeap(param1, sizeof(UnkStruct_0209BDF8));
+    UnkStruct_0209BDF8 *v0 = Heap_Alloc(heapID, sizeof(UnkStruct_0209BDF8));
     GF_ASSERT(v0 != NULL);
     memset(v0, 0, sizeof(UnkStruct_0209BDF8));
 
     v0->unk_00 = param0;
-    v0->unk_4C = Heap_AllocFromHeap(param1, 5 * (236 * 6 + 4 * 2));
-    v0->unk_50 = Heap_AllocFromHeap(param1, 5 * (236 * 6 + 4 * 2));
+    v0->unk_4C = Heap_Alloc(heapID, 5 * (236 * 6 + 4 * 2));
+    v0->unk_50 = Heap_Alloc(heapID, 5 * (236 * 6 + 4 * 2));
 
     return v0;
 }
 
 void sub_0209BE38(UnkStruct_0209BDF8 *param0)
 {
-    Heap_FreeToHeap(param0->unk_4C);
-    Heap_FreeToHeap(param0->unk_50);
-    Heap_FreeToHeap(param0);
+    Heap_Free(param0->unk_4C);
+    Heap_Free(param0->unk_50);
+    Heap_Free(param0);
 }
 
 void sub_0209BE50(UnkStruct_0209BDF8 *param0)
@@ -64,8 +62,8 @@ void sub_0209BE50(UnkStruct_0209BDF8 *param0)
 
 void sub_0209BE64(UnkStruct_0209BDF8 *param0)
 {
-    sub_02037B58(2);
-    sub_02036AC4();
+    CommManager_SetMaxNumConnections(2);
+    CommManager_UnionRestartSearch();
     sub_0205C2C8(param0->unk_00->unk_14.unk_0C);
     sub_0205BEA8(0);
 }
@@ -101,7 +99,7 @@ static void sub_0209BED0(int param0, int param1, void *param2, void *param3)
     UnkStruct_0209BE84 *v0 = param2;
 
     if (v0->unk_00 >= 18) {
-        GF_ASSERT(0);
+        GF_ASSERT(FALSE);
         return;
     }
 
@@ -171,13 +169,13 @@ static void sub_0209BF64(int param0, int param1, void *param2, void *param3)
 
             switch (v2->unk_02) {
             case 0:
-                if ((v0->unk_2C != CommSys_ConnectedCount()) || (v0->unk_2C != sub_0209C16C()) || (v0->unk_2C != MATH_CountPopulation(sub_020318EC()))) {
+                if ((v0->unk_2C != CommSys_ConnectedCount()) || (v0->unk_2C != sub_0209C16C()) || (v0->unk_2C != MATH_CountPopulation(WirelessManager_GetConnectedBitmap()))) {
                     v1.unk_03 = 0;
                 } else {
                     v0->unk_30 |= 1 << param0;
                     v1.unk_03 = 1;
 
-                    sub_02037B58(CommSys_ConnectedCount());
+                    CommManager_SetMaxNumConnections(CommSys_ConnectedCount());
                 }
                 break;
             case 1:
@@ -210,9 +208,7 @@ static void sub_0209BF64(int param0, int param1, void *param2, void *param3)
 static void sub_0209C040(int param0, int param1, void *param2, void *param3)
 {
     UnkStruct_0209BDF8 *v0 = param3;
-    u8 v1;
-
-    v1 = *(u8 *)param2;
+    u8 v1 = *(u8 *)param2;
     ov109_021D5258(v0->unk_00->unk_3C, 1, v1);
 
     if (CommSys_CurNetId() == 0) {
@@ -355,123 +351,121 @@ int sub_0209C16C(void)
 
 void *sub_0209C188(UnkStruct_0209BDF8 *param0, int param1)
 {
-    u32 v0;
-
-    v0 = (u32)(param0->unk_50);
+    u32 v0 = (u32)(param0->unk_50);
     v0 += param1 * (236 * 6 + 4 * 2);
 
     return (void *)v0;
 }
 
 static const CommCmdTable Unk_020F8EA8[135] = {
-    { sub_02099510, sub_0203294C, NULL },
-    { sub_02099510, sub_0203294C, NULL },
-    { sub_02099510, sub_0203294C, NULL },
-    { sub_02099510, sub_0203294C, NULL },
-    { sub_02099510, sub_0203294C, NULL },
-    { sub_02099510, sub_0203294C, NULL },
-    { sub_02099510, sub_0203294C, NULL },
-    { sub_02099510, sub_0203294C, NULL },
-    { sub_02099510, sub_0203294C, NULL },
-    { sub_02099510, sub_0203294C, NULL },
-    { sub_02099510, sub_0203294C, NULL },
-    { sub_02099510, sub_0203294C, NULL },
-    { sub_02099510, sub_0203294C, NULL },
-    { sub_02099510, sub_0203294C, NULL },
-    { sub_02099510, sub_0203294C, NULL },
-    { sub_02099510, sub_0203294C, NULL },
-    { sub_02099510, sub_0203294C, NULL },
-    { sub_02099510, sub_0203294C, NULL },
-    { sub_02099510, sub_0203294C, NULL },
-    { sub_02099510, sub_0203294C, NULL },
-    { sub_02099510, sub_0203294C, NULL },
-    { sub_02099510, sub_0203294C, NULL },
-    { sub_02099510, sub_0203294C, NULL },
-    { sub_02099510, sub_0203294C, NULL },
-    { sub_02099510, sub_0203294C, NULL },
-    { sub_02099510, sub_0203294C, NULL },
-    { sub_02099510, sub_0203294C, NULL },
-    { sub_02099510, sub_0203294C, NULL },
-    { sub_02099510, sub_0203294C, NULL },
-    { sub_02099510, sub_0203294C, NULL },
-    { sub_02099510, sub_0203294C, NULL },
-    { sub_02099510, sub_0203294C, NULL },
-    { sub_02099510, sub_0203294C, NULL },
-    { sub_02099510, sub_0203294C, NULL },
-    { sub_02099510, sub_0203294C, NULL },
-    { sub_02099510, sub_0203294C, NULL },
-    { sub_02099510, sub_0203294C, NULL },
-    { sub_02099510, sub_0203294C, NULL },
-    { sub_02099510, sub_0203294C, NULL },
-    { sub_02099510, sub_0203294C, NULL },
-    { sub_02099510, sub_0203294C, NULL },
-    { sub_02099510, sub_0203294C, NULL },
-    { sub_02099510, sub_0203294C, NULL },
-    { sub_02099510, sub_0203294C, NULL },
-    { sub_02099510, sub_0203294C, NULL },
-    { sub_02099510, sub_0203294C, NULL },
-    { sub_02099510, sub_0203294C, NULL },
-    { sub_02099510, sub_0203294C, NULL },
-    { sub_02099510, sub_0203294C, NULL },
-    { sub_02099510, sub_0203294C, NULL },
-    { sub_02099510, sub_0203294C, NULL },
-    { sub_02099510, sub_0203294C, NULL },
-    { sub_02099510, sub_0203294C, NULL },
-    { sub_02099510, sub_0203294C, NULL },
-    { sub_02099510, sub_0203294C, NULL },
-    { sub_02099510, sub_0203294C, NULL },
-    { sub_02099510, sub_0203294C, NULL },
-    { sub_02099510, sub_0203294C, NULL },
-    { sub_02099510, sub_0203294C, NULL },
-    { sub_02099510, sub_0203294C, NULL },
-    { sub_02099510, sub_0203294C, NULL },
-    { sub_02099510, sub_0203294C, NULL },
-    { sub_02099510, sub_0203294C, NULL },
-    { sub_02099510, sub_0203294C, NULL },
-    { sub_02099510, sub_0203294C, NULL },
-    { sub_02099510, sub_0203294C, NULL },
-    { sub_02099510, sub_0203294C, NULL },
-    { sub_02099510, sub_0203294C, NULL },
-    { sub_02099510, sub_0203294C, NULL },
-    { sub_02099510, sub_0203294C, NULL },
-    { sub_02099510, sub_0203294C, NULL },
-    { sub_02099510, sub_0203294C, NULL },
-    { sub_02099510, sub_0203294C, NULL },
-    { sub_02099510, sub_0203294C, NULL },
-    { sub_02099510, sub_0203294C, NULL },
-    { sub_02099510, sub_0203294C, NULL },
-    { sub_02099510, sub_0203294C, NULL },
-    { sub_02099510, sub_0203294C, NULL },
-    { sub_02099510, sub_0203294C, NULL },
-    { sub_02099510, sub_0203294C, NULL },
-    { sub_02099510, sub_0203294C, NULL },
-    { sub_02099510, sub_0203294C, NULL },
-    { sub_02099510, sub_0203294C, NULL },
-    { sub_02099510, sub_0203294C, NULL },
-    { sub_02099510, sub_0203294C, NULL },
-    { sub_02099510, sub_0203294C, NULL },
-    { sub_02099510, sub_0203294C, NULL },
-    { sub_02099510, sub_0203294C, NULL },
-    { sub_02099510, sub_0203294C, NULL },
-    { sub_02099510, sub_0203294C, NULL },
-    { sub_02099510, sub_0203294C, NULL },
-    { sub_02099510, sub_0203294C, NULL },
-    { sub_02099510, sub_0203294C, NULL },
-    { sub_02099510, sub_0203294C, NULL },
-    { sub_02099510, sub_0203294C, NULL },
-    { sub_02099510, sub_0203294C, NULL },
-    { sub_02099510, sub_0203294C, NULL },
-    { sub_02099510, sub_0203294C, NULL },
-    { sub_02099510, sub_0203294C, NULL },
-    { sub_02099510, sub_0203294C, NULL },
-    { sub_02099510, sub_0203294C, NULL },
-    { sub_02099510, sub_0203294C, NULL },
-    { sub_02099510, sub_0203294C, NULL },
-    { sub_02099510, sub_0203294C, NULL },
-    { sub_02099510, sub_0203294C, NULL },
-    { sub_02099510, sub_0203294C, NULL },
-    { sub_02099510, sub_0203294C, NULL },
-    { sub_02099510, sub_0203294C, NULL },
+    { sub_02099510, CommPacketSizeOf_Nothing, NULL },
+    { sub_02099510, CommPacketSizeOf_Nothing, NULL },
+    { sub_02099510, CommPacketSizeOf_Nothing, NULL },
+    { sub_02099510, CommPacketSizeOf_Nothing, NULL },
+    { sub_02099510, CommPacketSizeOf_Nothing, NULL },
+    { sub_02099510, CommPacketSizeOf_Nothing, NULL },
+    { sub_02099510, CommPacketSizeOf_Nothing, NULL },
+    { sub_02099510, CommPacketSizeOf_Nothing, NULL },
+    { sub_02099510, CommPacketSizeOf_Nothing, NULL },
+    { sub_02099510, CommPacketSizeOf_Nothing, NULL },
+    { sub_02099510, CommPacketSizeOf_Nothing, NULL },
+    { sub_02099510, CommPacketSizeOf_Nothing, NULL },
+    { sub_02099510, CommPacketSizeOf_Nothing, NULL },
+    { sub_02099510, CommPacketSizeOf_Nothing, NULL },
+    { sub_02099510, CommPacketSizeOf_Nothing, NULL },
+    { sub_02099510, CommPacketSizeOf_Nothing, NULL },
+    { sub_02099510, CommPacketSizeOf_Nothing, NULL },
+    { sub_02099510, CommPacketSizeOf_Nothing, NULL },
+    { sub_02099510, CommPacketSizeOf_Nothing, NULL },
+    { sub_02099510, CommPacketSizeOf_Nothing, NULL },
+    { sub_02099510, CommPacketSizeOf_Nothing, NULL },
+    { sub_02099510, CommPacketSizeOf_Nothing, NULL },
+    { sub_02099510, CommPacketSizeOf_Nothing, NULL },
+    { sub_02099510, CommPacketSizeOf_Nothing, NULL },
+    { sub_02099510, CommPacketSizeOf_Nothing, NULL },
+    { sub_02099510, CommPacketSizeOf_Nothing, NULL },
+    { sub_02099510, CommPacketSizeOf_Nothing, NULL },
+    { sub_02099510, CommPacketSizeOf_Nothing, NULL },
+    { sub_02099510, CommPacketSizeOf_Nothing, NULL },
+    { sub_02099510, CommPacketSizeOf_Nothing, NULL },
+    { sub_02099510, CommPacketSizeOf_Nothing, NULL },
+    { sub_02099510, CommPacketSizeOf_Nothing, NULL },
+    { sub_02099510, CommPacketSizeOf_Nothing, NULL },
+    { sub_02099510, CommPacketSizeOf_Nothing, NULL },
+    { sub_02099510, CommPacketSizeOf_Nothing, NULL },
+    { sub_02099510, CommPacketSizeOf_Nothing, NULL },
+    { sub_02099510, CommPacketSizeOf_Nothing, NULL },
+    { sub_02099510, CommPacketSizeOf_Nothing, NULL },
+    { sub_02099510, CommPacketSizeOf_Nothing, NULL },
+    { sub_02099510, CommPacketSizeOf_Nothing, NULL },
+    { sub_02099510, CommPacketSizeOf_Nothing, NULL },
+    { sub_02099510, CommPacketSizeOf_Nothing, NULL },
+    { sub_02099510, CommPacketSizeOf_Nothing, NULL },
+    { sub_02099510, CommPacketSizeOf_Nothing, NULL },
+    { sub_02099510, CommPacketSizeOf_Nothing, NULL },
+    { sub_02099510, CommPacketSizeOf_Nothing, NULL },
+    { sub_02099510, CommPacketSizeOf_Nothing, NULL },
+    { sub_02099510, CommPacketSizeOf_Nothing, NULL },
+    { sub_02099510, CommPacketSizeOf_Nothing, NULL },
+    { sub_02099510, CommPacketSizeOf_Nothing, NULL },
+    { sub_02099510, CommPacketSizeOf_Nothing, NULL },
+    { sub_02099510, CommPacketSizeOf_Nothing, NULL },
+    { sub_02099510, CommPacketSizeOf_Nothing, NULL },
+    { sub_02099510, CommPacketSizeOf_Nothing, NULL },
+    { sub_02099510, CommPacketSizeOf_Nothing, NULL },
+    { sub_02099510, CommPacketSizeOf_Nothing, NULL },
+    { sub_02099510, CommPacketSizeOf_Nothing, NULL },
+    { sub_02099510, CommPacketSizeOf_Nothing, NULL },
+    { sub_02099510, CommPacketSizeOf_Nothing, NULL },
+    { sub_02099510, CommPacketSizeOf_Nothing, NULL },
+    { sub_02099510, CommPacketSizeOf_Nothing, NULL },
+    { sub_02099510, CommPacketSizeOf_Nothing, NULL },
+    { sub_02099510, CommPacketSizeOf_Nothing, NULL },
+    { sub_02099510, CommPacketSizeOf_Nothing, NULL },
+    { sub_02099510, CommPacketSizeOf_Nothing, NULL },
+    { sub_02099510, CommPacketSizeOf_Nothing, NULL },
+    { sub_02099510, CommPacketSizeOf_Nothing, NULL },
+    { sub_02099510, CommPacketSizeOf_Nothing, NULL },
+    { sub_02099510, CommPacketSizeOf_Nothing, NULL },
+    { sub_02099510, CommPacketSizeOf_Nothing, NULL },
+    { sub_02099510, CommPacketSizeOf_Nothing, NULL },
+    { sub_02099510, CommPacketSizeOf_Nothing, NULL },
+    { sub_02099510, CommPacketSizeOf_Nothing, NULL },
+    { sub_02099510, CommPacketSizeOf_Nothing, NULL },
+    { sub_02099510, CommPacketSizeOf_Nothing, NULL },
+    { sub_02099510, CommPacketSizeOf_Nothing, NULL },
+    { sub_02099510, CommPacketSizeOf_Nothing, NULL },
+    { sub_02099510, CommPacketSizeOf_Nothing, NULL },
+    { sub_02099510, CommPacketSizeOf_Nothing, NULL },
+    { sub_02099510, CommPacketSizeOf_Nothing, NULL },
+    { sub_02099510, CommPacketSizeOf_Nothing, NULL },
+    { sub_02099510, CommPacketSizeOf_Nothing, NULL },
+    { sub_02099510, CommPacketSizeOf_Nothing, NULL },
+    { sub_02099510, CommPacketSizeOf_Nothing, NULL },
+    { sub_02099510, CommPacketSizeOf_Nothing, NULL },
+    { sub_02099510, CommPacketSizeOf_Nothing, NULL },
+    { sub_02099510, CommPacketSizeOf_Nothing, NULL },
+    { sub_02099510, CommPacketSizeOf_Nothing, NULL },
+    { sub_02099510, CommPacketSizeOf_Nothing, NULL },
+    { sub_02099510, CommPacketSizeOf_Nothing, NULL },
+    { sub_02099510, CommPacketSizeOf_Nothing, NULL },
+    { sub_02099510, CommPacketSizeOf_Nothing, NULL },
+    { sub_02099510, CommPacketSizeOf_Nothing, NULL },
+    { sub_02099510, CommPacketSizeOf_Nothing, NULL },
+    { sub_02099510, CommPacketSizeOf_Nothing, NULL },
+    { sub_02099510, CommPacketSizeOf_Nothing, NULL },
+    { sub_02099510, CommPacketSizeOf_Nothing, NULL },
+    { sub_02099510, CommPacketSizeOf_Nothing, NULL },
+    { sub_02099510, CommPacketSizeOf_Nothing, NULL },
+    { sub_02099510, CommPacketSizeOf_Nothing, NULL },
+    { sub_02099510, CommPacketSizeOf_Nothing, NULL },
+    { sub_02099510, CommPacketSizeOf_Nothing, NULL },
+    { sub_02099510, CommPacketSizeOf_Nothing, NULL },
+    { sub_02099510, CommPacketSizeOf_Nothing, NULL },
+    { sub_02099510, CommPacketSizeOf_Nothing, NULL },
+    { sub_02099510, CommPacketSizeOf_Nothing, NULL },
+    { sub_02099510, CommPacketSizeOf_Nothing, NULL },
+    { sub_02099510, CommPacketSizeOf_Nothing, NULL },
     { sub_0209BED0, sub_0209C154, NULL },
     { sub_0209BEF0, sub_0209C158, sub_0209C160 }
 };

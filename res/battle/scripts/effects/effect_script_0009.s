@@ -1,6 +1,5 @@
-    .include "macros/btlcmd.inc"
+#include "macros/btlcmd.inc"
 
-    .data
 
 _000:
     PrintAttackMessage 
@@ -8,7 +7,7 @@ _000:
     WaitButtonABTime 30
     SetMirrorMove 
     // Mirror Move failed!
-    PrintMessage pl_msg_00000368_00798, TAG_NONE
+    PrintMessage BattleStrings_Text_MirrorMoveFailed, TAG_NONE
     Wait 
     WaitButtonABTime 30
     UpdateVar OPCODE_FLAG_ON, BTLVAR_MOVE_STATUS_FLAGS, MOVE_STATUS_NO_MORE_WORK

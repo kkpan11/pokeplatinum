@@ -1,69 +1,63 @@
-    .include "macros/scrcmd.inc"
+#include "macros/scrcmd.inc"
+#include "res/text/bank/route_218_gate_to_jubilife_city.h"
 
-    .data
 
-    ScriptEntry _000A
-    ScriptEntry _001D
-    .short 0xFD13
+    ScriptEntry Route218GateToJubilifeCity_Policeman
+    ScriptEntry Route218GateToJubilifeCity_Fisherman
+    ScriptEntryEnd
 
-_000A:
-    PlayFanfare SEQ_SE_CONFIRM
+Route218GateToJubilifeCity_Policeman:
+    NPCMessage Route218GateToJubilifeCity_Text_GreatFishingHole
+    End
+
+Route218GateToJubilifeCity_Fisherman:
+    PlaySE SE_CONFIRM_sseq_3
     LockAll
     FacePlayer
-    Message 0
-    WaitABXPadPress
+    SetVar VAR_0x8004, ITEM_OLD_ROD
+    BufferItemName 0, VAR_0x8004
+    GoToIfSet FLAG_RECEIVED_OLD_ROD, Route218GateToJubilifeCity_DidYouNeedTips
+    Message Route218GateToJubilifeCity_Text_OldRodGoodRight
+    ShowYesNoMenu VAR_RESULT
+    GoToIfEq VAR_RESULT, MENU_YES, Route218GateToJubilifeCity_AcceptOldRod
+    GoToIfEq VAR_RESULT, MENU_NO, Route218GateToJubilifeCity_RefuseOldRod
+    End
+
+Route218GateToJubilifeCity_DidYouNeedTips:
+    BufferItemName 0, VAR_0x8004
+    Message Route218GateToJubilifeCity_Text_DidYouNeedTips
+    ShowYesNoMenu VAR_RESULT
+    GoToIfEq VAR_RESULT, MENU_YES, Route218GateToJubilifeCity_ExplainFishing
+    GoToIfEq VAR_RESULT, MENU_NO, Route218GateToJubilifeCity_FishingTwiceTheFun
+    End
+
+Route218GateToJubilifeCity_ExplainFishing:
+    Message Route218GateToJubilifeCity_Text_ExplainFishing
+    WaitButton
     CloseMessage
     ReleaseAll
     End
 
-_001D:
-    PlayFanfare SEQ_SE_CONFIRM
-    LockAll
-    FacePlayer
-    SetVar 0x8004, 0x1BD
-    ScrCmd_0D1 0, 0x8004
-    GoToIfSet 132, _005E
-    Message 1
-    ScrCmd_03E 0x800C
-    GoToIfEq 0x800C, 0, _00A7
-    GoToIfEq 0x800C, 1, _009C
-    End
-
-_005E:
-    ScrCmd_0D1 0, 0x8004
-    Message 3
-    ScrCmd_03E 0x800C
-    GoToIfEq 0x800C, 0, _0086
-    GoToIfEq 0x800C, 1, _0091
-    End
-
-_0086:
-    Message 5
-    WaitABXPadPress
+Route218GateToJubilifeCity_FishingTwiceTheFun:
+    Message Route218GateToJubilifeCity_Text_FishingTwiceTheFun
+    WaitButton
     CloseMessage
     ReleaseAll
     End
 
-_0091:
-    Message 6
-    WaitABXPadPress
+Route218GateToJubilifeCity_RefuseOldRod:
+    Message Route218GateToJubilifeCity_Text_YouDontLikeToFish
+    WaitButton
     CloseMessage
     ReleaseAll
     End
 
-_009C:
-    Message 4
-    WaitABXPadPress
-    CloseMessage
-    ReleaseAll
-    End
+Route218GateToJubilifeCity_AcceptOldRod:
+    BufferItemName 0, VAR_0x8004
+    Message Route218GateToJubilifeCity_Text_HereYouGo
+    SetVar VAR_0x8005, 1
+    Common_GiveItemQuantity
+    SetFlag FLAG_RECEIVED_OLD_ROD
+    GoTo Route218GateToJubilifeCity_DidYouNeedTips
 
-_00A7:
-    ScrCmd_0D1 0, 0x8004
-    Message 2
-    SetVar 0x8005, 1
-    CallCommonScript 0x7FC
-    SetFlag 132
-    GoTo _005E
-
-    .byte 0
+    .balign 4, 0

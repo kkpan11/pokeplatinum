@@ -1,216 +1,202 @@
-    .include "macros/scrcmd.inc"
+#include "macros/scrcmd.inc"
+#include "res/text/bank/route_209_gate_to_hearthome_city.h"
+#include "res/field/events/events_route_209_gate_to_hearthome_city.h"
 
-    .data
 
-    ScriptEntry _000A
-    ScriptEntry _001D
-    .short 0xFD13
+    ScriptEntry Route209GateToHearthomeCity_BattleGirl
+    ScriptEntry Route209GateToHearthomeCity_CoordEvent_Rival
+    ScriptEntryEnd
 
-_000A:
-    PlayFanfare SEQ_SE_CONFIRM
+Route209GateToHearthomeCity_BattleGirl:
+    NPCMessage Route209GateToHearthomeCity_Text_WreckedStonePillar
+    End
+
+Route209GateToHearthomeCity_CoordEvent_Rival:
     LockAll
-    FacePlayer
-    Message 0
-    WaitABXPadPress
+    ApplyMovement LOCALID_RIVAL, Route209GateToHearthomeCity_Movement_RivalNoticePlayer
+    WaitMovement
+    Common_SetRivalBGM
+    GetPlayerMapPos VAR_0x8004, VAR_0x8005
+    CallIfEq VAR_0x8005, 5, Route209GateToHearthomeCity_RivalWalkToPlayerZ5
+    CallIfEq VAR_0x8005, 6, Route209GateToHearthomeCity_RivalWalkToPlayerZ6
+    CallIfEq VAR_0x8005, 7, Route209GateToHearthomeCity_RivalWalkToPlayerZ7
+    CallIfEq VAR_0x8005, 8, Route209GateToHearthomeCity_RivalWalkToPlayerZ8
+    CallIfEq VAR_0x8005, 9, Route209GateToHearthomeCity_RivalWalkToPlayerZ9
+    BufferRivalName 0
+    BufferPlayerName 1
+    Message Route209GateToHearthomeCity_Text_LetsGetTheShowStarted
     CloseMessage
+    GetPlayerStarterSpecies VAR_RESULT
+    GoToIfEq VAR_RESULT, SPECIES_TURTWIG, Route209GateToHearthomeCity_StartRivalBattleTurtwig
+    GoToIfEq VAR_RESULT, SPECIES_CHIMCHAR, Route209GateToHearthomeCity_StartRivalBattleChimchar
+    GoTo Route209GateToHearthomeCity_StartRivalBattlePiplup
+    End
+
+Route209GateToHearthomeCity_StartRivalBattlePiplup:
+    StartTrainerBattle TRAINER_RIVAL_ROUTE_209_PIPLUP
+    GoTo Route209GateToHearthomeCity_PostRivalBattle
+    End
+
+Route209GateToHearthomeCity_StartRivalBattleTurtwig:
+    StartTrainerBattle TRAINER_RIVAL_ROUTE_209_TURTWIG
+    GoTo Route209GateToHearthomeCity_PostRivalBattle
+    End
+
+Route209GateToHearthomeCity_StartRivalBattleChimchar:
+    StartTrainerBattle TRAINER_RIVAL_ROUTE_209_CHIMCHAR
+    GoTo Route209GateToHearthomeCity_PostRivalBattle
+    End
+
+Route209GateToHearthomeCity_PostRivalBattle:
+    CheckWonBattle VAR_RESULT
+    GoToIfEq VAR_RESULT, FALSE, Route209GateToHearthomeCity_BlackOut
+    BufferRivalName 0
+    BufferPlayerName 1
+    Message Route209GateToHearthomeCity_Text_MyStrategyDoesntWork
+    CloseMessage
+    GetPlayerMapPos VAR_0x8004, VAR_0x8005
+    CallIfEq VAR_0x8005, 5, Route209GateToHearthomeCity_RivalLeaveZ5
+    CallIfEq VAR_0x8005, 6, Route209GateToHearthomeCity_RivalLeaveZ6
+    CallIfEq VAR_0x8005, 7, Route209GateToHearthomeCity_RivalLeaveZ7
+    CallIfEq VAR_0x8005, 8, Route209GateToHearthomeCity_RivalLeaveZ8
+    CallIfEq VAR_0x8005, 9, Route209GateToHearthomeCity_RivalLeaveZ9
+    PlaySE SEQ_SE_DP_KAIDAN2_sseq
+    RemoveObject LOCALID_RIVAL
+    WaitSE SEQ_SE_DP_KAIDAN2_sseq
+    SetVar VAR_ROUTE_209_GATE_TO_HEARTHOME_CITY_STATE, 2
     ReleaseAll
     End
 
-_001D:
-    LockAll
-    ApplyMovement 1, _0264
-    WaitMovement
-    CallCommonScript 0x7FA
-    ScrCmd_069 0x8004, 0x8005
-    CallIfEq 0x8005, 5, _014E
-    CallIfEq 0x8005, 6, _015A
-    CallIfEq 0x8005, 7, _0166
-    CallIfEq 0x8005, 8, _0172
-    CallIfEq 0x8005, 9, _017E
-    ScrCmd_0CE 0
-    ScrCmd_0CD 1
-    Message 1
-    CloseMessage
-    ScrCmd_0DE 0x800C
-    GoToIfEq 0x800C, 0x183, _00B3
-    GoToIfEq 0x800C, 0x186, _00C1
-    GoTo _00A5
-    End
-
-_00A5:
-    ScrCmd_0E5 0x1D6, 0
-    GoTo _00CF
-    End
-
-_00B3:
-    ScrCmd_0E5 0x1D7, 0
-    GoTo _00CF
-    End
-
-_00C1:
-    ScrCmd_0E5 0x1D8, 0
-    GoTo _00CF
-    End
-
-_00CF:
-    ScrCmd_0EC 0x800C
-    GoToIfEq 0x800C, 0, _0148
-    ScrCmd_0CE 0
-    ScrCmd_0CD 1
-    Message 2
-    CloseMessage
-    ScrCmd_069 0x8004, 0x8005
-    CallIfEq 0x8005, 5, _018A
-    CallIfEq 0x8005, 6, _0196
-    CallIfEq 0x8005, 7, _01A2
-    CallIfEq 0x8005, 8, _01AE
-    CallIfEq 0x8005, 9, _01BA
-    PlayFanfare SEQ_SE_DP_KAIDAN2
-    ScrCmd_065 1
-    ScrCmd_04B 0x603
-    SetVar 0x407B, 2
+Route209GateToHearthomeCity_BlackOut:
+    BlackOutFromBattle
     ReleaseAll
     End
 
-_0148:
-    ScrCmd_0EB
-    ReleaseAll
-    End
-
-_014E:
-    ApplyMovement 1, _01D4
+Route209GateToHearthomeCity_RivalWalkToPlayerZ5:
+    ApplyMovement LOCALID_RIVAL, Route209GateToHearthomeCity_Movement_RivalWalkToPlayerZ5
     WaitMovement
     Return
 
-_015A:
-    ApplyMovement 1, _01E4
+Route209GateToHearthomeCity_RivalWalkToPlayerZ6:
+    ApplyMovement LOCALID_RIVAL, Route209GateToHearthomeCity_Movement_RivalWalkToPlayerZ6
     WaitMovement
     Return
 
-_0166:
-    ApplyMovement 1, _01F4
+Route209GateToHearthomeCity_RivalWalkToPlayerZ7:
+    ApplyMovement LOCALID_RIVAL, Route209GateToHearthomeCity_Movement_RivalWalkToPlayerZ7
     WaitMovement
     Return
 
-_0172:
-    ApplyMovement 1, _01FC
+Route209GateToHearthomeCity_RivalWalkToPlayerZ8:
+    ApplyMovement LOCALID_RIVAL, Route209GateToHearthomeCity_Movement_RivalWalkToPlayerZ8
     WaitMovement
     Return
 
-_017E:
-    ApplyMovement 1, _020C
+Route209GateToHearthomeCity_RivalWalkToPlayerZ9:
+    ApplyMovement LOCALID_RIVAL, Route209GateToHearthomeCity_Movement_RivalWalkToPlayerZ9
     WaitMovement
     Return
 
-_018A:
-    ApplyMovement 1, _021C
+Route209GateToHearthomeCity_RivalLeaveZ5:
+    ApplyMovement LOCALID_RIVAL, Route209GateToHearthomeCity_Movement_RivalLeaveZ5
     WaitMovement
     Return
 
-_0196:
-    ApplyMovement 1, _022C
+Route209GateToHearthomeCity_RivalLeaveZ6:
+    ApplyMovement LOCALID_RIVAL, Route209GateToHearthomeCity_Movement_RivalLeaveZ6
     WaitMovement
     Return
 
-_01A2:
-    ApplyMovement 1, _023C
+Route209GateToHearthomeCity_RivalLeaveZ7:
+    ApplyMovement LOCALID_RIVAL, Route209GateToHearthomeCity_Movement_RivalLeaveZ7
     WaitMovement
     Return
 
-_01AE:
-    ApplyMovement 1, _0244
+Route209GateToHearthomeCity_RivalLeaveZ8:
+    ApplyMovement LOCALID_RIVAL, Route209GateToHearthomeCity_Movement_RivalLeaveZ8
     WaitMovement
     Return
 
-_01BA:
-    ApplyMovement 1, _0254
+Route209GateToHearthomeCity_RivalLeaveZ9:
+    ApplyMovement LOCALID_RIVAL, Route209GateToHearthomeCity_Movement_RivalLeaveZ9
     WaitMovement
     Return
 
-    .byte 0
-    .byte 0
-    .byte 18
-    .byte 0
-    .byte 4
-    .byte 0
-    .byte 75
-    .byte 0
-    .byte 1
-    .byte 0
-    .byte 254
-    .byte 0
-    .byte 0
-    .byte 0
-
     .balign 4, 0
-_01D4:
-    MoveAction_012 2
-    MoveAction_010 2
-    MoveAction_026
+Route209GateToHearthomeCity_Movement_Unused:
+    WalkFastWest 4
+    EmoteExclamationMark
     EndMovement
 
     .balign 4, 0
-_01E4:
-    MoveAction_012 2
-    MoveAction_010
-    MoveAction_026
+Route209GateToHearthomeCity_Movement_RivalWalkToPlayerZ5:
+    WalkFastWest 2
+    WalkFastNorth 2
+    WalkOnSpotFastWest
     EndMovement
 
     .balign 4, 0
-_01F4:
-    MoveAction_012 2
+Route209GateToHearthomeCity_Movement_RivalWalkToPlayerZ6:
+    WalkFastWest 2
+    WalkFastNorth
+    WalkOnSpotFastWest
     EndMovement
 
     .balign 4, 0
-_01FC:
-    MoveAction_012 2
-    MoveAction_011
-    MoveAction_026
+Route209GateToHearthomeCity_Movement_RivalWalkToPlayerZ7:
+    WalkFastWest 2
     EndMovement
 
     .balign 4, 0
-_020C:
-    MoveAction_012 2
-    MoveAction_011 2
-    MoveAction_026
+Route209GateToHearthomeCity_Movement_RivalWalkToPlayerZ8:
+    WalkFastWest 2
+    WalkFastSouth
+    WalkOnSpotFastWest
     EndMovement
 
     .balign 4, 0
-_021C:
-    MoveAction_013 2
-    MoveAction_011 2
-    MoveAction_013 2
+Route209GateToHearthomeCity_Movement_RivalWalkToPlayerZ9:
+    WalkFastWest 2
+    WalkFastSouth 2
+    WalkOnSpotFastWest
     EndMovement
 
     .balign 4, 0
-_022C:
-    MoveAction_013 2
-    MoveAction_011
-    MoveAction_013 2
+Route209GateToHearthomeCity_Movement_RivalLeaveZ5:
+    WalkFastEast 2
+    WalkFastSouth 2
+    WalkFastEast 2
     EndMovement
 
     .balign 4, 0
-_023C:
-    MoveAction_013 4
+Route209GateToHearthomeCity_Movement_RivalLeaveZ6:
+    WalkFastEast 2
+    WalkFastSouth
+    WalkFastEast 2
     EndMovement
 
     .balign 4, 0
-_0244:
-    MoveAction_013 2
-    MoveAction_010
-    MoveAction_013 2
+Route209GateToHearthomeCity_Movement_RivalLeaveZ7:
+    WalkFastEast 4
     EndMovement
 
     .balign 4, 0
-_0254:
-    MoveAction_013 2
-    MoveAction_010 2
-    MoveAction_013 2
+Route209GateToHearthomeCity_Movement_RivalLeaveZ8:
+    WalkFastEast 2
+    WalkFastNorth
+    WalkFastEast 2
     EndMovement
 
     .balign 4, 0
-_0264:
-    MoveAction_03F
-    MoveAction_04B
-    MoveAction_03F
+Route209GateToHearthomeCity_Movement_RivalLeaveZ9:
+    WalkFastEast 2
+    WalkFastNorth 2
+    WalkFastEast 2
+    EndMovement
+
+    .balign 4, 0
+Route209GateToHearthomeCity_Movement_RivalNoticePlayer:
+    Delay8
+    EmoteExclamationMark
+    Delay8
     EndMovement

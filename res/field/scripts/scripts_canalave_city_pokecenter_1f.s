@@ -1,58 +1,33 @@
-    .include "macros/scrcmd.inc"
+#include "macros/scrcmd.inc"
+#include "res/text/bank/canalave_city_pokecenter_1f.h"
+#include "res/field/events/events_canalave_city_pokecenter_1f.h"
 
-    .data
 
-    ScriptEntry _0016
-    ScriptEntry _0022
-    ScriptEntry _0035
-    ScriptEntry _0048
-    ScriptEntry _005B
-    .short 0xFD13
+    ScriptEntry CanalaveCityPokecenter1F_Nurse
+    ScriptEntry CanalaveCityPokecenter1F_PokemonBreederF
+    ScriptEntry CanalaveCityPokecenter1F_Lass
+    ScriptEntry CanalaveCityPokecenter1F_ScientistM
+    ScriptEntry CanalaveCityPokecenter1F_BugCatcher
+    ScriptEntryEnd
 
-_0016:
-    SetVar 0x8007, 1
-    CallCommonScript 0x7D2
+CanalaveCityPokecenter1F_Nurse:
+    Common_CallPokecenterNurse LOCALID_CANALAVE_NURSE
     End
 
-_0022:
-    PlayFanfare SEQ_SE_CONFIRM
-    LockAll
-    FacePlayer
-    Message 0
-    WaitABXPadPress
-    CloseMessage
-    ReleaseAll
+CanalaveCityPokecenter1F_PokemonBreederF:
+    NPCMessage CanalaveCityPokecenter1F_Text_BoatToIronIsland
     End
 
-_0035:
-    PlayFanfare SEQ_SE_CONFIRM
-    LockAll
-    FacePlayer
-    Message 1
-    WaitABXPadPress
-    CloseMessage
-    ReleaseAll
+CanalaveCityPokecenter1F_Lass:
+    NPCMessage CanalaveCityPokecenter1F_Text_StrengthHMIronIsland
     End
 
-_0048:
-    PlayFanfare SEQ_SE_CONFIRM
-    LockAll
-    FacePlayer
-    Message 2
-    WaitABXPadPress
-    CloseMessage
-    ReleaseAll
+CanalaveCityPokecenter1F_ScientistM:
+    NPCMessage CanalaveCityPokecenter1F_Text_DifferentAbilities
     End
 
-_005B:
-    PlayFanfare SEQ_SE_CONFIRM
-    LockAll
-    FacePlayer
-    Message 3
-    WaitABXPadPress
-    CloseMessage
-    ReleaseAll
+CanalaveCityPokecenter1F_BugCatcher:
+    NPCMessage CanalaveCityPokecenter1F_Text_CoolRumor
     End
 
-    .byte 0
-    .byte 0
+    .balign 4, 0

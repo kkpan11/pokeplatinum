@@ -1,131 +1,122 @@
-    .include "macros/scrcmd.inc"
+#include "macros/scrcmd.inc"
+#include "res/text/bank/cafe.h"
 
-    .data
 
-    ScriptEntry _0012
-    ScriptEntry _0018
-    ScriptEntry _002B
-    ScriptEntry _016A
-    .short 0xFD13
+    ScriptEntry Cafe_OnTransition
+    ScriptEntry Cafe_Rancher
+    ScriptEntry Cafe_Waitress
+    ScriptEntry Cafe_OldMan
+    ScriptEntryEnd
 
-_0012:
-    SetFlag 0x9E9
+Cafe_OnTransition:
+    SetFlag FLAG_FIRST_ARRIVAL_ROUTE_210_COFFEE_SHOP
     End
 
-_0018:
-    PlayFanfare SEQ_SE_CONFIRM
+Cafe_Rancher:
+    NPCMessage Cafe_Text_CustomersWantToBattle
+    End
+
+Cafe_Waitress:
+    PlaySE SE_CONFIRM_sseq_3
     LockAll
     FacePlayer
-    Message 0
-    WaitABXPadPress
+    ShowMoney 20, 2
+    Message Cafe_Text_MoomooMilk500ABottle
+    GoTo Cafe_MoomooMilkMenu
+    End
+
+Cafe_MoomooMilkMenu:
+    InitLocalTextMenu 30, 11, 0, VAR_RESULT
+    SetMenuXOriginToRight
+    AddMenuEntryImm Cafe_Text_1Bottle, 0
+    AddMenuEntryImm Cafe_Text_1Dozen, 1
+    AddMenuEntryImm Cafe_Text_NoThanks, 2
+    ShowMenu
+    SetVar VAR_0x8008, VAR_RESULT
+    GoToIfEq VAR_0x8008, 0, Cafe_TryBuyBottle
+    GoToIfEq VAR_0x8008, 1, Cafe_TryBuyDozen
+    GoToIfEq VAR_0x8008, 2, Cafe_AllRightThen
+    GoTo Cafe_AllRightThen
+    End
+
+Cafe_TryBuyBottle:
+    GoToIfNotEnoughMoney 500, Cafe_YouDontHaveTheMoney
+    SetVar VAR_0x8005, 1
+    SetVar VAR_0x8006, 500
+    GoTo Cafe_GiveMoomooMilk
+    End
+
+Cafe_TryBuyDozen:
+    GoToIfNotEnoughMoney 6000, Cafe_YouDontHaveTheMoney
+    SetVar VAR_0x8005, 12
+    SetVar VAR_0x8006, 6000
+    GoTo Cafe_GiveMoomooMilk
+    End
+
+Cafe_GiveMoomooMilk:
+    SetVar VAR_0x8004, ITEM_MOOMOO_MILK
+    GoToIfCannotFitItem VAR_0x8004, VAR_0x8005, VAR_RESULT, Cafe_YourBagsFull
+    AddToGameRecord RECORD_MONEY_SPENT, VAR_0x8006
+    RemoveMoney2 VAR_0x8006
+    UpdateMoneyDisplay
+    PlaySE SEQ_SE_DP_REGI_sseq
+    WaitSE SEQ_SE_DP_REGI_sseq
+    CallIfEq VAR_0x8006, 500, Cafe_HeresYourMoomooMilk
+    CallIfEq VAR_0x8006, 6000, Cafe_GetMoomooMilkByDozen
+    Common_GiveItemQuantityNoLineFeed
     CloseMessage
+    HideMoney
     ReleaseAll
     End
 
-_002B:
-    PlayFanfare SEQ_SE_CONFIRM
-    LockAll
-    FacePlayer
-    ScrCmd_072 20, 2
-    Message 1
-    GoTo _0044
-    End
-
-_0044:
-    ScrCmd_041 30, 11, 0, 1, 0x800C
-    ScrCmd_33A 1
-    ScrCmd_042 7, 0
-    ScrCmd_042 8, 1
-    ScrCmd_042 9, 2
-    ScrCmd_043
-    SetVar 0x8008, 0x800C
-    GoToIfEq 0x8008, 0, _0092
-    GoToIfEq 0x8008, 1, _00BB
-    GoToIfEq 0x8008, 2, _015D
-    GoTo _015D
-    End
-
-_0092:
-    ScrCmd_071 0x800C, 0x1F4
-    GoToIfEq 0x800C, 0, _0150
-    SetVar 0x8005, 1
-    SetVar 0x8006, 0x1F4
-    GoTo _00E4
-    End
-
-_00BB:
-    ScrCmd_071 0x800C, 0x1770
-    GoToIfEq 0x800C, 0, _0150
-    SetVar 0x8005, 12
-    SetVar 0x8006, 0x1770
-    GoTo _00E4
-    End
-
-_00E4:
-    SetVar 0x8004, 33
-    ScrCmd_07D 0x8004, 0x8005, 0x800C
-    GoToIfEq 0x800C, 0, _0143
-    ScrCmd_334 35, 0x8006
-    ScrCmd_1A3 0x8006
-    ScrCmd_074
-    PlayFanfare SEQ_SE_DP_REGI
-    ScrCmd_04B 0x644
-    CallIfEq 0x8006, 0x1F4, _0139
-    CallIfEq 0x8006, 0x1770, _013E
-    CallCommonScript 0x7E0
-    CloseMessage
-    ScrCmd_073
-    ReleaseAll
-    End
-
-_0139:
-    Message 2
+Cafe_HeresYourMoomooMilk:
+    Message Cafe_Text_HeresYourMoomooMilk
     Return
 
-_013E:
-    Message 6
+Cafe_GetMoomooMilkByDozen:
+    Message Cafe_Text_GetMoomooMilkByDozen
     Return
 
-_0143:
-    Message 3
-    WaitABXPadPress
+Cafe_YourBagsFull:
+    Message Cafe_Text_YourBagsFull
+    WaitButton
     CloseMessage
-    ScrCmd_073
+    HideMoney
     ReleaseAll
     End
 
-_0150:
-    Message 4
-    WaitABXPadPress
+Cafe_YouDontHaveTheMoney:
+    Message Cafe_Text_YouDontHaveTheMoney
+    WaitButton
     CloseMessage
-    ScrCmd_073
+    HideMoney
     ReleaseAll
     End
 
-_015D:
-    Message 5
-    WaitABXPadPress
+Cafe_AllRightThen:
+    Message Cafe_Text_AllRightThen
+    WaitButton
     CloseMessage
-    ScrCmd_073
+    HideMoney
     ReleaseAll
     End
 
-_016A:
-    PlayFanfare SEQ_SE_CONFIRM
+Cafe_OldMan:
+    PlaySE SE_CONFIRM_sseq_3
     LockAll
     FacePlayer
-    GoToIfSet 0x107, _0188
-    Message 10
-    WaitABXPadPress
+    GoToIfSet FLAG_USED_SECRETPOTION, Cafe_RelievedPsyduckOfHeadaches
+    Message Cafe_Text_SeenPsyduckHuddledOutside
+    WaitButton
     CloseMessage
     ReleaseAll
     End
 
-_0188:
-    Message 11
-    WaitABXPadPress
+Cafe_RelievedPsyduckOfHeadaches:
+    Message Cafe_Text_RelievedPsyduckOfHeadaches
+    WaitButton
     CloseMessage
     ReleaseAll
     End
 
-    .byte 0
+    .balign 4, 0

@@ -1,74 +1,75 @@
-    .include "macros/scrcmd.inc"
+#include "macros/scrcmd.inc"
+#include "res/text/bank/mt_coronet_1f_south.h"
+#include "res/field/events/events_mt_coronet_1f_south.h"
 
-    .data
 
-    ScriptEntry _0006
-    .short 0xFD13
+    ScriptEntry MtCoronet1FSouth_CoordEvent_Cyrus
+    ScriptEntryEnd
 
-_0006:
+MtCoronet1FSouth_CoordEvent_Cyrus:
     LockAll
-    ApplyMovement 0xFF, _008C
-    ApplyMovement 6, _0064
+    ApplyMovement LOCALID_PLAYER, MtCoronet1FSouth_Movement_PlayerWatchCyrusWalkToPlayer
+    ApplyMovement LOCALID_CYRUS, MtCoronet1FSouth_Movement_CyrusWalkToPlayer
     WaitMovement
-    Message 0
+    Message MtCoronet1FSouth_Text_MtCoronetIsWhereSinnohBegan
     CloseMessage
-    ApplyMovement 6, _0070
-    ApplyMovement 0xFF, _009C
+    ApplyMovement LOCALID_CYRUS, MtCoronet1FSouth_Movement_CyrusWalkOnSpotNorth
+    ApplyMovement LOCALID_PLAYER, MtCoronet1FSouth_Movement_PlayerWalkOnSpotNorthEast
     WaitMovement
-    Message 1
-    ApplyMovement 6, _0078
+    Message MtCoronet1FSouth_Text_InANewlyCreatedWorld
+    ApplyMovement LOCALID_CYRUS, MtCoronet1FSouth_Movement_CyrusWalkOnSpotWest
     WaitMovement
-    Message 2
+    Message MtCoronet1FSouth_Text_ButWhatBecameOfThatWorld
     CloseMessage
-    ApplyMovement 0xFF, _00B0
-    ApplyMovement 6, _0080
+    ApplyMovement LOCALID_PLAYER, MtCoronet1FSouth_Movement_PlayerMoveAsideAndWatchCyrusLeave
+    ApplyMovement LOCALID_CYRUS, MtCoronet1FSouth_Movement_CyrusLeave
     WaitMovement
-    ScrCmd_065 6
-    SetVar 0x4096, 1
+    RemoveObject LOCALID_CYRUS
+    SetVar VAR_MT_CORONET_1F_SOUTH_STATE, 1
     ReleaseAll
     End
 
     .balign 4, 0
-_0064:
-    MoveAction_00D 6
-    MoveAction_022
+MtCoronet1FSouth_Movement_CyrusWalkToPlayer:
+    WalkNormalSouth 6
+    WalkOnSpotNormalWest
     EndMovement
 
     .balign 4, 0
-_0070:
-    MoveAction_020
+MtCoronet1FSouth_Movement_CyrusWalkOnSpotNorth:
+    WalkOnSpotNormalNorth
     EndMovement
 
     .balign 4, 0
-_0078:
-    MoveAction_022
+MtCoronet1FSouth_Movement_CyrusWalkOnSpotWest:
+    WalkOnSpotNormalWest
     EndMovement
 
     .balign 4, 0
-_0080:
-    MoveAction_03F 3
-    MoveAction_00E 10
+MtCoronet1FSouth_Movement_CyrusLeave:
+    Delay8 3
+    WalkNormalWest 10
     EndMovement
 
     .balign 4, 0
-_008C:
-    MoveAction_020
-    MoveAction_03F 4
-    MoveAction_023
+MtCoronet1FSouth_Movement_PlayerWatchCyrusWalkToPlayer:
+    WalkOnSpotNormalNorth
+    Delay8 4
+    WalkOnSpotNormalEast
     EndMovement
 
     .balign 4, 0
-_009C:
-    MoveAction_03F 3
-    MoveAction_020
-    MoveAction_03F
-    MoveAction_023
+MtCoronet1FSouth_Movement_PlayerWalkOnSpotNorthEast:
+    Delay8 3
+    WalkOnSpotNormalNorth
+    Delay8
+    WalkOnSpotNormalEast
     EndMovement
 
     .balign 4, 0
-_00B0:
-    MoveAction_00D
-    MoveAction_020
-    MoveAction_03F 2
-    MoveAction_022
+MtCoronet1FSouth_Movement_PlayerMoveAsideAndWatchCyrusLeave:
+    WalkNormalSouth
+    WalkOnSpotNormalNorth
+    Delay8 2
+    WalkOnSpotNormalWest
     EndMovement

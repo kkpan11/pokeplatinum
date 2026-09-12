@@ -1,5 +1,4 @@
 {
-    "name": "Delibird",
     "base_stats": {
         "hp": 45,
         "attack": 55,
@@ -8,10 +7,7 @@
         "special_attack": 65,
         "special_defense": 45
     },
-    "types": [
-        "TYPE_ICE",
-        "TYPE_FLYING"
-    ],
+    "types": [ "TYPE_ICE", "TYPE_FLYING" ],
     "catch_rate": 45,
     "base_exp_reward": 183,
     "ev_yields": {
@@ -30,21 +26,17 @@
     "hatch_cycles": 20,
     "base_friendship": 70,
     "exp_rate": "EXP_RATE_FAST",
-    "egg_groups": [
-        "EGG_GROUP_WATER_1",
-        "EGG_GROUP_FIELD"
-    ],
-    "abilities": [
-        "ABILITY_VITAL_SPIRIT",
-        "ABILITY_HUSTLE"
-    ],
-    "great_marsh_flee_rate": 0,
-    "sprite": {
-        "color": "MON_COLOR_RED",
-        "flip_sprite": false
-    },
+    "egg_groups": [ "EGG_GROUP_WATER_1", "EGG_GROUP_FIELD" ],
+    "abilities": [ "ABILITY_VITAL_SPIRIT", "ABILITY_HUSTLE" ],
+    "safari_flee_rate": 0,
+    "body_color": "MON_COLOR_RED",
+    "flip_sprite": false,
+    "icon_palette": 0,
     "learnset": {
-        "tms": [
+        "by_level": [
+            [ 1, "MOVE_PRESENT" ]
+        ],
+        "by_tm": [
             "TM01",
             "TM03",
             "TM06",
@@ -77,10 +69,7 @@
             "HM02",
             "HM05"
         ],
-        "level_up": {
-            "1": "MOVE_PRESENT"
-        },
-        "tutor": [
+        "by_tutor": [
             "MOVE_MUD_SLAP",
             "MOVE_ICY_WIND",
             "MOVE_ROLLOUT",
@@ -89,10 +78,97 @@
             "MOVE_SEED_BOMB",
             "MOVE_BOUNCE",
             "MOVE_SWIFT"
+        ],
+        "egg_moves": [
+            "MOVE_AURORA_BEAM",
+            "MOVE_QUICK_ATTACK",
+            "MOVE_FUTURE_SIGHT",
+            "MOVE_SPLASH",
+            "MOVE_RAPID_SPIN",
+            "MOVE_ICE_BALL",
+            "MOVE_ICE_SHARD",
+            "MOVE_ICE_PUNCH"
         ]
     },
+    "evolutions": [  ],
+    "offspring": "SPECIES_DELIBIRD",
     "footprint": {
-        "has_footprint": true,
-        "footprint_size": "FOOTPRINT_MEDIUM"
+        "has": true,
+        "size": "FOOTPRINT_MEDIUM",
+        "type": "FOOTPRINT_TYPE_CUTE"
+    },
+    "pokedex_data": {
+        "height_inches": 35,
+        "weight_pounds": 35.3,
+        "body_shape": "SHAPE_WINGED",
+        "trainer_scale_f": 272,
+        "pokemon_scale_f": 295,
+        "trainer_scale_m": 256,
+        "pokemon_scale_m": 295,
+        "trainer_pos_f": 8,
+        "pokemon_pos_f": 15,
+        "trainer_pos_m": 9,
+        "pokemon_pos_m": 15,
+        "en": {
+            "name": "DELIBIRD",
+            "category": "Delivery Pokémon",
+            "entry_text": [
+                "It carries food rolled up in its\n",
+                "tail. It has the habit of sharing\n",
+                "food with people lost in mountains."
+            ]
+        },
+        "fr": {
+            "name": "CADOIZO",
+            "category": "Pokémon Livraison",
+            "entry_text": [
+                "Il dépose sa nourriture dans sa\n",
+                "queue enroulée. Il l’offre souvent\n",
+                "aux gens égarés en montagne."
+            ]
+        },
+        "de": {
+            "name": "BOTOGEL",
+            "category": "Lieferant",
+            "entry_text": [
+                "Im eingerollten Schweif transpor-\n",
+                "tiert es Futter, das es mit denen\n",
+                "teilt, die sich verlaufen haben."
+            ]
+        },
+        "it": {
+            "name": "DELIBIRD",
+            "category": "Pokémon Consegna",
+            "entry_text": [
+                "Trascina il cibo avvolgendolo nella\n",
+                "coda e ha l’abitudine di condividerlo\n",
+                "con chi si perde fra le montagne."
+            ]
+        },
+        "es": {
+            "name": "DELIBIRD",
+            "category": "Pokémon Reparto",
+            "entry_text": [
+                "Lleva alimentos en su saco. Le\n",
+                "gusta compartir su comida con\n",
+                "los montañistas perdidos."
+            ]
+        },
+        "jp": {
+            "name": "デリバ－ド",
+            "category": "はこびやポケモン",
+            "entry_text": [
+                "しっぽで　えさを　つつんで　はこぶ。\n",
+                "やまで　そうなんした　ひとに\n",
+                "えさを　わけあたえる　しゅうせい。"
+            ]
+        }
+    },
+    "catching_show": {
+        "pal_park_land_area": "PAL_PARK_AREA_LAND_NORTH_EAST",
+        "pal_park_water_area": "PAL_PARK_AREA_WATER_NONE",
+        "catching_points": 70,
+        "rarity": 20,
+        "unused": 4365
     }
 }

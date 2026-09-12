@@ -1,192 +1,159 @@
-    .include "macros/scrcmd.inc"
+#include "macros/scrcmd.inc"
+#include "res/text/bank/spear_pillar_distorted.h"
+#include "res/field/events/events_spear_pillar_distorted.h"
 
-    .data
 
-    ScriptEntry _0022
-    ScriptEntry _0184
-    ScriptEntry _01BA
-    ScriptEntry _01CD
-    ScriptEntry _01E0
-    ScriptEntry _01F3
-    ScriptEntry _0206
-    ScriptEntry _0217
-    .short 0xFD13
+    ScriptEntry SpearPillarDistorted_OnFrame_AfterWarp
+    ScriptEntry SpearPillarDistorted_Cynthia
+    ScriptEntry SpearPillarDistorted_Jupiter
+    ScriptEntry SpearPillarDistorted_Mars
+    ScriptEntry SpearPillarDistorted_GruntM
+    ScriptEntry SpearPillarDistorted_GruntF
+    ScriptEntry SpearPillarDistorted_RiftDialga
+    ScriptEntry SpearPillarDistorted_RiftPalkia
+    ScriptEntryEnd
 
-_0022:
+SpearPillarDistorted_OnFrame_AfterWarp:
     LockAll
-    ClearFlag 0x2BA
-    ScrCmd_064 1
-    ScrCmd_1B2 1
-    ScrCmd_186 0, 32, 34
-    ScrCmd_189 0, 0
-    ScrCmd_188 0, 14
-    ClearFlag 0x1CD
-    ScrCmd_064 0
-    ScrCmd_066 30, 30
-    ApplyMovement 241, _016C
+    ClearFlag FLAG_HIDE_SPEAR_PILLAR_DISTORTED_MESPRIT
+    AddObject LOCALID_MESPRIT
+    HideObject LOCALID_MESPRIT
+    SetObjectEventPos LOCALID_CYNTHIA, 32, 34
+    SetObjectEventDir LOCALID_CYNTHIA, DIR_NORTH
+    SetObjectEventMovementType LOCALID_CYNTHIA, MOVEMENT_TYPE_LOOK_NORTH
+    ClearFlag FLAG_HIDE_SPEAR_PILLAR_DISTORTED_CYNTHIA
+    AddObject LOCALID_CYNTHIA
+    AddFreeCamera 30, 30
+    ApplyFreeCameraMovement SpearPillarDistorted_Movement_CameraMoveNorthEast
     WaitMovement
-    FadeScreen 6, 1, 1, 0
+    FadeScreenIn
     WaitFadeScreen
-    SetVar 0x40C3, 2
-    ApplyMovement 0, _0144
+    SetVar VAR_SPEAR_PILLAR_DISTORTED_STATE, 2
+    ApplyMovement LOCALID_CYNTHIA, SpearPillarDistorted_Movement_CynthiaWalkNorth
     WaitMovement
-    Message 0
+    Message SpearPillarDistorted_Text_No
     CloseMessage
-    ScrCmd_20D 4, 0x800C
-    WaitTime 30, 0x800C
-_0088:
-    ScrCmd_20D 6, 0x800C
-    GoToIfEq 0x800C, 0, _0088
-    ScrCmd_065 1
-    ApplyMovement 241, _0178
+    ScrCmd_20D 4, VAR_RESULT
+    WaitTime 30, VAR_RESULT
+SpearPillarDistorted_WaitThenAskEnterDistortionWorld:
+    ScrCmd_20D 6, VAR_RESULT
+    GoToIfEq VAR_RESULT, 0, SpearPillarDistorted_WaitThenAskEnterDistortionWorld
+    RemoveObject LOCALID_MESPRIT
+    ApplyFreeCameraMovement SpearPillarDistorted_Movement_CameraMoveSouthWest
     WaitMovement
-    ScrCmd_067
-    ApplyMovement 0xFF, _013C
-    ApplyMovement 0, _014C
+    RestoreCamera
+    ApplyMovement LOCALID_PLAYER, SpearPillarDistorted_Movement_PlayerWalkOnSpotEast
+    ApplyMovement LOCALID_CYNTHIA, SpearPillarDistorted_Movement_CynthiaWalkOnSpotWest
     WaitMovement
-    Message 4
+    Message SpearPillarDistorted_Text_SorryITookSoLong
     CloseMessage
-    ApplyMovement 0, _0154
+    ApplyMovement LOCALID_CYNTHIA, SpearPillarDistorted_Movement_CynthiaLookAround
     WaitMovement
-    Message 5
-    SetFlag 0x29E
-    GoTo _00DA
+    Message SpearPillarDistorted_Text_WorldWillBeDestroyed
+    SetFlag FLAG_HIDE_GALACTIC_HQ_CONTROL_ROOM_CHARON
+    GoTo SpearPillarDistorted_AskEnterDistortionWorld
     End
 
-_00DA:
-    Message 6
-    ScrCmd_03E 0x800C
-    GoToIfEq 0x800C, 0, _00FD
-    GoToIfEq 0x800C, 1, _0130
+SpearPillarDistorted_AskEnterDistortionWorld:
+    Message SpearPillarDistorted_Text_AreYouReady
+    ShowYesNoMenu VAR_RESULT
+    GoToIfEq VAR_RESULT, MENU_YES, SpearPillarDistorted_EnterDistortionWorld
+    GoToIfEq VAR_RESULT, MENU_NO, SpearPillarDistorted_IllWaitHere
     End
 
-_00FD:
-    Message 7
+SpearPillarDistorted_EnterDistortionWorld:
+    Message SpearPillarDistorted_Text_WeHaveToHurry
     CloseMessage
-    FadeScreen 6, 1, 0, 0
+    FadeScreenOut
     WaitFadeScreen
-    ScrCmd_320
-    ScrCmd_0A1
-    ScrCmd_328 1
-    ScrCmd_0BE 0x23D, 0, 55, 40, 1
-    FadeScreen 6, 1, 1, 0
+    DoDWWarp
+    ReturnToField
+    SetPartyGiratinaForm GIRATINA_FORM_ORIGIN
+    Warp MAP_HEADER_DISTORTION_WORLD_1F, 55, 40, DIR_SOUTH
+    FadeScreenIn
     WaitFadeScreen
     End
 
-_0130:
-    Message 8
-    WaitABXPadPress
+SpearPillarDistorted_IllWaitHere:
+    Message SpearPillarDistorted_Text_IllWaitHere
+    WaitButton
     CloseMessage
     ReleaseAll
     End
 
     .balign 4, 0
-_013C:
-    MoveAction_023
+SpearPillarDistorted_Movement_PlayerWalkOnSpotEast:
+    WalkOnSpotNormalEast
     EndMovement
 
     .balign 4, 0
-_0144:
-    MoveAction_00C 4
+SpearPillarDistorted_Movement_CynthiaWalkNorth:
+    WalkNormalNorth 4
     EndMovement
 
     .balign 4, 0
-_014C:
-    MoveAction_022
+SpearPillarDistorted_Movement_CynthiaWalkOnSpotWest:
+    WalkOnSpotNormalWest
     EndMovement
 
     .balign 4, 0
-_0154:
-    MoveAction_023
-    MoveAction_03F 2
-    MoveAction_021
-    MoveAction_03F
-    MoveAction_020
+SpearPillarDistorted_Movement_CynthiaLookAround:
+    WalkOnSpotNormalEast
+    Delay8 2
+    WalkOnSpotNormalSouth
+    Delay8
+    WalkOnSpotNormalNorth
     EndMovement
 
     .balign 4, 0
-_016C:
-    MoveAction_00F
-    MoveAction_00C 5
+SpearPillarDistorted_Movement_CameraMoveNorthEast:
+    WalkNormalEast
+    WalkNormalNorth 5
     EndMovement
 
     .balign 4, 0
-_0178:
-    MoveAction_00D 5
-    MoveAction_00E
+SpearPillarDistorted_Movement_CameraMoveSouthWest:
+    WalkNormalSouth 5
+    WalkNormalWest
     EndMovement
 
-_0184:
-    PlayFanfare SEQ_SE_CONFIRM
+SpearPillarDistorted_Cynthia:
+    PlaySE SE_CONFIRM_sseq_3
     LockAll
     FacePlayer
-    Message 6
-    ScrCmd_03E 0x800C
-    GoToIfEq 0x800C, 0, _00FD
-    GoToIfEq 0x800C, 1, _01AF
+    Message SpearPillarDistorted_Text_AreYouReady
+    ShowYesNoMenu VAR_RESULT
+    GoToIfEq VAR_RESULT, MENU_YES, SpearPillarDistorted_EnterDistortionWorld
+    GoToIfEq VAR_RESULT, MENU_NO, SpearPillarDistorted_IllWaitHere2
     End
 
-_01AF:
-    Message 8
-    WaitABXPadPress
+SpearPillarDistorted_IllWaitHere2:
+    Message SpearPillarDistorted_Text_IllWaitHere
+    WaitButton
     CloseMessage
     ReleaseAll
     End
 
-_01BA:
-    PlayFanfare SEQ_SE_CONFIRM
-    LockAll
-    FacePlayer
-    Message 10
-    WaitABXPadPress
-    CloseMessage
-    ReleaseAll
+SpearPillarDistorted_Jupiter:
+    NPCMessage SpearPillarDistorted_Text_WhatWasIt
     End
 
-_01CD:
-    PlayFanfare SEQ_SE_CONFIRM
-    LockAll
-    FacePlayer
-    Message 9
-    WaitABXPadPress
-    CloseMessage
-    ReleaseAll
+SpearPillarDistorted_Mars:
+    NPCMessage SpearPillarDistorted_Text_WhereDidHeGo
     End
 
-_01E0:
-    PlayFanfare SEQ_SE_CONFIRM
-    LockAll
-    FacePlayer
-    Message 11
-    WaitABXPadPress
-    CloseMessage
-    ReleaseAll
+SpearPillarDistorted_GruntM:
+    NPCMessage SpearPillarDistorted_Text_CanOnlyPanicAimlessly
     End
 
-_01F3:
-    PlayFanfare SEQ_SE_CONFIRM
-    LockAll
-    FacePlayer
-    Message 11
-    WaitABXPadPress
-    CloseMessage
-    ReleaseAll
+SpearPillarDistorted_GruntF:
+    NPCMessage SpearPillarDistorted_Text_CanOnlyPanicAimlessly
     End
 
-_0206:
-    PlayFanfare SEQ_SE_CONFIRM
-    LockAll
-    Message 18
-    WaitABXPadPress
-    CloseMessage
-    ReleaseAll
+SpearPillarDistorted_RiftDialga:
+    EventMessage SpearPillarDistorted_Text_TimeEmanatesFromRift
     End
 
-_0217:
-    PlayFanfare SEQ_SE_CONFIRM
-    LockAll
-    Message 19
-    WaitABXPadPress
-    CloseMessage
-    ReleaseAll
+SpearPillarDistorted_RiftPalkia:
+    EventMessage SpearPillarDistorted_Text_SpaceEmanatesFromRift
     End

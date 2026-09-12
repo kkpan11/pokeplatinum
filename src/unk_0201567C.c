@@ -3,58 +3,44 @@
 #include <nitro.h>
 #include <string.h>
 
-#include "struct_decls/struct_02002F38_decl.h"
+#include "constants/graphics.h"
 
+#include "bg_window.h"
+#include "hardware_palette.h"
+#include "palette.h"
+#include "sys_task_extensions.h"
 #include "sys_task_manager.h"
-#include "unk_02002F38.h"
-#include "unk_0200679C.h"
-#include "unk_02018340.h"
-#include "unk_020241F0.h"
-
-typedef void (*UnkFuncPtr_020157E4)(void *, u16 *);
-
-typedef struct {
-    SysTask *unk_00;
-    UnkFuncPtr_020157E4 unk_04;
-    PaletteData *unk_08;
-    u16 unk_0C[16];
-    u16 unk_2C[16];
-    u8 unk_4C;
-    u8 unk_4D;
-    u8 unk_4E;
-    u8 unk_4F;
-} UnkStruct_020157E4;
 
 static void sub_0201576C(SysTask *param0, void *param1);
-static u8 sub_020157E4(UnkStruct_020157E4 *param0);
-static void sub_02015840(void *param0, u16 *param1);
-static void sub_02015858(void *param0, u16 *param1);
-static void sub_02015870(void *param0, u16 *param1);
-static void sub_0201588C(void *param0, u16 *param1);
+static u8 sub_020157E4(PaletteAnimator *param0);
+static void sub_02015840(PaletteAnimator *param0, u16 *param1);
+static void sub_02015858(PaletteAnimator *param0, u16 *param1);
+static void sub_02015870(PaletteAnimator *param0, u16 *param1);
+static void sub_0201588C(PaletteAnimator *param0, u16 *param1);
 
-void *sub_0201567C(PaletteData *param0, u16 param1, u16 param2, u32 param3)
+PaletteAnimator *sub_0201567C(PaletteData *param0, u16 param1, u16 param2, enum HeapID heapID)
 {
-    UnkStruct_020157E4 *v0;
+    PaletteAnimator *v0;
     SysTask *v1;
     u16 *v2;
 
-    v1 = SysTask_StartAndAllocateParam(sub_0201576C, sizeof(UnkStruct_020157E4), 0, param3);
-    v0 = (UnkStruct_020157E4 *)SysTask_GetParam(v1);
+    v1 = SysTask_StartAndAllocateParam(sub_0201576C, sizeof(PaletteAnimator), 0, heapID);
+    v0 = (PaletteAnimator *)SysTask_GetParam(v1);
 
     if (param0 != NULL) {
         if (param1 == 0) {
-            v2 = sub_02003164(param0, 0);
+            v2 = PaletteData_GetUnfadedBuffer(param0, 0);
             v0->unk_04 = sub_02015870;
         } else {
-            v2 = sub_02003164(param0, 1);
+            v2 = PaletteData_GetUnfadedBuffer(param0, 1);
             v0->unk_04 = sub_0201588C;
         }
     } else {
         if (param1 == 0) {
-            v2 = (u16 *)sub_020241F0();
+            v2 = (u16 *)GetHardwareMainBgPaletteAddress();
             v0->unk_04 = sub_02015840;
         } else {
-            v2 = (u16 *)sub_02024200();
+            v2 = (u16 *)GetHardwareSubBgPaletteAddress();
             v0->unk_04 = sub_02015858;
         }
     }
@@ -72,31 +58,29 @@ void *sub_0201567C(PaletteData *param0, u16 param1, u16 param2, u32 param3)
     return v0;
 }
 
-void sub_02015738(void *param0, u8 param1)
+void sub_02015738(PaletteAnimator *param0, u8 param1)
 {
-    UnkStruct_020157E4 *v0 = (UnkStruct_020157E4 *)param0;
 
     switch (param1) {
     case 0:
-        v0->unk_4E = 0;
+        param0->unk_4E = 0;
         break;
     case 1:
-        v0->unk_4E = 2;
+        param0->unk_4E = 2;
         break;
     case 2:
-        v0->unk_4E = 3;
+        param0->unk_4E = 3;
     }
 }
 
-void sub_02015760(void *param0)
+void sub_02015760(PaletteAnimator *param0)
 {
-    UnkStruct_020157E4 *v0 = (UnkStruct_020157E4 *)param0;
-    SysTask_FinishAndFreeParam(v0->unk_00);
+    SysTask_FinishAndFreeParam(param0->unk_00);
 }
 
 static void sub_0201576C(SysTask *param0, void *param1)
 {
-    UnkStruct_020157E4 *v0 = (UnkStruct_020157E4 *)param1;
+    PaletteAnimator *v0 = (PaletteAnimator *)param1;
 
     switch (v0->unk_4E) {
     case 0:
@@ -122,7 +106,7 @@ static void sub_0201576C(SysTask *param0, void *param1)
     }
 }
 
-static u8 sub_020157E4(UnkStruct_020157E4 *param0)
+static u8 sub_020157E4(PaletteAnimator *param0)
 {
     u32 v0;
 
@@ -151,26 +135,22 @@ static u8 sub_020157E4(UnkStruct_020157E4 *param0)
     return 0;
 }
 
-static void sub_02015840(void *param0, u16 *param1)
+static void sub_02015840(PaletteAnimator *param0, u16 *param1)
 {
-    UnkStruct_020157E4 *v0 = (UnkStruct_020157E4 *)param0;
-    sub_0201972C(0, param1, 0x20, v0->unk_4D * 0x20);
+    Bg_LoadPalette(BG_LAYER_MAIN_0, param1, PALETTE_SIZE_BYTES, PLTT_OFFSET(param0->unk_4D));
 }
 
-static void sub_02015858(void *param0, u16 *param1)
+static void sub_02015858(PaletteAnimator *param0, u16 *param1)
 {
-    UnkStruct_020157E4 *v0 = (UnkStruct_020157E4 *)param0;
-    sub_0201972C(4, param1, 0x20, v0->unk_4D * 0x20);
+    Bg_LoadPalette(BG_LAYER_SUB_0, param1, PALETTE_SIZE_BYTES, PLTT_OFFSET(param0->unk_4D));
 }
 
-static void sub_02015870(void *param0, u16 *param1)
+static void sub_02015870(PaletteAnimator *param0, u16 *param1)
 {
-    UnkStruct_020157E4 *v0 = (UnkStruct_020157E4 *)param0;
-    sub_02002FBC(v0->unk_08, param1, 0, v0->unk_4D * 16, 0x20);
+    PaletteData_LoadBuffer(param0->unk_08, param1, PLTTBUF_MAIN_BG, PLTT_DEST(param0->unk_4D), PALETTE_SIZE_BYTES);
 }
 
-static void sub_0201588C(void *param0, u16 *param1)
+static void sub_0201588C(PaletteAnimator *param0, u16 *param1)
 {
-    UnkStruct_020157E4 *v0 = (UnkStruct_020157E4 *)param0;
-    sub_02002FBC(v0->unk_08, param1, 1, v0->unk_4D * 16, 0x20);
+    PaletteData_LoadBuffer(param0->unk_08, param1, PLTTBUF_SUB_BG, PLTT_DEST(param0->unk_4D), PALETTE_SIZE_BYTES);
 }

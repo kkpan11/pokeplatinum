@@ -1,105 +1,105 @@
-    .include "macros/scrcmd.inc"
+#include "macros/scrcmd.inc"
+#include "res/text/bank/valor_cavern.h"
+#include "res/field/events/events_valor_cavern.h"
 
-    .data
 
-    ScriptEntry _0012
-    ScriptEntry _0042
-    ScriptEntry _0077
-    ScriptEntry _00D3
-    .short 0xFD13
+    ScriptEntry ValorCavern_OnTransition
+    ScriptEntry ValorCavern_OnLoad
+    ScriptEntry ValorCavern_Azelf
+    ScriptEntry ValorCavern_Saturn
+    ScriptEntryEnd
 
-_0012:
-    SetFlag 0x9E1
-    GoToIfUnset 0x15E, _002E
-    GoToIfSet 0x15E, _0038
+ValorCavern_OnTransition:
+    SetFlag FLAG_FIRST_ARRIVAL_VALOR_CAVERN
+    GoToIfUnset FLAG_GALACTIC_LEFT_LAKE_VALOR, ValorCavern_RemoveWarpLakeValorNormal
+    GoToIfSet FLAG_GALACTIC_LEFT_LAKE_VALOR, ValorCavern_RemoveWarpLakeValorDrained
     End
 
-_002E:
-    ScrCmd_18A 1, 10, 29
+ValorCavern_RemoveWarpLakeValorNormal:
+    SetWarpEventPos 1, 10, 29
     End
 
-_0038:
-    ScrCmd_18A 0, 10, 29
+ValorCavern_RemoveWarpLakeValorDrained:
+    SetWarpEventPos 0, 10, 29
     End
 
-_0042:
-    SetFlag 0x9E1
-    CallIfSet 142, _0069
-    GoToIfUnset 0x15E, _002E
-    GoToIfSet 0x15E, _0038
+ValorCavern_OnLoad:
+    SetFlag FLAG_FIRST_ARRIVAL_VALOR_CAVERN
+    CallIfSet FLAG_MAP_LOCAL_REMOVE_OBJECT, ValorCavern_RemoveAzelf
+    GoToIfUnset FLAG_GALACTIC_LEFT_LAKE_VALOR, ValorCavern_RemoveWarpLakeValorNormal
+    GoToIfSet FLAG_GALACTIC_LEFT_LAKE_VALOR, ValorCavern_RemoveWarpLakeValorDrained
     End
 
-_0069:
-    SetFlag 0x1E0
-    ScrCmd_065 0
-    ClearFlag 142
+ValorCavern_RemoveAzelf:
+    SetFlag FLAG_HIDE_VALOR_CAVERN_AZELF
+    RemoveObject LOCALID_AZELF
+    ClearFlag FLAG_MAP_LOCAL_REMOVE_OBJECT
     Return
 
-_0077:
-    PlayFanfare SEQ_SE_CONFIRM
+ValorCavern_Azelf:
+    PlaySE SE_CONFIRM_sseq_3
     LockAll
     FacePlayer
-    ScrCmd_04C 0x1E2, 0
-    Message 3
+    PlayCry SPECIES_AZELF
+    Message ValorCavern_Text_AzelfCry
     CloseMessage
-    SetFlag 142
-    ScrCmd_2BD 0x1E2, 50
-    ClearFlag 142
-    ScrCmd_0EC 0x800C
-    GoToIfEq 0x800C, 0, _00CD
-    ScrCmd_2BC 0x800C
-    GoToIfEq 0x800C, 1, _00C2
-    SetFlag 0x126
+    SetFlag FLAG_MAP_LOCAL_REMOVE_OBJECT
+    StartLegendaryBattle SPECIES_AZELF, 50
+    ClearFlag FLAG_MAP_LOCAL_REMOVE_OBJECT
+    CheckWonBattle VAR_RESULT
+    GoToIfEq VAR_RESULT, FALSE, ValorCavern_LostBattleAzelf
+    CheckDidNotCapture VAR_RESULT
+    GoToIfEq VAR_RESULT, TRUE, ValorCavern_AzelfDisappeared
+    SetFlag FLAG_CAUGHT_AZELF
     ReleaseAll
     End
 
-_00C2:
-    Message 4
-    WaitABXPadPress
+ValorCavern_AzelfDisappeared:
+    Message ValorCavern_Text_AzelfDisappeared
+    WaitButton
     CloseMessage
     ReleaseAll
     End
 
-_00CD:
-    ScrCmd_0EB
+ValorCavern_LostBattleAzelf:
+    BlackOutFromBattle
     ReleaseAll
     End
 
-_00D3:
-    PlayFanfare SEQ_SE_CONFIRM
+ValorCavern_Saturn:
+    PlaySE SE_CONFIRM_sseq_3
     LockAll
-    Message 0
+    Message ValorCavern_Text_SaturnMissionIsProceeding
     CloseMessage
     FacePlayer
-    ApplyMovement 1, _013C
+    ApplyMovement LOCALID_SATURN, ValorCavern_Movement_SaturnExclamationMark
     WaitMovement
-    WaitTime 30, 0x800C
-    Message 1
+    WaitTime 30, VAR_RESULT
+    Message ValorCavern_Text_SaturnBattleIntro
     CloseMessage
-    ScrCmd_0E5 0x198, 0
-    ScrCmd_0EC 0x800C
-    GoToIfEq 0x800C, 0, _0144
-    Message 2
+    StartTrainerBattle TRAINER_COMMANDER_SATURN_VALOR_CAVERN
+    CheckWonBattle VAR_RESULT
+    GoToIfEq VAR_RESULT, FALSE, ValorCavern_LostBattleCommanderSaturn
+    Message ValorCavern_Text_SaturnPostBattle
     CloseMessage
-    FadeScreen 6, 1, 0, 0
+    FadeScreenOut
     WaitFadeScreen
-    ScrCmd_065 1
-    SetFlag 0x13E
-    SetFlag 0x984
-    FadeScreen 6, 1, 1, 0
+    RemoveObject LOCALID_SATURN
+    SetFlag FLAG_DEFEATED_COMMANDER_SATURN_VALOR_CAVERN
+    SetFlag FLAG_ALT_MUSIC_LAKE_VALOR
+    FadeScreenIn
     WaitFadeScreen
     ReleaseAll
     End
 
     .balign 4, 0
-_013C:
-    MoveAction_04B
+ValorCavern_Movement_SaturnExclamationMark:
+    EmoteExclamationMark
     EndMovement
 
-_0144:
-    ScrCmd_0EB
+ValorCavern_LostBattleCommanderSaturn:
+    BlackOutFromBattle
     ReleaseAll
     End
 
-    .byte 0
-    .byte 0
+    .balign 4, 0

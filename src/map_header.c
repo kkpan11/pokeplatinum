@@ -1,308 +1,305 @@
 #include "map_header.h"
 
-#include <nitro.h>
-#include <string.h>
+#include "constants/versions.h"
+#include "generated/map_headers.h"
 
 #include "data/map_headers.h"
 
-u32 MapHeader_IDBoundsCheck(u32 headerID)
+enum MapHeaderID MapHeader_IDBoundsCheck(enum MapHeaderID mapHeaderID)
 {
-    if (headerID >= NELEMS(sMapHeaders)) {
-        GF_ASSERT(0);
-        return 3;
+    if (mapHeaderID >= NELEMS(sMapHeaders)) {
+        GF_ASSERT(FALSE);
+        return MAP_HEADER_JUBILIFE_CITY;
     }
 
-    return headerID;
+    return mapHeaderID;
 }
 
-const u16 sub_0203A038(u32 headerID)
+u16 MapHeader_GetAreaDataArchiveID(enum MapHeaderID mapHeaderID)
 {
-    headerID = MapHeader_IDBoundsCheck(headerID);
-    return sMapHeaders[headerID].unk_00;
+    mapHeaderID = MapHeader_IDBoundsCheck(mapHeaderID);
+    return sMapHeaders[mapHeaderID].areaDataArchiveID;
 }
 
-const u16 sub_0203A04C(u32 headerID)
+u16 MapHeader_GetPreloadedMapObjectsArchiveID(enum MapHeaderID mapHeaderID)
 {
-    headerID = MapHeader_IDBoundsCheck(headerID);
-    return sMapHeaders[headerID].unk_01;
+    mapHeaderID = MapHeader_IDBoundsCheck(mapHeaderID);
+    return sMapHeaders[mapHeaderID].preloadedMapObjectsArchiveID;
 }
 
-const u16 MapHeader_GetMapMatrixID(u32 headerID)
+u16 MapHeader_GetMapMatrixID(enum MapHeaderID mapHeaderID)
 {
-    u16 mapMatrixID;
+    mapHeaderID = MapHeader_IDBoundsCheck(mapHeaderID);
+    u16 mapMatrixID = sMapHeaders[mapHeaderID].mapMatrixID;
 
-    headerID = MapHeader_IDBoundsCheck(headerID);
-    mapMatrixID = sMapHeaders[headerID].mapMatrixID;
-
-    if (mapMatrixID == 22) {
-        if (Unk_020E4C40 == 11) {
-            mapMatrixID = 23;
-        }
+    if (mapMatrixID == 22 && gGameVersion == VERSION_PEARL) {
+        mapMatrixID = 23;
     }
 
     return mapMatrixID;
 }
 
-u32 MapHeader_GetMsgArchiveID(u32 headerID)
+u32 MapHeader_GetMsgArchiveID(enum MapHeaderID mapHeaderID)
 {
-    headerID = MapHeader_IDBoundsCheck(headerID);
-    return sMapHeaders[headerID].msgArchiveID;
+    mapHeaderID = MapHeader_IDBoundsCheck(mapHeaderID);
+    return sMapHeaders[mapHeaderID].msgArchiveID;
 }
 
-u32 MapHeader_GetScriptsArchiveID(u32 headerID)
+u32 MapHeader_GetScriptsArchiveID(enum MapHeaderID mapHeaderID)
 {
-    headerID = MapHeader_IDBoundsCheck(headerID);
-    return sMapHeaders[headerID].scriptsArchiveID;
+    mapHeaderID = MapHeader_IDBoundsCheck(mapHeaderID);
+    return sMapHeaders[mapHeaderID].scriptsArchiveID;
 }
 
-u32 MapHeader_GetInitScriptsArchiveID(u32 headerID)
+u32 MapHeader_GetInitScriptsArchiveID(enum MapHeaderID mapHeaderID)
 {
-    headerID = MapHeader_IDBoundsCheck(headerID);
-    return sMapHeaders[headerID].initScriptsArchiveID;
+    mapHeaderID = MapHeader_IDBoundsCheck(mapHeaderID);
+    return sMapHeaders[mapHeaderID].initScriptsArchiveID;
 }
 
-u16 MapHeader_GetDayMusicID(u32 headerID)
+u16 MapHeader_GetDayMusicID(enum MapHeaderID mapHeaderID)
 {
-    headerID = MapHeader_IDBoundsCheck(headerID);
-    return sMapHeaders[headerID].dayMusicID;
+    mapHeaderID = MapHeader_IDBoundsCheck(mapHeaderID);
+    return sMapHeaders[mapHeaderID].dayMusicID;
 }
 
-u16 MapHeader_GetNightMusicID(u32 headerID)
+u16 MapHeader_GetNightMusicID(enum MapHeaderID mapHeaderID)
 {
-    headerID = MapHeader_IDBoundsCheck(headerID);
-    return sMapHeaders[headerID].nightMusicID;
+    mapHeaderID = MapHeader_IDBoundsCheck(mapHeaderID);
+    return sMapHeaders[mapHeaderID].nightMusicID;
 }
 
-BOOL MapHeader_HasWildEncounters(u32 headerID)
+BOOL MapHeader_HasWildEncounters(enum MapHeaderID mapHeaderID)
 {
-    headerID = MapHeader_IDBoundsCheck(headerID);
-    return sMapHeaders[headerID].wildEncountersArchiveID != 65535;
+    mapHeaderID = MapHeader_IDBoundsCheck(mapHeaderID);
+    return sMapHeaders[mapHeaderID].wildEncountersArchiveID != 65535;
 }
 
-u32 MapHeader_GetWildEncountersArchiveID(u32 headerID)
+u32 MapHeader_GetWildEncountersArchiveID(enum MapHeaderID mapHeaderID)
 {
-    headerID = MapHeader_IDBoundsCheck(headerID);
-    return sMapHeaders[headerID].wildEncountersArchiveID;
+    mapHeaderID = MapHeader_IDBoundsCheck(mapHeaderID);
+    return sMapHeaders[mapHeaderID].wildEncountersArchiveID;
 }
 
-u32 MapHeader_GetEventsArchiveID(u32 headerID)
+u32 MapHeader_GetEventsArchiveID(enum MapHeaderID mapHeaderID)
 {
-    headerID = MapHeader_IDBoundsCheck(headerID);
-    return sMapHeaders[headerID].eventsArchiveID;
+    mapHeaderID = MapHeader_IDBoundsCheck(mapHeaderID);
+    return sMapHeaders[mapHeaderID].eventsArchiveID;
 }
 
-u32 MapHeader_GetMapLabelTextID(u32 headerID)
+u32 MapHeader_GetMapLabelTextID(enum MapHeaderID mapHeaderID)
 {
-    headerID = MapHeader_IDBoundsCheck(headerID);
-    return sMapHeaders[headerID].mapLabelTextID;
+    mapHeaderID = MapHeader_IDBoundsCheck(mapHeaderID);
+    return sMapHeaders[mapHeaderID].mapLabelTextID;
 }
 
-u8 MapHeader_GetMapLabelWindowID(u32 headerID)
+u8 MapHeader_GetMapLabelWindowID(enum MapHeaderID mapHeaderID)
 {
-    headerID = MapHeader_IDBoundsCheck(headerID);
-    return sMapHeaders[headerID].mapLabelWindowID;
+    mapHeaderID = MapHeader_IDBoundsCheck(mapHeaderID);
+    return sMapHeaders[mapHeaderID].mapLabelWindowID;
 }
 
-u32 MapHeader_GetWeatherType(u32 headerID)
+u32 MapHeader_GetWeatherType(enum MapHeaderID mapHeaderID)
 {
-    headerID = MapHeader_IDBoundsCheck(headerID);
-    return sMapHeaders[headerID].weather;
+    mapHeaderID = MapHeader_IDBoundsCheck(mapHeaderID);
+    return sMapHeaders[mapHeaderID].weather;
 }
 
-u32 MapHeader_GetCameraType(u32 headerID)
+u32 MapHeader_GetCameraType(enum MapHeaderID mapHeaderID)
 {
-    headerID = MapHeader_IDBoundsCheck(headerID);
-    return sMapHeaders[headerID].cameraType;
+    mapHeaderID = MapHeader_IDBoundsCheck(mapHeaderID);
+    return sMapHeaders[mapHeaderID].cameraType;
 }
 
-u32 MapHeader_GetBattleBG(u32 headerID)
+enum BattleBackground MapHeader_GetBattleBG(enum MapHeaderID mapHeaderID)
 {
-    headerID = MapHeader_IDBoundsCheck(headerID);
-    return sMapHeaders[headerID].battleBG;
+    mapHeaderID = MapHeader_IDBoundsCheck(mapHeaderID);
+    return sMapHeaders[mapHeaderID].battleBG;
 }
 
-BOOL MapHeader_IsEscapeRopeAllowed(u32 headerID)
+BOOL MapHeader_IsEscapeRopeAllowed(enum MapHeaderID mapHeaderID)
 {
-    headerID = MapHeader_IDBoundsCheck(headerID);
-    return sMapHeaders[headerID].isEscapeRopeAllowed;
+    mapHeaderID = MapHeader_IDBoundsCheck(mapHeaderID);
+    return sMapHeaders[mapHeaderID].isEscapeRopeAllowed;
 }
 
-BOOL MapHeader_IsFlyAllowed(u32 headerID)
+BOOL MapHeader_IsFlyAllowed(enum MapHeaderID mapHeaderID)
 {
-    headerID = MapHeader_IDBoundsCheck(headerID);
-    return sMapHeaders[headerID].isFlyAllowed;
+    mapHeaderID = MapHeader_IDBoundsCheck(mapHeaderID);
+    return sMapHeaders[mapHeaderID].isFlyAllowed;
 }
 
-BOOL MapHeader_IsBikeAllowed(u32 headerID)
+BOOL MapHeader_IsBikeAllowed(enum MapHeaderID mapHeaderID)
 {
-    headerID = MapHeader_IDBoundsCheck(headerID);
-    return sMapHeaders[headerID].isBikeAllowed;
+    mapHeaderID = MapHeader_IDBoundsCheck(mapHeaderID);
+    return sMapHeaders[mapHeaderID].isBikeAllowed;
 }
 
-u32 MapHeader_GetMapType(u32 headerID)
+u32 MapHeader_GetMapType(enum MapHeaderID mapHeaderID)
 {
-    headerID = MapHeader_IDBoundsCheck(headerID);
-    return sMapHeaders[headerID].mapType;
+    mapHeaderID = MapHeader_IDBoundsCheck(mapHeaderID);
+    return sMapHeaders[mapHeaderID].mapType;
 }
 
-BOOL MapHeader_IsTeleportAllowed(u32 headerID)
+BOOL MapHeader_IsTeleportAllowed(enum MapHeaderID mapHeaderID)
 {
-    if (MapHeader_IsFlyAllowed(headerID) == 0) {
+    if (MapHeader_IsFlyAllowed(mapHeaderID) == FALSE) {
         return FALSE;
     }
 
-    return MapHeader_GetMapType(headerID) != 1;
+    return MapHeader_GetMapType(mapHeaderID) != MAP_TYPE_TOWN_CITY;
 }
 
-BOOL MapHeader_IsOnMainMatrix(u32 headerID)
+BOOL MapHeader_IsOnMainMatrix(enum MapHeaderID mapHeaderID)
 {
-    return MapHeader_GetMapMatrixID(headerID) == 0;
+    return MapHeader_GetMapMatrixID(mapHeaderID) == 0;
 }
 
-BOOL MapHeader_IsPokemonCenter(u32 headerID)
+BOOL MapHeader_IsPokemonCenter(enum MapHeaderID mapHeaderID)
 {
-    return MapHeader_GetMapType(headerID) == 5;
+    return MapHeader_GetMapType(mapHeaderID) == MAP_TYPE_POKECENTER;
 }
 
-BOOL MapHeader_IsCave(u32 headerID)
+BOOL MapHeader_IsCave(enum MapHeaderID mapHeaderID)
 {
-    return MapHeader_GetMapType(headerID) == 3;
+    return MapHeader_GetMapType(mapHeaderID) == MAP_TYPE_CAVE;
 }
 
-BOOL sub_0203A288(u32 headerID)
+BOOL MapHeader_IsBuilding(enum MapHeaderID mapHeaderID)
 {
-    return (MapHeader_GetMapType(headerID) == 4) || (MapHeader_GetMapType(headerID) == 5);
+    return MapHeader_GetMapType(mapHeaderID) == MAP_TYPE_INDOORS
+        || MapHeader_GetMapType(mapHeaderID) == MAP_TYPE_POKECENTER;
 }
 
-BOOL MapHeader_IsOutdoors(u32 headerID)
+BOOL MapHeader_IsOutdoors(enum MapHeaderID mapHeaderID)
 {
-    return (MapHeader_GetMapType(headerID) == 1) || (MapHeader_GetMapType(headerID) == 2);
+    return MapHeader_GetMapType(mapHeaderID) == MAP_TYPE_TOWN_CITY
+        || MapHeader_GetMapType(mapHeaderID) == MAP_TYPE_OUTDOORS;
 }
 
-BOOL sub_0203A2C8(u32 headerID)
+BOOL MapHeader_IsPokemonCenter2(enum MapHeaderID mapHeaderID)
 {
-    if (MapHeader_IsPokemonCenter(headerID)) {
+    if (MapHeader_IsPokemonCenter(mapHeaderID)) {
         return TRUE;
     }
 
     return FALSE;
 }
 
-BOOL MapHeader_IsUnionRoom(const u32 headerID)
+BOOL MapHeader_IsUnionRoom(const enum MapHeaderID mapHeaderID)
 {
-    return headerID == 466;
+    return mapHeaderID == MAP_HEADER_UNION_ROOM;
 }
 
-BOOL MapHeader_HasFeebasTiles(const u32 headerID)
+BOOL MapHeader_HasFeebasTiles(const enum MapHeaderID mapHeaderID)
 {
-    return headerID == 219;
+    return mapHeaderID == MAP_HEADER_MT_CORONET_B1F;
 }
 
-BOOL MapHeader_IsTrophyGarden(const u32 headerID)
+BOOL MapHeader_IsTrophyGarden(const enum MapHeaderID mapHeaderID)
 {
-    return headerID == 287;
+    return mapHeaderID == MAP_HEADER_TROPHY_GARDEN;
 }
 
-BOOL MapHeader_IsAmitySquare(const u32 headerID)
+BOOL MapHeader_IsAmitySquare(const enum MapHeaderID mapHeaderID)
 {
-    return headerID == 253;
+    return mapHeaderID == MAP_HEADER_AMITY_SQUARE;
 }
 
-BOOL MapHeader_IsAzureFluteAllowed(const u32 headerID)
+BOOL MapHeader_IsAzureFluteAllowed(const enum MapHeaderID mapHeaderID)
 {
-    if ((headerID == 220) || (headerID == 584) || (headerID == 585)) {
+    if (mapHeaderID == MAP_HEADER_SPEAR_PILLAR || mapHeaderID == MAP_HEADER_SPEAR_PILLAR_DIALGA || mapHeaderID == MAP_HEADER_SPEAR_PILLAR_PALKIA) {
         return TRUE;
     }
 
     return FALSE;
 }
 
-BOOL MapHeader_IsPokemonCenter2F(const u32 headerID)
+BOOL MapHeader_IsPokemonCenter2F(const enum MapHeaderID mapHeaderID)
 {
-    static const u16 v0[] = {
-        0x1A5,
-        0x1AD,
-        0x1B4,
-        0x1BC,
-        0x1C5,
-        0x1CC,
-        0x7,
-        0x25,
-        0x31,
-        0x1EF,
-        0x46,
-        0x66,
-        0x7C,
-        0x87,
-        0x98,
-        0xA9,
-        0xAE,
-        0xBE
+    static const u16 pokecenters2F[] = {
+        MAP_HEADER_SANDGEM_TOWN_POKECENTER_2F,
+        MAP_HEADER_FLOAROMA_TOWN_POKECENTER_2F,
+        MAP_HEADER_SOLACEON_TOWN_POKECENTER_2F,
+        MAP_HEADER_CELESTIC_TOWN_POKECENTER_2F,
+        MAP_HEADER_SURVIVAL_AREA_POKECENTER_2F,
+        MAP_HEADER_RESORT_AREA_POKECENTER_2F,
+        MAP_HEADER_JUBILIFE_CITY_POKECENTER_2F,
+        MAP_HEADER_CANALAVE_CITY_POKECENTER_2F,
+        MAP_HEADER_OREBURGH_CITY_POKECENTER_2F,
+        MAP_HEADER_POKEMON_LEAGUE_NORTH_POKECENTER_2F,
+        MAP_HEADER_ETERNA_CITY_POKECENTER_2F,
+        MAP_HEADER_HEARTHOME_CITY_POKECENTER_2F,
+        MAP_HEADER_PASTORIA_CITY_POKECENTER_2F,
+        MAP_HEADER_VEILSTONE_CITY_POKECENTER_2F,
+        MAP_HEADER_SUNYSHORE_CITY_POKECENTER_2F,
+        MAP_HEADER_SNOWPOINT_CITY_POKECENTER_2F,
+        MAP_HEADER_POKEMON_LEAGUE_SOUTH_POKECENTER_2F,
+        MAP_HEADER_FIGHT_AREA_POKECENTER_2F
     };
     int i;
 
-    for (i = 0; i < NELEMS(v0); i++) {
-        if (headerID == v0[i]) {
-            return 1;
+    for (i = 0; i < NELEMS(pokecenters2F); i++) {
+        if (mapHeaderID == pokecenters2F[i]) {
+            return TRUE;
         }
     }
 
-    return 0;
+    return FALSE;
 }
 
-u32 MapHeader_GetMapEvolutionMethod(u32 headerID)
+enum EvolutionMethod MapHeader_GetMapEvolutionMethod(enum MapHeaderID mapHeaderID)
 {
-    static const u16 v0[] = {
-        0x181,
-        0x1A,
-        0xCB,
-        0x19,
-        0xCF,
-        0x18,
-        0xD0,
-        0x18,
-        0xD1,
-        0x18,
-        0xD2,
-        0x18,
-        0xD3,
-        0x18,
-        0xD4,
-        0x18,
-        0xD5,
-        0x18,
-        0xD6,
-        0x18,
-        0xD7,
-        0x18,
-        0xD8,
-        0x18,
-        0xD9,
-        0x18,
-        0xDA,
-        0x18,
-        0xDB,
-        0x18,
-        0xDC,
-        0x18,
-        0xDD,
-        0x18,
-        0x1FE,
-        0x18,
-        0x1FF,
-        0x18,
-        0x248,
-        0x18,
-        0x249,
-        0x18
+    static const u16 mapEvolutionMethods[] = {
+        MAP_HEADER_ROUTE_217,
+        EVO_LEVEL_ICE_ROCK,
+        MAP_HEADER_ETERNA_FOREST,
+        EVO_LEVEL_MOSS_ROCK,
+        MAP_HEADER_MT_CORONET_1F_SOUTH,
+        EVO_LEVEL_MAGNETIC_FIELD,
+        MAP_HEADER_MT_CORONET_2F,
+        EVO_LEVEL_MAGNETIC_FIELD,
+        MAP_HEADER_MT_CORONET_3F,
+        EVO_LEVEL_MAGNETIC_FIELD,
+        MAP_HEADER_MT_CORONET_OUTSIDE_NORTH,
+        EVO_LEVEL_MAGNETIC_FIELD,
+        MAP_HEADER_MT_CORONET_OUTSIDE_SOUTH,
+        EVO_LEVEL_MAGNETIC_FIELD,
+        MAP_HEADER_MT_CORONET_4F_ROOMS_1_AND_2,
+        EVO_LEVEL_MAGNETIC_FIELD,
+        MAP_HEADER_MT_CORONET_4F_ROOM_3,
+        EVO_LEVEL_MAGNETIC_FIELD,
+        MAP_HEADER_MT_CORONET_5F,
+        EVO_LEVEL_MAGNETIC_FIELD,
+        MAP_HEADER_MT_CORONET_6F,
+        EVO_LEVEL_MAGNETIC_FIELD,
+        MAP_HEADER_MT_CORONET_1F_TUNNEL_ROOM,
+        EVO_LEVEL_MAGNETIC_FIELD,
+        MAP_HEADER_MT_CORONET_1F_NORTH_ROOM_2,
+        EVO_LEVEL_MAGNETIC_FIELD,
+        MAP_HEADER_MT_CORONET_1F_NORTH_ROOM_1,
+        EVO_LEVEL_MAGNETIC_FIELD,
+        MAP_HEADER_MT_CORONET_B1F,
+        EVO_LEVEL_MAGNETIC_FIELD,
+        MAP_HEADER_SPEAR_PILLAR,
+        EVO_LEVEL_MAGNETIC_FIELD,
+        MAP_HEADER_SPEAR_PILLAR_DISTORTED,
+        EVO_LEVEL_MAGNETIC_FIELD,
+        MAP_HEADER_HALL_OF_ORIGIN,
+        EVO_LEVEL_MAGNETIC_FIELD,
+        MAP_HEADER_UNKNOWN_511,
+        EVO_LEVEL_MAGNETIC_FIELD,
+        MAP_HEADER_SPEAR_PILLAR_DIALGA,
+        EVO_LEVEL_MAGNETIC_FIELD,
+        MAP_HEADER_SPEAR_PILLAR_PALKIA,
+        EVO_LEVEL_MAGNETIC_FIELD
     };
-    int i;
 
-    for (i = 0; i < NELEMS(v0); i += 2) {
-        if (v0[i] == headerID) {
-            return v0[i + 1];
+    for (int i = 0; i < NELEMS(mapEvolutionMethods); i += 2) {
+        if (mapEvolutionMethods[i] == mapHeaderID) {
+            return mapEvolutionMethods[i + 1];
         }
     }
 
-    return 0;
+    return EVO_NONE;
 }

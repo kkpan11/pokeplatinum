@@ -1,120 +1,102 @@
-    .include "macros/scrcmd.inc"
+#include "macros/scrcmd.inc"
+#include "res/text/bank/distortion_world_b6f.h"
 
-    .data
+    ScriptEntry DistortionWorldB6F_OnTransition
+    ScriptEntry DistortionWorldB6F_Cynthia
+    ScriptEntry DistortionWorldB6F_CynthiaPuzzleFinished
+    ScriptEntry DistortionWorldB6F_WereGettingClose
+    ScriptEntry DistortionWorldB6F_CoordEvent_MespritBoulderInPit
+    ScriptEntry DistortionWorldB6F_CoordEvent_UxieBoulderInPit
+    ScriptEntry DistortionWorldB6F_CoordEvent_AzelfBoulderInPit
+    ScriptEntry DistortionWorldB6F_BoulderPit
+    ScriptEntryEnd
 
-    ScriptEntry _0022
-    ScriptEntry _0026
-    ScriptEntry _0051
-    ScriptEntry _0080
-    ScriptEntry _0093
-    ScriptEntry _00B4
-    ScriptEntry _00D5
-    ScriptEntry _00F6
-    .short 0xFD13
-
-_0022:
-    ScrCmd_2F2
+DistortionWorldB6F_OnTransition:
+    InitPersistedMapFeaturesForDistortionWorld
     End
 
-_0026:
-    GoToIfEq 0x4055, 7, _0080
-    GoToIfSet 0x9AD, _0051
-    PlayFanfare SEQ_SE_CONFIRM
+DistortionWorldB6F_Cynthia:
+    GoToIfEq VAR_DISTORTION_WORLD_PROGRESS, DIST_WORLD_PROGRESS_FINISHED_BOULDER_PUZZLE, DistortionWorldB6F_WereGettingClose
+    GoToIfSet FLAG_DISTORTION_WORLD_PUZZLE_FINISHED, DistortionWorldB6F_CynthiaPuzzleFinished
+    NPCMessage DistortionWorldB6F_Text_ThisPlaceGiantPuzzle
+    End
+
+DistortionWorldB6F_CynthiaPuzzleFinished:
+    PlaySE SE_CONFIRM_sseq_3
     LockAll
     FacePlayer
-    Message 3
-    WaitABXPadPress
+    Message DistortionWorldB6F_Text_LakePokemonWentHome
     CloseMessage
-    ReleaseAll
-    End
-
-_0051:
-    PlayFanfare SEQ_SE_CONFIRM
-    LockAll
-    FacePlayer
-    Message 4
-    CloseMessage
-    SetFlag 0x977
-    ApplyMovement 134, _0108
+    SetFlag FLAG_DISTORTION_WORLD_STEPPING_STONES
+    ApplyMovement DIST_WORLD_MAP_OBJECT_B6F_CYNTHIA, DistortionWorldB6F_Movement_CynthiaNoticePlatform
     WaitMovement
-    ApplyMovement 134, _011C
+    ApplyMovement DIST_WORLD_MAP_OBJECT_B6F_CYNTHIA, DistortionWorldB6F_Movement_CynthiaJumpOnPlatform
     WaitMovement
-    SetVar 0x4055, 7
+    SetVar VAR_DISTORTION_WORLD_PROGRESS, DIST_WORLD_PROGRESS_FINISHED_BOULDER_PUZZLE
     ReleaseAll
     End
 
-_0080:
-    PlayFanfare SEQ_SE_CONFIRM
-    LockAll
-    FacePlayer
-    Message 5
-    WaitABXPadPress
-    CloseMessage
-    ReleaseAll
+DistortionWorldB6F_WereGettingClose:
+    NPCMessage DistortionWorldB6F_Text_WereGettingClose
     End
 
-_0093:
+DistortionWorldB6F_CoordEvent_MespritBoulderInPit:
     LockAll
-    ScrCmd_04C 0x1E1, 0
-    Message 0
+    PlayCry SPECIES_MESPRIT
+    Message DistortionWorldB6F_Text_MespritCry
     CloseMessage
-    ScrCmd_04D
-    ApplyMovement 131, _0130
+    WaitCry
+    ApplyMovement DIST_WORLD_MAP_OBJECT_B6F_MESPRIT, DistortionWorldB6F_Movement_LakeGuardianWarpOut
     WaitMovement
-    ScrCmd_312 131
+    DeleteDistortionWorldMapObject DIST_WORLD_MAP_OBJECT_B6F_MESPRIT
     ReleaseAll
     End
 
-_00B4:
+DistortionWorldB6F_CoordEvent_UxieBoulderInPit:
     LockAll
-    ScrCmd_04C 0x1E0, 0
-    Message 1
+    PlayCry SPECIES_UXIE
+    Message DistortionWorldB6F_Text_UxieCry
     CloseMessage
-    ScrCmd_04D
-    ApplyMovement 132, _0130
+    WaitCry
+    ApplyMovement DIST_WORLD_MAP_OBJECT_B6F_UXIE, DistortionWorldB6F_Movement_LakeGuardianWarpOut
     WaitMovement
-    ScrCmd_312 132
+    DeleteDistortionWorldMapObject DIST_WORLD_MAP_OBJECT_B6F_UXIE
     ReleaseAll
     End
 
-_00D5:
+DistortionWorldB6F_CoordEvent_AzelfBoulderInPit:
     LockAll
-    ScrCmd_04C 0x1E2, 0
-    Message 2
+    PlayCry SPECIES_AZELF
+    Message DistortionWorldB6F_Text_AzelfCry
     CloseMessage
-    ScrCmd_04D
-    ApplyMovement 133, _0130
+    WaitCry
+    ApplyMovement DIST_WORLD_MAP_OBJECT_B6F_AZELF, DistortionWorldB6F_Movement_LakeGuardianWarpOut
     WaitMovement
-    ScrCmd_312 133
+    DeleteDistortionWorldMapObject DIST_WORLD_MAP_OBJECT_B6F_AZELF
     ReleaseAll
     End
 
-_00F6:
-    PlayFanfare SEQ_SE_CONFIRM
-    LockAll
-    Message 6
-    WaitABXPadPress
-    CloseMessage
-    ReleaseAll
+DistortionWorldB6F_BoulderPit:
+    EventMessage DistortionWorldB6F_Text_BoulderMightFit
     End
 
     .balign 4, 0
-_0108:
-    MoveAction_042
-    MoveAction_021
-    MoveAction_04B
-    MoveAction_042
+DistortionWorldB6F_Movement_CynthiaNoticePlatform:
+    Delay32
+    WalkOnSpotNormalSouth
+    EmoteExclamationMark
+    Delay32
     EndMovement
 
     .balign 4, 0
-_011C:
-    MoveAction_00D
-    MoveAction_076
-    MoveAction_00E
-    MoveAction_023
+DistortionWorldB6F_Movement_CynthiaJumpOnPlatform:
+    WalkNormalSouth
+    JumpDistortionWorldSouth
+    WalkNormalWest
+    WalkOnSpotNormalEast
     EndMovement
 
     .balign 4, 0
-_0130:
-    MoveAction_043
+DistortionWorldB6F_Movement_LakeGuardianWarpOut:
+    WarpOut
     EndMovement

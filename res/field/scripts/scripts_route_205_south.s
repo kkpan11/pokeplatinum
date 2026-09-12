@@ -1,258 +1,235 @@
-    .include "macros/scrcmd.inc"
+#include "macros/scrcmd.inc"
+#include "res/text/bank/route_205_south.h"
+#include "res/field/events/events_route_205_south.h"
 
-    .data
 
-    ScriptEntry _002A
-    ScriptEntry _00F8
-    ScriptEntry _010B
-    ScriptEntry _002C
-    ScriptEntry _011E
-    ScriptEntry _015D
-    ScriptEntry _0070
-    ScriptEntry _0280
-    ScriptEntry _0297
-    ScriptEntry _02AE
-    .short 0xFD13
+    ScriptEntry Route205South_OnTransition
+    ScriptEntry Route205South_BugCatcher
+    ScriptEntry Route205South_Youngster
+    ScriptEntry Route205South_Grunts
+    ScriptEntry Route205South_LittleGirl
+    ScriptEntry Route205South_CoordEvent_LittleGirl
+    ScriptEntry Route205South_CoordEvent_Grunts
+    ScriptEntry Route205South_ArrowSignpostFloaromaTown
+    ScriptEntry Route205South_ArrowSignpostEternaForest
+    ScriptEntry Route205South_TrainerTipsSignpost
+    ScriptEntryEnd
 
-_002A:
+Route205South_OnTransition:
     End
 
-_002C:
-    PlayFanfare SEQ_SE_CONFIRM
+Route205South_Grunts:
+    PlaySE SE_CONFIRM_sseq_3
     LockAll
     FacePlayer
-    ApplyMovement 13, _0060
+    ApplyMovement LOCALID_GRUNT_M_WEST, Route205South_Movement_GruntMWestWalkOnSpotSouth
     WaitMovement
-    Message 2
+    Message Route205South_Text_TeamGalacticConductingResearch
     CloseMessage
-    ApplyMovement 12, _0068
+    ApplyMovement LOCALID_GRUNT_M_EAST, Route205South_Movement_GruntMEastWalkOnSpotSouth
     WaitMovement
     Call _00B6
-    Message 4
-    WaitABXPadPress
+    Message Route205South_Text_ResearchInvolvesCatchingPokemon2
+    WaitButton
     CloseMessage
     ReleaseAll
     End
 
     .balign 4, 0
-_0060:
-    MoveAction_021
+Route205South_Movement_GruntMWestWalkOnSpotSouth:
+    WalkOnSpotNormalSouth
     EndMovement
 
     .balign 4, 0
-_0068:
-    MoveAction_021
+Route205South_Movement_GruntMEastWalkOnSpotSouth:
+    WalkOnSpotNormalSouth
     EndMovement
 
-_0070:
+Route205South_CoordEvent_Grunts:
     LockAll
-    ApplyMovement 13, _00BC
+    ApplyMovement LOCALID_GRUNT_M_WEST, Route205South_Movement_GruntMWestWalkOnSpotEast
     WaitMovement
-    Message 2
+    Message Route205South_Text_TeamGalacticConductingResearch
     CloseMessage
-    ApplyMovement 12, _00C4
+    ApplyMovement LOCALID_GRUNT_M_EAST, Route205South_Movement_GruntMEastWalkOnSpotWest
     WaitMovement
-    Message 3
+    Message Route205South_Text_ResearchInvolvesCatchingPokemon1
     CloseMessage
-    ApplyMovement 13, _00CC
-    ApplyMovement 0xFF, _00EC
+    ApplyMovement LOCALID_GRUNT_M_WEST, Route205South_Movement_GruntMWestPushBackPlayer
+    ApplyMovement LOCALID_PLAYER, Route205South_Movement_PlayerGetPushedBack
     WaitMovement
-    ApplyMovement 12, _00E4
+    ApplyMovement LOCALID_GRUNT_M_EAST, Route205South_Movement_GruntMEastTurnBackSouth
     WaitMovement
     Call _00B6
     ReleaseAll
     End
 
 _00B6:
-    SetFlag 127
+    SetFlag FLAG_DUMMY_0x007F
     Return
 
     .balign 4, 0
-_00BC:
-    MoveAction_023
+Route205South_Movement_GruntMWestWalkOnSpotEast:
+    WalkOnSpotNormalEast
     EndMovement
 
     .balign 4, 0
-_00C4:
-    MoveAction_022
+Route205South_Movement_GruntMEastWalkOnSpotWest:
+    WalkOnSpotNormalWest
     EndMovement
 
     .balign 4, 0
-_00CC:
-    MoveAction_013
-    MoveAction_025
-    MoveAction_03F 2
-    MoveAction_00E
-    MoveAction_021
+Route205South_Movement_GruntMWestPushBackPlayer:
+    WalkFastEast
+    WalkOnSpotFastSouth
+    Delay8 2
+    WalkNormalWest
+    WalkOnSpotNormalSouth
     EndMovement
 
     .balign 4, 0
-_00E4:
-    MoveAction_021
+Route205South_Movement_GruntMEastTurnBackSouth:
+    WalkOnSpotNormalSouth
     EndMovement
 
     .balign 4, 0
-_00EC:
-    MoveAction_00D
-    MoveAction_024
+Route205South_Movement_PlayerGetPushedBack:
+    WalkNormalSouth
+    WalkOnSpotFastNorth
     EndMovement
 
-_00F8:
-    PlayFanfare SEQ_SE_CONFIRM
+Route205South_BugCatcher:
+    NPCMessage Route205South_Text_ManyPoisonTypePokemon
+    End
+
+Route205South_Youngster:
+    NPCMessage Route205South_Text_SlatherHoneyOnATree
+    End
+
+Route205South_LittleGirl:
+    PlaySE SE_CONFIRM_sseq_3
     LockAll
     FacePlayer
-    Message 5
-    WaitABXPadPress
+    GoToIfSet FLAG_TALKED_TO_ROUTE_205_SOUTH_LITTLE_GIRL, Route205South_IWantToSeeMyPapa
+    Call Route205South_HideFloaromaTownGrunts
+    Message Route205South_Text_HelpIWantToSeeMyPapa
+    WaitButton
     CloseMessage
     ReleaseAll
     End
 
-_010B:
-    PlayFanfare SEQ_SE_CONFIRM
-    LockAll
-    FacePlayer
-    Message 6
-    WaitABXPadPress
+Route205South_IWantToSeeMyPapa:
+    Message Route205South_Text_IWantToSeeMyPapa
+    WaitButton
     CloseMessage
     ReleaseAll
     End
 
-_011E:
-    PlayFanfare SEQ_SE_CONFIRM
-    LockAll
-    FacePlayer
-    GoToIfSet 145, _0142
-    Call _014D
-    Message 0
-    WaitABXPadPress
-    CloseMessage
-    ReleaseAll
-    End
-
-_0142:
-    Message 1
-    WaitABXPadPress
-    CloseMessage
-    ReleaseAll
-    End
-
-_014D:
-    SetFlag 0x1A1
-    SetFlag 145
-    SetVar 0x4089, 1
+Route205South_HideFloaromaTownGrunts:
+    SetFlag FLAG_HIDE_FLOAROMA_TOWN_GRUNTS
+    SetFlag FLAG_TALKED_TO_ROUTE_205_SOUTH_LITTLE_GIRL
+    SetVar VAR_VALLEY_WINDWORKS_STATE, 1
     Return
 
-_015D:
+Route205South_CoordEvent_LittleGirl:
     LockAll
-    ScrCmd_069 0x8004, 0x8005
-    GoToIfEq 0x8005, 0x293, _01A8
-    GoToIfEq 0x8005, 0x294, _01C2
-    GoToIfEq 0x8005, 0x295, _01DC
-    GoToIfEq 0x8005, 0x296, _01E2
-    GoToIfEq 0x8005, 0x297, _01FC
+    GetPlayerMapPos VAR_0x8004, VAR_0x8005
+    GoToIfEq VAR_0x8005, 659, Route205South_LittleGirlNoticePlayerZ659
+    GoToIfEq VAR_0x8005, 660, Route205South_LittleGirlNoticePlayerZ660
+    GoToIfEq VAR_0x8005, 661, Route205South_DummyZ661 @ unreachable position
+    GoToIfEq VAR_0x8005, 662, Route205South_LittleGirlNoticePlayerZ662
+    GoToIfEq VAR_0x8005, 663, Route205South_LittleGirlNoticePlayerZ663
     End
 
-_01A8:
-    ApplyMovement 18, _0238
+Route205South_LittleGirlNoticePlayerZ659:
+    ApplyMovement LOCALID_LITTLE_GIRL, Route205South_Movement_TwinNoticePlayerZ659
     WaitMovement
-    ApplyMovement 0xFF, _0228
+    ApplyMovement LOCALID_PLAYER, Route205South_Movement_PlayerWalkOnSpotSouth
     WaitMovement
-    GoTo _0216
+    GoTo Route205South_HelpIWantToSeeMyPapa
 
-_01C2:
-    ApplyMovement 18, _024C
+Route205South_LittleGirlNoticePlayerZ660:
+    ApplyMovement LOCALID_LITTLE_GIRL, Route205South_Movement_TwinNoticePlayerZ660
     WaitMovement
-    ApplyMovement 0xFF, _0228
+    ApplyMovement LOCALID_PLAYER, Route205South_Movement_PlayerWalkOnSpotSouth
     WaitMovement
-    GoTo _0216
+    GoTo Route205South_HelpIWantToSeeMyPapa
 
-_01DC:
-    GoTo _0216
+Route205South_DummyZ661:
+    GoTo Route205South_HelpIWantToSeeMyPapa
 
-_01E2:
-    ApplyMovement 18, _025C
+Route205South_LittleGirlNoticePlayerZ662:
+    ApplyMovement LOCALID_LITTLE_GIRL, Route205South_Movement_TwinNoticePlayerZ662
     WaitMovement
-    ApplyMovement 0xFF, _0230
+    ApplyMovement LOCALID_PLAYER, Route205South_Movement_PlayerWalkOnSpotNorth
     WaitMovement
-    GoTo _0216
+    GoTo Route205South_HelpIWantToSeeMyPapa
 
-_01FC:
-    ApplyMovement 18, _026C
+Route205South_LittleGirlNoticePlayerZ663:
+    ApplyMovement LOCALID_LITTLE_GIRL, Route205South_Movement_TwinNoticePlayerZ663
     WaitMovement
-    ApplyMovement 0xFF, _0230
+    ApplyMovement LOCALID_PLAYER, Route205South_Movement_PlayerWalkOnSpotNorth
     WaitMovement
-    GoTo _0216
+    GoTo Route205South_HelpIWantToSeeMyPapa
 
-_0216:
-    Call _014D
-    Message 0
-    WaitABXPadPress
+Route205South_HelpIWantToSeeMyPapa:
+    Call Route205South_HideFloaromaTownGrunts
+    Message Route205South_Text_HelpIWantToSeeMyPapa
+    WaitButton
     CloseMessage
     ReleaseAll
     End
 
     .balign 4, 0
-_0228:
-    MoveAction_021
+Route205South_Movement_PlayerWalkOnSpotSouth:
+    WalkOnSpotNormalSouth
     EndMovement
 
     .balign 4, 0
-_0230:
-    MoveAction_020
+Route205South_Movement_PlayerWalkOnSpotNorth:
+    WalkOnSpotNormalNorth
     EndMovement
 
     .balign 4, 0
-_0238:
-    MoveAction_020
-    MoveAction_04B
-    MoveAction_03F
-    MoveAction_00C
+Route205South_Movement_TwinNoticePlayerZ659:
+    WalkOnSpotNormalNorth
+    EmoteExclamationMark
+    Delay8
+    WalkNormalNorth
     EndMovement
 
     .balign 4, 0
-_024C:
-    MoveAction_020
-    MoveAction_04B
-    MoveAction_03F
+Route205South_Movement_TwinNoticePlayerZ660:
+    WalkOnSpotNormalNorth
+    EmoteExclamationMark
+    Delay8
     EndMovement
 
     .balign 4, 0
-_025C:
-    MoveAction_021
-    MoveAction_04B
-    MoveAction_03F
+Route205South_Movement_TwinNoticePlayerZ662:
+    WalkOnSpotNormalSouth
+    EmoteExclamationMark
+    Delay8
     EndMovement
 
     .balign 4, 0
-_026C:
-    MoveAction_021
-    MoveAction_04B
-    MoveAction_03F
-    MoveAction_00D
+Route205South_Movement_TwinNoticePlayerZ663:
+    WalkOnSpotNormalSouth
+    EmoteExclamationMark
+    Delay8
+    WalkNormalSouth
     EndMovement
 
-_0280:
-    ScrCmd_036 7, 1, 0, 0x800C
-    ScrCmd_038 3
-    ScrCmd_039
-    ScrCmd_03B 0x800C
-    CallCommonScript 0x7D0
+Route205South_ArrowSignpostFloaromaTown:
+    ShowArrowSign Route205South_Text_SignFloaromaTown
     End
 
-_0297:
-    ScrCmd_036 8, 1, 0, 0x800C
-    ScrCmd_038 3
-    ScrCmd_039
-    ScrCmd_03B 0x800C
-    CallCommonScript 0x7D0
+Route205South_ArrowSignpostEternaForest:
+    ShowArrowSign Route205South_Text_SignEternaForest
     End
 
-_02AE:
-    ScrCmd_037 3, 0
-    ScrCmd_038 3
-    ScrCmd_039
-    ScrCmd_03A 9, 0x800C
-    CallCommonScript 0x7D0
+Route205South_TrainerTipsSignpost:
+    ShowScrollingSign Route205South_Text_TrainerTipsItemsAutomaticallySorted
     End
 
-    .byte 0
+    .balign 4, 0

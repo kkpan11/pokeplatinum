@@ -1,92 +1,87 @@
-    .include "macros/scrcmd.inc"
+#include "macros/scrcmd.inc"
+#include "res/text/bank/route_206_cycling_road_south_gate.h"
+#include "res/field/events/events_route_206_cycling_road_south_gate.h"
 
-    .data
 
-    ScriptEntry _001A
-    ScriptEntry _003D
-    ScriptEntry _0050
-    ScriptEntry _00A0
-    ScriptEntry _00B0
-    ScriptEntry _001C
-    .short 0xFD13
+    ScriptEntry Route206CyclingRoadSouthGate_OnTransition
+    ScriptEntry Route206CyclingRoadSouthGate_CashierM
+    ScriptEntry Route206CyclingRoadSouthGate_CoordEvent_OnlyCyclists
+    ScriptEntry Route206CyclingRoadSouthGate_CoordEvent_ClearFlagForceBikingInGate
+    ScriptEntry Route206CyclingRoadSouthGate_BattleGirl
+    ScriptEntry Route206CyclingRoadSouthGate_OnFrame_TryForceBiking
+    ScriptEntryEnd
 
-_001A:
+Route206CyclingRoadSouthGate_OnTransition:
     End
 
-_001C:
-    ScrCmd_069 0x4004, 0x4005
-    CallIfLe 0x4005, 3, _0037
-    SetVar 0x4003, 1
+Route206CyclingRoadSouthGate_OnFrame_TryForceBiking:
+    GetPlayerMapPos VAR_MAP_LOCAL_0x04, VAR_MAP_LOCAL_0x05
+    CallIfLe VAR_MAP_LOCAL_0x05, 3, Route206CyclingRoadSouthGate_ForceBikingInGateOnFrame
+    SetVar VAR_MAP_LOCAL_0x03, 1
     End
 
-_0037:
-    SetFlag 0x996
+Route206CyclingRoadSouthGate_ForceBikingInGateOnFrame:
+    SetFlag FLAG_FORCE_BIKING_IN_GATE
     Return
 
-_003D:
-    PlayFanfare SEQ_SE_CONFIRM
-    LockAll
-    FacePlayer
-    Message 2
-    WaitABXPadPress
-    CloseMessage
-    ReleaseAll
+Route206CyclingRoadSouthGate_CashierM:
+    NPCMessage Route206CyclingRoadSouthGate_Text_LearnHowToShiftGears
     End
 
-_0050:
+Route206CyclingRoadSouthGate_CoordEvent_OnlyCyclists:
     LockAll
-    ScrCmd_0C7 0x800C
-    GoToIfEq 0x800C, 1, _0080
-    ApplyMovement 0, _0090
+    CheckPlayerOnBike VAR_RESULT
+    GoToIfEq VAR_RESULT, TRUE, Route206CyclingRoadSouthGate_ForceBikingInGateCoordEvent
+    ApplyMovement LOCALID_CASHIER_M_WEST, Route206CyclingRoadSouthGate_Movement_CashierMExclamationMark
     WaitMovement
-    Message 1
+    Message Route206CyclingRoadSouthGate_Text_OpenOnlyToCyclists
     CloseMessage
-    ApplyMovement 0xFF, _0098
+    ApplyMovement LOCALID_PLAYER, Route206CyclingRoadSouthGate_Movement_PlayerWalkSouth
     WaitMovement
     ReleaseAll
     End
 
-_0080:
-    SetFlag 0x996
-    SetVar 0x4002, 1
+Route206CyclingRoadSouthGate_ForceBikingInGateCoordEvent:
+    SetFlag FLAG_FORCE_BIKING_IN_GATE
+    SetVar VAR_MAP_LOCAL_0x02, 1
     ReleaseAll
     End
 
     .balign 4, 0
-_0090:
-    MoveAction_04B
+Route206CyclingRoadSouthGate_Movement_CashierMExclamationMark:
+    EmoteExclamationMark
     EndMovement
 
     .balign 4, 0
-_0098:
-    MoveAction_00D
+Route206CyclingRoadSouthGate_Movement_PlayerWalkSouth:
+    WalkNormalSouth
     EndMovement
 
-_00A0:
+Route206CyclingRoadSouthGate_CoordEvent_ClearFlagForceBikingInGate:
     LockAll
-    ClearFlag 0x996
-    SetVar 0x4002, 0
+    ClearFlag FLAG_FORCE_BIKING_IN_GATE
+    SetVar VAR_MAP_LOCAL_0x02, 0
     ReleaseAll
     End
 
-_00B0:
-    PlayFanfare SEQ_SE_CONFIRM
+Route206CyclingRoadSouthGate_BattleGirl:
+    PlaySE SE_CONFIRM_sseq_3
     LockAll
     FacePlayer
-    GoToIfSet 0x12B, _00E5
-    SetVar 0x8004, 96
-    ScrCmd_261 0, 0x8004
-    Message 3
-    SetVar 0x8005, 1
-    CallCommonScript 0x7DF
-    SetFlag 0x12B
+    GoToIfSet FLAG_RECEIVED_ROUTE_206_CYCLING_ROAD_SOUTH_GATE_ACCESSORY_FLAG, Route206CyclingRoadSouthGate_GoThroughMtCoronet
+    SetVar VAR_0x8004, ACCESSORY_FLAG
+    BufferAccessoryName 0, VAR_0x8004
+    Message Route206CyclingRoadSouthGate_Text_HaveAFlag
+    SetVar VAR_0x8005, 1
+    Common_GiveAccessoryWaitForConfirm
+    SetFlag FLAG_RECEIVED_ROUTE_206_CYCLING_ROAD_SOUTH_GATE_ACCESSORY_FLAG
     CloseMessage
     ReleaseAll
     End
 
-_00E5:
-    Message 4
-    WaitABXPadPress
+Route206CyclingRoadSouthGate_GoThroughMtCoronet:
+    Message Route206CyclingRoadSouthGate_Text_GoThroughMtCoronet
+    WaitButton
     CloseMessage
     ReleaseAll
     End

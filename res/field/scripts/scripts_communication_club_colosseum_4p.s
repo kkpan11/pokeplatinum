@@ -1,13 +1,12 @@
-    .include "macros/scrcmd.inc"
+#include "macros/scrcmd.inc"
 
-    .data
 
-    ScriptEntry _0006
-    .short 0xFD13
+    ScriptEntry CommunicationClubColosseum4P_OnTransition
+    ScriptEntryEnd
 
-_0006:
-    ScrCmd_151
+CommunicationClubColosseum4P_OnTransition:
+    FieldCommEnterBattleRoom
     End
 
-    .byte 2
-    .byte 0
+CommunicationClubColosseum4P_Unused:
+    End

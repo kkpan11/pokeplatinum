@@ -1,71 +1,72 @@
-    .include "macros/scrcmd.inc"
+#include "macros/scrcmd.inc"
+#include "generated/distribution_events.h"
+#include "res/text/bank/spear_pillar_dialga.h"
 
-    .data
 
-    ScriptEntry _0077
-    ScriptEntry _000A
-    .short 0xFD13
+    ScriptEntry SpearPillarDialga_Rift
+    ScriptEntry SpearPillarDialga_OnTransition
+    ScriptEntryEnd
 
-_000A:
-    Call _0012
+SpearPillarDialga_OnTransition:
+    Call SpearPillarDialga_TryEnableHallOfOrigin
     End
 
-_0012:
-    ScrCmd_166 0x4000
-    GoToIfEq 0x4000, 0, _0075
-    ScrCmd_22D 2, 0x4000
-    GoToIfEq 0x4000, 0, _0075
-    ScrCmd_07E 0x1C7, 1, 0x4000
-    GoToIfEq 0x4000, 0, _0075
-    ScrCmd_28B 2, 0x4000
-    GoToIfEq 0x4000, 0, _0075
-    GoToIfSet 0x11E, _0075
-    SetVar 0x4118, 1
-    GoTo _0075
+SpearPillarDialga_TryEnableHallOfOrigin:
+    CheckGameCompleted VAR_MAP_LOCAL_0x00
+    GoToIfEq VAR_MAP_LOCAL_0x00, FALSE, SpearPillarDialga_TryEnableHallOfOriginEnd
+    GetNationalDexEnabled VAR_MAP_LOCAL_0x00
+    GoToIfEq VAR_MAP_LOCAL_0x00, FALSE, SpearPillarDialga_TryEnableHallOfOriginEnd
+    CheckItem ITEM_AZURE_FLUTE, 1, VAR_MAP_LOCAL_0x00
+    GoToIfEq VAR_MAP_LOCAL_0x00, FALSE, SpearPillarDialga_TryEnableHallOfOriginEnd
+    CheckDistributionEvent DISTRIBUTION_EVENT_ARCEUS, VAR_MAP_LOCAL_0x00
+    GoToIfEq VAR_MAP_LOCAL_0x00, FALSE, SpearPillarDialga_TryEnableHallOfOriginEnd
+    GoToIfSet FLAG_CAUGHT_ARCEUS, SpearPillarDialga_TryEnableHallOfOriginEnd
+    SetVar VAR_HALL_OF_ORIGIN_STATE, 1
+    GoTo SpearPillarDialga_TryEnableHallOfOriginEnd
     End
 
-_0075:
+SpearPillarDialga_TryEnableHallOfOriginEnd:
     Return
 
-_0077:
-    PlayFanfare SEQ_SE_CONFIRM
+SpearPillarDialga_Rift:
+    PlaySE SE_CONFIRM_sseq_3
     LockAll
-    GoToIfGe 0x40C4, 1, _00F4
-    GoToIfSet 208, _00F4
-    Message 0
-    ScrCmd_03E 0x800C
-    GoToIfEq 0x800C, 1, _0101
-    ScrCmd_04C 0x1E3, 0
-    Message 1
-    ScrCmd_04D
+    GoToIfGe VAR_SPEAR_PILLAR_DIALGA_STATE, 1, SpearPillarDialga_TimeEmanatesFromRift
+    GoToIfSet FLAG_CAUGHT_DIALGA, SpearPillarDialga_TimeEmanatesFromRift
+    Message SpearPillarDialga_Text_WillYouChallengeDialga
+    ShowYesNoMenu VAR_RESULT
+    GoToIfEq VAR_RESULT, MENU_NO, SpearPillarDialga_RiftEnd
+    PlayCry SPECIES_DIALGA
+    Message SpearPillarDialga_Text_DialgaCry
+    WaitCry
     CloseMessage
-    ScrCmd_2BD 0x1E3, 70
-    ScrCmd_0EC 0x800C
-    GoToIfEq 0x800C, 0, _00E8
-    SetVar 0x40C4, 1
-    ScrCmd_2BC 0x800C
-    CallIfEq 0x800C, 0, _00EE
+    StartLegendaryBattle SPECIES_DIALGA, 70
+    CheckWonBattle VAR_RESULT
+    GoToIfEq VAR_RESULT, FALSE, SpearPillarDialga_BlackOut
+    SetVar VAR_SPEAR_PILLAR_DIALGA_STATE, 1
+    CheckDidNotCapture VAR_RESULT
+    CallIfEq VAR_RESULT, FALSE, SpearPillarDialga_SetFlagCaughtDialga
     ReleaseAll
     End
 
-_00E8:
-    ScrCmd_0EB
+SpearPillarDialga_BlackOut:
+    BlackOutFromBattle
     ReleaseAll
     End
 
-_00EE:
-    SetFlag 208
+SpearPillarDialga_SetFlagCaughtDialga:
+    SetFlag FLAG_CAUGHT_DIALGA
     Return
 
-_00F4:
-    Message 2
-    WaitABXPadPress
-    GoTo _0101
+SpearPillarDialga_TimeEmanatesFromRift:
+    Message SpearPillarDialga_Text_TimeEmanatesFromRift
+    WaitButton
+    GoTo SpearPillarDialga_RiftEnd
     End
 
-_0101:
+SpearPillarDialga_RiftEnd:
     CloseMessage
     ReleaseAll
     End
 
-    .byte 0
+    .balign 4, 0

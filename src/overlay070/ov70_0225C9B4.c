@@ -20,10 +20,10 @@
 #include "overlay070/ov70_0225C858.h"
 #include "overlay070/struct_ov70_0225C894_decl.h"
 
-#include "core_sys.h"
 #include "heap.h"
-#include "unk_02005474.h"
-#include "unk_0201D15C.h"
+#include "math_util.h"
+#include "sound_playback.h"
+#include "system.h"
 
 typedef struct {
     fx32 unk_00;
@@ -174,18 +174,16 @@ static const u32 Unk_ov70_0226D518[6] = {
     { 0x0 }
 };
 
-UnkStruct_ov70_0225CA20 *ov70_0225C9B4(u32 param0, u32 param1, const UnkStruct_ov70_0225C894 *param2, u32 param3, u32 param4)
+UnkStruct_ov70_0225CA20 *ov70_0225C9B4(u32 param0, u32 param1, const UnkStruct_ov70_0225C894 *param2, u32 heapID, u32 heapID2)
 {
-    UnkStruct_ov70_0225CA20 *v0;
-
-    v0 = Heap_AllocFromHeap(param3, sizeof(UnkStruct_ov70_0225CA20));
+    UnkStruct_ov70_0225CA20 *v0 = Heap_Alloc(heapID, sizeof(UnkStruct_ov70_0225CA20));
     memset(v0, 0, sizeof(UnkStruct_ov70_0225CA20));
 
-    v0->unk_00 = ov63_0222BE18(param0, param3);
-    v0->unk_04 = ov66_022343A8(param0, param1, param3, param4);
-    v0->unk_10 = ov63_0222D848(32, param3);
+    v0->unk_00 = ov63_0222BE18(param0, heapID);
+    v0->unk_04 = ov66_022343A8(param0, param1, heapID, heapID2);
+    v0->unk_10 = ov63_0222D848(32, heapID);
     v0->unk_0C = param0;
-    v0->unk_08 = Heap_AllocFromHeap(param3, sizeof(UnkStruct_ov70_0225CC54) * param0);
+    v0->unk_08 = Heap_Alloc(heapID, sizeof(UnkStruct_ov70_0225CC54) * param0);
 
     memset(v0->unk_08, 0, sizeof(UnkStruct_ov70_0225CC54) * param0);
 
@@ -199,13 +197,13 @@ UnkStruct_ov70_0225CA20 *ov70_0225C9B4(u32 param0, u32 param1, const UnkStruct_o
 
 void ov70_0225CA20(UnkStruct_ov70_0225CA20 *param0)
 {
-    Heap_FreeToHeap(param0->unk_08);
+    Heap_Free(param0->unk_08);
 
     ov63_0222D880(param0->unk_10);
     ov66_02234548(param0->unk_04);
     ov63_0222BE58(param0->unk_00);
 
-    Heap_FreeToHeap(param0);
+    Heap_Free(param0);
 }
 
 void ov70_0225CA44(UnkStruct_ov70_0225CA20 *param0)
@@ -274,18 +272,14 @@ void ov70_0225CB1C(UnkStruct_ov70_0225CA20 *param0, const UnkStruct_ov63_0222D89
 UnkStruct_ov70_0225CC54 *ov70_0225CB28(UnkStruct_ov70_0225CA20 *param0, u32 param1)
 {
     u16 v0, v1;
-    BOOL v2;
-
-    v2 = ov70_0225C8D8(param0->unk_14, 3, &v0, &v1, 0);
+    BOOL v2 = ov70_0225C8D8(param0->unk_14, 3, &v0, &v1, 0);
     GF_ASSERT(v2);
     return ov70_0225CB5C(param0, param1, v0, v1);
 }
 
 UnkStruct_ov70_0225CC54 *ov70_0225CB5C(UnkStruct_ov70_0225CA20 *param0, u32 param1, u32 param2, u32 param3)
 {
-    UnkStruct_ov70_0225CC54 *v0;
-
-    v0 = ov70_0225D2C0(param0);
+    UnkStruct_ov70_0225CC54 *v0 = ov70_0225D2C0(param0);
 
     {
         UnkStruct_ov65_022376D0 v1;
@@ -317,9 +311,7 @@ UnkStruct_ov70_0225CC54 *ov70_0225CB5C(UnkStruct_ov70_0225CA20 *param0, u32 para
 
 UnkStruct_ov70_0225CC54 *ov70_0225CBB8(UnkStruct_ov70_0225CA20 *param0, u32 param1, u32 param2)
 {
-    UnkStruct_ov70_0225CC54 *v0;
-
-    v0 = ov70_0225D2C0(param0);
+    UnkStruct_ov70_0225CC54 *v0 = ov70_0225D2C0(param0);
 
     {
         UnkStruct_ov65_022376D0 v1;
@@ -522,7 +514,7 @@ const UnkStruct_ov70_0225CC54 *ov70_0225CE7C(const UnkStruct_ov70_0225CA20 *para
         }
     }
 
-    GF_ASSERT(0);
+    GF_ASSERT(FALSE);
     return NULL;
 }
 
@@ -712,9 +704,7 @@ static void ov70_0225D17C(UnkStruct_ov70_0225CA20 *param0, s32 param1, s32 param
 
 static u8 ov70_0225D194(const u8 *param0, u32 param1)
 {
-    int v0;
-
-    v0 = MTRNG_Next() % param1;
+    int v0 = MTRNG_Next() % param1;
     return param0[v0];
 }
 
@@ -773,7 +763,7 @@ static UnkStruct_ov70_0225CC54 *ov70_0225D2C0(UnkStruct_ov70_0225CA20 *param0)
         }
     }
 
-    GF_ASSERT(0);
+    GF_ASSERT(FALSE);
     return &param0->unk_08[v0];
 }
 
@@ -807,31 +797,31 @@ static void ov70_0225D310(UnkStruct_ov70_0225CC54 *param0, UnkStruct_ov70_0225CA
         return;
     }
 
-    if (gCoreSys.heldKeys & PAD_BUTTON_B) {
+    if (gSystem.heldKeys & PAD_BUTTON_B) {
         v3 = 3;
     } else {
         v3 = 2;
     }
 
-    if (gCoreSys.heldKeys & PAD_KEY_UP) {
+    if (gSystem.heldKeys & PAD_KEY_UP) {
         if (v0 == 0) {
             ov70_0225D17C(param1, v3, v0, v1);
         } else {
             ov70_0225D17C(param1, 1, 0, v1);
         }
-    } else if (gCoreSys.heldKeys & PAD_KEY_DOWN) {
+    } else if (gSystem.heldKeys & PAD_KEY_DOWN) {
         if (v0 == 1) {
             ov70_0225D17C(param1, v3, v0, v1);
         } else {
             ov70_0225D17C(param1, 1, 1, v1);
         }
-    } else if (gCoreSys.heldKeys & PAD_KEY_LEFT) {
+    } else if (gSystem.heldKeys & PAD_KEY_LEFT) {
         if (v0 == 2) {
             ov70_0225D17C(param1, v3, v0, v1);
         } else {
             ov70_0225D17C(param1, 1, 2, v1);
         }
-    } else if (gCoreSys.heldKeys & PAD_KEY_RIGHT) {
+    } else if (gSystem.heldKeys & PAD_KEY_RIGHT) {
         if (v0 == 3) {
             ov70_0225D17C(param1, v3, v0, v1);
         } else {
@@ -914,7 +904,7 @@ static void ov70_0225D4CC(UnkStruct_ov70_0225CC54 *param0, UnkStruct_ov70_0225CA
         if (param0->unk_0C.val2.unk_10 == 0) {
             param0->unk_08++;
             param0->unk_0C.val2.unk_10 = 0;
-            Sound_PlayEffect(1615);
+            Sound_PlayEffect(SEQ_SE_DP_TELE2_sseq);
         }
         break;
     case 2: {
@@ -951,7 +941,7 @@ static void ov70_0225D57C(UnkStruct_ov70_0225CC54 *param0, UnkStruct_ov70_0225CA
         param0->unk_0C.val2.unk_10 = 0;
         param0->unk_08++;
 
-        Sound_PlayEffect(1615);
+        Sound_PlayEffect(SEQ_SE_DP_TELE2_sseq);
     case 1: {
         BOOL v0;
         VecFx32 v1;
@@ -1133,8 +1123,8 @@ static void ov70_0225D81C(UnkStruct_ov70_0225CC54 *param0, UnkStruct_ov70_0225CA
                 v2 = v2 % 6;
                 v0 = (180 * v2) / 6;
 
-                v1.z += FX_Mul(sub_0201D15C(v0), -2 * FX32_ONE);
-                v1.y += FX_Mul(sub_0201D15C(v0), 10 * FX32_ONE);
+                v1.z += FX_Mul(CalcSineDegrees(v0), -2 * FX32_ONE);
+                v1.y += FX_Mul(CalcSineDegrees(v0), 10 * FX32_ONE);
             }
 
             ov66_022347F8(param0->unk_04, &v1);

@@ -5,16 +5,15 @@
 #include <ppwlobby/ppw_lobby.h>
 #include <string.h>
 
-#include "constants/species.h"
-#include "consts/game_records.h"
+#include "constants/charcode.h"
+#include "constants/versions.h"
+#include "generated/game_records.h"
+#include "generated/genders.h"
+#include "generated/journal_online_events.h"
+#include "generated/species.h"
 
-#include "struct_decls/pokedexdata_decl.h"
-#include "struct_decls/struct_02014FB0_decl.h"
-#include "struct_decls/struct_0202C878_decl.h"
-#include "struct_decls/struct_02030EC4_decl.h"
 #include "struct_decls/struct_0207E060_decl.h"
-#include "struct_decls/struct_party_decl.h"
-#include "struct_defs/struct_02055BA8.h"
+#include "struct_defs/wi_fi_history.h"
 
 #include "overlay066/ov66_02231428.h"
 #include "overlay066/ov66_0223177C.h"
@@ -42,59 +41,37 @@
 #include "overlay066/struct_ov66_022589B4.h"
 #include "overlay068/struct_ov68_0225DC74.h"
 
+#include "appearance.h"
+#include "charcode.h"
 #include "enums.h"
+#include "font.h"
 #include "game_records.h"
 #include "heap.h"
-#include "inlines.h"
 #include "journal.h"
+#include "math_util.h"
 #include "message.h"
+#include "object_events_gfx.h"
 #include "party.h"
+#include "password_word_bank.h"
+#include "pokedex.h"
 #include "pokemon.h"
 #include "save_player.h"
 #include "savedata.h"
-#include "strbuf.h"
+#include "sound.h"
+#include "sound_playback.h"
+#include "string_gf.h"
+#include "system_data.h"
 #include "trainer_info.h"
-#include "unk_02002B7C.h"
-#include "unk_020041CC.h"
-#include "unk_02005474.h"
-#include "unk_02014D38.h"
-#include "unk_0201D15C.h"
-#include "unk_02025CB0.h"
-#include "unk_0202631C.h"
-#include "unk_0202C858.h"
-#include "unk_02030EA4.h"
 #include "unk_0207E060.h"
+#include "wifi_history_save_data.h"
+#include "wifi_plaza_question_data.h"
 
-typedef struct UnkStruct_ov66_0222E71C_t {
-    s32 unk_00;
-    u32 unk_04;
-    u16 unk_08[8];
-    UnkStruct_ov66_02231428 unk_18;
-    UnkStruct_ov66_02231428 unk_1C;
-    u16 unk_20[6];
-    u8 unk_2C[6];
-    u8 unk_32[6];
-    u8 unk_38;
-    u8 unk_39;
-    u16 unk_3A;
-    u16 unk_3C;
-    u8 unk_3E;
-    u8 unk_3F;
-    u8 unk_40;
-    u8 unk_41;
-    u8 unk_42;
-    u8 unk_43;
-    s64 unk_44;
-    u8 unk_4C[12];
-    s32 unk_58[12];
-    u16 unk_88[2];
-    UnkStruct_ov66_0222E908 unk_8C;
-} UnkStruct_ov66_0222E71C;
+#include "res/text/bank/unk_0673.h"
 
 typedef struct {
     u16 unk_00[8];
     u16 unk_10[8];
-    UnkStruct_ov66_0222E71C unk_20;
+    WiFiPlazaProfile profile;
     u32 unk_B4;
 } UnkStruct_ov66_0222F6C4;
 
@@ -156,7 +133,7 @@ typedef struct {
     UnkStruct_ov66_02231428 unk_D0;
     s64 unk_D4;
     s64 unk_DC;
-    TrainerInfo *unk_E4[4];
+    TrainerInfo *trainerInfos[4];
 } UnkStruct_ov66_0222DFF8_sub1;
 
 typedef struct {
@@ -196,7 +173,7 @@ typedef struct {
 typedef struct {
     u8 unk_00[20];
     UnkStruct_ov66_02230914 unk_14[20];
-    UnkStruct_02014FB0 *unk_B4;
+    PasswordWordBank *unk_B4;
 } UnkStruct_ov66_022308A0;
 
 typedef union {
@@ -210,13 +187,13 @@ typedef struct {
     u8 unk_41;
     u8 unk_42;
     u8 unk_43;
-    const SaveData *unk_44;
+    const SaveData *saveData;
     u16 unk_48;
     u16 unk_4A;
 } UnkStruct_ov66_02230A6C;
 
 typedef struct {
-    TrainerInfo *unk_00;
+    TrainerInfo *trainerInfo;
     BOOL unk_04;
 } UnkStruct_ov66_0222FBF0;
 
@@ -226,7 +203,7 @@ typedef struct {
 } UnkStruct_ov66_0222DFF8_sub3;
 
 typedef struct UnkStruct_ov66_0222DFF8_t {
-    SaveData *unk_00;
+    SaveData *saveData;
     UnkStruct_ov66_0222DFF8_sub1 unk_04;
     UnkStruct_ov66_0222FA80 unk_F8;
     UnkStruct_ov66_0222F6C4 unk_108;
@@ -245,21 +222,21 @@ typedef struct UnkStruct_ov66_0222DFF8_t {
     UnkStruct_ov66_02230A6C unk_4BC;
     UnkStruct_ov66_0222FBF0 unk_508;
     UnkStruct_ov66_0222DFF8_sub3 unk_510;
-    u32 unk_528;
+    enum HeapID heapID;
     u32 unk_52C;
 } UnkStruct_ov66_0222DFF8;
 
-typedef struct {
-    u16 unk_00;
-    u16 unk_02;
-} UnkStruct_ov66_02258974;
+typedef struct WiFiPlazaTrainerAppearance {
+    u16 graphicsID;
+    u16 gender;
+} WiFiPlazaTrainerAppearance;
 
 typedef struct {
     u16 unk_00;
     u16 unk_02;
 } UnkStruct_ov66_02258918;
 
-static BOOL ov66_0222F1B4(const u16 *param0, u32 param1);
+static BOOL ov66_0222F1B4(const charcode_t *trainerName, u32 length);
 static void ov66_0222F1DC(s32 param0, const void *param1, void *param2, BOOL param3);
 static void ov66_0222F398(s32 param0, void *param1);
 static void ov66_0222F458(s32 param0, const void *param1, void *param2);
@@ -267,11 +244,11 @@ static void ov66_0222F4C8(PPW_LOBBY_TIME_EVENT param0, void *param1);
 static void ov66_0222F684(const void *param0, u32 param1, void *param2);
 static void ov66_0222F6C4(UnkStruct_ov66_0222F6C4 *param0, UnkStruct_ov66_02231560 *param1);
 static void ov66_0222F768(UnkStruct_ov66_0222DFF8 *param0);
-static void ov66_0222F7C8(UnkStruct_ov66_0222F6C4 *param0, SaveData *param1, u32 param2);
+static void ov66_0222F7C8(UnkStruct_ov66_0222F6C4 *param0, SaveData *saveData, enum HeapID heapID);
 static void ov66_0222F964(UnkStruct_ov66_0222DFF8 *param0);
-static void ov66_0222F9EC(UnkStruct_ov66_0222F6C4 *param0, const SaveData *param1);
-static BOOL ov66_0222FA04(const UnkStruct_ov66_0222F6C4 *param0, const SaveData *param1);
-static void ov66_0222FA28(UnkStruct_ov66_0222F6C4 *param0, const UnkStruct_ov66_0222E71C *param1, u32 param2);
+static void ov66_0222F9EC(UnkStruct_ov66_0222F6C4 *param0, const SaveData *saveData);
+static BOOL ov66_0222FA04(const UnkStruct_ov66_0222F6C4 *param0, const SaveData *saveData);
+static void ov66_0222FA28(UnkStruct_ov66_0222F6C4 *param0, const WiFiPlazaProfile *param1, u32 param2);
 static void ov66_0222FA80(UnkStruct_ov66_0222FA80 *param0);
 static void ov66_0222FA88(UnkStruct_ov66_0222FB64 *param0, UnkStruct_ov66_0222FA80 *param1, UnkStruct_ov66_022302B0 *param2, UnkStruct_ov66_022309A4 *param3);
 static void ov66_0222FB64(UnkStruct_ov66_0222FB64 *param0);
@@ -279,9 +256,9 @@ static void ov66_0222FBAC(const UnkStruct_ov66_0222FB64 *param0);
 static void ov66_0222FBC8(UnkStruct_ov66_0222FBC8 *param0);
 static BOOL ov66_0222FBD0(const UnkStruct_ov66_0222FBC8 *param0);
 static void ov66_0222FBE0(UnkStruct_ov66_0222FBC8 *param0);
-static void ov66_0222FBF0(UnkStruct_ov66_0222FBF0 *param0, u32 param1);
+static void ov66_0222FBF0(UnkStruct_ov66_0222FBF0 *param0, enum HeapID heapID);
 static void ov66_0222FC00(UnkStruct_ov66_0222FBF0 *param0);
-static void ov66_0222FC0C(UnkStruct_ov66_0222FBF0 *param0, const UnkStruct_ov66_0222F6C4 *param1, u32 param2);
+static void ov66_0222FC0C(UnkStruct_ov66_0222FBF0 *param0, const UnkStruct_ov66_0222F6C4 *param1, enum HeapID heapID);
 static void ov66_0222FC4C(UnkStruct_ov66_0222FBC8 *param0);
 static BOOL ov66_0222FC54(const UnkStruct_ov66_0222FBC8 *param0);
 static void ov66_0222FC58(UnkStruct_ov66_0222FC58 *param0);
@@ -344,13 +321,13 @@ static void ov66_022308BC(UnkStruct_ov66_022308A0 *param0);
 static void ov66_022308C8(UnkStruct_ov66_022308A0 *param0, u32 param1, BOOL param2, u32 param3);
 static BOOL ov66_022308F8(const UnkStruct_ov66_022308A0 *param0, u32 param1);
 static const UnkStruct_ov66_02230914 *ov66_02230914(const UnkStruct_ov66_022308A0 *param0, u32 param1);
-static void ov66_02230938(UnkStruct_02014FB0 *param0, u32 param1, UnkStruct_ov66_02230914 *param2);
+static void ov66_02230938(PasswordWordBank *param0, u32 param1, UnkStruct_ov66_02230914 *param2);
 static void ov66_022309A4(UnkStruct_ov66_022309A4 *param0, u32 param1, u32 param2);
 static void ov66_022309B4(UnkStruct_ov66_022309A4 *param0);
 static void ov66_022309C8(UnkStruct_ov66_022309A4 *param0);
 static u32 ov66_02230A64(const UnkStruct_ov66_022309A4 *param0);
 static int ov66_02230A68(const UnkStruct_ov66_022309A4 *param0);
-static void ov66_02230A6C(UnkStruct_ov66_02230A6C *param0, const SaveData *param1);
+static void ov66_02230A6C(UnkStruct_ov66_02230A6C *param0, const SaveData *saveData);
 static void ov66_02230A9C(UnkStruct_ov66_02230A6C *param0, int param1, s32 param2);
 static BOOL ov66_02230AF8(UnkStruct_ov66_02230A6C *param0, s32 param1, s32 param2);
 static int ov66_02230B28(UnkStruct_ov66_02230A6C *param0);
@@ -360,7 +337,7 @@ static void ov66_02230BCC(UnkStruct_ov66_02230A6C *param0);
 static void ov66_02230BE0(UnkStruct_ov66_02230A6C *param0);
 static BOOL ov66_02230C04(const UnkStruct_ov66_02230A6C *param0);
 static u32 ov66_02230C0C(u32 param0);
-static u32 ov66_02230C2C(u32 param0);
+static u32 GetTrainerAppearanceGraphicsID(u32 trainerAppearanceIdx);
 
 static const s32 Unk_ov66_0225892C[9] = {
     0x0,
@@ -374,24 +351,26 @@ static const s32 Unk_ov66_0225892C[9] = {
     0xC30
 };
 
-static const UnkStruct_ov66_02258974 Unk_ov66_02258974[16] = {
-    { 0x3, 0x0 },
-    { 0x5, 0x0 },
-    { 0xB, 0x0 },
-    { 0x1F, 0x0 },
-    { 0x32, 0x0 },
-    { 0x33, 0x0 },
-    { 0x3E, 0x0 },
-    { 0x46, 0x0 },
-    { 0x6, 0x1 },
-    { 0x7, 0x1 },
-    { 0xD, 0x1 },
-    { 0xE, 0x1 },
-    { 0x23, 0x1 },
-    { 0x25, 0x1 },
-    { 0x2A, 0x1 },
-    { 0x3F, 0x1 }
+// clang-format off
+static const WiFiPlazaTrainerAppearance sWiFiPlazaTrainerAppearances[APPEARANCES_COUNT * 2] = {
+    { .graphicsID = OBJ_EVENT_GFX_SCHOOL_KID_M,  .gender = GENDER_MALE   },
+    { .graphicsID = OBJ_EVENT_GFX_BUG_CATCHER,   .gender = GENDER_MALE   },
+    { .graphicsID = OBJ_EVENT_GFX_ACE_TRAINER_M, .gender = GENDER_MALE   },
+    { .graphicsID = OBJ_EVENT_GFX_ROUGHNECK,     .gender = GENDER_MALE   },
+    { .graphicsID = OBJ_EVENT_GFX_RUIN_MANIAC,   .gender = GENDER_MALE   },
+    { .graphicsID = OBJ_EVENT_GFX_BLACK_BELT,    .gender = GENDER_MALE   },
+    { .graphicsID = OBJ_EVENT_GFX_RICH_BOY,      .gender = GENDER_MALE   },
+    { .graphicsID = OBJ_EVENT_GFX_PSYCHIC,       .gender = GENDER_MALE   },
+    { .graphicsID = OBJ_EVENT_GFX_LASS,          .gender = GENDER_FEMALE },
+    { .graphicsID = OBJ_EVENT_GFX_BATTLE_GIRL,   .gender = GENDER_FEMALE },
+    { .graphicsID = OBJ_EVENT_GFX_BEAUTY,        .gender = GENDER_FEMALE },
+    { .graphicsID = OBJ_EVENT_GFX_ACE_TRAINER_F, .gender = GENDER_FEMALE },
+    { .graphicsID = OBJ_EVENT_GFX_IDOL,          .gender = GENDER_FEMALE },
+    { .graphicsID = OBJ_EVENT_GFX_SOCIALITE,     .gender = GENDER_FEMALE },
+    { .graphicsID = OBJ_EVENT_GFX_COWGIRL,       .gender = GENDER_FEMALE },
+    { .graphicsID = OBJ_EVENT_GFX_LADY,          .gender = GENDER_FEMALE },
 };
+// clang-format on
 
 static const UnkStruct_ov66_02258918 Unk_ov66_02258918[] = {
     { 0x2, 0x50 },
@@ -412,15 +391,13 @@ static const UnkStruct_ov66_022589B4 Unk_ov66_022589B4[8] = {
     { ov66_022307B4, sizeof(u32) }
 };
 
-UnkStruct_ov66_0222DFF8 *ov66_0222DDF0(SaveData *param0, u32 param1)
+UnkStruct_ov66_0222DFF8 *ov66_0222DDF0(SaveData *saveData, enum HeapID heapID)
 {
-    UnkStruct_ov66_0222DFF8 *v0;
-
-    v0 = Heap_AllocFromHeap(param1, sizeof(UnkStruct_ov66_0222DFF8));
+    UnkStruct_ov66_0222DFF8 *v0 = Heap_Alloc(heapID, sizeof(UnkStruct_ov66_0222DFF8));
     memset(v0, 0, sizeof(UnkStruct_ov66_0222DFF8));
 
-    v0->unk_00 = param0;
-    v0->unk_528 = param1;
+    v0->saveData = saveData;
+    v0->heapID = heapID;
 
     {
         UnkStruct_ov66_022324F0 v1;
@@ -431,29 +408,29 @@ UnkStruct_ov66_0222DFF8 *ov66_0222DDF0(SaveData *param0, u32 param1)
         v1.unk_0C = ov66_0222F4C8;
         v1.unk_10 = ov66_0222F684;
 
-        ov66_022324F0(param1, v0->unk_00, sizeof(UnkStruct_ov66_0222E71C), &v1, v0);
+        ov66_022324F0(heapID, v0->saveData, sizeof(WiFiPlazaProfile), &v1, v0);
     }
 
     {
         int v2;
 
-        v0->unk_04.unk_00 = ov66_0223177C(param1);
+        v0->unk_04.unk_00 = ov66_0223177C(heapID);
 
         for (v2 = 0; v2 < 4; v2++) {
-            v0->unk_04.unk_E4[v2] = TrainerInfo_New(param1);
+            v0->unk_04.trainerInfos[v2] = TrainerInfo_New(heapID);
         }
     }
 
-    ov66_0222F7C8(&v0->unk_108, v0->unk_00, param1);
+    ov66_0222F7C8(&v0->unk_108, v0->saveData, heapID);
     ov66_0222FC68(&v0->unk_1C0);
     ov66_0222FC58(&v0->unk_1E8);
     ov66_02232D30(Unk_ov66_022589B4, 8, v0);
     ov66_0222FB64(&v0->unk_1FC);
     ov66_022302B0(&v0->unk_20C);
     ov66_022307D4(&v0->unk_3AB);
-    ov66_022308A0(&v0->unk_3E4, param1);
-    ov66_02230A6C(&v0->unk_4BC, v0->unk_00);
-    ov66_0222FBF0(&v0->unk_508, param1);
+    ov66_022308A0(&v0->unk_3E4, heapID);
+    ov66_02230A6C(&v0->unk_4BC, v0->saveData);
+    ov66_0222FBF0(&v0->unk_508, heapID);
 
     return v0;
 }
@@ -461,15 +438,15 @@ UnkStruct_ov66_0222DFF8 *ov66_0222DDF0(SaveData *param0, u32 param1)
 void ov66_0222DEEC(UnkStruct_ov66_0222DFF8 *param0)
 {
     {
-        UnkStruct_02030EC4 *v0;
+        WiFiPlazaQuestion *wiFiPlazaQuestion;
         UnkStruct_ov66_0222E908 v1;
 
-        ov66_0222E908(&param0->unk_108.unk_20, &v1);
+        ov66_0222E908(&param0->unk_108.profile, &v1);
 
-        v0 = sub_02030EC4(param0->unk_00);
+        wiFiPlazaQuestion = SaveData_GetWiFiPlazaQuestion(param0->saveData);
 
-        sub_02030ED8(v0, v1.unk_00);
-        sub_02030EDC(v0, v1.unk_04);
+        WiFiPlazaQuestion_SetQuestionNumber(wiFiPlazaQuestion, v1.questionNumber);
+        WiFiPlazaQuestion_SetSelectedAnswer(wiFiPlazaQuestion, v1.selectedAnswer);
     }
 
     ov66_0222FC00(&param0->unk_508);
@@ -485,12 +462,12 @@ void ov66_0222DEEC(UnkStruct_ov66_0222DFF8 *param0)
         ov66_022317AC(param0->unk_04.unk_00);
 
         for (v2 = 0; v2 < 4; v2++) {
-            Heap_FreeToHeap(param0->unk_04.unk_E4[v2]);
+            Heap_Free(param0->unk_04.trainerInfos[v2]);
         }
     }
 
     ov66_02232598();
-    Heap_FreeToHeap(param0);
+    Heap_Free(param0);
 }
 
 void ov66_0222DF58(UnkStruct_ov66_0222DFF8 *param0)
@@ -604,7 +581,7 @@ BOOL ov66_0222E09C(UnkStruct_ov66_0222DFF8 *param0, u32 param1)
 
 SaveData *ov66_0222E0C4(UnkStruct_ov66_0222DFF8 *param0)
 {
-    return param0->unk_00;
+    return param0->saveData;
 }
 
 BOOL ov66_0222E0C8(const UnkStruct_ov66_0222DFF8 *param0)
@@ -747,9 +724,7 @@ void ov66_0222E24C(UnkStruct_ov66_0222DFF8 *param0, s32 param1, u32 param2)
 
 void ov66_0222E27C(UnkStruct_ov66_0222DFF8 *param0, u32 param1)
 {
-    s32 v0;
-
-    v0 = ov66_022328F0();
+    s32 v0 = ov66_022328F0();
     ov66_0222E24C(param0, v0, param1);
 }
 
@@ -776,10 +751,10 @@ void ov66_0222E2C4(UnkStruct_ov66_0222DFF8 *param0, BOOL param1)
 void ov66_0222E2CC(const UnkStruct_ov66_0222DFF8 *param0)
 {
     if ((param0->unk_1FC.unk_00_4 == 1) && (param0->unk_1FC.unk_0A <= 0)) {
-        sub_02004550(21, 1213, 0);
+        Sound_SetSceneAndPlayBGM(SOUND_SCENE_21, SEQ_PL_WIFIPARADE_sseq, 0);
         ov66_0222FBAC(&param0->unk_1FC);
     } else {
-        sub_02004550(21, 1212, 0);
+        Sound_SetSceneAndPlayBGM(SOUND_SCENE_21, SEQ_PL_WIFIUNION_sseq, 0);
         ov66_0222FBAC(&param0->unk_1FC);
     }
 }
@@ -816,11 +791,11 @@ BOOL ov66_0222E34C(const UnkStruct_ov66_0222DFF8 *param0, u32 param1)
     return 0;
 }
 
-const UnkStruct_ov66_0222E71C *ov66_0222E374(const UnkStruct_ov66_0222DFF8 *param0, u32 param1)
+const WiFiPlazaProfile *ov66_0222E374(const UnkStruct_ov66_0222DFF8 *param0, u32 param1)
 {
     s32 v0;
     UnkStruct_ov66_02232B20 v1;
-    const UnkStruct_ov66_0222E71C *v2;
+    const WiFiPlazaProfile *v2;
 
     GF_ASSERT(param1 < 20);
 
@@ -833,21 +808,21 @@ const UnkStruct_ov66_0222E71C *ov66_0222E374(const UnkStruct_ov66_0222DFF8 *para
     }
 
     if (v0 == ov66_022328F0()) {
-        v2 = &param0->unk_108.unk_20;
+        v2 = &param0->unk_108.profile;
     } else {
-        v2 = (const UnkStruct_ov66_0222E71C *)ov66_0223293C(v0);
+        v2 = (const WiFiPlazaProfile *)ov66_0223293C(v0);
     }
 
     return v2;
 }
 
-UnkStruct_ov66_0222E71C *ov66_0222E3BC(UnkStruct_ov66_0222DFF8 *param0)
+WiFiPlazaProfile *ov66_0222E3BC(UnkStruct_ov66_0222DFF8 *param0)
 {
-    if (ov66_0222FA04(&param0->unk_108, param0->unk_00) == 0) {
+    if (ov66_0222FA04(&param0->unk_108, param0->saveData) == 0) {
         param0->unk_52C = 1;
     }
 
-    return &param0->unk_108.unk_20;
+    return &param0->unk_108.profile;
 }
 
 void ov66_0222E3E4(UnkStruct_ov66_0222DFF8 *param0, int param1)
@@ -856,12 +831,12 @@ void ov66_0222E3E4(UnkStruct_ov66_0222DFF8 *param0, int param1)
 
     GF_ASSERT(param1 < 15);
 
-    if (ov66_0222FA04(&param0->unk_108, param0->unk_00) == 0) {
+    if (ov66_0222FA04(&param0->unk_108, param0->saveData) == 0) {
         param0->unk_52C = 1;
         return;
     }
 
-    if (param0->unk_108.unk_20.unk_43 == param1) {
+    if (param0->unk_108.profile.unk_43 == param1) {
         return;
     }
 
@@ -876,7 +851,7 @@ void ov66_0222E3E4(UnkStruct_ov66_0222DFF8 *param0, int param1)
         }
     }
 
-    switch (param0->unk_108.unk_20.unk_43) {
+    switch (param0->unk_108.profile.unk_43) {
     case 2:
         ov66_02230A9C(&param0->unk_4BC, 16, DWC_LOBBY_INVALID_USER_ID);
         break;
@@ -903,9 +878,9 @@ void ov66_0222E3E4(UnkStruct_ov66_0222DFF8 *param0, int param1)
         break;
     }
 
-    param0->unk_108.unk_20.unk_43 = param1;
+    param0->unk_108.profile.unk_43 = param1;
 
-    ov66_0222F9EC(&param0->unk_108, param0->unk_00);
+    ov66_0222F9EC(&param0->unk_108, param0->saveData);
     ov66_0222F964(param0);
 }
 
@@ -921,44 +896,44 @@ void ov66_0222E528(UnkStruct_ov66_0222DFF8 *param0, u32 param1)
 {
     GF_ASSERT(param1 < 27);
 
-    if (ov66_0222FA04(&param0->unk_108, param0->unk_00) == 0) {
+    if (ov66_0222FA04(&param0->unk_108, param0->saveData) == 0) {
         param0->unk_52C = 1;
         return;
     }
 
-    param0->unk_108.unk_20.unk_41 = param1;
+    param0->unk_108.profile.unk_41 = param1;
 
-    ov66_0222F9EC(&param0->unk_108, param0->unk_00);
+    ov66_0222F9EC(&param0->unk_108, param0->saveData);
     ov66_0222F964(param0);
 }
 
-void ov66_0222E56C(UnkStruct_ov66_0222DFF8 *param0, int param1, int param2)
+void ov66_0222E56C(UnkStruct_ov66_0222DFF8 *param0, int type1, int type2)
 {
-    GF_ASSERT(param1 < 18);
-    GF_ASSERT(param2 < 18);
+    GF_ASSERT(type1 < NUM_POKEMON_TYPES);
+    GF_ASSERT(type2 < NUM_POKEMON_TYPES);
 
-    if (ov66_0222FA04(&param0->unk_108, param0->unk_00) == 0) {
+    if (ov66_0222FA04(&param0->unk_108, param0->saveData) == 0) {
         param0->unk_52C = 1;
         return;
     }
 
-    if (param1 >= 18) {
+    if (type1 >= NUM_POKEMON_TYPES) {
         return;
     }
 
-    if (param2 >= 18) {
+    if (type2 >= NUM_POKEMON_TYPES) {
         return;
     }
 
-    if (param1 == 0) {
-        param0->unk_108.unk_20.unk_88[0] = param2;
-        param0->unk_108.unk_20.unk_88[1] = 0;
+    if (type1 == TYPE_NORMAL) {
+        param0->unk_108.profile.unk_88[0] = type2;
+        param0->unk_108.profile.unk_88[1] = TYPE_NORMAL;
     } else {
-        param0->unk_108.unk_20.unk_88[0] = param1;
-        param0->unk_108.unk_20.unk_88[1] = param2;
+        param0->unk_108.profile.unk_88[0] = type1;
+        param0->unk_108.profile.unk_88[1] = type2;
     }
 
-    ov66_0222F9EC(&param0->unk_108, param0->unk_00);
+    ov66_0222F9EC(&param0->unk_108, param0->saveData);
     ov66_0222F964(param0);
 }
 
@@ -966,7 +941,7 @@ void ov66_0222E5D8(UnkStruct_ov66_0222DFF8 *param0, u32 param1, u32 param2)
 {
     GF_ASSERT(param2 < 3);
 
-    if (ov66_0222FA04(&param0->unk_108, param0->unk_00) == 0) {
+    if (ov66_0222FA04(&param0->unk_108, param0->saveData) == 0) {
         param0->unk_52C = 1;
         return;
     }
@@ -975,301 +950,277 @@ void ov66_0222E5D8(UnkStruct_ov66_0222DFF8 *param0, u32 param1, u32 param2)
         return;
     }
 
-    param0->unk_108.unk_20.unk_8C.unk_00 = param1;
-    param0->unk_108.unk_20.unk_8C.unk_04 = param2;
+    param0->unk_108.profile.unk_8C.questionNumber = param1;
+    param0->unk_108.profile.unk_8C.selectedAnswer = param2;
     param0->unk_1FC.unk_0F_0 = 1;
 
     ov66_0222F040(param0, 6);
-    ov66_0222F9EC(&param0->unk_108, param0->unk_00);
+    ov66_0222F9EC(&param0->unk_108, param0->saveData);
     ov66_0222F964(param0);
 }
 
-void ov66_0222E640(const UnkStruct_ov66_0222E71C *param0, TrainerInfo *param1, u32 param2)
+void ov66_0222E640(const WiFiPlazaProfile *profile, TrainerInfo *trainerInfo, enum HeapID heapID)
 {
-    BOOL v0;
-    BOOL v1;
+    BOOL isTrainerNameValid = ov66_0222F1B4(profile->trainerName, TRAINER_NAME_LEN + 1);
+    BOOL isTrainerNameInvalid = FALSE;
 
-    v0 = ov66_0222F1B4(param0->unk_08, 7 + 1);
-    v1 = 0;
+    if (isTrainerNameValid == TRUE) {
+        String *trainerName, *tmpbuf; // must declare like this to match
 
-    if (v0 == 1) {
-        TrainerInfo_SetName(param1, param0->unk_08);
+        TrainerInfo_SetName(trainerInfo, profile->trainerName);
 
-        {
-            Strbuf *v2;
-            Strbuf *v3;
+        tmpbuf = String_Init(NELEMS(profile->trainerName) * 4, heapID);
+        trainerName = String_Init(NELEMS(profile->trainerName) * 4, heapID);
+        TrainerInfo_NameString(trainerInfo, trainerName);
+        isTrainerNameValid = Font_AreAllCharsValid(FONT_SYSTEM, trainerName, tmpbuf);
 
-            v3 = Strbuf_Init((7 + 1) * 4, param2);
-            v2 = Strbuf_Init((7 + 1) * 4, param2);
-            TrainerInfo_NameStrbuf(param1, v2);
-            v0 = sub_02002DB4(0, v2, v3);
-
-            if (v0 == 0) {
-                v1 = 1;
-            }
-
-            Strbuf_Free(v3);
-            Strbuf_Free(v2);
+        if (isTrainerNameValid == FALSE) {
+            isTrainerNameInvalid = TRUE;
         }
+
+        String_Free(tmpbuf);
+        String_Free(trainerName);
     } else {
-        v1 = 1;
+        isTrainerNameInvalid = TRUE;
     }
 
-    if (v1) {
-        MessageLoader *v4;
-        Strbuf *v5;
+    if (isTrainerNameInvalid) {
+        MessageLoader *messageLoader = MessageLoader_Init(MSG_LOADER_LOAD_ON_DEMAND, NARC_INDEX_MSGDATA__PL_MSG, TEXT_BANK_UNK_0673, heapID);
+        String *fallbackName = MessageLoader_GetNewString(messageLoader, pl_msg_00000673_00064);
 
-        v4 = MessageLoader_Init(1, 26, 673, param2);
-        v5 = MessageLoader_GetNewStrbuf(v4, 64);
-
-        TrainerInfo_SetNameFromStrbuf(param1, v5);
-        Strbuf_Free(v5);
-        MessageLoader_Free(v4);
+        TrainerInfo_SetNameFromString(trainerInfo, fallbackName);
+        String_Free(fallbackName);
+        MessageLoader_Free(messageLoader);
     }
 
-    TrainerInfo_SetID(param1, ov66_0222E79C(param0));
-    TrainerInfo_SetGender(param1, ov66_0222E7C8(param0));
-    TrainerInfo_SetAppearance(param1, ov66_0222E858(param0));
-    TrainerInfo_SetRegionCode(param1, ov66_0222E80C(param0));
-    TrainerInfo_SetMainStoryCleared(param1);
+    TrainerInfo_SetID(trainerInfo, WiFiPlazaProfile_GetTrainerID(profile));
+    TrainerInfo_SetGender(trainerInfo, WiFiPlazaProfile_GetGender(profile));
+    TrainerInfo_SetAppearance(trainerInfo, WiFiPlazaProfile_GetTrainerAppearanceGraphicsID(profile));
+    TrainerInfo_SetLanguage(trainerInfo, WiFiPlazaProfile_GetNormalizedLanguage(profile));
+    TrainerInfo_SetMainStoryCleared(trainerInfo);
 }
 
-u32 ov66_0222E71C(const UnkStruct_ov66_0222E71C *param0)
+u32 ov66_0222E71C(const WiFiPlazaProfile *profile)
 {
-    if (param0->unk_43 >= 14) {
+    if (profile->unk_43 >= 14) {
         return 14;
     }
 
-    return param0->unk_43;
+    return profile->unk_43;
 }
 
-int ov66_0222E728(const UnkStruct_ov66_0222E71C *param0, u32 param1)
+int ov66_0222E728(const WiFiPlazaProfile *profile, u32 param1)
 {
-    int v0;
+    int idx;
     int v1;
 
     GF_ASSERT(param1 < 12);
 
     v1 = 0;
 
-    for (v0 = 0; v0 < 12; v0++) {
-        if (param0->unk_4C[v0] < 24) {
+    for (idx = 0; idx < 12; idx++) {
+        if (profile->unk_4C[idx] < 24) {
             v1++;
         }
 
         if ((v1 - 1) == param1) {
-            return param0->unk_4C[v0];
+            return profile->unk_4C[idx];
         }
     }
 
     return 24;
 }
 
-s32 ov66_0222E760(const UnkStruct_ov66_0222E71C *param0, u32 param1)
+s32 ov66_0222E760(const WiFiPlazaProfile *profile, u32 param1)
 {
-    int v0;
+    int idx;
     int v1;
 
     GF_ASSERT(param1 < 12);
 
     v1 = 0;
 
-    for (v0 = 0; v0 < 12; v0++) {
-        if (param0->unk_4C[v0] < 24) {
+    for (idx = 0; idx < 12; idx++) {
+        if (profile->unk_4C[idx] < 24) {
             v1++;
         }
 
         if ((v1 - 1) == param1) {
-            return param0->unk_58[v0];
+            return profile->unk_58[idx];
         }
     }
 
     return DWC_LOBBY_INVALID_USER_ID;
 }
 
-s32 ov66_0222E798(const UnkStruct_ov66_0222E71C *param0)
+s32 ov66_0222E798(const WiFiPlazaProfile *profile)
 {
-    return param0->unk_00;
+    return profile->unk_00;
 }
 
-u32 ov66_0222E79C(const UnkStruct_ov66_0222E71C *param0)
+u32 WiFiPlazaProfile_GetTrainerID(const WiFiPlazaProfile *profile)
 {
-    return param0->unk_04;
+    return profile->trainerID;
 }
 
-int ov66_0222E7A0(const UnkStruct_ov66_0222E71C *param0)
+int ov66_0222E7A0(const WiFiPlazaProfile *profile)
 {
-    u32 v0;
-    int v1;
+    u32 trainerAppearance = WiFiPlazaProfile_GetTrainerAppearanceGraphicsID(profile);
 
-    v0 = ov66_0222E858(param0);
-
-    for (v1 = 0; v1 < 16; v1++) {
-        if (Unk_ov66_02258974[v1].unk_00 == v0) {
-            return v1;
+    for (int idx = 0; idx < SNELEMS(sWiFiPlazaTrainerAppearances); idx++) {
+        if (sWiFiPlazaTrainerAppearances[idx].graphicsID == trainerAppearance) {
+            return idx;
         }
     }
 
     return 24;
 }
 
-UnkStruct_ov66_02231428 ov66_0222E7C4(const UnkStruct_ov66_0222E71C *param0)
+UnkStruct_ov66_02231428 ov66_0222E7C4(const WiFiPlazaProfile *profile)
 {
-    return param0->unk_1C;
+    return profile->unk_1C;
 }
 
-u32 ov66_0222E7C8(const UnkStruct_ov66_0222E71C *param0)
+u32 WiFiPlazaProfile_GetGender(const WiFiPlazaProfile *profile)
 {
-    u32 v0;
-    int v1;
-    u32 v2;
+    u32 gender;
 
-    if (param0->unk_38 >= 2) {
-        v2 = ov66_02230C2C(param0->unk_3A);
+    if (profile->trainerGender >= GENDER_NONE) {
+        u32 graphicsID = GetTrainerAppearanceGraphicsID(profile->trainerAppearanceIdx);
 
-        if (v2 != 0xffff) {
-            for (v1 = 0; v1 < NELEMS(Unk_ov66_02258974); v1++) {
-                if (Unk_ov66_02258974[v1].unk_00 == param0->unk_3A) {
-                    v0 = Unk_ov66_02258974[v1].unk_00;
+        if (graphicsID != 0xffff) {
+            for (int idx = 0; idx < NELEMS(sWiFiPlazaTrainerAppearances); idx++) {
+                if (sWiFiPlazaTrainerAppearances[idx].graphicsID == profile->trainerAppearanceIdx) {
+                    gender = sWiFiPlazaTrainerAppearances[idx].graphicsID;
                 }
             }
         } else {
-            v0 = 1;
+            gender = GENDER_FEMALE;
         }
     } else {
-        v0 = param0->unk_38;
+        gender = profile->trainerGender;
     }
 
-    return v0;
+    return gender;
 }
 
-u32 ov66_0222E80C(const UnkStruct_ov66_0222E71C *param0)
+u32 WiFiPlazaProfile_GetNormalizedLanguage(const WiFiPlazaProfile *profile)
 {
-    u32 v0;
+    return WiFiPlazaProfile_IsLanguageValid(profile) == TRUE
+        ? profile->language
+        : LANGUAGE_ENGLISH;
+}
 
-    if (ov66_0222E824(param0) == 1) {
-        v0 = param0->unk_39;
+BOOL WiFiPlazaProfile_IsLanguageValid(const WiFiPlazaProfile *profile)
+{
+    switch (profile->language) {
+    case LANGUAGE_JAPANESE:
+    case LANGUAGE_ENGLISH:
+    case LANGUAGE_FRENCH:
+    case LANGUAGE_ITALIAN:
+    case LANGUAGE_GERMAN:
+    case LANGUAGE_SPANISH:
+        return TRUE;
+    }
+
+    return FALSE;
+}
+
+u32 WiFiPlazaProfile_GetLanguage(const WiFiPlazaProfile *profile)
+{
+    return profile->language;
+}
+
+u32 WiFiPlazaProfile_GetTrainerAppearanceGraphicsID(const WiFiPlazaProfile *profile)
+{
+    u32 trainerAppearance = GetTrainerAppearanceGraphicsID(profile->trainerAppearanceIdx);
+
+    if (trainerAppearance != 0xffff) {
+        return trainerAppearance;
+    }
+
+    if (WiFiPlazaProfile_GetGender(profile) == GENDER_MALE) {
+        return OBJ_EVENT_GFX_SCHOOL_KID_M;
+    }
+
+    return OBJ_EVENT_GFX_LASS;
+}
+
+u32 ov66_0222E880(const WiFiPlazaProfile *profile)
+{
+    u32 country;
+
+    if (profile->country >= 234) {
+        country = 0;
     } else {
-        v0 = 2;
-    }
-
-    return v0;
-}
-
-BOOL ov66_0222E824(const UnkStruct_ov66_0222E71C *param0)
-{
-    switch (param0->unk_39) {
-    case 1:
-    case 2:
-    case 3:
-    case 4:
-    case 5:
-    case 7:
-        return 1;
-    default:
-        break;
-    }
-
-    return 0;
-}
-
-u32 ov66_0222E850(const UnkStruct_ov66_0222E71C *param0)
-{
-    return param0->unk_39;
-}
-
-u32 ov66_0222E858(const UnkStruct_ov66_0222E71C *param0)
-{
-    u32 v0;
-
-    v0 = ov66_02230C2C(param0->unk_3A);
-
-    if (v0 != 0xffff) {
-        return v0;
-    }
-
-    if (ov66_0222E7C8(param0) == 0) {
-        return 0x3;
-    }
-
-    return 0x6;
-}
-
-u32 ov66_0222E880(const UnkStruct_ov66_0222E71C *param0)
-{
-    u32 v0;
-
-    if (param0->unk_3C >= 234) {
-        v0 = 0;
-    } else {
-        if (ov66_022316C4(param0->unk_3C, param0->unk_3E) == 0) {
+        if (ov66_022316C4(profile->country, profile->region) == 0) {
             return 0;
         }
 
-        v0 = param0->unk_3C;
+        country = profile->country;
     }
 
-    return v0;
+    return country;
 }
 
-u32 ov66_0222E8A4(const UnkStruct_ov66_0222E71C *param0)
+u32 ov66_0222E8A4(const WiFiPlazaProfile *profile)
 {
-    u32 v0;
+    u32 region;
 
-    if (ov66_022316C4(param0->unk_3C, param0->unk_3E) == 0) {
-        v0 = 0;
+    if (ov66_022316C4(profile->country, profile->region) == 0) {
+        region = 0;
     } else {
-        v0 = param0->unk_3E;
+        region = profile->region;
     }
 
-    return v0;
+    return region;
 }
 
-u32 ov66_0222E8C4(const UnkStruct_ov66_0222E71C *param0)
+u32 ov66_0222E8C4(const WiFiPlazaProfile *profile)
 {
     u32 v0;
 
-    if (param0->unk_41 == 0xff) {
+    if (profile->unk_41 == 0xff) {
         return 0;
     }
 
-    if (param0->unk_41 >= 27) {
+    if (profile->unk_41 >= 27) {
         v0 = 0;
     } else {
-        v0 = param0->unk_41;
+        v0 = profile->unk_41;
     }
 
     return v0;
 }
 
-BOOL ov66_0222E8D8(const UnkStruct_ov66_0222E71C *param0)
+BOOL ov66_0222E8D8(const WiFiPlazaProfile *profile)
 {
-    if (param0->unk_41 == 0xff) {
+    if (profile->unk_41 == 0xff) {
         return 0;
     }
 
     return 1;
 }
 
-int ov66_0222E8E8(const UnkStruct_ov66_0222E71C *param0, u32 param1)
+int ov66_0222E8E8(const WiFiPlazaProfile *profile, u32 index)
 {
-    GF_ASSERT(param1 < 2);
+    GF_ASSERT(index < 2);
 
-    if (param0->unk_88[param1] >= 18) {
-        return 0;
+    if (profile->unk_88[index] >= NUM_POKEMON_TYPES) {
+        return TYPE_NORMAL;
     }
 
-    return param0->unk_88[param1];
+    return profile->unk_88[index];
 }
 
-void ov66_0222E908(const UnkStruct_ov66_0222E71C *param0, UnkStruct_ov66_0222E908 *param1)
+void ov66_0222E908(const WiFiPlazaProfile *profile, UnkStruct_ov66_0222E908 *param1)
 {
-    *param1 = param0->unk_8C;
+    *param1 = profile->unk_8C;
 }
 
 TrainerInfo *ov66_0222E918(const UnkStruct_ov66_0222DFF8 *param0)
 {
-    return param0->unk_508.unk_00;
+    return param0->unk_508.trainerInfo;
 }
 
 BOOL ov66_0222E924(const UnkStruct_ov66_0222DFF8 *param0, u32 param1)
@@ -1304,9 +1255,7 @@ u32 ov66_0222E964(const UnkStruct_ov66_0222DFF8 *param0)
 
 u32 ov66_0222E974(const UnkStruct_ov66_0222DFF8 *param0, u32 param1)
 {
-    u32 v0;
-
-    v0 = ov66_02232BB4(param1);
+    u32 v0 = ov66_02232BB4(param1);
 
     if (v0 == DWC_LOBBY_INVALID_USER_ID) {
         return 0xffffffff;
@@ -1405,9 +1354,7 @@ void ov66_0222EAB4(UnkStruct_ov66_0222DFF8 *param0, enum PlazaMinigame param1, u
 
 u32 ov66_0222EB28(const UnkStruct_ov66_0222DFF8 *param0)
 {
-    u32 v0;
-
-    v0 = ov66_02232BEC(UnkEnum_ov66_02232BEC_03);
+    u32 v0 = ov66_02232BEC(UnkEnum_ov66_02232BEC_03);
 
     if (v0 >= 5) {
         v0 = 0;
@@ -1418,9 +1365,7 @@ u32 ov66_0222EB28(const UnkStruct_ov66_0222DFF8 *param0)
 
 u32 ov66_0222EB38(const UnkStruct_ov66_0222DFF8 *param0)
 {
-    u32 v0;
-
-    v0 = ov66_02232BEC(UnkEnum_ov66_02232BEC_02);
+    u32 v0 = ov66_02232BEC(UnkEnum_ov66_02232BEC_02);
 
     if (v0 >= 5) {
         v0 = 0;
@@ -1431,9 +1376,7 @@ u32 ov66_0222EB38(const UnkStruct_ov66_0222DFF8 *param0)
 
 u32 ov66_0222EB48(const UnkStruct_ov66_0222DFF8 *param0)
 {
-    u32 v0;
-
-    v0 = ov66_02232BEC(UnkEnum_ov66_02232BEC_05);
+    u32 v0 = ov66_02232BEC(UnkEnum_ov66_02232BEC_05);
     v0 += ((30 * 30) / 30);
 
     return v0;
@@ -1447,9 +1390,7 @@ BOOL ov66_0222EB54(const UnkStruct_ov66_0222DFF8 *param0, u32 param1)
 
 void ov66_0222EB6C(UnkStruct_ov66_0222DFF8 *param0, u32 param1)
 {
-    u32 v0;
-
-    v0 = param1;
+    u32 v0 = param1;
     ov66_02232E00(5, &v0, sizeof(u32));
 }
 
@@ -1541,7 +1482,7 @@ BOOL ov66_0222EC70(UnkStruct_ov66_0222DFF8 *param0, u32 param1)
     }
 
     {
-        const UnkStruct_ov66_0222E71C *v1 = ov66_0222E374(param0, param1);
+        const WiFiPlazaProfile *v1 = ov66_0222E374(param0, param1);
         u32 v2 = ov66_0222E71C(v1);
 
         if (v2 != 1) {
@@ -1563,22 +1504,22 @@ BOOL ov66_0222EC70(UnkStruct_ov66_0222DFF8 *param0, u32 param1)
 
 void ov66_0222ECD4(UnkStruct_ov66_0222DFF8 *param0, u16 param1)
 {
-    BOOL v0 = 0;
+    BOOL isTrainerNameValid = FALSE;
     s32 v1;
 
     if (param0->unk_1C0.unk_0A == 1) {
         if (param0->unk_1C0.unk_06 != 2) {
-            v0 = 1;
+            isTrainerNameValid = TRUE;
         }
     } else {
         if (param0->unk_1C0.unk_0A == 2) {
             if (param0->unk_1C0.unk_06 != 3) {
-                v0 = 1;
+                isTrainerNameValid = TRUE;
             }
         }
     }
 
-    if (v0) {
+    if (isTrainerNameValid) {
         v1 = ov66_02232BA0(param0->unk_1C0.unk_04);
         ov66_0222FD50(param0, v1);
         return;
@@ -1734,102 +1675,88 @@ void ov66_0222EEE4(UnkStruct_ov66_0222DFF8 *param0, u32 param1)
 
 void ov66_0222EEF4(UnkStruct_ov66_0222DFF8 *param0, u32 param1)
 {
-    UnkStruct_ov66_0222E71C *v0;
-    TrainerInfo *v1;
-    void *v2;
-    Journal *v3;
-
-    v3 = SaveData_GetJournal(param0->unk_00);
-    v0 = (UnkStruct_ov66_0222E71C *)ov66_0222E374(param0, param1);
+    WiFiPlazaProfile *v0;
+    TrainerInfo *trainerInfo;
+    void *journalEntryOnlineEvent;
+    JournalEntry *journalEntry = SaveData_GetJournal(param0->saveData);
+    v0 = (WiFiPlazaProfile *)ov66_0222E374(param0, param1);
 
     if (v0 != NULL) {
-        v1 = TrainerInfo_New(112);
-        ov66_0222E640(v0, v1, 112);
-        v2 = sub_0202C250(TrainerInfo_Name(v1), v0->unk_38, 112, 22);
+        trainerInfo = TrainerInfo_New(HEAP_ID_112);
+        ov66_0222E640(v0, trainerInfo, HEAP_ID_112);
+        journalEntryOnlineEvent = JournalEntry_CreateEventInteraction(TrainerInfo_Name(trainerInfo), v0->trainerGender, HEAP_ID_112, ONLINE_EVENT_CHATTED_IN_PLAZA);
 
-        sub_0202B758(v3, v2, 4);
-        Heap_FreeToHeap(v1);
+        JournalEntry_SaveData(journalEntry, journalEntryOnlineEvent, JOURNAL_ONLINE_EVENT);
+        Heap_Free(trainerInfo);
     }
 }
 
 void ov66_0222EF44(UnkStruct_ov66_0222DFF8 *param0, u32 param1)
 {
-    UnkStruct_ov66_0222E71C *v0;
-    TrainerInfo *v1;
-    void *v2;
-    Journal *v3;
-
-    v3 = SaveData_GetJournal(param0->unk_00);
-    v0 = (UnkStruct_ov66_0222E71C *)ov66_0222E374(param0, param1);
+    WiFiPlazaProfile *v0;
+    TrainerInfo *trainerInfo;
+    void *journalEntryOnlineEvent;
+    JournalEntry *journalEntry = SaveData_GetJournal(param0->saveData);
+    v0 = (WiFiPlazaProfile *)ov66_0222E374(param0, param1);
 
     if (v0 != NULL) {
-        v1 = TrainerInfo_New(112);
-        ov66_0222E640(v0, v1, 112);
+        trainerInfo = TrainerInfo_New(HEAP_ID_112);
+        ov66_0222E640(v0, trainerInfo, HEAP_ID_112);
+        journalEntryOnlineEvent = JournalEntry_CreateEventInteraction(TrainerInfo_Name(trainerInfo), v0->trainerGender, HEAP_ID_112, ONLINE_EVENT_GOT_TAP_TOY);
 
-        v2 = sub_0202C250(TrainerInfo_Name(v1), v0->unk_38, 112, 23);
-
-        sub_0202B758(v3, v2, 4);
-        Heap_FreeToHeap(v1);
+        JournalEntry_SaveData(journalEntry, journalEntryOnlineEvent, JOURNAL_ONLINE_EVENT);
+        Heap_Free(trainerInfo);
     }
 }
 
-void ov66_0222EF94(UnkStruct_ov66_0222DFF8 *param0, enum PlazaMinigame param1)
+void ov66_0222EF94(UnkStruct_ov66_0222DFF8 *param0, enum PlazaMinigame minigame)
 {
-    void *v0;
-    Journal *v1;
+    void *journalEntryOnlineEvent;
+    JournalEntry *journalEntry = SaveData_GetJournal(param0->saveData);
 
-    v1 = SaveData_GetJournal(param0->unk_00);
-
-    switch (param1) {
+    switch (minigame) {
     case UnkEnum_ov66_022324D0_00:
     case UnkEnum_ov66_022324D0_01:
     case UnkEnum_ov66_022324D0_02:
-        v0 = sub_0202C280(param1, 112, 24);
+        journalEntryOnlineEvent = JournalEntry_CreateEventPlazaMinigame(minigame, 112, ONLINE_EVENT_PLAZA_MINIGAME);
         break;
     case UnkEnum_ov66_022324D0_03:
     case UnkEnum_ov66_022324D0_04:
-        v0 = sub_0202C244(112, 25);
+        journalEntryOnlineEvent = JournalEntry_CreateEventMisc(112, ONLINE_EVENT_PLAYED_WITH_FOOTPRINT_STAMP);
         break;
     case UnkEnum_ov66_022324D0_05:
-        v0 = sub_0202C244(112, 26);
+        journalEntryOnlineEvent = JournalEntry_CreateEventMisc(112, ONLINE_EVENT_VIEWED_PLAZA_VISITOR_PROFILES);
         break;
     case UnkEnum_ov66_022324D0_06:
-        v0 = sub_0202C244(112, 27);
+        journalEntryOnlineEvent = JournalEntry_CreateEventMisc(112, ONLINE_EVENT_READ_PLAZA_NEWS);
         break;
     default:
-        v0 = NULL;
+        journalEntryOnlineEvent = NULL;
         break;
     }
 
-    if (v0) {
-        sub_0202B758(v1, v0, 4);
+    if (journalEntryOnlineEvent) {
+        JournalEntry_SaveData(journalEntry, journalEntryOnlineEvent, JOURNAL_ONLINE_EVENT);
     }
 }
 
 void ov66_0222F000(UnkStruct_ov66_0222DFF8 *param0)
 {
-    void *v0;
-    Journal *v1;
+    JournalEntry *journalEntry = SaveData_GetJournal(param0->saveData);
+    void *journalEntryOnlineEvent = JournalEntry_CreateEventMisc(112, ONLINE_EVENT_JOINED_PARADE);
 
-    v1 = SaveData_GetJournal(param0->unk_00);
-    v0 = sub_0202C244(112, 28);
-
-    sub_0202B758(v1, v0, 4);
+    JournalEntry_SaveData(journalEntry, journalEntryOnlineEvent, JOURNAL_ONLINE_EVENT);
 }
 
 void ov66_0222F020(UnkStruct_ov66_0222DFF8 *param0)
 {
-    GameRecords *v0;
-
-    v0 = SaveData_GetGameRecordsPtr(param0->unk_00);
+    GameRecords *v0 = SaveData_GetGameRecords(param0->saveData);
     GameRecords_IncrementRecordValue(v0, RECORD_UNK_046);
 }
 
 void ov66_0222F030(UnkStruct_ov66_0222DFF8 *param0)
 {
-    GameRecords *v0;
-
-    v0 = SaveData_GetGameRecordsPtr(param0->unk_00);
+    GameRecords *v0 = SaveData_GetGameRecords(param0->saveData);
     GameRecords_IncrementRecordValue(v0, RECORD_UNK_118);
 }
 
@@ -1889,9 +1816,7 @@ int ov66_0222F05C(const UnkStruct_ov66_0222DFF8 *param0)
 
 u32 ov66_0222F0DC(const UnkStruct_ov66_0222DFF8 *param0)
 {
-    u32 v0;
-
-    v0 = ov66_02230828(&param0->unk_3AB);
+    u32 v0 = ov66_02230828(&param0->unk_3AB);
 
     if (ov66_0222E924(param0, ov66_0222E338(param0)) == 1) {
         v0 += (3 - 1);
@@ -1928,12 +1853,12 @@ BOOL ov66_0222F144(const UnkStruct_ov66_0222DFF8 *param0, UnkStruct_ov68_0225DC7
 
 void ov66_0222F16C(UnkStruct_ov66_0222DFF8 *param0)
 {
-    TrainerInfo *v0;
+    TrainerInfo *info;
 
     GF_ASSERT(param0->unk_4B8 == NULL);
 
-    v0 = SaveData_GetTrainerInfo(param0->unk_00);
-    param0->unk_4B8 = sub_0207E060(v0, param0->unk_528);
+    info = SaveData_GetTrainerInfo(param0->saveData);
+    param0->unk_4B8 = sub_0207E060(info, param0->heapID);
 }
 
 void ov66_0222F198(UnkStruct_ov66_0222DFF8 *param0)
@@ -1944,72 +1869,70 @@ void ov66_0222F198(UnkStruct_ov66_0222DFF8 *param0)
     }
 }
 
-static BOOL ov66_0222F1B4(const u16 *param0, u32 param1)
+static BOOL ov66_0222F1B4(const charcode_t *trainerName, u32 length)
 {
-    int v0;
-
-    for (v0 = 0; v0 < param1; v0++) {
-        if (param0[v0] == 0xffff) {
-            return 1;
+    for (int idx = 0; idx < length; idx++) {
+        if (trainerName[idx] == CHAR_EOS) {
+            return TRUE;
         }
     }
 
-    return 0;
+    return FALSE;
 }
 
 static void ov66_0222F1DC(s32 param0, const void *param1, void *param2, BOOL param3)
 {
     UnkStruct_ov66_0222DFF8 *v0;
     u32 v1;
-    const UnkStruct_ov66_0222E71C *v2;
+    const WiFiPlazaProfile *v2;
     s32 v3;
     u32 v4;
 
     v0 = param2;
 
     if (param3) {
-        ov66_0222FC0C(&v0->unk_508, &v0->unk_108, v0->unk_528);
+        ov66_0222FC0C(&v0->unk_508, &v0->unk_108, v0->heapID);
 
-        if (ov66_0222FA04(&v0->unk_108, v0->unk_00) == 0) {
+        if (ov66_0222FA04(&v0->unk_108, v0->saveData) == 0) {
             v0->unk_52C = 1;
         }
 
         v1 = ov66_02232B78(param0);
-        ov66_022317E4(v0->unk_04.unk_00, v1, v0->unk_108.unk_20.unk_38, UnkEnum_ov66_02231E54_01 | UnkEnum_ov66_02231E54_02);
-        v0->unk_108.unk_20.unk_00 = param0;
+        ov66_022317E4(v0->unk_04.unk_00, v1, v0->unk_108.profile.trainerGender, UnkEnum_ov66_02231E54_01 | UnkEnum_ov66_02231E54_02);
+        v0->unk_108.profile.unk_00 = param0;
 
         {
             s64 v5;
 
             ov66_0223295C(param0, &v5);
-            ov66_02231428(&v0->unk_108.unk_20.unk_18, &v5);
+            ov66_02231428(&v0->unk_108.profile.unk_18, &v5);
         }
 
         {
             u32 v6, v7;
             BOOL v8;
 
-            v6 = ov66_0222E880(&v0->unk_108.unk_20);
-            v7 = ov66_0222E8A4(&v0->unk_108.unk_20);
-            v8 = ov66_0222E824(&v0->unk_108.unk_20);
+            v6 = ov66_0222E880(&v0->unk_108.profile);
+            v7 = ov66_0222E8A4(&v0->unk_108.profile);
+            v8 = WiFiPlazaProfile_IsLanguageValid(&v0->unk_108.profile);
 
             if ((v6 != 0) && (v8 == 1)) {
-                v0->unk_108.unk_20.unk_1C = ov66_02234EA8(v6, v7, v0->unk_108.unk_20.unk_18, v0->unk_528);
+                v0->unk_108.profile.unk_1C = ov66_02234EA8(v6, v7, v0->unk_108.profile.unk_18, v0->heapID);
             } else {
-                v0->unk_108.unk_20.unk_1C.unk_00_val2_unk_00 = 12;
-                v0->unk_108.unk_20.unk_1C.unk_00_val2_unk_01 = 0;
-                v0->unk_108.unk_20.unk_1C.unk_00_val2_unk_02 = 0;
+                v0->unk_108.profile.unk_1C.unk_00_val2_unk_00 = 12;
+                v0->unk_108.profile.unk_1C.unk_00_val2_unk_01 = 0;
+                v0->unk_108.profile.unk_1C.unk_00_val2_unk_02 = 0;
             }
         }
 
-        ov66_0222F9EC(&v0->unk_108, v0->unk_00);
+        ov66_0222F9EC(&v0->unk_108, v0->saveData);
         ov66_0222F964(v0);
     } else {
-        v2 = (const UnkStruct_ov66_0222E71C *)param1;
+        v2 = (const WiFiPlazaProfile *)param1;
         v3 = ov66_02232988();
         v1 = ov66_02232B78(param0);
 
-        ov66_022317E4(v0->unk_04.unk_00, v1, ov66_0222E7C8(v2), UnkEnum_ov66_02231E54_00);
+        ov66_022317E4(v0->unk_04.unk_00, v1, WiFiPlazaProfile_GetGender(v2), UnkEnum_ov66_02231E54_00);
 
         if (v3 == param0) {
             ov66_0223180C(v0->unk_04.unk_00, v1);
@@ -2096,7 +2019,7 @@ static void ov66_0222F458(s32 param0, const void *param1, void *param2)
 {
     UnkStruct_ov66_0222DFF8 *v0;
     u32 v1;
-    const UnkStruct_ov66_0222E71C *v2;
+    const WiFiPlazaProfile *v2;
     u32 v3;
 
     v0 = param2;
@@ -2243,25 +2166,25 @@ static void ov66_0222F4C8(PPW_LOBBY_TIME_EVENT param0, void *param1)
 static void ov66_0222F684(const void *param0, u32 param1, void *param2)
 {
     UnkStruct_ov66_0222DFF8 *v0;
-    const UnkStruct_ov66_0222E71C *v1;
+    const WiFiPlazaProfile *v1;
 
     v0 = param2;
     v1 = param0;
 
-    if (ov66_0222FA04(&v0->unk_108, v0->unk_00) == 0) {
+    if (ov66_0222FA04(&v0->unk_108, v0->saveData) == 0) {
         v0->unk_52C = 1;
         return;
     }
 
     ov66_0222FA28(&v0->unk_108, v1, param1);
-    ov66_0222F9EC(&v0->unk_108, v0->unk_00);
+    ov66_0222F9EC(&v0->unk_108, v0->saveData);
 }
 
 static void ov66_0222F6C4(UnkStruct_ov66_0222F6C4 *param0, UnkStruct_ov66_02231560 *param1)
 {
     int v0;
     UnkStruct_ov66_02232B20 v1;
-    const UnkStruct_ov66_0222E71C *v2;
+    const WiFiPlazaProfile *v2;
     UnkStruct_ov66_02231560 *v3;
     u8 v4;
     u8 v5;
@@ -2270,12 +2193,12 @@ static void ov66_0222F6C4(UnkStruct_ov66_0222F6C4 *param0, UnkStruct_ov66_022315
 
     ov66_02232B20(&v1);
 
-    v2 = &param0->unk_20;
+    v2 = &param0->profile;
     ov66_02231560(param1, ov66_0222E880(v2), ov66_0222E8A4(v2), 0);
 
     for (v0 = 0; v0 < 20; v0++) {
         if (v1.unk_04[v0] != DWC_LOBBY_INVALID_USER_ID) {
-            v2 = (const UnkStruct_ov66_0222E71C *)ov66_0223293C(v1.unk_04[v0]);
+            v2 = (const WiFiPlazaProfile *)ov66_0223293C(v1.unk_04[v0]);
             ov66_02231560(param1, ov66_0222E880(v2), ov66_0222E8A4(v2), 0);
         }
     }
@@ -2306,142 +2229,120 @@ static void ov66_0222F768(UnkStruct_ov66_0222DFF8 *param0)
     }
 }
 
-static void ov66_0222F7C8(UnkStruct_ov66_0222F6C4 *param0, SaveData *param1, u32 param2)
+static void ov66_0222F7C8(UnkStruct_ov66_0222F6C4 *param0, SaveData *saveData, enum HeapID heapID)
 {
-    TrainerInfo *v0;
-    Party *v1;
-    UnkStruct_0202C878 *v2;
-    PokedexData *v3;
-    UnkStruct_02055BA8 *v4;
+    // must forward-declare to match
+    TrainerInfo *trainerInfo;
+    Party *party;
+    WiFiHistory *wiFiHistory;
+    Pokedex *pokedex;
+    GameTime *gameTime;
 
-    {
-        v0 = SaveData_GetTrainerInfo(param1);
-        v1 = Party_GetFromSavedata(param1);
-        v3 = SaveData_Pokedex(param1);
-        v2 = sub_0202C878(param1);
-        v4 = sub_02025CD8(param1);
-    }
+    trainerInfo = SaveData_GetTrainerInfo(saveData);
+    party = SaveData_GetParty(saveData);
+    pokedex = SaveData_GetPokedex(saveData);
+    wiFiHistory = SaveData_WiFiHistory(saveData);
+    gameTime = SaveData_GetGameTime(saveData);
 
-    {
-        Strbuf *v5;
+    String *trainerName = TrainerInfo_NameNewString(trainerInfo, heapID);
+    String_ToChars(trainerName, param0->profile.trainerName, NELEMS(param0->profile.trainerName));
+    String_ToChars(trainerName, param0->unk_00, NELEMS(param0->unk_00));
+    String_Free(trainerName);
 
-        v5 = TrainerInfo_NameNewStrbuf(v0, param2);
+    param0->profile.unk_00 = DWC_LOBBY_INVALID_USER_ID;
+    param0->profile.trainerID = TrainerInfo_ID(trainerInfo);
 
-        Strbuf_ToChars(v5, param0->unk_20.unk_08, 7 + 1);
-        Strbuf_ToChars(v5, param0->unk_00, 7 + 1);
-        Strbuf_Free(v5);
-    }
-
-    param0->unk_20.unk_00 = DWC_LOBBY_INVALID_USER_ID;
-    param0->unk_20.unk_04 = TrainerInfo_ID(v0);
-
-    {
-        Pokemon *v6;
-        int v7;
-        int v8;
-
-        v7 = Party_GetCurrentCount(v1);
-
-        for (v8 = 0; v8 < 6; v8++) {
-            if (v8 < v7) {
-                v6 = Party_GetPokemonBySlotIndex(v1, v8);
-                param0->unk_20.unk_20[v8] = Pokemon_GetValue(v6, MON_DATA_SPECIES, NULL);
-                param0->unk_20.unk_2C[v8] = Pokemon_GetValue(v6, MON_DATA_FORM, NULL);
-                param0->unk_20.unk_32[v8] = Pokemon_GetValue(v6, MON_DATA_IS_EGG, NULL);
-            } else {
-                param0->unk_20.unk_20[v8] = SPECIES_BAD_EGG;
-            }
+    int partyCount = Party_GetCurrentCount(party);
+    for (int partyIdx = 0; partyIdx < MAX_PARTY_SIZE; partyIdx++) {
+        if (partyIdx < partyCount) {
+            Pokemon *pokemon = Party_GetPokemonBySlotIndex(party, partyIdx);
+            param0->profile.partySpecies[partyIdx] = Pokemon_GetValue(pokemon, MON_DATA_SPECIES, NULL);
+            param0->profile.partyForms[partyIdx] = Pokemon_GetValue(pokemon, MON_DATA_FORM, NULL);
+            param0->profile.partyIsEgg[partyIdx] = Pokemon_GetValue(pokemon, MON_DATA_IS_EGG, NULL);
+        } else {
+            param0->profile.partySpecies[partyIdx] = SPECIES_BAD_EGG;
         }
     }
 
-    param0->unk_20.unk_38 = TrainerInfo_Gender(v0);
-    param0->unk_20.unk_39 = TrainerInfo_RegionCode(v0);
-    param0->unk_20.unk_3A = TrainerInfo_Appearance(v0);
-    param0->unk_20.unk_3A = ov66_02230C0C(param0->unk_20.unk_3A);
-    param0->unk_20.unk_3C = sub_0202C8C0(v2);
-    param0->unk_20.unk_3E = sub_0202C8C4(v2);
-    param0->unk_20.unk_3F = sub_02027474(v3);
-    param0->unk_20.unk_40 = TrainerInfo_IsMainStoryCleared(v0);
-    param0->unk_20.unk_41 = 0xff;
-    param0->unk_20.unk_43 = 0;
-    param0->unk_20.unk_42 = GAME_VERSION;
-    param0->unk_20.unk_44 = v4->unk_24;
+    param0->profile.trainerGender = TrainerInfo_Gender(trainerInfo);
+    param0->profile.language = TrainerInfo_Language(trainerInfo);
+    param0->profile.trainerAppearanceIdx = TrainerInfo_Appearance(trainerInfo);
+    param0->profile.trainerAppearanceIdx = ov66_02230C0C(param0->profile.trainerAppearanceIdx);
+    param0->profile.country = WiFiHistory_GetCountry(wiFiHistory);
+    param0->profile.region = WiFiHistory_GetRegion(wiFiHistory);
+    param0->profile.isNationalDexObtained = Pokedex_IsNationalDexObtained(pokedex);
+    param0->profile.isMainStoryCleared = TrainerInfo_IsMainStoryCleared(trainerInfo);
+    param0->profile.unk_41 = 0xff;
+    param0->profile.unk_43 = 0;
+    param0->profile.gameVersion = GAME_VERSION;
+    param0->profile.startTimestamp = gameTime->startTimestamp;
 
-    {
-        int v9;
-
-        for (v9 = 0; v9 < 12; v9++) {
-            param0->unk_20.unk_4C[v9] = 24;
-            param0->unk_20.unk_58[v9] = DWC_LOBBY_INVALID_USER_ID;
-        }
-    }
-    {
-        int v10;
-
-        for (v10 = 0; v10 < 2; v10++) {
-            param0->unk_20.unk_88[v10] = 0;
-        }
+    for (int i = 0; i < 12; i++) {
+        param0->profile.unk_4C[i] = 24;
+        param0->profile.unk_58[i] = DWC_LOBBY_INVALID_USER_ID;
     }
 
-    param0->unk_20.unk_8C.unk_00 = 0xffffffff;
-    param0->unk_20.unk_8C.unk_04 = 3;
+    for (int i = 0; i < 2; i++) {
+        param0->profile.unk_88[i] = TYPE_NORMAL;
+    }
 
-    ov66_0222F9EC(param0, param1);
+    param0->profile.unk_8C.questionNumber = 0xffffffff;
+    param0->profile.unk_8C.selectedAnswer = 3;
+
+    ov66_0222F9EC(param0, saveData);
 }
 
 static void ov66_0222F964(UnkStruct_ov66_0222DFF8 *param0)
 {
     int v0;
-    const UnkStruct_ov66_0222E71C *v1;
+    const WiFiPlazaProfile *v1;
 
-    if (ov66_0222FA04(&param0->unk_108, param0->unk_00) == 0) {
+    if (ov66_0222FA04(&param0->unk_108, param0->saveData) == 0) {
         param0->unk_52C = 1;
         return;
     }
 
     for (v0 = 0; v0 < 12; v0++) {
-        param0->unk_108.unk_20.unk_4C[v0] = ov66_02230B78(&param0->unk_4BC, v0);
-        param0->unk_108.unk_20.unk_58[v0] = ov66_02230BA4(&param0->unk_4BC, v0);
+        param0->unk_108.profile.unk_4C[v0] = ov66_02230B78(&param0->unk_4BC, v0);
+        param0->unk_108.profile.unk_58[v0] = ov66_02230BA4(&param0->unk_4BC, v0);
     }
 
-    MI_CpuCopy8(param0->unk_108.unk_10, param0->unk_108.unk_20.unk_08, sizeof(u16) * (7 + 1));
-    ov66_02232908(&param0->unk_108.unk_20);
+    MI_CpuCopy8(param0->unk_108.unk_10, param0->unk_108.profile.trainerName, sizeof(u16) * (7 + 1));
+    ov66_02232908(&param0->unk_108.profile);
 
-    MI_CpuCopy8(param0->unk_108.unk_00, param0->unk_108.unk_20.unk_08, sizeof(u16) * (7 + 1));
-    ov66_0222F9EC(&param0->unk_108, param0->unk_00);
+    MI_CpuCopy8(param0->unk_108.unk_00, param0->unk_108.profile.trainerName, sizeof(u16) * (7 + 1));
+    ov66_0222F9EC(&param0->unk_108, param0->saveData);
 }
 
-static void ov66_0222F9EC(UnkStruct_ov66_0222F6C4 *param0, const SaveData *param1)
+static void ov66_0222F9EC(UnkStruct_ov66_0222F6C4 *param0, const SaveData *saveData)
 {
-    param0->unk_B4 = SaveData_CalculateChecksum(param1, &param0->unk_20, sizeof(UnkStruct_ov66_0222E71C));
+    param0->unk_B4 = SaveData_CalculateChecksum(saveData, &param0->profile, sizeof(WiFiPlazaProfile));
 }
 
-static BOOL ov66_0222FA04(const UnkStruct_ov66_0222F6C4 *param0, const SaveData *param1)
+static BOOL ov66_0222FA04(const UnkStruct_ov66_0222F6C4 *param0, const SaveData *saveData)
 {
-    u32 v0;
-
-    v0 = SaveData_CalculateChecksum(param1, &param0->unk_20, sizeof(UnkStruct_ov66_0222E71C));
+    u32 v0 = SaveData_CalculateChecksum(saveData, &param0->profile, sizeof(WiFiPlazaProfile));
 
     if (v0 != param0->unk_B4) {
-        GF_ASSERT(0);
+        GF_ASSERT(FALSE);
         return 0;
     }
 
     return 1;
 }
 
-static void ov66_0222FA28(UnkStruct_ov66_0222F6C4 *param0, const UnkStruct_ov66_0222E71C *param1, u32 param2)
+static void ov66_0222FA28(UnkStruct_ov66_0222F6C4 *param0, const WiFiPlazaProfile *param1, u32 param2)
 {
-    param0->unk_20 = *param1;
+    param0->profile = *param1;
 
-    if (sizeof(UnkStruct_ov66_0222E71C) >= param2) {
-        MI_CpuCopy8(param1, &param0->unk_20, param2);
+    if (sizeof(WiFiPlazaProfile) >= param2) {
+        MI_CpuCopy8(param1, &param0->profile, param2);
     } else {
-        MI_CpuCopy8(param1, &param0->unk_20, sizeof(UnkStruct_ov66_0222E71C));
+        MI_CpuCopy8(param1, &param0->profile, sizeof(WiFiPlazaProfile));
     }
 
-    MI_CpuCopy8(param1->unk_08, param0->unk_10, sizeof(u16) * (7 + 1));
-    MI_CpuCopy8(param0->unk_00, param0->unk_20.unk_08, sizeof(u16) * (7 + 1));
+    MI_CpuCopy8(param1->trainerName, param0->unk_10, sizeof(u16) * (7 + 1));
+    MI_CpuCopy8(param0->unk_00, param0->profile.trainerName, sizeof(u16) * (7 + 1));
 }
 
 static void ov66_0222FA80(UnkStruct_ov66_0222FA80 *param0)
@@ -2455,7 +2356,7 @@ static void ov66_0222FA88(UnkStruct_ov66_0222FB64 *param0, UnkStruct_ov66_0222FA
         param0->unk_04--;
 
         if (param0->unk_04 == (28 * 30)) {
-            sub_0200564C(0, 127);
+            Sound_FadeOutBGM(0, 127);
             param0->unk_0E = 1;
         }
     } else if (param0->unk_04 == 0) {
@@ -2488,7 +2389,7 @@ static void ov66_0222FA88(UnkStruct_ov66_0222FB64 *param0, UnkStruct_ov66_0222FA
         ov66_022302D0(param2);
 
         if (param0->unk_0C == 0) {
-            Sound_PlayBGM(1213);
+            Sound_PlayBGM(SEQ_PL_WIFIPARADE_sseq);
         }
 
         param0->unk_00_4 = 1;
@@ -2517,9 +2418,9 @@ static void ov66_0222FB64(UnkStruct_ov66_0222FB64 *param0)
 static void ov66_0222FBAC(const UnkStruct_ov66_0222FB64 *param0)
 {
     if (param0->unk_0D == 1) {
-        sub_0200544C(7, (127 / 3));
+        Sound_SetPlayerVolume(7, (127 / 3));
     } else {
-        sub_0200544C(7, 127);
+        Sound_SetPlayerVolume(7, 127);
     }
 }
 
@@ -2544,27 +2445,25 @@ static void ov66_0222FBE0(UnkStruct_ov66_0222FBC8 *param0)
     }
 }
 
-static void ov66_0222FBF0(UnkStruct_ov66_0222FBF0 *param0, u32 param1)
+static void ov66_0222FBF0(UnkStruct_ov66_0222FBF0 *param0, enum HeapID heapID)
 {
-    param0->unk_00 = TrainerInfo_New(param1);
+    param0->trainerInfo = TrainerInfo_New(heapID);
 }
 
 static void ov66_0222FC00(UnkStruct_ov66_0222FBF0 *param0)
 {
-    Heap_FreeToHeap(param0->unk_00);
+    Heap_Free(param0->trainerInfo);
 }
 
-static void ov66_0222FC0C(UnkStruct_ov66_0222FBF0 *param0, const UnkStruct_ov66_0222F6C4 *param1, u32 param2)
+static void ov66_0222FC0C(UnkStruct_ov66_0222FBF0 *param0, const UnkStruct_ov66_0222F6C4 *param1, enum HeapID heapID)
 {
-    UnkStruct_ov66_0222E71C *v0;
+    WiFiPlazaProfile *v0 = Heap_Alloc(heapID, sizeof(WiFiPlazaProfile));
 
-    v0 = Heap_AllocFromHeap(param2, sizeof(UnkStruct_ov66_0222E71C));
+    MI_CpuCopyFast(&param1->profile, v0, sizeof(WiFiPlazaProfile));
+    MI_CpuCopy8(param1->unk_10, v0->trainerName, sizeof(u16) * (7 + 1));
 
-    MI_CpuCopyFast(&param1->unk_20, v0, sizeof(UnkStruct_ov66_0222E71C));
-    MI_CpuCopy8(param1->unk_10, v0->unk_08, sizeof(u16) * (7 + 1));
-
-    ov66_0222E640(v0, param0->unk_00, param2);
-    Heap_FreeToHeap(v0);
+    ov66_0222E640(v0, param0->trainerInfo, heapID);
+    Heap_Free(v0);
 }
 
 static void ov66_0222FC4C(UnkStruct_ov66_0222FBC8 *param0)
@@ -2707,7 +2606,7 @@ static s16 ov66_0222FDBC(const UnkStruct_ov66_0222FC68 *param0)
 
 static void ov66_0222FDC4(UnkStruct_ov66_0222DFF8 *param0, const UnkStruct_ov66_0222E990 *param1)
 {
-    const UnkStruct_ov66_0222E71C *v0;
+    const WiFiPlazaProfile *v0;
     int v1;
     u32 v2;
     UnkStruct_ov66_0223185C v3;
@@ -2721,14 +2620,14 @@ static void ov66_0222FDC4(UnkStruct_ov66_0222DFF8 *param0, const UnkStruct_ov66_
 
         if (v2 != 0xffffffff) {
             v0 = ov66_0222E374(param0, v2);
-            ov66_0222E640(v0, param0->unk_04.unk_E4[v1], param0->unk_528);
+            ov66_0222E640(v0, param0->unk_04.trainerInfos[v1], param0->heapID);
         } else {
             return;
         }
     }
 
-    v3.unk_00 = param0->unk_04.unk_E4[0];
-    v3.unk_04 = param0->unk_04.unk_E4[1];
+    v3.unk_00 = param0->unk_04.trainerInfos[0];
+    v3.unk_04 = param0->unk_04.trainerInfos[1];
     v3.unk_08 = ov66_02232B78(param1->unk_00[0]);
     v3.unk_0A = ov66_02232B78(param1->unk_00[1]);
 
@@ -2737,7 +2636,7 @@ static void ov66_0222FDC4(UnkStruct_ov66_0222DFF8 *param0, const UnkStruct_ov66_
 
 static void ov66_0222FE40(UnkStruct_ov66_0222DFF8 *param0, const UnkStruct_ov66_0222E990 *param1)
 {
-    const UnkStruct_ov66_0222E71C *v0;
+    const WiFiPlazaProfile *v0;
     int v1;
     u32 v2;
     UnkStruct_ov66_022318AC v3;
@@ -2751,14 +2650,14 @@ static void ov66_0222FE40(UnkStruct_ov66_0222DFF8 *param0, const UnkStruct_ov66_
 
         if (v2 != 0xffffffff) {
             v0 = ov66_0222E374(param0, v2);
-            ov66_0222E640(v0, param0->unk_04.unk_E4[v1], param0->unk_528);
+            ov66_0222E640(v0, param0->unk_04.trainerInfos[v1], param0->heapID);
         } else {
             return;
         }
     }
 
-    v3.unk_00 = param0->unk_04.unk_E4[0];
-    v3.unk_04 = param0->unk_04.unk_E4[1];
+    v3.unk_00 = param0->unk_04.trainerInfos[0];
+    v3.unk_04 = param0->unk_04.trainerInfos[1];
     v3.unk_08 = ov66_02232B78(param1->unk_00[0]);
     v3.unk_0A = ov66_02232B78(param1->unk_00[1]);
     v3.unk_0C = param1->unk_12;
@@ -2768,7 +2667,7 @@ static void ov66_0222FE40(UnkStruct_ov66_0222DFF8 *param0, const UnkStruct_ov66_
 
 static void ov66_0222FEC0(UnkStruct_ov66_0222DFF8 *param0, const UnkStruct_ov66_0222E990 *param1)
 {
-    const UnkStruct_ov66_0222E71C *v0;
+    const WiFiPlazaProfile *v0;
     int v1;
     TrainerInfo *v2[4];
     u32 v3;
@@ -2785,8 +2684,8 @@ static void ov66_0222FEC0(UnkStruct_ov66_0222DFF8 *param0, const UnkStruct_ov66_
 
                 if (v3 != 0xffffffff) {
                     v0 = ov66_0222E374(param0, v3);
-                    ov66_0222E640(v0, param0->unk_04.unk_E4[v1], param0->unk_528);
-                    v2[v1] = param0->unk_04.unk_E4[v1];
+                    ov66_0222E640(v0, param0->unk_04.trainerInfos[v1], param0->heapID);
+                    v2[v1] = param0->unk_04.trainerInfos[v1];
                 } else {
                     return;
                 }
@@ -2801,8 +2700,8 @@ static void ov66_0222FEC0(UnkStruct_ov66_0222DFF8 *param0, const UnkStruct_ov66_
 
                 if (v5 != 0xffffffff) {
                     v0 = ov66_0222E374(param0, v5);
-                    ov66_0222E640(v0, param0->unk_04.unk_E4[v1], param0->unk_528);
-                    v2[v1] = param0->unk_04.unk_E4[v1];
+                    ov66_0222E640(v0, param0->unk_04.trainerInfos[v1], param0->heapID);
+                    v2[v1] = param0->unk_04.trainerInfos[v1];
                 } else {
                     return;
                 }
@@ -2829,7 +2728,7 @@ static void ov66_0222FEC0(UnkStruct_ov66_0222DFF8 *param0, const UnkStruct_ov66_
 
 static void ov66_0222FFF4(UnkStruct_ov66_0222DFF8 *param0, const UnkStruct_ov66_0222E990 *param1)
 {
-    const UnkStruct_ov66_0222E71C *v0;
+    const WiFiPlazaProfile *v0;
     int v1;
     u32 v2;
     UnkStruct_ov66_0223199C v3;
@@ -2842,14 +2741,14 @@ static void ov66_0222FFF4(UnkStruct_ov66_0222DFF8 *param0, const UnkStruct_ov66_
 
     if (v2 != 0xffffffff) {
         v0 = ov66_0222E374(param0, v2);
-        ov66_0222E640(v0, param0->unk_04.unk_E4[0], param0->unk_528);
+        ov66_0222E640(v0, param0->unk_04.trainerInfos[0], param0->heapID);
     } else {
         return;
     }
 
     v3.unk_00 = param1->unk_13_0;
     v3.unk_04 = param1->unk_10;
-    v3.unk_08 = param0->unk_04.unk_E4[0];
+    v3.unk_08 = param0->unk_04.trainerInfos[0];
     v3.unk_0C = ov66_02232B78(param1->unk_00[0]);
 
     ov66_0223199C(param0->unk_04.unk_00, &v3);
@@ -2857,7 +2756,7 @@ static void ov66_0222FFF4(UnkStruct_ov66_0222DFF8 *param0, const UnkStruct_ov66_
 
 static void ov66_02230058(UnkStruct_ov66_0222DFF8 *param0, const UnkStruct_ov66_0222E990 *param1)
 {
-    const UnkStruct_ov66_0222E71C *v0;
+    const WiFiPlazaProfile *v0;
     int v1;
     TrainerInfo *v2[4];
     u32 v3;
@@ -2873,8 +2772,8 @@ static void ov66_02230058(UnkStruct_ov66_0222DFF8 *param0, const UnkStruct_ov66_
 
             if (v3 != 0xffffffff) {
                 v0 = ov66_0222E374(param0, v3);
-                ov66_0222E640(v0, param0->unk_04.unk_E4[v1], param0->unk_528);
-                v2[v1] = param0->unk_04.unk_E4[v1];
+                ov66_0222E640(v0, param0->unk_04.trainerInfos[v1], param0->heapID);
+                v2[v1] = param0->unk_04.trainerInfos[v1];
             } else {
                 return;
             }
@@ -2898,7 +2797,7 @@ static void ov66_02230058(UnkStruct_ov66_0222DFF8 *param0, const UnkStruct_ov66_
 
 static void ov66_02230114(UnkStruct_ov66_0222DFF8 *param0, const UnkStruct_ov66_0222E990 *param1)
 {
-    const UnkStruct_ov66_0222E71C *v0;
+    const WiFiPlazaProfile *v0;
     int v1;
     TrainerInfo *v2[4];
     u32 v3;
@@ -2914,8 +2813,8 @@ static void ov66_02230114(UnkStruct_ov66_0222DFF8 *param0, const UnkStruct_ov66_
 
             if (v3 != 0xffffffff) {
                 v0 = ov66_0222E374(param0, v3);
-                ov66_0222E640(v0, param0->unk_04.unk_E4[v1], param0->unk_528);
-                v2[v1] = param0->unk_04.unk_E4[v1];
+                ov66_0222E640(v0, param0->unk_04.trainerInfos[v1], param0->heapID);
+                v2[v1] = param0->unk_04.trainerInfos[v1];
             } else {
                 return;
             }
@@ -2939,7 +2838,7 @@ static void ov66_02230114(UnkStruct_ov66_0222DFF8 *param0, const UnkStruct_ov66_
 
 static void ov66_022301D0(UnkStruct_ov66_0222DFF8 *param0, const UnkStruct_ov66_0222E990 *param1)
 {
-    const UnkStruct_ov66_0222E71C *v0;
+    const WiFiPlazaProfile *v0;
     int v1;
     TrainerInfo *v2[4];
     u32 v3;
@@ -2955,8 +2854,8 @@ static void ov66_022301D0(UnkStruct_ov66_0222DFF8 *param0, const UnkStruct_ov66_
 
             if (v3 != 0xffffffff) {
                 v0 = ov66_0222E374(param0, v3);
-                ov66_0222E640(v0, param0->unk_04.unk_E4[v1], param0->unk_528);
-                v2[v1] = param0->unk_04.unk_E4[v1];
+                ov66_0222E640(v0, param0->unk_04.trainerInfos[v1], param0->heapID);
+                v2[v1] = param0->unk_04.trainerInfos[v1];
             } else {
                 return;
             }
@@ -3112,9 +3011,7 @@ static void ov66_0223043C(UnkStruct_ov66_022302B0 *param0, u32 param1)
 {
     u32 v0;
     u32 v1;
-    u32 v2;
-
-    v2 = ov66_022304DC(param0, param1);
+    u32 v2 = ov66_022304DC(param0, param1);
 
     if (v2 != 0xffffffff) {
         inline_ov66_0222EC04(v2, &v0, &v1);
@@ -3209,11 +3106,11 @@ static void ov66_022305B0(s32 param0, const void *param1, u32 param2, void *para
     v2 = param1;
     v1 = ov66_02232B78(param0);
 
-    if (ov66_0222FA04(&v0->unk_108, v0->unk_00) == 0) {
+    if (ov66_0222FA04(&v0->unk_108, v0->saveData) == 0) {
         v0->unk_52C = 1;
     }
 
-    v3 = ov66_0222E71C(&v0->unk_108.unk_20);
+    v3 = ov66_0222E71C(&v0->unk_108.profile);
     v4 = ov66_0222EDF4(v0);
 
     if ((v3 != 1) || (v1 == 0xffffffff) || (v2->unk_02 != 1) || (v4 == 1) || (ov66_0222EE44(v0, v1) == 0)) {
@@ -3241,9 +3138,7 @@ static void ov66_02230664(s32 param0, const void *param1, u32 param2, void *para
 {
     UnkStruct_ov66_0222DFF8 *v0 = param3;
     u32 v1;
-    const UnkStruct_ov66_022305B0 *v2;
-
-    v2 = param1;
+    const UnkStruct_ov66_022305B0 *v2 = param1;
     v1 = ov66_02232B78(param0);
 
     if (v0->unk_1C0.unk_0A == 0) {
@@ -3338,9 +3233,7 @@ static void ov66_02230750(s32 param0, const void *param1, u32 param2, void *para
 static void ov66_02230764(s32 param0, const void *param1, u32 param2, void *param3)
 {
     UnkStruct_ov66_0222DFF8 *v0 = param3;
-    u32 v1;
-
-    v1 = ov66_02232B78(param0);
+    u32 v1 = ov66_02232B78(param0);
 
     if (v1 != 0xffffffff) {
         v0->unk_1E8.unk_00[v1] = 1;
@@ -3370,9 +3263,7 @@ static void ov66_02230780(s32 param0, const void *param1, u32 param2, void *para
 static void ov66_022307B4(s32 param0, const void *param1, u32 param2, void *param3)
 {
     UnkStruct_ov66_0222DFF8 *v0 = param3;
-    u32 v1;
-
-    v1 = ov66_02232B78(param0);
+    u32 v1 = ov66_02232B78(param0);
 
     if (v1 != 0xffffffff) {
         ov66_0223043C(&v0->unk_20C, v1);
@@ -3429,7 +3320,7 @@ static u32 ov66_02230828(const UnkStruct_ov66_022307D4 *param0)
         v2 += param0->unk_00[v0];
     }
 
-    GF_ASSERT(0);
+    GF_ASSERT(FALSE);
     return 0;
 }
 
@@ -3456,12 +3347,12 @@ static BOOL ov66_02230884(const UnkStruct_ov66_02232068 *param0, u32 param1)
 static void ov66_022308A0(UnkStruct_ov66_022308A0 *param0, u32 param1)
 {
     MI_CpuClear8(param0, sizeof(UnkStruct_ov66_022308A0));
-    param0->unk_B4 = sub_02014FB0(param1);
+    param0->unk_B4 = PasswordWordBank_New(param1);
 }
 
 static void ov66_022308BC(UnkStruct_ov66_022308A0 *param0)
 {
-    sub_02014FF0(param0->unk_B4);
+    PasswordWordBank_Free(param0->unk_B4);
 }
 
 static void ov66_022308C8(UnkStruct_ov66_022308A0 *param0, u32 param1, BOOL param2, u32 param3)
@@ -3501,27 +3392,27 @@ static const UnkStruct_ov66_02230914 *ov66_02230914(const UnkStruct_ov66_022308A
     return NULL;
 }
 
-static void ov66_02230938(UnkStruct_02014FB0 *param0, u32 param1, UnkStruct_ov66_02230914 *param2)
+static void ov66_02230938(PasswordWordBank *param0, u32 param1, UnkStruct_ov66_02230914 *param2)
 {
     UnkStruct_ov66_02230938 v0;
     u32 v1;
     u32 v2;
 
-    v1 = sub_02015004(param0);
+    v1 = PasswordWordBank_GetLength(param0);
 
     v0.val1 = param1;
 
     v2 = (v0.val2[3] + v0.val2[0]) % v1;
-    param2->unk_00[0] = sub_02015008(param0, v2);
+    param2->unk_00[0] = PasswordWordBank_GetWordAtIndex(param0, v2);
 
     v2 = (v0.val2[0] + v0.val2[1]) % v1;
-    param2->unk_00[1] = sub_02015008(param0, v2);
+    param2->unk_00[1] = PasswordWordBank_GetWordAtIndex(param0, v2);
 
     v2 = (v0.val2[1] + v0.val2[2]) % v1;
-    param2->unk_00[2] = sub_02015008(param0, v2);
+    param2->unk_00[2] = PasswordWordBank_GetWordAtIndex(param0, v2);
 
     v2 = (v0.val2[2] + v0.val2[3]) % v1;
-    param2->unk_00[3] = sub_02015008(param0, v2);
+    param2->unk_00[3] = PasswordWordBank_GetWordAtIndex(param0, v2);
 }
 
 static void ov66_022309A4(UnkStruct_ov66_022309A4 *param0, u32 param1, u32 param2)
@@ -3602,7 +3493,7 @@ static int ov66_02230A68(const UnkStruct_ov66_022309A4 *param0)
     return param0->unk_14;
 }
 
-static void ov66_02230A6C(UnkStruct_ov66_02230A6C *param0, const SaveData *param1)
+static void ov66_02230A6C(UnkStruct_ov66_02230A6C *param0, const SaveData *saveData)
 {
     int v0;
 
@@ -3613,7 +3504,7 @@ static void ov66_02230A6C(UnkStruct_ov66_02230A6C *param0, const SaveData *param
 
     param0->unk_41 = 0;
     param0->unk_42 = 0;
-    param0->unk_44 = param1;
+    param0->saveData = saveData;
 
     ov66_02230BCC(param0);
 }
@@ -3711,17 +3602,15 @@ static s32 ov66_02230BA4(UnkStruct_ov66_02230A6C *param0, u32 param1)
 
 static void ov66_02230BCC(UnkStruct_ov66_02230A6C *param0)
 {
-    param0->unk_48 = SaveData_CalculateChecksum(param0->unk_44, param0, (sizeof(UnkStruct_ov66_02230A6C) - 8));
+    param0->unk_48 = SaveData_CalculateChecksum(param0->saveData, param0, (sizeof(UnkStruct_ov66_02230A6C) - 8));
 }
 
 static void ov66_02230BE0(UnkStruct_ov66_02230A6C *param0)
 {
-    u32 v0;
-
-    v0 = SaveData_CalculateChecksum(param0->unk_44, param0, (sizeof(UnkStruct_ov66_02230A6C) - 8));
+    u32 v0 = SaveData_CalculateChecksum(param0->saveData, param0, (sizeof(UnkStruct_ov66_02230A6C) - 8));
 
     if (v0 != param0->unk_48) {
-        GF_ASSERT(0);
+        GF_ASSERT(FALSE);
         param0->unk_4A = 1;
     }
 }
@@ -3733,21 +3622,21 @@ static BOOL ov66_02230C04(const UnkStruct_ov66_02230A6C *param0)
 
 static u32 ov66_02230C0C(u32 param0)
 {
-    int v0;
+    int idx;
 
-    for (v0 = 0; v0 < 16; v0++) {
-        if (Unk_ov66_02258974[v0].unk_00 == param0) {
-            return v0;
+    for (idx = 0; idx < 16; idx++) {
+        if (sWiFiPlazaTrainerAppearances[idx].graphicsID == param0) {
+            return idx;
         }
     }
 
     return 16;
 }
 
-static u32 ov66_02230C2C(u32 param0)
+static u32 GetTrainerAppearanceGraphicsID(u32 trainerAppearance)
 {
-    if (param0 < 16) {
-        return Unk_ov66_02258974[param0].unk_00;
+    if (trainerAppearance < SNELEMS(sWiFiPlazaTrainerAppearances)) {
+        return sWiFiPlazaTrainerAppearances[trainerAppearance].graphicsID;
     }
 
     return 0xffff;

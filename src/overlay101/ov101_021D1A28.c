@@ -3,6 +3,8 @@
 #include <nitro.h>
 #include <string.h>
 
+#include "constants/species.h"
+
 #include "overlay101/const_ov101_021D94D8.h"
 #include "overlay101/const_ov101_021D94F0.h"
 #include "overlay101/const_ov101_021D9508.h"
@@ -25,22 +27,20 @@
 #include "overlay101/struct_ov101_021D4714.h"
 #include "overlay101/struct_ov101_021D4764.h"
 #include "overlay101/struct_ov101_021D4F58.h"
-#include "overlay101/struct_ov101_021D5D90_decl.h"
-#include "overlay101/struct_ov101_021D86B0.h"
 #include "overlay101/struct_ov101_021D95C8.h"
 #include "overlay101/struct_ov101_021D9784.h"
 #include "overlay101/struct_ov101_021D9934.h"
 #include "overlay101/struct_ov101_021D9AE4.h"
 
-#include "core_sys.h"
+#include "bg_window.h"
 #include "enums.h"
 #include "heap.h"
+#include "math_util.h"
+#include "overworld_anim_manager.h"
+#include "sound_playback.h"
 #include "sys_task.h"
 #include "sys_task_manager.h"
-#include "unk_02005474.h"
-#include "unk_02018340.h"
-#include "unk_0201D15C.h"
-#include "unk_020711EC.h"
+#include "system.h"
 
 typedef struct {
     u16 unk_00_0 : 5;
@@ -167,8 +167,8 @@ static void ov101_021D4F78(UnkStruct_ov101_021D13C8 *param0, UnkEnum_ov101_021D4
 static void ov101_021D4FB8(UnkStruct_ov101_021D13C8 *param0, UnkEnum_ov101_021D4F58 param1);
 static void ov101_021D4FF8(UnkStruct_ov101_021D13C8 *param0);
 static void ov101_021D5010(UnkStruct_ov101_021D13C8 *param0);
-static UnkStruct_ov101_021D5D90 *ov101_021D5028(UnkStruct_ov101_021D13C8 *param0, UnkEnum_ov101_021D4F58 param1, u32 param2);
-static int ov101_021D505C(UnkStruct_ov101_021D5D90 *param0);
+static OverworldAnimManager *ov101_021D5028(UnkStruct_ov101_021D13C8 *param0, UnkEnum_ov101_021D4F58 param1, u32 param2);
+static int ov101_021D505C(OverworldAnimManager *param0);
 static void ov101_021D5200(UnkStruct_ov101_021D13C8 *param0);
 static void ov101_021D5244(UnkStruct_ov101_021D13C8 *param0);
 static void ov101_021D53B0(UnkStruct_ov101_021D13C8 *param0);
@@ -289,7 +289,7 @@ static int ov101_021D1B40(UnkStruct_ov101_021D13C8 *param0)
         param0->unk_45C += 3;
         param0->unk_00 = 2;
 
-        Sound_PlayEffect(1517);
+        Sound_PlayEffect(SEQ_SE_DP_ZUKAN02_sseq);
         ov101_021D5244(param0);
         ov101_021D5010(param0);
 
@@ -357,7 +357,7 @@ static int ov101_021D1BD0(UnkStruct_ov101_021D13C8 *param0)
     param0->unk_6C = 0;
     param0->unk_00 = 4;
 
-    Sound_PlayEffect(1518);
+    Sound_PlayEffect(SEQ_SE_DP_OPEN2_sseq);
 
     return 1;
 }
@@ -377,7 +377,7 @@ static int ov101_021D1C9C(UnkStruct_ov101_021D13C8 *param0)
 
 static int ov101_021D1CBC(UnkStruct_ov101_021D13C8 *param0)
 {
-    u32 v0 = gCoreSys.pressedKeys;
+    u32 v0 = gSystem.pressedKeys;
 
     if ((param0->unk_7C[0] == 1) && (v0 & PAD_BUTTON_Y)) {
         param0->unk_7C[0] = 2;
@@ -389,7 +389,7 @@ static int ov101_021D1CBC(UnkStruct_ov101_021D13C8 *param0)
 
         ov101_021D58F4(param0, 0);
         ov101_021D2BF4(param0, 0);
-        Sound_PlayEffect(1574);
+        Sound_PlayEffect(SEQ_SE_DP_UG_022_sseq);
     } else if ((param0->unk_7C[1] == 1) && (v0 & PAD_BUTTON_B)) {
         param0->unk_7C[1] = 2;
 
@@ -401,7 +401,7 @@ static int ov101_021D1CBC(UnkStruct_ov101_021D13C8 *param0)
 
         ov101_021D58F4(param0, 1);
         ov101_021D2BF4(param0, 1);
-        Sound_PlayEffect(1574);
+        Sound_PlayEffect(SEQ_SE_DP_UG_022_sseq);
     } else if ((param0->unk_7C[2] == 1) && (v0 & PAD_BUTTON_A)) {
         param0->unk_7C[2] = 2;
         ov101_021D5858(param0, PAD_BUTTON_A);
@@ -412,7 +412,7 @@ static int ov101_021D1CBC(UnkStruct_ov101_021D13C8 *param0)
 
         ov101_021D58F4(param0, 2);
         ov101_021D2BF4(param0, 2);
-        Sound_PlayEffect(1574);
+        Sound_PlayEffect(SEQ_SE_DP_UG_022_sseq);
     }
 
     if ((param0->unk_7C[0] == 2) && (param0->unk_7C[1] == 2) && (param0->unk_7C[2] == 2)) {
@@ -731,7 +731,7 @@ static int ov101_021D2198(UnkStruct_ov101_021D13C8 *param0)
         param0->unk_45C += 3;
         param0->unk_00 = 27;
 
-        Sound_PlayEffect(1517);
+        Sound_PlayEffect(SEQ_SE_DP_ZUKAN02_sseq);
         ov101_021D5244(param0);
         ov101_021D5010(param0);
 
@@ -793,7 +793,7 @@ static int ov101_021D2228(UnkStruct_ov101_021D13C8 *param0)
     param0->unk_6C = 0;
     param0->unk_00 = 29;
 
-    Sound_PlayEffect(1518);
+    Sound_PlayEffect(SEQ_SE_DP_OPEN2_sseq);
 
     return 1;
 }
@@ -814,7 +814,7 @@ static int ov101_021D22D0(UnkStruct_ov101_021D13C8 *param0)
 
 static int ov101_021D22F0(UnkStruct_ov101_021D13C8 *param0)
 {
-    u32 v0 = gCoreSys.pressedKeys;
+    u32 v0 = gSystem.pressedKeys;
 
     if ((param0->unk_7C[0] == 1) && (v0 & PAD_BUTTON_Y)) {
         param0->unk_7C[0] = 2;
@@ -827,7 +827,7 @@ static int ov101_021D22F0(UnkStruct_ov101_021D13C8 *param0)
 
         ov101_021D58F4(param0, 0);
         ov101_021D2BF4(param0, 0);
-        Sound_PlayEffect(1574);
+        Sound_PlayEffect(SEQ_SE_DP_UG_022_sseq);
     } else if ((param0->unk_7C[1] == 1) && (v0 & PAD_BUTTON_B)) {
         param0->unk_7C[1] = 2;
         ov101_021D5858(param0, PAD_BUTTON_B);
@@ -838,7 +838,7 @@ static int ov101_021D22F0(UnkStruct_ov101_021D13C8 *param0)
 
         ov101_021D58F4(param0, 1);
         ov101_021D2BF4(param0, 1);
-        Sound_PlayEffect(1574);
+        Sound_PlayEffect(SEQ_SE_DP_UG_022_sseq);
     } else if ((param0->unk_7C[2] == 1) && (v0 & PAD_BUTTON_A)) {
         param0->unk_7C[2] = 2;
         ov101_021D5858(param0, PAD_BUTTON_A);
@@ -849,7 +849,7 @@ static int ov101_021D22F0(UnkStruct_ov101_021D13C8 *param0)
 
         ov101_021D58F4(param0, 2);
         ov101_021D2BF4(param0, 2);
-        Sound_PlayEffect(1574);
+        Sound_PlayEffect(SEQ_SE_DP_UG_022_sseq);
     }
 
     if ((param0->unk_7C[0] == 2) && (param0->unk_7C[1] == 2) && (param0->unk_7C[2] == 2)) {
@@ -995,7 +995,7 @@ static int ov101_021D254C(UnkStruct_ov101_021D13C8 *param0)
 static int ov101_021D2598(UnkStruct_ov101_021D13C8 *param0)
 {
     if (ov101_021D460C(param0) == 1) {
-        sub_0207136C(param0->unk_454);
+        OverworldAnimManager_Finish(param0->unk_454);
         ov101_021D4798(param0, 7);
         param0->unk_00 = 41;
         return 1;
@@ -1087,7 +1087,7 @@ static int ov101_021D269C(UnkStruct_ov101_021D13C8 *param0)
 
         param0->unk_00 = 45;
 
-        Sound_PlayEffect(1517);
+        Sound_PlayEffect(SEQ_SE_DP_ZUKAN02_sseq);
         ov101_021D5244(param0);
         ov101_021D4FB8(param0, UnkEnum_ov101_021D4F58_00);
 
@@ -1138,7 +1138,7 @@ static int ov101_021D2738(UnkStruct_ov101_021D13C8 *param0)
     param0->unk_6C = 0;
     param0->unk_00 = 47;
 
-    Sound_PlayEffect(1518);
+    Sound_PlayEffect(SEQ_SE_DP_OPEN2_sseq);
 
     if ((param0->unk_24 == 0) && (param0->unk_28 == 0)) {
         if (ov101_021D44C4(param0) == 1) {
@@ -1181,7 +1181,7 @@ static int ov101_021D2828(UnkStruct_ov101_021D13C8 *param0)
 
 static int ov101_021D2850(UnkStruct_ov101_021D13C8 *param0)
 {
-    u32 v0 = gCoreSys.pressedKeys;
+    u32 v0 = gSystem.pressedKeys;
 
     if ((param0->unk_7C[0] == 1) && (v0 & PAD_BUTTON_Y)) {
         param0->unk_7C[0] = 2;
@@ -1194,7 +1194,7 @@ static int ov101_021D2850(UnkStruct_ov101_021D13C8 *param0)
 
         ov101_021D58F4(param0, 0);
         ov101_021D2BF4(param0, 0);
-        Sound_PlayEffect(1525);
+        Sound_PlayEffect(SE_CONFIRM_sseq_6);
     } else if ((param0->unk_7C[1] == 1) && (v0 & PAD_BUTTON_B)) {
         param0->unk_7C[1] = 2;
         ov101_021D5858(param0, PAD_BUTTON_B);
@@ -1206,7 +1206,7 @@ static int ov101_021D2850(UnkStruct_ov101_021D13C8 *param0)
 
         ov101_021D58F4(param0, 1);
         ov101_021D2BF4(param0, 1);
-        Sound_PlayEffect(1525);
+        Sound_PlayEffect(SE_CONFIRM_sseq_6);
     } else if ((param0->unk_7C[2] == 1) && (v0 & PAD_BUTTON_A)) {
         param0->unk_7C[2] = 2;
         ov101_021D5858(param0, PAD_BUTTON_A);
@@ -1218,7 +1218,7 @@ static int ov101_021D2850(UnkStruct_ov101_021D13C8 *param0)
 
         ov101_021D58F4(param0, 2);
         ov101_021D2BF4(param0, 2);
-        Sound_PlayEffect(1525);
+        Sound_PlayEffect(SE_CONFIRM_sseq_6);
     }
 
     if ((param0->unk_7C[0] == 2) && (param0->unk_7C[1] == 2) && (param0->unk_7C[2] == 2)) {
@@ -1346,7 +1346,7 @@ static int ov101_021D2A78(UnkStruct_ov101_021D13C8 *param0)
         return 0;
     }
 
-    sub_02005844(35, 0);
+    Sound_PlayPokemonCry(SPECIES_CLEFAIRY, 0);
     param0->unk_00 = 42;
     return 0;
 }
@@ -1671,7 +1671,7 @@ static int ov101_021D2D88(UnkStruct_ov101_021D2D88 *param0, UnkStruct_ov101_021D
         return ov101_021D2E58(param0, param1);
     }
 
-    GF_ASSERT(0);
+    GF_ASSERT(FALSE);
     return 0;
 }
 
@@ -2476,9 +2476,7 @@ static int ov101_021D394C(UnkStruct_ov101_021D2D88 *param0, UnkStruct_ov101_021D
 
 static int ov101_021D3AF0(UnkStruct_ov101_021D13C8 *param0, int param1)
 {
-    u32 v0;
-
-    v0 = ov101_021D55D4(param0, 0, 1 - param1);
+    u32 v0 = ov101_021D55D4(param0, 0, 1 - param1);
 
     if (v0 == 3) {
         return 1;
@@ -3113,7 +3111,7 @@ static void ov101_021D4614(SysTask *param0, void *param1)
         v1->unk_00++;
     case 3:
         if (ov101_021D55F8(PAD_BUTTON_X) || (v2->unk_64 == 0)) {
-            Sound_PlayEffect(1581);
+            Sound_PlayEffect(SEQ_SE_DP_DENSI16_sseq);
             v2->unk_60 += v2->unk_64;
 
             if (v2->unk_60 >= 50000) {
@@ -3127,12 +3125,12 @@ static void ov101_021D4614(SysTask *param0, void *param1)
             v2->unk_64 = 0;
 
             if (v1->unk_14 != NULL) {
-                sub_0207136C(v1->unk_14);
+                OverworldAnimManager_Finish(v1->unk_14);
                 v1->unk_14 = NULL;
             }
 
             if (v1->unk_18 != NULL) {
-                sub_0207136C(v1->unk_18);
+                OverworldAnimManager_Finish(v1->unk_18);
                 v1->unk_18 = NULL;
             }
 
@@ -3144,7 +3142,7 @@ static void ov101_021D4614(SysTask *param0, void *param1)
 
         v0 = 0x3;
 
-        if (gCoreSys.heldKeys & (PAD_BUTTON_A | PAD_BUTTON_B | PAD_BUTTON_X | PAD_BUTTON_Y)) {
+        if (gSystem.heldKeys & (PAD_BUTTON_A | PAD_BUTTON_B | PAD_BUTTON_X | PAD_BUTTON_Y)) {
             v0 = 0x1;
         }
 
@@ -3158,7 +3156,7 @@ static void ov101_021D4614(SysTask *param0, void *param1)
                 v2->unk_60 = 50000;
             }
 
-            Sound_PlayEffect(1581);
+            Sound_PlayEffect(SEQ_SE_DP_DENSI16_sseq);
 
             if (v2->unk_08 == 1) {
                 v2->unk_14++;
@@ -3233,10 +3231,10 @@ static void ov101_021D47F0(UnkStruct_ov101_021D13C8 *param0)
 {
     param0->unk_13C.unk_0C = 1;
 
-    sub_0207136C(param0->unk_13C.unk_38);
-    sub_0207136C(param0->unk_13C.unk_3C);
-    sub_0207136C(param0->unk_13C.unk_40);
-    sub_0207136C(param0->unk_13C.unk_44);
+    OverworldAnimManager_Finish(param0->unk_13C.unk_38);
+    OverworldAnimManager_Finish(param0->unk_13C.unk_3C);
+    OverworldAnimManager_Finish(param0->unk_13C.unk_40);
+    OverworldAnimManager_Finish(param0->unk_13C.unk_44);
 }
 
 static void ov101_021D4824(SysTask *param0, void *param1)
@@ -3311,7 +3309,7 @@ static int ov101_021D48AC(UnkStruct_ov101_021D4764 *param0)
 static int ov101_021D48C4(UnkStruct_ov101_021D4764 *param0)
 {
     if (ov101_021D5DC4(param0->unk_28) == 1) {
-        sub_0207136C(param0->unk_28);
+        OverworldAnimManager_Finish(param0->unk_28);
         param0->unk_08 = 1;
         param0->unk_04++;
     }
@@ -3357,7 +3355,7 @@ static int ov101_021D492C(UnkStruct_ov101_021D4764 *param0)
 static int ov101_021D4954(UnkStruct_ov101_021D4764 *param0)
 {
     if (ov101_021D67B0(param0->unk_30) == 1) {
-        sub_0207136C(param0->unk_2C);
+        OverworldAnimManager_Finish(param0->unk_2C);
         param0->unk_08 = 1;
         param0->unk_04++;
     }
@@ -3384,8 +3382,8 @@ static int ov101_021D4978(UnkStruct_ov101_021D4764 *param0)
 static int ov101_021D4998(UnkStruct_ov101_021D4764 *param0)
 {
     if (ov101_021D67B0(param0->unk_30) == 1) {
-        sub_0207136C(param0->unk_30);
-        sub_0207136C(param0->unk_2C);
+        OverworldAnimManager_Finish(param0->unk_30);
+        OverworldAnimManager_Finish(param0->unk_2C);
         ov101_021D5DA4(param0->unk_28, 0);
         ov101_021D5D90(param0->unk_28, UnkEnum_ov101_021D5D90_03);
         param0->unk_04++;
@@ -3407,7 +3405,7 @@ static int ov101_021D49CC(UnkStruct_ov101_021D4764 *param0)
 static int ov101_021D49EC(UnkStruct_ov101_021D4764 *param0)
 {
     if (ov101_021D5DC4(param0->unk_28) == 1) {
-        sub_0207136C(param0->unk_28);
+        OverworldAnimManager_Finish(param0->unk_28);
         param0->unk_08 = 1;
         param0->unk_04++;
     }
@@ -3439,7 +3437,7 @@ static int ov101_021D4A30(UnkStruct_ov101_021D4764 *param0)
     if (param0->unk_10 >= 48) {
         param0->unk_10 = 0;
         param0->unk_04++;
-        sub_02005844(35, 0);
+        Sound_PlayPokemonCry(SPECIES_CLEFAIRY, 0);
         ov101_021D679C(param0->unk_30, UnkEnum_ov101_021D679C_04);
     }
 
@@ -3450,7 +3448,7 @@ static int ov101_021D4A5C(UnkStruct_ov101_021D4764 *param0)
 {
     if (ov101_021D6E1C(param0->unk_34) == 1) {
         ov101_021D679C(param0->unk_30, UnkEnum_ov101_021D679C_03);
-        sub_0207136C(param0->unk_34);
+        OverworldAnimManager_Finish(param0->unk_34);
         param0->unk_04++;
         param0->unk_10 = 0;
         param0->unk_08 = 1;
@@ -3528,8 +3526,8 @@ static int ov101_021D4B14(UnkStruct_ov101_021D4764 *param0)
 static int ov101_021D4B38(UnkStruct_ov101_021D4764 *param0)
 {
     if (ov101_021D67B0(param0->unk_30) == 1) {
-        sub_0207136C(param0->unk_30);
-        sub_0207136C(param0->unk_2C);
+        OverworldAnimManager_Finish(param0->unk_30);
+        OverworldAnimManager_Finish(param0->unk_2C);
         ov101_021D5DA4(param0->unk_28, 0);
         ov101_021D5D90(param0->unk_28, UnkEnum_ov101_021D5D90_03);
         param0->unk_04++;
@@ -3567,7 +3565,7 @@ static int ov101_021D4BA0(UnkStruct_ov101_021D4764 *param0)
 static int ov101_021D4BC4(UnkStruct_ov101_021D4764 *param0)
 {
     if (ov101_021D5DC4(param0->unk_28) == 1) {
-        sub_0207136C(param0->unk_28);
+        OverworldAnimManager_Finish(param0->unk_28);
         param0->unk_08 = 1;
         param0->unk_04++;
     }
@@ -3635,8 +3633,8 @@ static int ov101_021D4C3C(UnkStruct_ov101_021D4764 *param0)
 static int ov101_021D4C60(UnkStruct_ov101_021D4764 *param0)
 {
     if (ov101_021D67B0(param0->unk_30) == 1) {
-        sub_0207136C(param0->unk_2C);
-        sub_0207136C(param0->unk_30);
+        OverworldAnimManager_Finish(param0->unk_2C);
+        OverworldAnimManager_Finish(param0->unk_30);
         ov101_021D5DA4(param0->unk_28, 0);
         ov101_021D5D90(param0->unk_28, UnkEnum_ov101_021D5D90_03);
         param0->unk_10 = 0;
@@ -3685,7 +3683,7 @@ static int ov101_021D4CEC(UnkStruct_ov101_021D4764 *param0)
 static int ov101_021D4D14(UnkStruct_ov101_021D4764 *param0)
 {
     if (ov101_021D67B0(param0->unk_30) == 1) {
-        sub_0207136C(param0->unk_2C);
+        OverworldAnimManager_Finish(param0->unk_2C);
         param0->unk_08 = 1;
         param0->unk_04++;
     }
@@ -3737,39 +3735,39 @@ static void ov101_021D4D38(UnkStruct_ov101_021D13C8 *param0)
     ov101_021D4EA8(v1, 0x4, v2->unk_A4[UnkEnum_ov101_021D4F58_03]);
     ov101_021D4EA8(v1, 0x4, v2->unk_A4[UnkEnum_ov101_021D4F58_04]);
 
-    Heap_FreeToHeap(v0);
+    Heap_Free(v0);
 
     v0 = ov101_021D19E4(param0, 5, 0);
     NNS_G2dGetUnpackedPaletteData(v0, &v1);
     ov101_021D4EA8(v1, 0, v2->unk_24);
-    Heap_FreeToHeap(v0);
+    Heap_Free(v0);
 
     v0 = ov101_021D19E4(param0, 6, 0);
     NNS_G2dGetUnpackedPaletteData(v0, &v1);
     ov101_021D4EA8(v1, 0, v2->unk_44);
-    Heap_FreeToHeap(v0);
+    Heap_Free(v0);
 
     v0 = ov101_021D19E4(param0, 7, 0);
     NNS_G2dGetUnpackedPaletteData(v0, &v1);
     ov101_021D4EA8(v1, 0, v2->unk_64);
-    Heap_FreeToHeap(v0);
+    Heap_Free(v0);
 
     v0 = ov101_021D19E4(param0, 74, 0);
     NNS_G2dGetUnpackedPaletteData(v0, &v1);
     ov101_021D4EA8(v1, 0, v2->unk_144[UnkEnum_ov101_021D4F58_00]);
-    Heap_FreeToHeap(v0);
+    Heap_Free(v0);
 
     v0 = ov101_021D19E4(param0, 75, 0);
     NNS_G2dGetUnpackedPaletteData(v0, &v1);
     ov101_021D4EA8(v1, 0, v2->unk_144[UnkEnum_ov101_021D4F58_01]);
     ov101_021D4EA8(v1, 0, v2->unk_144[UnkEnum_ov101_021D4F58_02]);
-    Heap_FreeToHeap(v0);
+    Heap_Free(v0);
 
     v0 = ov101_021D19E4(param0, 76, 0);
     NNS_G2dGetUnpackedPaletteData(v0, &v1);
     ov101_021D4EA8(v1, 0, v2->unk_144[UnkEnum_ov101_021D4F58_03]);
     ov101_021D4EA8(v1, 0, v2->unk_144[UnkEnum_ov101_021D4F58_04]);
-    Heap_FreeToHeap(v0);
+    Heap_Free(v0);
 }
 
 static void ov101_021D4EA4(UnkStruct_ov101_021D13C8 *param0)
@@ -3813,7 +3811,7 @@ static void ov101_021D4F18(const u16 *param0, const u16 *param1, u16 param2, u16
 
 static void ov101_021D4F40(UnkStruct_ov101_021D13C8 *param0, u32 param1, int param2, u16 *param3)
 {
-    sub_0201972C(param1, param3, 32, 32 * param2);
+    Bg_LoadPalette(param1, param3, PALETTE_SIZE_BYTES, PLTT_OFFSET(param2));
 }
 
 static int Unk_ov101_021D9E60[UnkEnum_ov101_021D4F58_05] = {
@@ -3876,11 +3874,11 @@ static void ov101_021D5010(UnkStruct_ov101_021D13C8 *param0)
     } while (v0 < UnkEnum_ov101_021D4F58_05);
 }
 
-static const UnkStruct_ov101_021D86B0 Unk_ov101_021D86B0;
+static const OverworldAnimManagerFuncs Unk_ov101_021D86B0;
 
-static UnkStruct_ov101_021D5D90 *ov101_021D5028(UnkStruct_ov101_021D13C8 *param0, UnkEnum_ov101_021D4F58 param1, u32 param2)
+static OverworldAnimManager *ov101_021D5028(UnkStruct_ov101_021D13C8 *param0, UnkEnum_ov101_021D4F58 param1, u32 param2)
 {
-    UnkStruct_ov101_021D5D90 *v0;
+    OverworldAnimManager *v0;
     VecFx32 v1 = { 0, 0, 0 };
     UnkStruct_ov101_021D5068 v2;
 
@@ -3888,23 +3886,23 @@ static UnkStruct_ov101_021D5D90 *ov101_021D5028(UnkStruct_ov101_021D13C8 *param0
     v2.unk_04 = param2;
     v2.unk_08 = param0;
 
-    v0 = sub_02071330(param0->unk_44C, &Unk_ov101_021D86B0, &v1, 0, &v2, 143);
+    v0 = OverworldAnimManagerList_InitManager(param0->unk_44C, &Unk_ov101_021D86B0, &v1, 0, &v2, 143);
 
     return v0;
 }
 
-static int ov101_021D505C(UnkStruct_ov101_021D5D90 *param0)
+static int ov101_021D505C(OverworldAnimManager *param0)
 {
-    UnkStruct_ov101_021D505C *v0 = sub_02071598(param0);
+    UnkStruct_ov101_021D505C *v0 = OverworldAnimManager_GetFuncsContext(param0);
     return v0->unk_0C;
 }
 
-static int ov101_021D5068(UnkStruct_ov101_021D5D90 *param0, void *param1)
+static int ov101_021D5068(OverworldAnimManager *param0, void *param1)
 {
     const UnkStruct_ov101_021D5068 *v0;
     UnkStruct_ov101_021D505C *v1 = param1;
 
-    v0 = (const UnkStruct_ov101_021D5068 *)sub_020715BC(param0);
+    v0 = (const UnkStruct_ov101_021D5068 *)OverworldAnimManager_GetUserData(param0);
     v1->unk_1C = v0->unk_08;
     v1->unk_10 = v0->unk_00;
     v1->unk_14 = v0->unk_04;
@@ -3913,13 +3911,13 @@ static int ov101_021D5068(UnkStruct_ov101_021D5D90 *param0, void *param1)
     return 1;
 }
 
-static void ov101_021D508C(UnkStruct_ov101_021D5D90 *param0, void *param1)
+static void ov101_021D508C(OverworldAnimManager *param0, void *param1)
 {
     UnkStruct_ov101_021D505C *v0 = param1;
     ov101_021D4F58(v0->unk_1C, v0->unk_10);
 }
 
-static void ov101_021D5098(UnkStruct_ov101_021D5D90 *param0, void *param1)
+static void ov101_021D5098(OverworldAnimManager *param0, void *param1)
 {
     int v0;
     UnkStruct_ov101_021D505C *v1 = param1;
@@ -4010,28 +4008,28 @@ static void ov101_021D5098(UnkStruct_ov101_021D5D90 *param0, void *param1)
     }
 }
 
-static const UnkStruct_ov101_021D86B0 Unk_ov101_021D86B0 = {
+static const OverworldAnimManagerFuncs Unk_ov101_021D86B0 = {
     sizeof(UnkStruct_ov101_021D505C),
     ov101_021D5068,
     ov101_021D508C,
     ov101_021D5098,
-    sub_020715FC
+    OverworldAnimManager_DummyRenderFunc
 };
 
-static const UnkStruct_ov101_021D86B0 Unk_ov101_021D8700;
+static const OverworldAnimManagerFuncs Unk_ov101_021D8700;
 
 static void ov101_021D5200(UnkStruct_ov101_021D13C8 *param0)
 {
     VecFx32 v0 = { 0, 0, 0 };
 
     GF_ASSERT(param0->unk_120.unk_14 == NULL);
-    param0->unk_120.unk_14 = sub_02071330(param0->unk_44C, &Unk_ov101_021D8700, &v0, 0, param0, 143);
+    param0->unk_120.unk_14 = OverworldAnimManagerList_InitManager(param0->unk_44C, &Unk_ov101_021D8700, &v0, 0, param0, 143);
 }
 
 static void ov101_021D5244(UnkStruct_ov101_021D13C8 *param0)
 {
     if (param0->unk_120.unk_14 != NULL) {
-        sub_0207136C(param0->unk_120.unk_14);
+        OverworldAnimManager_Finish(param0->unk_120.unk_14);
         param0->unk_120.unk_14 = NULL;
     }
 
@@ -4194,38 +4192,38 @@ static void ov101_021D5268(UnkStruct_ov101_021D5388 *param0)
     }
 }
 
-static int ov101_021D5388(UnkStruct_ov101_021D5D90 *param0, void *param1)
+static int ov101_021D5388(OverworldAnimManager *param0, void *param1)
 {
     UnkStruct_ov101_021D5388 *v0 = param1;
 
-    v0->unk_28 = (UnkStruct_ov101_021D13C8 *)sub_020715BC(param0);
+    v0->unk_28 = (UnkStruct_ov101_021D13C8 *)OverworldAnimManager_GetUserData(param0);
     v0->unk_2C = &v0->unk_28->unk_184;
 
     return 1;
 }
 
-static void ov101_021D53A0(UnkStruct_ov101_021D5D90 *param0, void *param1)
+static void ov101_021D53A0(OverworldAnimManager *param0, void *param1)
 {
     return;
 }
 
-static void ov101_021D53A4(UnkStruct_ov101_021D5D90 *param0, void *param1)
+static void ov101_021D53A4(OverworldAnimManager *param0, void *param1)
 {
     UnkStruct_ov101_021D5388 *v0 = param1;
     ov101_021D5268(v0);
 }
 
-static const UnkStruct_ov101_021D86B0 Unk_ov101_021D8700 = {
+static const OverworldAnimManagerFuncs Unk_ov101_021D8700 = {
     sizeof(UnkStruct_ov101_021D5388),
     ov101_021D5388,
     ov101_021D53A0,
     ov101_021D53A4,
-    sub_020715FC
+    OverworldAnimManager_DummyRenderFunc
 };
 
 static void ov101_021D53B0(UnkStruct_ov101_021D13C8 *param0)
 {
-    UnkStruct_ov101_021D53B0 *v0 = Heap_AllocFromHeapAtEnd(79, sizeof(UnkStruct_ov101_021D53B0));
+    UnkStruct_ov101_021D53B0 *v0 = Heap_AllocAtEnd(HEAP_ID_79, sizeof(UnkStruct_ov101_021D53B0));
 
     v0->unk_00 = 0;
     v0->unk_04 = 0;
@@ -4236,7 +4234,7 @@ static void ov101_021D53B0(UnkStruct_ov101_021D13C8 *param0)
 
 static void ov101_021D53D4(UnkStruct_ov101_021D13C8 *param0)
 {
-    UnkStruct_ov101_021D53B0 *v0 = Heap_AllocFromHeapAtEnd(79, sizeof(UnkStruct_ov101_021D53B0));
+    UnkStruct_ov101_021D53B0 *v0 = Heap_AllocAtEnd(HEAP_ID_79, sizeof(UnkStruct_ov101_021D53B0));
 
     v0->unk_00 = 0;
     v0->unk_04 = 0;
@@ -4247,7 +4245,7 @@ static void ov101_021D53D4(UnkStruct_ov101_021D13C8 *param0)
 
 static void ov101_021D53F8(UnkStruct_ov101_021D13C8 *param0, int param1)
 {
-    UnkStruct_ov101_021D53B0 *v0 = Heap_AllocFromHeapAtEnd(79, sizeof(UnkStruct_ov101_021D53B0));
+    UnkStruct_ov101_021D53B0 *v0 = Heap_AllocAtEnd(HEAP_ID_79, sizeof(UnkStruct_ov101_021D53B0));
 
     v0->unk_00 = 0;
     v0->unk_08 = param1;
@@ -4255,7 +4253,7 @@ static void ov101_021D53F8(UnkStruct_ov101_021D13C8 *param0, int param1)
     v0->unk_0C = param0;
 
     SysTask_Start(ov101_021D54EC, v0, 143);
-    Sound_PlayEffect(1520);
+    Sound_PlayEffect(SEQ_SE_DP_025_sseq);
 }
 
 static void ov101_021D542C(SysTask *param0, void *param1)
@@ -4278,7 +4276,7 @@ static void ov101_021D542C(SysTask *param0, void *param1)
     ov101_021D4F40(v0->unk_0C, 7, 0x1, v4);
 
     if ((v5 == 16) || (v0->unk_0C->unk_00 == 63)) {
-        Heap_FreeToHeap(v0);
+        Heap_Free(v0);
         SysTask_Done(param0);
     }
 }
@@ -4303,7 +4301,7 @@ static void ov101_021D548C(SysTask *param0, void *param1)
     ov101_021D4F40(v0->unk_0C, 7, 0x1, v4);
 
     if ((v5 == 16) || (v0->unk_0C->unk_00 == 63)) {
-        Heap_FreeToHeap(v0);
+        Heap_Free(v0);
         SysTask_Done(param0);
     }
 }
@@ -4317,7 +4315,7 @@ static void ov101_021D54EC(SysTask *param0, void *param1)
     int v5;
 
     if (v0->unk_0C->unk_00 == 63) {
-        Heap_FreeToHeap(v0);
+        Heap_Free(v0);
         SysTask_Done(param0);
         return;
     }
@@ -4353,7 +4351,7 @@ static void ov101_021D54EC(SysTask *param0, void *param1)
         ov101_021D4F40(v0->unk_0C, 7, 0x1, v4);
 
         if (v5 == 0) {
-            Heap_FreeToHeap(v0);
+            Heap_Free(v0);
             SysTask_Done(param0);
         }
     }
@@ -4383,7 +4381,7 @@ UnkEnum_ov101_021D9688 ov101_021D55D4(UnkStruct_ov101_021D13C8 *param0, UnkEnum_
 
 static int ov101_021D55F8(u32 param0)
 {
-    u32 v0 = gCoreSys.pressedKeys & param0;
+    u32 v0 = gSystem.pressedKeys & param0;
 
     if (v0 == param0) {
         return 2;
@@ -4427,11 +4425,9 @@ static UnkEnum_ov101_021D9688 ov101_021D5618(u32 param0)
 
 static UnkEnum_ov101_021D9688 ov101_021D5660(UnkStruct_ov101_021D13C8 *param0)
 {
-    u32 v0, v1, v2;
-
-    v0 = ov101_021D55D4(param0, 0, 1);
-    v1 = ov101_021D55D4(param0, 1, 1);
-    v2 = ov101_021D55D4(param0, 2, 1);
+    u32 v0 = ov101_021D55D4(param0, 0, 1);
+    u32 v1 = ov101_021D55D4(param0, 1, 1);
+    u32 v2 = ov101_021D55D4(param0, 2, 1);
 
     if ((v0 == 3) || ((v0 == v1) && (v0 == v2))) {
         return v0;
@@ -4442,11 +4438,9 @@ static UnkEnum_ov101_021D9688 ov101_021D5660(UnkStruct_ov101_021D13C8 *param0)
 
 static UnkEnum_ov101_021D9688 ov101_021D5698(UnkStruct_ov101_021D13C8 *param0)
 {
-    u32 v0, v1, v2;
-
-    v0 = ov101_021D55D4(param0, 0, 2);
-    v1 = ov101_021D55D4(param0, 1, 2);
-    v2 = ov101_021D55D4(param0, 2, 2);
+    u32 v0 = ov101_021D55D4(param0, 0, 2);
+    u32 v1 = ov101_021D55D4(param0, 1, 2);
+    u32 v2 = ov101_021D55D4(param0, 2, 2);
 
     if ((v0 == 3) || ((v0 == v1) && (v0 == v2))) {
         return v0;
@@ -4457,11 +4451,9 @@ static UnkEnum_ov101_021D9688 ov101_021D5698(UnkStruct_ov101_021D13C8 *param0)
 
 static UnkEnum_ov101_021D9688 ov101_021D56D0(UnkStruct_ov101_021D13C8 *param0)
 {
-    u32 v0, v1, v2;
-
-    v0 = ov101_021D55D4(param0, 0, 3);
-    v1 = ov101_021D55D4(param0, 1, 3);
-    v2 = ov101_021D55D4(param0, 2, 3);
+    u32 v0 = ov101_021D55D4(param0, 0, 3);
+    u32 v1 = ov101_021D55D4(param0, 1, 3);
+    u32 v2 = ov101_021D55D4(param0, 2, 3);
 
     if ((v0 == 3) || ((v0 == v1) && (v0 == v2))) {
         return v0;
@@ -4472,11 +4464,9 @@ static UnkEnum_ov101_021D9688 ov101_021D56D0(UnkStruct_ov101_021D13C8 *param0)
 
 static UnkEnum_ov101_021D9688 ov101_021D5708(UnkStruct_ov101_021D13C8 *param0)
 {
-    u32 v0, v1, v2;
-
-    v0 = ov101_021D55D4(param0, 0, 1);
-    v1 = ov101_021D55D4(param0, 1, 2);
-    v2 = ov101_021D55D4(param0, 2, 3);
+    u32 v0 = ov101_021D55D4(param0, 0, 1);
+    u32 v1 = ov101_021D55D4(param0, 1, 2);
+    u32 v2 = ov101_021D55D4(param0, 2, 3);
 
     if ((v0 == 3) || ((v0 == v1) && (v0 == v2))) {
         return v0;
@@ -4487,11 +4477,9 @@ static UnkEnum_ov101_021D9688 ov101_021D5708(UnkStruct_ov101_021D13C8 *param0)
 
 static UnkEnum_ov101_021D9688 ov101_021D5740(UnkStruct_ov101_021D13C8 *param0)
 {
-    u32 v0, v1, v2;
-
-    v0 = ov101_021D55D4(param0, 0, 3);
-    v1 = ov101_021D55D4(param0, 1, 2);
-    v2 = ov101_021D55D4(param0, 2, 1);
+    u32 v0 = ov101_021D55D4(param0, 0, 3);
+    u32 v1 = ov101_021D55D4(param0, 1, 2);
+    u32 v2 = ov101_021D55D4(param0, 2, 1);
 
     if ((v0 == 3) || ((v0 == v1) && (v0 == v2))) {
         return v0;
@@ -4644,16 +4632,16 @@ static void ov101_021D58F4(UnkStruct_ov101_021D13C8 *param0, UnkEnum_ov101_021D2
 {
     const int *v0 = Unk_ov101_021D8740[param1];
 
-    sub_02019E2C(param0->unk_43C, 1, v0[0], v0[1], 3, 2, 6);
-    sub_0201C3C0(param0->unk_43C, 1);
+    Bg_ChangeTilemapRectPalette(param0->unk_43C, 1, v0[0], v0[1], 3, 2, 6);
+    Bg_ScheduleTilemapTransfer(param0->unk_43C, 1);
 }
 
 static void ov101_021D5938(UnkStruct_ov101_021D13C8 *param0, UnkEnum_ov101_021D2BDC param1)
 {
     const int *v0 = Unk_ov101_021D8740[param1];
 
-    sub_02019E2C(param0->unk_43C, 1, v0[0], v0[1], 3, 2, 5);
-    sub_0201C3C0(param0->unk_43C, 1);
+    Bg_ChangeTilemapRectPalette(param0->unk_43C, 1, v0[0], v0[1], 3, 2, 5);
+    Bg_ScheduleTilemapTransfer(param0->unk_43C, 1);
 }
 
 static u32 ov101_021D597C(UnkStruct_ov101_021D13C8 *param0)

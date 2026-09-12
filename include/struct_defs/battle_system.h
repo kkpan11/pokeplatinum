@@ -1,150 +1,146 @@
-#ifndef POKEPLATINUM_STRUCT_BATTLE_SYSTEM_T_H
-#define POKEPLATINUM_STRUCT_BATTLE_SYSTEM_T_H
+#ifndef POKEPLATINUM_STRUCT_BATTLE_SYSTEM_H
+#define POKEPLATINUM_STRUCT_BATTLE_SYSTEM_H
 
 #include <nnsys.h>
 
 #include "constants/battle.h"
-#include "constants/time.h"
+#include "constants/rtc.h"
 
-#include "struct_decls/pokedexdata_decl.h"
-#include "struct_decls/pokemon_animation_sys_decl.h"
-#include "struct_decls/struct_02002F38_decl.h"
-#include "struct_decls/struct_02007768_decl.h"
-#include "struct_decls/struct_0200C440_decl.h"
-#include "struct_decls/struct_0200C6E4_decl.h"
-#include "struct_decls/struct_0200C704_decl.h"
-#include "struct_decls/struct_02018340_decl.h"
-#include "struct_decls/struct_02027F8C_decl.h"
-#include "struct_decls/struct_0206D140_decl.h"
-#include "struct_decls/struct_020797DC_decl.h"
-#include "struct_decls/struct_party_decl.h"
-#include "struct_defs/chatot_cry.h"
-#include "struct_defs/struct_0205AA50.h"
-#include "struct_defs/struct_0207C690.h"
-#include "struct_defs/struct_0209C370.h"
-#include "struct_defs/trainer_data.h"
+#include "struct_defs/battler_data.h"
+#include "struct_defs/trainer.h"
 
 #include "battle/battle_context.h"
-#include "battle/struct_ov16_0223E0C8.h"
-#include "battle/struct_ov16_0225BFFC_decl.h"
-#include "battle/struct_ov16_02268520.h"
-#include "battle/struct_ov16_02268A14_decl.h"
-#include "battle/struct_ov16_0226D160_decl.h"
-#include "overlay006/struct_ov6_02240D5C_sub1.h"
-#include "overlay010/struct_ov10_0221F800.h"
-#include "overlay012/struct_ov12_0221FCDC_decl.h"
+#include "battle/battle_main.h"
+#include "battle/battle_subscreen.h"
+#include "battle/party_gauge.h"
+#include "battle/pokemon_sprite_data.h"
+#include "battle/terrain.h"
+#include "battle_anim/battle_anim_system.h"
 
 #include "bag.h"
+#include "bg_window.h"
+#include "field_battle_data_transfer.h"
+#include "font_special_chars.h"
+#include "g3d_pipeline.h"
 #include "game_options.h"
 #include "message.h"
-#include "poketch_data.h"
-#include "strbuf.h"
+#include "pal_pad.h"
+#include "palette.h"
+#include "party.h"
+#include "pc_boxes.h"
+#include "pokedex.h"
+#include "pokemon_anim.h"
+#include "poketch.h"
+#include "render_window.h"
+#include "sprite_system.h"
+#include "string_gf.h"
 #include "string_template.h"
 #include "sys_task_manager.h"
 #include "trainer_info.h"
+#include "unk_0201567C.h"
 
 struct BattleSystem {
-    GenericPointerData *unk_00;
-    BGL *unk_04;
+    G3DPipelineBuffers *pipelineBuffers;
+    BgConfig *bgConfig;
     Window *windows;
-    MessageLoader *unk_0C;
-    MessageLoader *unk_10;
+    MessageLoader *msgLoader;
+    MessageLoader *attackMsgLoader;
     StringTemplate *strFormatter;
-    Strbuf *msgBuffer;
-    SysTask *unk_1C;
-    SysTask *unk_20;
-    SysTask *unk_24;
-    PaletteData *unk_28;
+    String *msgBuffer;
+    SysTask *taskDrawSprites;
+    SysTask *taskUpdateRedHPSound;
+    SysTask *taskFlyInMessageBox;
+    PaletteData *paletteData;
     u32 battleType;
     BattleContext *battleCtx;
     BattlerData *battlers[MAX_BATTLERS];
     int maxBattlers;
-    TrainerInfo *trainerInfo[4];
-    Bag *unk_58;
-    UnkStruct_0207D99C *unk_5C;
-    PokedexData *pokedex;
+    TrainerInfo *trainerInfo[MAX_BATTLERS];
+    Bag *bag;
+    BagCursor *bagCursor;
+    Pokedex *pokedex;
     PCBoxes *pcBoxes;
-    Party *parties[4];
-    ChatotCry *unk_78[4];
-    UnkStruct_02007768 *unk_88;
-    UnkStruct_ov12_0221FCDC *unk_8C;
-    SpriteRenderer *unk_90;
-    SpriteGfxHandler *unk_94;
-    PoketchData *poketchData;
-    UnkStruct_0206D140 *unk_9C;
-    u16 trainerIDs[4];
-    u8 unk_A8[4];
-    TrainerData trainers[4];
-    UnkStruct_ov16_02268520 unk_17C[2];
-    UnkStruct_ov16_02268A14 *unk_198;
-    PartyGauge *unk_19C[2];
-    UnkStruct_0200C440 *unk_1A4;
-    UnkStruct_0200C440 *unk_1A8;
-    void *unk_1AC;
-    Options *unk_1B0;
-    UnkStruct_02027F8C *unk_1B4;
-    void *unk_1B8;
-    UnkStruct_0209C370 *unk_1BC;
-    UnkStruct_ov10_0221F800 *unk_1C0;
-    PokemonAnimationSys *unk_1C4;
+    Party *parties[MAX_BATTLERS];
+    ChatotCry *chatotCries[MAX_BATTLERS];
+    PokemonSpriteManager *monSpriteMan;
+    BattleAnimSystem *battleAnimSys;
+    SpriteSystem *spriteSys;
+    SpriteManager *spriteMan;
+    Poketch *poketch;
+    CaptureAttempt *captureAttempt;
+    u16 trainerIDs[MAX_BATTLERS];
+    u8 unwritten[4];
+    Trainer trainers[MAX_BATTLERS];
+    Terrain terrains[2];
+    BattleSubscreen *btlSubscreen;
+    PartyGauge *partyGauges[2];
+    FontSpecialCharsContext *specialCharsHP;
+    FontSpecialCharsContext *specialCharsLevel;
+    PaletteAnimator *paletteAnimator;
+    Options *options;
+    PalPad *palPad;
+    WaitDial *waitDial;
+    u8 *subscreenCursorOn;
+    TrainerIntroData *trainerIntroData;
+    PokemonAnimManager *monAnimMan;
     NNSG2dCellTransferState *cellTransferState;
-    UnkStruct_ov16_0223E0C8 unk_1CC[4];
-    BattleParams_sub1 unk_20C;
+    PokemonSpriteData pokemonSpriteDataArray[4];
+    BattleRecords unusedBattleRecords;
     GameRecords *records;
-    u8 *unk_21C;
-    u16 *unk_220;
-    u8 unk_224[4096];
-    u8 unk_1224[4096];
-    u16 unk_2224[112];
-    u16 unk_2304[112];
-    u16 unk_23E4;
-    u16 unk_23E6;
-    u16 unk_23E8;
-    u16 unk_23EA;
-    u16 unk_23EC;
-    u16 unk_23EE;
-    u8 *unk_23F0;
-    u8 *unk_23F4;
-    u8 unk_23F8;
-    u8 unk_23F9;
-    u8 unk_23FA;
-    u8 unk_23FB_0 : 1;
-    u8 unk_23FB_1 : 1;
-    u8 unk_23FB_2 : 1;
-    u8 unk_23FB_3 : 2;
-    u8 unk_23FB_5 : 3;
-    enum Terrain terrain;
-    int unk_2400;
-    int unk_2404;
+    u8 *bgTileSnapshot;
+    u16 *bgPaletteSnapshot;
+    u8 serverMessage[4096];
+    u8 clientMessage[4096];
+    u16 savedBgPalettes[112];
+    u16 savedObjPalettes[112];
+    u16 serverReadIndex;
+    u16 serverWriteIndex;
+    u16 serverEndIndex;
+    u16 clientReadIndex;
+    u16 clientWriteIndex;
+    u16 clientEndIndex;
+    u8 *linkServerSenderState;
+    u8 *linkClientReceiverState;
+    u8 battleInitialized;
+    u8 renderMode;
+    u8 commandIsEndWait;
+    u8 pendingBlendReset : 1;
+    u8 pendingBattleVRAMSetup : 1;
+    u8 pendingSubMenuVRAMSetup : 1;
+    u8 redHPSoundFlag : 2;
+    u8 redHPSoundEffectDelay : 3;
+    enum BattleTerrain terrain;
+    enum BattleBackground background;
+    int mapHeader;
     u32 battleStatusMask;
-    enum Time time;
+    enum TimeOfDay time;
     int safariBalls;
-    u8 unk_2414[4];
-    u32 unk_2418;
+    u8 battleParticipantMask[MAX_BATTLERS];
+    u32 rulesetMask;
     u8 resultMask;
-    u8 unk_241D;
-    u16 unk_241E;
-    int unk_2420;
-    int unk_2424;
+    u8 catchingTutorialLowHP;
+    u16 ballsThrown;
+    enum EvolutionMethod mapEvolutionMethod;
+    int visitedContestHall;
     int fieldWeather;
-    int unk_242C;
-    u32 unk_2430;
-    int unk_2434;
-    int unk_2438;
+    int metBebe;
+    u32 seedLCRNG;
+    int yOffset;
+    int caughtBattlerIdx;
     int commandSelectionFlags;
-    u8 unk_2440;
+    u8 unread_2440;
     u8 overlayFlags;
-    u16 unk_2442;
-    u32 unk_2444;
-    u32 unk_2448;
-    u16 unk_244C[4];
-    u16 unk_2454[4];
-    u16 unk_245C[4];
-    int unk_2464[4];
-    u32 unk_2474_0 : 1;
-    u32 unk_2474_1 : 31;
+    u16 networkID;
+    u32 seedRandNext;
+    u32 seedDTO;
+    u16 recordingCollectedPos[MAX_BATTLERS];
+    u16 recordingWritePos[MAX_BATTLERS];
+    u16 recordingAckPos[MAX_BATTLERS];
+    int linkPlayerPositions[MAX_BATTLERS];
+    u32 recordingStopped : 1;
+    u32 padding_2474_1 : 31;
     SysTask *playbackStopButton;
-    u8 unk_247C[4];
+    u8 recordedChatter[MAX_BATTLERS];
 };
 
-#endif // POKEPLATINUM_STRUCT_BATTLE_SYSTEM_T_H
+#endif // POKEPLATINUM_STRUCT_BATTLE_SYSTEM_H

@@ -1,133 +1,81 @@
-    .include "macros/scrcmd.inc"
+#include "macros/scrcmd.inc"
+#include "res/text/bank/route_212_north.h"
 
-    .data
 
-    ScriptEntry _00B5
-    ScriptEntry _00C8
-    ScriptEntry _00DF
-    ScriptEntry _00F6
-    ScriptEntry _010B
-    ScriptEntry _011E
-    ScriptEntry _0131
-    ScriptEntry _0144
-    ScriptEntry _0157
-    ScriptEntry _002A
-    .short 0xFD13
+    ScriptEntry Route212North_Youngster
+    ScriptEntry Route212North_ArrowSignpostHearthomeCity
+    ScriptEntry Route212North_SignboardPokemonMansion
+    ScriptEntry Route212North_TrainerTipsSignpost
+    ScriptEntry Route212North_Collector
+    ScriptEntry Route212North_PolicemanBobby
+    ScriptEntry Route212North_PolicemanAlex
+    ScriptEntry Route212North_PolicemanDylan
+    ScriptEntry Route212North_PolicemanCaleb
+    ScriptEntry Route212North_OnTransition
+    ScriptEntryEnd
 
-_002A:
-    GetTimeOfDay 0x4000
-    GoToIfEq 0x4000, 0, _0071
-    GoToIfEq 0x4000, 1, _0071
-    GoToIfEq 0x4000, 2, _0071
-    GoToIfEq 0x4000, 3, _0093
-    GoToIfEq 0x4000, 4, _0093
+Route212North_OnTransition:
+    GetTimeOfDay VAR_MAP_LOCAL_0x00
+    GoToIfInRange VAR_MAP_LOCAL_0x00, TIMEOFDAY_MORNING, TIMEOFDAY_TWILIGHT, Route212North_SetPolicemenNoBattle
+    GoToIfInRange VAR_MAP_LOCAL_0x00, TIMEOFDAY_NIGHT, TIMEOFDAY_LATE_NIGHT, Route212North_SetPolicemenBattle
     End
 
-_0071:
-    ClearFlag 0x260
-    ClearFlag 0x262
-    ClearFlag 0x264
-    ClearFlag 0x266
-    SetFlag 0x261
-    SetFlag 0x263
-    SetFlag 0x265
-    SetFlag 0x267
+Route212North_SetPolicemenNoBattle:
+    ClearFlag FLAG_HIDE_ROUTE_212_NORTH_POLICEMAN_BOBBY_NO_BATTLE
+    ClearFlag FLAG_HIDE_ROUTE_212_NORTH_POLICEMAN_ALEX_NO_BATTLE
+    ClearFlag FLAG_HIDE_ROUTE_212_NORTH_POLICEMAN_DYLAN_NO_BATTLE
+    ClearFlag FLAG_HIDE_ROUTE_212_NORTH_POLICEMAN_CALEB_NO_BATTLE
+    SetFlag FLAG_HIDE_ROUTE_212_NORTH_POLICEMAN_BOBBY
+    SetFlag FLAG_HIDE_ROUTE_212_NORTH_POLICEMAN_ALEX
+    SetFlag FLAG_HIDE_ROUTE_212_NORTH_POLICEMAN_DYLAN
+    SetFlag FLAG_HIDE_ROUTE_212_NORTH_POLICEMAN_CALEB
     End
 
-_0093:
-    ClearFlag 0x261
-    ClearFlag 0x263
-    ClearFlag 0x265
-    ClearFlag 0x267
-    SetFlag 0x260
-    SetFlag 0x262
-    SetFlag 0x264
-    SetFlag 0x266
+Route212North_SetPolicemenBattle:
+    ClearFlag FLAG_HIDE_ROUTE_212_NORTH_POLICEMAN_BOBBY
+    ClearFlag FLAG_HIDE_ROUTE_212_NORTH_POLICEMAN_ALEX
+    ClearFlag FLAG_HIDE_ROUTE_212_NORTH_POLICEMAN_DYLAN
+    ClearFlag FLAG_HIDE_ROUTE_212_NORTH_POLICEMAN_CALEB
+    SetFlag FLAG_HIDE_ROUTE_212_NORTH_POLICEMAN_BOBBY_NO_BATTLE
+    SetFlag FLAG_HIDE_ROUTE_212_NORTH_POLICEMAN_ALEX_NO_BATTLE
+    SetFlag FLAG_HIDE_ROUTE_212_NORTH_POLICEMAN_DYLAN_NO_BATTLE
+    SetFlag FLAG_HIDE_ROUTE_212_NORTH_POLICEMAN_CALEB_NO_BATTLE
     End
 
-_00B5:
-    PlayFanfare SEQ_SE_CONFIRM
-    LockAll
-    FacePlayer
-    Message 0
-    WaitABXPadPress
-    CloseMessage
-    ReleaseAll
+Route212North_Youngster:
+    NPCMessage Route212North_Text_MrBacklotLikesVisitors
     End
 
-_00C8:
-    ScrCmd_036 6, 1, 0, 0x800C
-    ScrCmd_038 3
-    ScrCmd_039
-    ScrCmd_03B 0x800C
-    CallCommonScript 0x7D0
+Route212North_ArrowSignpostHearthomeCity:
+    ShowArrowSign Route212North_Text_SignHearthomeCity
     End
 
-_00DF:
-    ScrCmd_036 7, 2, 0, 0x800C
-    ScrCmd_038 3
-    ScrCmd_039
-    ScrCmd_03B 0x800C
-    CallCommonScript 0x7D0
+Route212North_SignboardPokemonMansion:
+    ShowLandmarkSign Route212North_Text_SignPokemonMansion
     End
 
-_00F6:
-    ScrCmd_037 3, 0
-    ScrCmd_038 3
-    ScrCmd_039
-    ScrCmd_03A 8, 0x800C
-    CallCommonScript 0x7D0
+Route212North_TrainerTipsSignpost:
+    ShowScrollingSign Route212North_Text_TrainerTipsReorganizeItems
     End
 
-_010B:
-    PlayFanfare SEQ_SE_CONFIRM
-    LockAll
-    FacePlayer
-    Message 1
-    WaitABXPadPress
-    CloseMessage
-    ReleaseAll
+Route212North_Collector:
+    NPCMessage Route212North_Text_FindAttractiveTree
     End
 
-_011E:
-    PlayFanfare SEQ_SE_CONFIRM
-    LockAll
-    FacePlayer
-    Message 2
-    WaitABXPadPress
-    CloseMessage
-    ReleaseAll
+Route212North_PolicemanBobby:
+    NPCMessage Route212North_Text_SayHiToPolicemen
     End
 
-_0131:
-    PlayFanfare SEQ_SE_CONFIRM
-    LockAll
-    FacePlayer
-    Message 3
-    WaitABXPadPress
-    CloseMessage
-    ReleaseAll
+Route212North_PolicemanAlex:
+    NPCMessage Route212North_Text_PatrolsDayAndNight
     End
 
-_0144:
-    PlayFanfare SEQ_SE_CONFIRM
-    LockAll
-    FacePlayer
-    Message 4
-    WaitABXPadPress
-    CloseMessage
-    ReleaseAll
+Route212North_PolicemanDylan:
+    NPCMessage Route212North_Text_WorkingHard
     End
 
-_0157:
-    PlayFanfare SEQ_SE_CONFIRM
-    LockAll
-    FacePlayer
-    Message 5
-    WaitABXPadPress
-    CloseMessage
-    ReleaseAll
+Route212North_PolicemanCaleb:
+    NPCMessage Route212North_Text_PatrolTooMuch
     End
 
-    .byte 0
-    .byte 0
+    .balign 4, 0

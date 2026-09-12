@@ -1,54 +1,42 @@
-    .include "macros/scrcmd.inc"
+#include "macros/scrcmd.inc"
+#include "res/text/bank/floaroma_town_pokecenter_1f.h"
+#include "res/field/events/events_floaroma_town_pokecenter_1f.h"
 
-    .data
 
-    ScriptEntry _0012
-    ScriptEntry _001E
-    ScriptEntry _0031
-    ScriptEntry _0044
-    .short 0xFD13
+    ScriptEntry FloaromaTownPokecenter1F_Nurse
+    ScriptEntry FloaromaTownPokecenter1F_PokefanM
+    ScriptEntry FloaromaTownPokecenter1F_BattleGirl
+    ScriptEntry FloaromaTownPokecenter1F_AceTrainerF
+    ScriptEntryEnd
 
-_0012:
-    SetVar 0x8007, 2
-    CallCommonScript 0x7D2
+FloaromaTownPokecenter1F_Nurse:
+    Common_CallPokecenterNurse LOCALID_FLOAROMA_NURSE
     End
 
-_001E:
-    PlayFanfare SEQ_SE_CONFIRM
+FloaromaTownPokecenter1F_PokefanM:
+    NPCMessage FloaromaTownPokecenter1F_Text_WithPokemonSafeToTravelAlone
+    End
+
+FloaromaTownPokecenter1F_BattleGirl:
+    NPCMessage FloaromaTownPokecenter1F_Text_MyPokemonsHPGotLow
+    End
+
+FloaromaTownPokecenter1F_AceTrainerF:
+    PlaySE SE_CONFIRM_sseq_3
     LockAll
     FacePlayer
-    Message 0
-    WaitABXPadPress
+    GoToIfGe VAR_VALLEY_WINDWORKS_TEAM_GALACTIC_STATE, 2, FloaromaTownPokecenter1F_LongWayToEternaCity
+    Message FloaromaTownPokecenter1F_Text_ProblemsWithElectricPower
+    WaitButton
     CloseMessage
     ReleaseAll
     End
 
-_0031:
-    PlayFanfare SEQ_SE_CONFIRM
-    LockAll
-    FacePlayer
-    Message 1
-    WaitABXPadPress
+FloaromaTownPokecenter1F_LongWayToEternaCity:
+    Message FloaromaTownPokecenter1F_Text_LongWayToEternaCity
+    WaitButton
     CloseMessage
     ReleaseAll
     End
 
-_0044:
-    PlayFanfare SEQ_SE_CONFIRM
-    LockAll
-    FacePlayer
-    GoToIfGe 0x40CF, 2, _0064
-    Message 2
-    WaitABXPadPress
-    CloseMessage
-    ReleaseAll
-    End
-
-_0064:
-    Message 3
-    WaitABXPadPress
-    CloseMessage
-    ReleaseAll
-    End
-
-    .byte 0
+    .balign 4, 0

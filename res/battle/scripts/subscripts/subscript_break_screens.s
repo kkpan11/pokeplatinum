@@ -1,13 +1,12 @@
-    .include "macros/btlcmd.inc"
+#include "macros/btlcmd.inc"
 
-    .data
 
 _000:
     TryBreakScreens _015
     UpdateVar OPCODE_SET, BTLVAR_MOVE_EFFECT_CHANCE, 1
     Call BATTLE_SUBSCRIPT_ATTACK_MESSAGE_AND_ANIMATION
     // It shattered the barrier!
-    PrintMessage pl_msg_00000368_00606, TAG_NONE
+    PrintMessage BattleStrings_Text_ItShatteredTheBarrier, TAG_NONE
     Wait 
     WaitButtonABTime 30
     GoTo _022

@@ -1,49 +1,25 @@
-    .include "macros/scrcmd.inc"
+#include "macros/scrcmd.inc"
+#include "res/text/bank/floaroma_town_mart.h"
 
-    .data
 
-    ScriptEntry _0012
-    ScriptEntry _0028
-    ScriptEntry _003E
-    ScriptEntry _0051
-    .short 0xFD13
+    ScriptEntry FloaromaTownMart_CommonVendor
+    ScriptEntry FloaromaTownMart_SpecialtyVendor
+    ScriptEntry FloaromaTownMart_Beauty
+    ScriptEntry FloaromaTownMart_SchoolGirl
+    ScriptEntryEnd
 
-_0012:
-    PlayFanfare SEQ_SE_CONFIRM
-    LockAll
-    FacePlayer
-    CallCommonScript 0x7E3
-    ScrCmd_035
-    ScrCmd_147 1
-    ReleaseAll
+FloaromaTownMart_CommonVendor:
+    PokeMartCommonWithGreeting
     End
 
-_0028:
-    PlayFanfare SEQ_SE_CONFIRM
-    LockAll
-    FacePlayer
-    CallCommonScript 0x7E3
-    ScrCmd_035
-    ScrCmd_148 2
-    ReleaseAll
+FloaromaTownMart_SpecialtyVendor:
+    PokeMartSpecialtiesWithGreeting MART_SPECIALTIES_ID_FLOAROMA
     End
 
-_003E:
-    PlayFanfare SEQ_SE_CONFIRM
-    LockAll
-    FacePlayer
-    Message 0
-    WaitABXPadPress
-    CloseMessage
-    ReleaseAll
+FloaromaTownMart_Beauty:
+    NPCMessage FloaromaTownMart_Text_DressUpPokemonWithAccessories
     End
 
-_0051:
-    PlayFanfare SEQ_SE_CONFIRM
-    LockAll
-    FacePlayer
-    Message 1
-    WaitABXPadPress
-    CloseMessage
-    ReleaseAll
+FloaromaTownMart_SchoolGirl:
+    NPCMessage FloaromaTownMart_Text_CantBuyBerriesAtMarts
     End

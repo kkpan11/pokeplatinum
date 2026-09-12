@@ -1,6 +1,5 @@
-    .include "macros/btlcmd.inc"
+#include "macros/btlcmd.inc"
 
-    .data
 
 _000:
     CheckSubstitute BTLSCR_DEFENDER, _029
@@ -9,7 +8,7 @@ _000:
     Call BATTLE_SUBSCRIPT_ATTACK_MESSAGE_AND_ANIMATION
     UpdateMonData OPCODE_FLAG_ON, BTLSCR_DEFENDER, BATTLEMON_VOLATILE_STATUS, VOLATILE_CONDITION_NIGHTMARE
     // {0} began having a nightmare!
-    PrintMessage pl_msg_00000368_00411, TAG_NICKNAME, BTLSCR_DEFENDER
+    PrintMessage BattleStrings_Text_PokemonBeganHavingANightmare_Ally, TAG_NICKNAME, BTLSCR_DEFENDER
     Wait 
     WaitButtonABTime 30
     End 

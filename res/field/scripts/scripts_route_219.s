@@ -1,18 +1,12 @@
-    .include "macros/scrcmd.inc"
+#include "macros/scrcmd.inc"
+#include "res/text/bank/route_219.h"
 
-    .data
 
-    ScriptEntry _0006
-    .short 0xFD13
+    ScriptEntry Route219_ArrowSignpostSandgemBeach
+    ScriptEntryEnd
 
-_0006:
-    ScrCmd_036 0, 1, 0, 0x800C
-    ScrCmd_038 3
-    ScrCmd_039
-    ScrCmd_03B 0x800C
-    CallCommonScript 0x7D0
+Route219_ArrowSignpostSandgemBeach:
+    ShowArrowSign Route219_Text_SignSandgemBeach
     End
 
-    .byte 0
-    .byte 0
-    .byte 0
+    .balign 4, 0

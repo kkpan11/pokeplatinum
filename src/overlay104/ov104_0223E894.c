@@ -3,19 +3,17 @@
 #include <nitro.h>
 #include <string.h>
 
-#include "struct_defs/struct_0205AA50.h"
-
 #include "overlay104/struct_ov104_0223E9EC.h"
 #include "overlay104/struct_ov104_0223EA38.h"
 #include "overlay104/struct_ov104_0223F094.h"
 #include "overlay104/struct_ov104_0223F1B4.h"
 
+#include "bg_window.h"
 #include "buffer_manager.h"
 #include "heap.h"
 #include "screen_scroll_manager.h"
 #include "sys_task.h"
 #include "sys_task_manager.h"
-#include "unk_02018340.h"
 
 typedef struct {
     int unk_00;
@@ -84,9 +82,7 @@ static void ov104_0223F070(SysTask *param0, void *param1);
 void ov104_0223E894(int param0, u32 param1, u32 param2, BOOL *param3, u32 param4)
 {
     SysTask *v0;
-    UnkStruct_ov104_0223E894 *v1;
-
-    v1 = Heap_AllocFromHeap(11, sizeof(UnkStruct_ov104_0223E894));
+    UnkStruct_ov104_0223E894 *v1 = Heap_Alloc(HEAP_ID_FIELD2, sizeof(UnkStruct_ov104_0223E894));
     memset(v1, 0, sizeof(UnkStruct_ov104_0223E894));
 
     SysTask_Start(ov104_0223E8D8, v1, 5);
@@ -152,7 +148,7 @@ static void ov104_0223E8D8(SysTask *param0, void *param1)
         }
 
         SysTask_Done(param0);
-        Heap_FreeToHeap(v0);
+        Heap_Free(v0);
 
         return;
     }
@@ -177,9 +173,7 @@ void ov104_0223E9EC(UnkStruct_ov104_0223E9EC *param0, int param1, int param2, in
 
 BOOL ov104_0223E9F8(UnkStruct_ov104_0223E9EC *param0)
 {
-    BOOL v0;
-
-    v0 = ov104_0223EA38(&param0->unk_00);
+    BOOL v0 = ov104_0223EA38(&param0->unk_00);
     SysTask_ExecuteAfterVBlank(ov104_0223EA14, param0, 10);
 
     return v0;
@@ -204,9 +198,7 @@ void ov104_0223EA28(UnkStruct_ov104_0223EA38 *param0, int param1, int param2, in
 
 BOOL ov104_0223EA38(UnkStruct_ov104_0223EA38 *param0)
 {
-    int v0;
-
-    v0 = param0->unk_08 * param0->unk_0C;
+    int v0 = param0->unk_08 * param0->unk_0C;
     v0 = v0 / param0->unk_10;
 
     param0->unk_00 = v0 + param0->unk_04;
@@ -220,11 +212,9 @@ BOOL ov104_0223EA38(UnkStruct_ov104_0223EA38 *param0)
     return 1;
 }
 
-UnkStruct_ov104_0223EA84 *ov104_0223EA64(u32 param0)
+UnkStruct_ov104_0223EA84 *ov104_0223EA64(enum HeapID heapID)
 {
-    UnkStruct_ov104_0223EA84 *v0;
-
-    v0 = Heap_AllocFromHeap(param0, sizeof(UnkStruct_ov104_0223EA84));
+    UnkStruct_ov104_0223EA84 *v0 = Heap_Alloc(heapID, sizeof(UnkStruct_ov104_0223EA84));
     memset(v0, 0, sizeof(UnkStruct_ov104_0223EA84));
 
     return v0;
@@ -232,7 +222,7 @@ UnkStruct_ov104_0223EA84 *ov104_0223EA64(u32 param0)
 
 void ov104_0223EA7C(UnkStruct_ov104_0223EA84 *param0)
 {
-    Heap_FreeToHeap(param0);
+    Heap_Free(param0);
 }
 
 void ov104_0223EA84(UnkStruct_ov104_0223EA84 *param0, int param1, int param2, int param3, int param4, int param5, Window *param6, u32 param7, u32 param8, u8 param9)
@@ -302,19 +292,19 @@ static void ov104_0223EB44(Window *param0, s32 param1, s32 param2, s32 param3, s
         param2 = 256;
     }
 
-    BGL_WindowColor(param0, param5, param3, param1, param4 - param3, param2 - param1);
+    Window_FillRectWithColor(param0, param5, param3, param1, param4 - param3, param2 - param1);
 }
 
-UnkStruct_ov104_0223EBD0 *ov104_0223EBA0(u32 param0)
+UnkStruct_ov104_0223EBD0 *ov104_0223EBA0(enum HeapID heapID)
 {
     UnkStruct_ov104_0223EBD0 *v0;
     int v1;
 
-    v0 = Heap_AllocFromHeap(param0, sizeof(UnkStruct_ov104_0223EBD0));
+    v0 = Heap_Alloc(heapID, sizeof(UnkStruct_ov104_0223EBD0));
     memset(v0, 0, sizeof(UnkStruct_ov104_0223EBD0));
 
     for (v1 = 0; v1 < ((256 / 16) * (192 / 32)); v1++) {
-        v0->unk_04[v1] = ov104_0223EA64(param0);
+        v0->unk_04[v1] = ov104_0223EA64(heapID);
     }
 
     return v0;
@@ -328,7 +318,7 @@ void ov104_0223EBD0(UnkStruct_ov104_0223EBD0 *param0)
         ov104_0223EA7C(param0->unk_04[v0]);
     }
 
-    Heap_FreeToHeap(param0);
+    Heap_Free(param0);
 }
 
 void ov104_0223EBF0(UnkStruct_ov104_0223EBD0 *param0, u8 param1, u8 param2, Window *param3, u8 param4)
@@ -516,9 +506,9 @@ static void ov104_0223F070(SysTask *param0, void *param1)
     v0->unk_08++;
 }
 
-void ov104_0223F094(UnkStruct_ov104_0223F094 *param0, u32 param1)
+void ov104_0223F094(UnkStruct_ov104_0223F094 *param0, enum HeapID heapID)
 {
-    param0->screenScrollMgr = ScreenScrollManager_New(param1);
+    param0->screenScrollMgr = ScreenScrollManager_New(heapID);
     param0->unk_08 = 0;
     param0->unk_04 = ov104_0223F05C(param0);
 }
@@ -582,9 +572,7 @@ static void ov104_0223F150(UnkStruct_ov104_0223F0D8 *param0)
 
 static void ov104_0223F174(UnkStruct_ov104_0223F174 *param0)
 {
-    const void *v0;
-
-    v0 = BufferManager_GetReadBuffer(param0->bufferManager);
+    const void *v0 = BufferManager_GetReadBuffer(param0->bufferManager);
 
     BufferManager_StopDMA();
     BufferManager_StartDMA(v0, (void *)param0->unk_3020, (sizeof(UnkStruct_ov104_0223F1B4)), 1);
@@ -604,16 +592,16 @@ static void ov104_0223F1AC(void *param0)
     ov104_0223F174(v0);
 }
 
-UnkStruct_ov104_0223F174 *ov104_0223F1B4(u32 param0, UnkStruct_ov104_0223F1B4 *param1, int param2)
+UnkStruct_ov104_0223F174 *ov104_0223F1B4(u32 param0, UnkStruct_ov104_0223F1B4 *param1, enum HeapID heapID)
 {
     UnkStruct_ov104_0223F174 *v0;
     int v1;
 
-    v0 = Heap_AllocFromHeap(param2, sizeof(UnkStruct_ov104_0223F174));
+    v0 = Heap_Alloc(heapID, sizeof(UnkStruct_ov104_0223F174));
     memset(v0, 0, sizeof(UnkStruct_ov104_0223F174));
 
     GF_ASSERT(v0);
-    v0->bufferManager = BufferManager_New(param2, v0->unk_20, v0->unk_1820);
+    v0->bufferManager = BufferManager_New(heapID, v0->unk_20, v0->unk_1820);
 
     GF_ASSERT(v0->bufferManager);
     v0->unk_3020 = param0;
@@ -637,7 +625,7 @@ void ov104_0223F258(UnkStruct_ov104_0223F174 *param0)
         BufferManager_Delete(param0->bufferManager);
     }
 
-    Heap_FreeToHeap(param0);
+    Heap_Free(param0);
 }
 
 void *ov104_0223F27C(const UnkStruct_ov104_0223F174 *param0)

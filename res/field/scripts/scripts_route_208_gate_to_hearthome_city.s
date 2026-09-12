@@ -1,43 +1,22 @@
-    .include "macros/scrcmd.inc"
+#include "macros/scrcmd.inc"
+#include "res/text/bank/route_208_gate_to_hearthome_city.h"
 
-    .data
 
-    ScriptEntry _000E
-    ScriptEntry _0021
-    ScriptEntry _0034
-    .short 0xFD13
+    ScriptEntry Route208GateToHearthomeCity_PokemonBreederM
+    ScriptEntry Route208GateToHearthomeCity_MiddleAgedWoman
+    ScriptEntry Route208GateToHearthomeCity_Clefairy
+    ScriptEntryEnd
 
-_000E:
-    PlayFanfare SEQ_SE_CONFIRM
-    LockAll
-    FacePlayer
-    Message 0
-    WaitABXPadPress
-    CloseMessage
-    ReleaseAll
+Route208GateToHearthomeCity_PokemonBreederM:
+    NPCMessage Route208GateToHearthomeCity_Text_HearthomeCityGreatPlace
     End
 
-_0021:
-    PlayFanfare SEQ_SE_CONFIRM
-    LockAll
-    FacePlayer
-    Message 1
-    WaitABXPadPress
-    CloseMessage
-    ReleaseAll
+Route208GateToHearthomeCity_MiddleAgedWoman:
+    NPCMessage Route208GateToHearthomeCity_Text_YouSayHearthomeISayContests
     End
 
-_0034:
-    PlayFanfare SEQ_SE_CONFIRM
-    LockAll
-    FacePlayer
-    ScrCmd_04B 0x5DC
-    ScrCmd_04C 35, 0
-    Message 2
-    ScrCmd_04D
-    WaitABXPadPress
-    CloseMessage
-    ReleaseAll
+Route208GateToHearthomeCity_Clefairy:
+    PokemonCryAndMessage SPECIES_CLEFAIRY, Route208GateToHearthomeCity_Text_ClefairyCryPippii
     End
 
-    .byte 0
+    .balign 4, 0

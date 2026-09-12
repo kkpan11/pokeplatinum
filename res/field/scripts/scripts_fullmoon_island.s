@@ -1,109 +1,111 @@
-    .include "macros/scrcmd.inc"
+#include "macros/scrcmd.inc"
+#include "generated/hidden_locations.h"
+#include "res/text/bank/fullmoon_island.h"
+#include "res/field/events/events_fullmoon_island.h"
 
-    .data
 
-    ScriptEntry _000A
-    ScriptEntry _0015
-    .short 0xFD13
+    ScriptEntry FullmoonIsland_OnTransition
+    ScriptEntry FullmoonIsland_Sailor
+    ScriptEntryEnd
 
-_000A:
-    SetFlag 0x9D0
-    ScrCmd_270 0, 1
+FullmoonIsland_OnTransition:
+    SetFlag FLAG_FIRST_ARRIVAL_FULLMOON_ISLAND
+    EnableHiddenLocation HIDDEN_LOCATION_FULLMOON_ISLAND
     End
 
-_0015:
-    PlayFanfare SEQ_SE_CONFIRM
+FullmoonIsland_Sailor:
+    PlaySE SE_CONFIRM_sseq_3
     LockAll
     FacePlayer
-    ScrCmd_1BD 0x8004
-    ScrCmd_07E 0x1C5, 1, 0x800C
-    GoToIfEq 0x800C, 1, _0052
-    Message 1
-    ScrCmd_03E 0x800C
+    GetPlayerDir VAR_0x8004
+    CheckItem ITEM_LUNAR_WING, 1, VAR_RESULT
+    GoToIfEq VAR_RESULT, TRUE, FullmoonIsland_ThatsTheLunarWing
+    Message FullmoonIsland_Text_SailBackToCanalave
+    ShowYesNoMenu VAR_RESULT
     CloseMessage
-    GoToIfEq 0x800C, 0, _005D
-    GoTo _0098
+    GoToIfEq VAR_RESULT, MENU_YES, FullmoonIsland_TakeShipToCanalave
+    GoTo FullmoonIsland_AllRightThen
 
-_0052:
-    Message 0
+FullmoonIsland_ThatsTheLunarWing:
+    Message FullmoonIsland_Text_ThatsTheLunarWing
     CloseMessage
-    GoTo _005D
+    GoTo FullmoonIsland_TakeShipToCanalave
 
-_005D:
-    Call _00A3
-    CallIfEq 0x8004, 1, _00BD
-    CallIfEq 0x8004, 3, _00D7
-    CallIfEq 0x8004, 0, _00F1
-    ScrCmd_23D 0, 2, 33, 44, 0x2EE
+FullmoonIsland_TakeShipToCanalave:
+    Call FullmoonIsland_SailorEnterShip
+    CallIfEq VAR_0x8004, DIR_SOUTH, FullmoonIsland_PlayerWalkToShipSouth
+    CallIfEq VAR_0x8004, DIR_EAST, FullmoonIsland_PlayerWalkToShipEast
+    CallIfEq VAR_0x8004, DIR_NORTH, FullmoonIsland_PlayerWalkToShipNorth
+    TakeShipToCanalave
     ReleaseAll
     End
 
-_0098:
-    Message 3
-    WaitABXPadPress
+FullmoonIsland_AllRightThen:
+    Message FullmoonIsland_Text_AllRightThen
+    WaitButton
     CloseMessage
     ReleaseAll
     End
 
-_00A3:
-    ApplyMovement 0, _010C
+FullmoonIsland_SailorEnterShip:
+    ApplyMovement LOCALID_SAILOR, FullmoonIsland_Movement_SailorWalkToShip
     WaitMovement
-    PlayFanfare SEQ_SE_DP_KAIDAN2
-    ApplyMovement 0, _0118
-    WaitMovement
-    Return
-
-_00BD:
-    ApplyMovement 0xFF, _0120
-    WaitMovement
-    PlayFanfare SEQ_SE_DP_KAIDAN2
-    ApplyMovement 0xFF, _0118
+    PlaySE SEQ_SE_DP_KAIDAN2_sseq
+    ApplyMovement LOCALID_SAILOR, FullmoonIsland_Movement_SetInvisible
     WaitMovement
     Return
 
-_00D7:
-    ApplyMovement 0xFF, _0130
+FullmoonIsland_PlayerWalkToShipSouth:
+    ApplyMovement LOCALID_PLAYER, FullmoonIsland_Movement_PlayerWalkToShipSouth
     WaitMovement
-    PlayFanfare SEQ_SE_DP_KAIDAN2
-    ApplyMovement 0xFF, _0118
-    WaitMovement
-    Return
-
-_00F1:
-    ApplyMovement 0xFF, _013C
-    WaitMovement
-    PlayFanfare SEQ_SE_DP_KAIDAN2
-    ApplyMovement 0xFF, _0118
+    PlaySE SEQ_SE_DP_KAIDAN2_sseq
+    ApplyMovement LOCALID_PLAYER, FullmoonIsland_Movement_SetInvisible
     WaitMovement
     Return
 
+FullmoonIsland_PlayerWalkToShipEast:
+    ApplyMovement LOCALID_PLAYER, FullmoonIsland_Movement_PlayerWalkToShipEast
+    WaitMovement
+    PlaySE SEQ_SE_DP_KAIDAN2_sseq
+    ApplyMovement LOCALID_PLAYER, FullmoonIsland_Movement_SetInvisible
+    WaitMovement
+    Return
+
+FullmoonIsland_PlayerWalkToShipNorth:
+    ApplyMovement LOCALID_PLAYER, FullmoonIsland_Movement_PlayerWalkToShipNorth
+    WaitMovement
+    PlaySE SEQ_SE_DP_KAIDAN2_sseq
+    ApplyMovement LOCALID_PLAYER, FullmoonIsland_Movement_SetInvisible
+    WaitMovement
+    Return
+
     .balign 4, 0
-_010C:
-    MoveAction_00F
-    MoveAction_040
+FullmoonIsland_Movement_SailorWalkToShip:
+    WalkNormalEast
+    Delay15
     EndMovement
 
     .balign 4, 0
-_0118:
-    MoveAction_045
+FullmoonIsland_Movement_SetInvisible:
+    SetInvisible
     EndMovement
 
     .balign 4, 0
-_0120:
-    MoveAction_00D
-    MoveAction_00F 2
-    MoveAction_040
+FullmoonIsland_Movement_PlayerWalkToShipSouth:
+    WalkNormalSouth
+    WalkNormalEast 2
+    Delay15
     EndMovement
 
     .balign 4, 0
-_0130:
-    MoveAction_00F 2
-    MoveAction_040
+FullmoonIsland_Movement_PlayerWalkToShipEast:
+    WalkNormalEast 2
+    Delay15
     EndMovement
 
     .balign 4, 0
-_013C:
-    MoveAction_00C
-    MoveAction_00F 2
-    MoveAction_040
+FullmoonIsland_Movement_PlayerWalkToShipNorth:
+    WalkNormalNorth
+    WalkNormalEast 2
+    Delay15
     EndMovement

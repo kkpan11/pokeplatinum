@@ -1,6 +1,5 @@
-    .include "macros/btlcmd.inc"
+#include "macros/btlcmd.inc"
 
-    .data
 
 _000:
     CompareMonDataToValue OPCODE_EQU, BTLSCR_ATTACKER, BATTLEMON_ABILITY, ABILITY_MULTITYPE, _034
@@ -13,7 +12,7 @@ _000:
     Wait 
     WaitButtonABTime 30
     // {0} flung its {1}!
-    PrintMessage pl_msg_00000368_01144, TAG_NICKNAME_ITEM, BTLSCR_ATTACKER, BTLSCR_ATTACKER
+    PrintMessage BattleStrings_Text_PokemonFlungItsItem_Ally, TAG_NICKNAME_ITEM, BTLSCR_ATTACKER, BTLSCR_ATTACKER
     Wait 
     WaitButtonABTime 30
     RemoveItem BTLSCR_ATTACKER

@@ -1,8 +1,7 @@
 #ifndef POKEPLATINUM_GAME_RECORDS_H
 #define POKEPLATINUM_GAME_RECORDS_H
 
-#include "struct_decls/pokedexdata_decl.h"
-
+#include "pokedex.h"
 #include "savedata.h"
 
 #define NUM_U32_RECORDS 71
@@ -26,7 +25,7 @@ typedef struct GameRecords {
     EncodingSeed seed;
 } GameRecords;
 
-GameRecords *SaveData_GetGameRecordsPtr(SaveData *savedata);
+GameRecords *SaveData_GetGameRecords(SaveData *saveData);
 
 int GameRecords_SaveSize(void);
 void GameRecords_Init(GameRecords *records);
@@ -37,6 +36,6 @@ u32 GameRecords_AddToRecordValue(GameRecords *records, int id, u32 toAdd);
 u32 GameRecords_GetRecordValue(GameRecords *records, int id);
 void GameRecords_IncrementTrainerScore(GameRecords *records, int scoreID);
 u32 GameRecords_GetTrainerScore(GameRecords *records);
-void GameRecords_IncrementTrainerScoreOnCatch(GameRecords *records, const PokedexData *pokedex, const u16 species);
+void GameRecords_IncrementTrainerScoreOnCatch(GameRecords *records, const Pokedex *pokedex, const u16 species);
 
 #endif // POKEPLATINUM_GAME_RECORDS_H

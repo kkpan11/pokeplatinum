@@ -1,49 +1,25 @@
-    .include "macros/scrcmd.inc"
+#include "macros/scrcmd.inc"
+#include "res/text/bank/sunyshore_city_mart.h"
 
-    .data
 
-    ScriptEntry _0012
-    ScriptEntry _0028
-    ScriptEntry _003E
-    ScriptEntry _0051
-    .short 0xFD13
+    ScriptEntry SunyshoreCityMart_CommonVendor
+    ScriptEntry SunyshoreCityMart_SpecialtyVendor
+    ScriptEntry SunyshoreCityMart_RuinManiac
+    ScriptEntry SunyshoreCityMart_Sailor
+    ScriptEntryEnd
 
-_0012:
-    PlayFanfare SEQ_SE_CONFIRM
-    LockAll
-    FacePlayer
-    CallCommonScript 0x7E3
-    ScrCmd_035
-    ScrCmd_147 1
-    ReleaseAll
+SunyshoreCityMart_CommonVendor:
+    PokeMartCommonWithGreeting
     End
 
-_0028:
-    PlayFanfare SEQ_SE_CONFIRM
-    LockAll
-    FacePlayer
-    CallCommonScript 0x7E3
-    ScrCmd_035
-    ScrCmd_148 17
-    ReleaseAll
+SunyshoreCityMart_SpecialtyVendor:
+    PokeMartSpecialtiesWithGreeting MART_SPECIALTIES_ID_SUNYSHORE
     End
 
-_003E:
-    PlayFanfare SEQ_SE_CONFIRM
-    LockAll
-    FacePlayer
-    Message 0
-    WaitABXPadPress
-    CloseMessage
-    ReleaseAll
+SunyshoreCityMart_RuinManiac:
+    NPCMessage SunyshoreCityMart_Text_VictoryRoadIsHarrowing
     End
 
-_0051:
-    PlayFanfare SEQ_SE_CONFIRM
-    LockAll
-    FacePlayer
-    Message 1
-    WaitABXPadPress
-    CloseMessage
-    ReleaseAll
+SunyshoreCityMart_Sailor:
+    NPCMessage SunyshoreCityMart_Text_BuySealsAtMarket
     End

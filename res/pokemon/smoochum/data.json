@@ -1,5 +1,4 @@
 {
-    "name": "Smoochum",
     "base_stats": {
         "hp": 45,
         "attack": 30,
@@ -8,10 +7,7 @@
         "special_attack": 85,
         "special_defense": 65
     },
-    "types": [
-        "TYPE_ICE",
-        "TYPE_PSYCHIC"
-    ],
+    "types": [ "TYPE_ICE", "TYPE_PSYCHIC" ],
     "catch_rate": 45,
     "base_exp_reward": 87,
     "ev_yields": {
@@ -30,21 +26,30 @@
     "hatch_cycles": 25,
     "base_friendship": 70,
     "exp_rate": "EXP_RATE_MEDIUM_FAST",
-    "egg_groups": [
-        "EGG_GROUP_UNDISCOVERED",
-        "EGG_GROUP_UNDISCOVERED"
-    ],
-    "abilities": [
-        "ABILITY_OBLIVIOUS",
-        "ABILITY_FOREWARN"
-    ],
-    "great_marsh_flee_rate": 0,
-    "sprite": {
-        "color": "MON_COLOR_PINK",
-        "flip_sprite": false
-    },
+    "egg_groups": [ "EGG_GROUP_UNDISCOVERED", "EGG_GROUP_UNDISCOVERED" ],
+    "abilities": [ "ABILITY_OBLIVIOUS", "ABILITY_FOREWARN" ],
+    "safari_flee_rate": 0,
+    "body_color": "MON_COLOR_PINK",
+    "flip_sprite": false,
+    "icon_palette": 1,
     "learnset": {
-        "tms": [
+        "by_level": [
+            [ 1, "MOVE_POUND" ],
+            [ 5, "MOVE_LICK" ],
+            [ 8, "MOVE_SWEET_KISS" ],
+            [ 11, "MOVE_POWDER_SNOW" ],
+            [ 15, "MOVE_CONFUSION" ],
+            [ 18, "MOVE_SING" ],
+            [ 21, "MOVE_MEAN_LOOK" ],
+            [ 25, "MOVE_FAKE_TEARS" ],
+            [ 28, "MOVE_LUCKY_CHANT" ],
+            [ 31, "MOVE_AVALANCHE" ],
+            [ 35, "MOVE_PSYCHIC" ],
+            [ 38, "MOVE_COPYCAT" ],
+            [ 41, "MOVE_PERISH_SONG" ],
+            [ 45, "MOVE_BLIZZARD" ]
+        ],
+        "by_tm": [
             "TM03",
             "TM04",
             "TM06",
@@ -83,23 +88,7 @@
             "TM90",
             "TM92"
         ],
-        "level_up": {
-            "1": "MOVE_POUND",
-            "5": "MOVE_LICK",
-            "8": "MOVE_SWEET_KISS",
-            "11": "MOVE_POWDER_SNOW",
-            "15": "MOVE_CONFUSION",
-            "18": "MOVE_SING",
-            "21": "MOVE_MEAN_LOOK",
-            "25": "MOVE_FAKE_TEARS",
-            "28": "MOVE_LUCKY_CHANT",
-            "31": "MOVE_AVALANCHE",
-            "35": "MOVE_PSYCHIC",
-            "38": "MOVE_COPYCAT",
-            "41": "MOVE_PERISH_SONG",
-            "45": "MOVE_BLIZZARD"
-        },
-        "tutor": [
+        "by_tutor": [
             "MOVE_MUD_SLAP",
             "MOVE_ICY_WIND",
             "MOVE_ICE_PUNCH",
@@ -109,17 +98,101 @@
             "MOVE_ZEN_HEADBUTT",
             "MOVE_TRICK",
             "MOVE_UPROAR"
+        ],
+        "egg_moves": [
+            "MOVE_MEDITATE",
+            "MOVE_PSYCH_UP",
+            "MOVE_FAKE_OUT",
+            "MOVE_WISH",
+            "MOVE_ICE_PUNCH",
+            "MOVE_MIRACLE_EYE"
         ]
     },
     "evolutions": [
         [
-            "EVO_LEVEL_UP",
+            "EVO_LEVEL",
             30,
             "SPECIES_JYNX"
         ]
     ],
+    "offspring": "SPECIES_SMOOCHUM",
     "footprint": {
-        "has_footprint": true,
-        "footprint_size": "FOOTPRINT_MEDIUM"
+        "has": true,
+        "size": "FOOTPRINT_MEDIUM",
+        "type": "FOOTPRINT_TYPE_CUTE"
+    },
+    "pokedex_data": {
+        "height_inches": 16,
+        "weight_pounds": 13.2,
+        "body_shape": "SHAPE_BIPEDAL_TAILLESS",
+        "trainer_scale_f": 272,
+        "pokemon_scale_f": 407,
+        "trainer_scale_m": 256,
+        "pokemon_scale_m": 407,
+        "trainer_pos_f": 8,
+        "pokemon_pos_f": 28,
+        "trainer_pos_m": 9,
+        "pokemon_pos_m": 28,
+        "en": {
+            "name": "SMOOCHUM",
+            "category": "Kiss Pokémon",
+            "entry_text": [
+                "It tests everything by touching\n",
+                "with its lips, which remember\n",
+                "what it likes and dislikes."
+            ]
+        },
+        "fr": {
+            "name": "LIPPOUTI",
+            "category": "Pokémon Bisou",
+            "entry_text": [
+                "Il goûte à tout du bout des lèvres.\n",
+                "Elles gardent en mémoire ses\n",
+                "goûts et ses dégoûts."
+            ]
+        },
+        "de": {
+            "name": "KUSSILLA",
+            "category": "Kuss",
+            "entry_text": [
+                "Dieses PKMN berührt alles mit den\n",
+                "Lippen. Diese merken sich, was es\n",
+                "mag und nicht mag."
+            ]
+        },
+        "it": {
+            "name": "SMOOCHUM",
+            "category": "Pokémon Bacio",
+            "entry_text": [
+                "Analizza tutto con le labbra e con\n",
+                "esse riesce a memorizzare ciò che\n",
+                "gli piace e ciò che non gli piace."
+            ]
+        },
+        "es": {
+            "name": "SMOOCHUM",
+            "category": "Pokémon Beso",
+            "entry_text": [
+                "Analiza todo tocándolo con los\n",
+                "labios. Así puede recordar las\n",
+                "cosas que le gustan y disgustan."
+            ]
+        },
+        "jp": {
+            "name": "ムチュ－ル",
+            "category": "くちづけポケモン",
+            "entry_text": [
+                "なんでも　くちびるで　ふれてみて\n",
+                "たしかめる。すきな　ものも　きらいな\n",
+                "ものも　くちびるが　おぼえている。"
+            ]
+        }
+    },
+    "catching_show": {
+        "pal_park_land_area": "PAL_PARK_AREA_LAND_SOUTH_WEST",
+        "pal_park_water_area": "PAL_PARK_AREA_WATER_NONE",
+        "catching_points": 80,
+        "rarity": 10,
+        "unused": 2573
     }
 }

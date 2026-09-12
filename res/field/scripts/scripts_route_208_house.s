@@ -1,254 +1,251 @@
-    .include "macros/scrcmd.inc"
+#include "macros/scrcmd.inc"
+#include "res/text/bank/menu_entries.h"
+#include "res/text/bank/route_208_house.h"
 
-    .data
 
-    ScriptEntry _0016
-    ScriptEntry _001C
-    ScriptEntry _007C
-    ScriptEntry _0108
-    ScriptEntry _02D5
-    .short 0xFD13
+    ScriptEntry Route208House_OnTransition
+    ScriptEntry Route208House_OldMan
+    ScriptEntry Route208House_Twin
+    ScriptEntry Route208House_PokemonBreederF
+    ScriptEntry Route208House_Book
+    ScriptEntryEnd
 
-_0016:
-    SetFlag 0x9E7
+Route208House_OnTransition:
+    SetFlag FLAG_FIRST_ARRIVAL_BERRY_MASTERS_HOUSE
     End
 
-_001C:
-    PlayFanfare SEQ_SE_CONFIRM
+Route208House_OldMan:
+    PlaySE SE_CONFIRM_sseq_3
     LockAll
     FacePlayer
-    GoToIfSet 0xAA0, _0067
-    Message 0
-    ScrCmd_1B7 0x8004, 26
-    AddVar 0x8004, 149
-    SetVar 0x8005, 1
-    ScrCmd_07D 0x8004, 0x8005, 0x800C
-    GoToIfEq 0x800C, 0, _0072
-    SetFlag 0xAA0
-    CallCommonScript 0x7E0
+    GoToIfSet FLAG_DAILY_RECEIVED_ROUTE_208_HOUSE_RANDOM_BERRY, Route208House_FeedBerriesToPokemon
+    Message Route208House_Text_YouDeserveABerry
+    GetRandom VAR_0x8004, 26
+    AddVar VAR_0x8004, ITEM_CHERI_BERRY /* Random berry from Cheri to Tamato */
+    SetVar VAR_0x8005, 1
+    GoToIfCannotFitItem VAR_0x8004, VAR_0x8005, VAR_RESULT, Route208House_BagIsFull
+    SetFlag FLAG_DAILY_RECEIVED_ROUTE_208_HOUSE_RANDOM_BERRY
+    Common_GiveItemQuantityNoLineFeed
     CloseMessage
     ReleaseAll
     End
 
-_0067:
-    Message 1
-    WaitABXPadPress
+Route208House_FeedBerriesToPokemon:
+    Message Route208House_Text_FeedBerriesToPokemon
+    WaitButton
     CloseMessage
     ReleaseAll
     End
 
-_0072:
-    CallCommonScript 0x7E1
+Route208House_BagIsFull:
+    Common_MessageBagIsFull
     CloseMessage
     ReleaseAll
     End
 
-_007C:
-    PlayFanfare SEQ_SE_CONFIRM
+Route208House_Twin:
+    PlaySE SE_CONFIRM_sseq_3
     LockAll
     FacePlayer
-    GoToIfEq 0x4000, 1, _00ED
-    ScrCmd_134 7, 0x800C
-    GoToIfEq 0x800C, 1, _00FD
-    Message 2
-    ScrCmd_03E 0x800C
-    GoToIfEq 0x800C, 0, _00C7
-    GoToIfEq 0x800C, 1, _00E2
+    GoToIfEq VAR_MAP_LOCAL_0x00, 1, Route208House_ExplainBerrySearcher
+    CheckPoketchAppRegistered POKETCH_APPID_BERRYSEARCHER, VAR_RESULT
+    GoToIfEq VAR_RESULT, TRUE, Route208House_CertainBerriesNeedLotsOfWater
+    Message Route208House_Text_DoYouForgetWherePlanted
+    ShowYesNoMenu VAR_RESULT
+    GoToIfEq VAR_RESULT, MENU_YES, Route208House_GiveBerrySearcherApp
+    GoToIfEq VAR_RESULT, MENU_NO, Route208House_OKWithoutThis
     End
 
-_00C7:
-    Message 3
-    SetVar 0x4000, 1
-    SetVar 0x8004, 7
-    CallCommonScript 0x7D9
-    WaitABXPadPress
+Route208House_GiveBerrySearcherApp:
+    Message Route208House_Text_HaveThisPoketchApp
+    SetVar VAR_MAP_LOCAL_0x00, 1
+    SetVar VAR_0x8004, POKETCH_APPID_BERRYSEARCHER
+    Common_GivePoketchApp
+    WaitButton
     CloseMessage
     ReleaseAll
     End
 
-_00E2:
-    Message 4
-    WaitABXPadPress
+Route208House_OKWithoutThis:
+    Message Route208House_Text_OKWithoutThis
+    WaitButton
     CloseMessage
     ReleaseAll
     End
 
-_00ED:
-    ScrCmd_0D7 0, 7
-    Message 5
-    WaitABXPadPress
+Route208House_ExplainBerrySearcher:
+    BufferPoketchAppName 0, POKETCH_APPID_BERRYSEARCHER
+    Message Route208House_Text_BerrySearcherShowsRipeLocations
+    WaitButton
     CloseMessage
     ReleaseAll
     End
 
-_00FD:
-    Message 6
-    WaitABXPadPress
+Route208House_CertainBerriesNeedLotsOfWater:
+    Message Route208House_Text_CertainBerriesNeedLotsOfWater
+    WaitButton
     CloseMessage
     ReleaseAll
     End
 
-_0108:
-    PlayFanfare SEQ_SE_CONFIRM
+Route208House_PokemonBreederF:
+    PlaySE SE_CONFIRM_sseq_3
     LockAll
     FacePlayer
-    Message 7
-    ScrCmd_072 20, 2
-    ScrCmd_040 1, 1, 0, 1, 0x800C
-    ScrCmd_042 223, 0
-    ScrCmd_042 224, 1
-    ScrCmd_042 225, 2
-    ScrCmd_042 226, 3
-    ScrCmd_042 227, 4
-    ScrCmd_043
-    SetVar 0x8000, 0x800C
-    SetVar 0x8008, 0x8000
-    GoToIfEq 0x8008, 0, _0245
-    GoToIfEq 0x8008, 1, _0251
-    GoToIfEq 0x8008, 2, _025D
-    GoToIfEq 0x8008, 3, _0269
-    Message 9
-    GoTo _0229
+    Message Route208House_Text_WouldYouLikeSomeMulch
+    ShowMoney 20, 2
+    InitGlobalTextMenu 1, 1, 0, VAR_RESULT
+    AddMenuEntryImm MenuEntries_Text_MulchShop_GrowthMulch, 0
+    AddMenuEntryImm MenuEntries_Text_MulchShop_DampMulch, 1
+    AddMenuEntryImm MenuEntries_Text_MulchShop_StableMulch, 2
+    AddMenuEntryImm MenuEntries_Text_MulchShop_GooeyMulch, 3
+    AddMenuEntryImm MenuEntries_Text_MulchShop_Exit, 4
+    ShowMenu
+    SetVar VAR_0x8000, VAR_RESULT
+    SetVar VAR_0x8008, VAR_0x8000
+    GoToIfEq VAR_0x8008, 0, Route208House_TryBuyGrowthMulch
+    GoToIfEq VAR_0x8008, 1, Route208House_TryBuyDampMulch
+    GoToIfEq VAR_0x8008, 2, Route208House_TryBuyStableMulch
+    GoToIfEq VAR_0x8008, 3, Route208House_TryBuyGooeyMulch
+    Message Route208House_Text_PleaseComeAgain
+    GoTo Route208House_PokemonBreederFEnd
 
-_0180:
-    CallIfEq 0x8000, 0, _0275
-    CallIfEq 0x8000, 1, _027F
-    CallIfEq 0x8000, 2, _0289
-    CallIfEq 0x8000, 3, _0293
-    GoToIfEq 0x800C, 0, _023C
-    ScrCmd_07D 0x8001, 1, 0x800C
-    GoToIfEq 0x800C, 0, _0233
-    CallIfEq 0x8000, 0, _029D
-    CallIfEq 0x8000, 1, _02AB
-    CallIfEq 0x8000, 2, _02B9
-    CallIfEq 0x8000, 3, _02C7
-    ScrCmd_074
-    PlayFanfare SEQ_SE_DP_REGI
-    ScrCmd_07B 0x8001, 1, 0x800C
-    ScrCmd_0D1 0, 0x8001
-    Message 10
-    Message 8
-    GoTo _0229
+Route208House_TryBuyMulch:
+    CallIfEq VAR_0x8000, 0, Route208House_CheckMoneyGrowthMulch
+    CallIfEq VAR_0x8000, 1, Route208House_CheckMoneyDampMulch
+    CallIfEq VAR_0x8000, 2, Route208House_CheckMoneyStableMulch
+    CallIfEq VAR_0x8000, 3, Route208House_CheckMoneyGooeyMulch
+    GoToIfEq VAR_RESULT, 0, Route208House_YouDontHaveEnoughMoney
+    GoToIfCannotFitItem VAR_0x8001, 1, VAR_RESULT, Route208House_YourBagAppearsToBeFull
+    CallIfEq VAR_0x8000, 0, Route208House_SpendMoneyGrowthMulch
+    CallIfEq VAR_0x8000, 1, Route208House_SpendMoneyDampMulch
+    CallIfEq VAR_0x8000, 2, Route208House_SpendMoneyStableMulch
+    CallIfEq VAR_0x8000, 3, Route208House_SpendMoneyGooeyMulch
+    UpdateMoneyDisplay
+    PlaySE SEQ_SE_DP_REGI_sseq
+    AddItem VAR_0x8001, 1, VAR_RESULT
+    BufferItemName 0, VAR_0x8001
+    Message Route208House_Text_YouBoughtSomeMulch
+    Message Route208House_Text_MulchWillPromoteBerryGrowth
+    GoTo Route208House_PokemonBreederFEnd
 
-_0229:
-    WaitABXPadPress
+Route208House_PokemonBreederFEnd:
+    WaitButton
     CloseMessage
-    ScrCmd_073
+    HideMoney
     ReleaseAll
     End
 
-_0233:
-    Message 11
-    GoTo _0229
+Route208House_YourBagAppearsToBeFull:
+    Message Route208House_Text_YourBagAppearsToBeFull
+    GoTo Route208House_PokemonBreederFEnd
 
-_023C:
-    Message 12
-    GoTo _0229
+Route208House_YouDontHaveEnoughMoney:
+    Message Route208House_Text_YouDontHaveEnoughMoney
+    GoTo Route208House_PokemonBreederFEnd
 
-_0245:
-    SetVar 0x8001, 95
-    GoTo _0180
+Route208House_TryBuyGrowthMulch:
+    SetVar VAR_0x8001, ITEM_GROWTH_MULCH
+    GoTo Route208House_TryBuyMulch
 
-_0251:
-    SetVar 0x8001, 96
-    GoTo _0180
+Route208House_TryBuyDampMulch:
+    SetVar VAR_0x8001, ITEM_DAMP_MULCH
+    GoTo Route208House_TryBuyMulch
 
-_025D:
-    SetVar 0x8001, 97
-    GoTo _0180
+Route208House_TryBuyStableMulch:
+    SetVar VAR_0x8001, ITEM_STABLE_MULCH
+    GoTo Route208House_TryBuyMulch
 
-_0269:
-    SetVar 0x8001, 98
-    GoTo _0180
+Route208House_TryBuyGooeyMulch:
+    SetVar VAR_0x8001, ITEM_GOOEY_MULCH
+    GoTo Route208House_TryBuyMulch
 
-_0275:
-    ScrCmd_071 0x800C, 200
+Route208House_CheckMoneyGrowthMulch:
+    CheckMoney VAR_RESULT, 200
     Return
 
-_027F:
-    ScrCmd_071 0x800C, 200
+Route208House_CheckMoneyDampMulch:
+    CheckMoney VAR_RESULT, 200
     Return
 
-_0289:
-    ScrCmd_071 0x800C, 200
+Route208House_CheckMoneyStableMulch:
+    CheckMoney VAR_RESULT, 200
     Return
 
-_0293:
-    ScrCmd_071 0x800C, 200
+Route208House_CheckMoneyGooeyMulch:
+    CheckMoney VAR_RESULT, 200
     Return
 
-_029D:
-    ScrCmd_334 35, 200
-    ScrCmd_070 200
+Route208House_SpendMoneyGrowthMulch:
+    AddToGameRecord RECORD_MONEY_SPENT, 200
+    RemoveMoney 200
     Return
 
-_02AB:
-    ScrCmd_334 35, 200
-    ScrCmd_070 200
+Route208House_SpendMoneyDampMulch:
+    AddToGameRecord RECORD_MONEY_SPENT, 200
+    RemoveMoney 200
     Return
 
-_02B9:
-    ScrCmd_334 35, 200
-    ScrCmd_070 200
+Route208House_SpendMoneyStableMulch:
+    AddToGameRecord RECORD_MONEY_SPENT, 200
+    RemoveMoney 200
     Return
 
-_02C7:
-    ScrCmd_334 35, 200
-    ScrCmd_070 200
+Route208House_SpendMoneyGooeyMulch:
+    AddToGameRecord RECORD_MONEY_SPENT, 200
+    RemoveMoney 200
     Return
 
-_02D5:
-    PlayFanfare SEQ_SE_CONFIRM
+Route208House_Book:
+    PlaySE SE_CONFIRM_sseq_3
     LockAll
     FacePlayer
-    Message 13
-    GoTo _02E8
+    Message Route208House_Text_BookMuchAdoAboutMulch
+    GoTo Route208House_ReadAboutWhatMulch
     End
 
-_02E8:
-    Message 14
-    ScrCmd_041 30, 7, 0, 1, 0x800C
-    ScrCmd_33A 1
-    ScrCmd_042 19, 0
-    ScrCmd_042 20, 1
-    ScrCmd_042 21, 2
-    ScrCmd_042 22, 3
-    ScrCmd_042 23, 4
-    ScrCmd_043
-    SetVar 0x8008, 0x800C
-    GoToIfEq 0x8008, 0, _035B
-    GoToIfEq 0x8008, 1, _0366
-    GoToIfEq 0x8008, 2, _0371
-    GoToIfEq 0x8008, 3, _037C
-    GoToIfEq 0x8008, 4, _0387
-    GoTo _0387
+Route208House_ReadAboutWhatMulch:
+    Message Route208House_Text_ReadAboutWhatMulch
+    InitLocalTextMenu 30, 7, 0, VAR_RESULT
+    SetMenuXOriginToRight
+    AddMenuEntryImm Route208House_Text_GrowthMulch, 0
+    AddMenuEntryImm Route208House_Text_DampMulch, 1
+    AddMenuEntryImm Route208House_Text_StableMulch, 2
+    AddMenuEntryImm Route208House_Text_GooeyMulch, 3
+    AddMenuEntryImm Route208House_Text_Exit, 4
+    ShowMenu
+    SetVar VAR_0x8008, VAR_RESULT
+    GoToIfEq VAR_0x8008, 0, Route208House_ExplainGrowthMulch
+    GoToIfEq VAR_0x8008, 1, Route208House_ExplainDampMulch
+    GoToIfEq VAR_0x8008, 2, Route208House_ExplainStableMulch
+    GoToIfEq VAR_0x8008, 3, Route208House_ExplainGooeyMulch
+    GoToIfEq VAR_0x8008, 4, Route208House_BookEnd
+    GoTo Route208House_BookEnd
     End
 
-_035B:
-    Message 15
-    GoTo _02E8
+Route208House_ExplainGrowthMulch:
+    Message Route208House_Text_ExplainGrowthMulch
+    GoTo Route208House_ReadAboutWhatMulch
     End
 
-_0366:
-    Message 16
-    GoTo _02E8
+Route208House_ExplainDampMulch:
+    Message Route208House_Text_ExplainDampMulch
+    GoTo Route208House_ReadAboutWhatMulch
     End
 
-_0371:
-    Message 17
-    GoTo _02E8
+Route208House_ExplainStableMulch:
+    Message Route208House_Text_ExplainStableMulch
+    GoTo Route208House_ReadAboutWhatMulch
     End
 
-_037C:
-    Message 18
-    GoTo _02E8
+Route208House_ExplainGooeyMulch:
+    Message Route208House_Text_ExplainGooeyMulch
+    GoTo Route208House_ReadAboutWhatMulch
     End
 
-_0387:
+Route208House_BookEnd:
     CloseMessage
     ReleaseAll
     End
 
-    .byte 0
-    .byte 0
-    .byte 0
+    .balign 4, 0

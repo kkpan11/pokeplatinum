@@ -3,14 +3,15 @@
 #include <nitro.h>
 #include <string.h>
 
-#include "core_sys.h"
 #include "heap.h"
 #include "save_player.h"
 #include "savedata.h"
+#include "system.h"
+#include "text.h"
 
-Options *Options_New(u32 heapID)
+Options *Options_New(enum HeapID heapID)
 {
-    Options *options = Heap_AllocFromHeap(heapID, sizeof(Options));
+    Options *options = Heap_Alloc(heapID, sizeof(Options));
     Options_Init(options);
 
     return options;
@@ -36,19 +37,19 @@ void Options_Init(Options *options)
 void Options_SetSystemButtonMode(SaveData *saveData, enum OptionsButtonMode mode)
 {
     if (saveData != NULL) {
-        mode = Options_ButtonMode(SaveData_Options(saveData));
+        mode = Options_ButtonMode(SaveData_GetOptions(saveData));
     }
 
     switch (mode) {
     case OPTIONS_BUTTON_MODE_START_IS_X:
-        gCoreSys.buttonMode = BUTTON_MODE_START_IS_X;
+        gSystem.buttonMode = BUTTON_MODE_START_IS_X;
         break;
     case OPTIONS_BUTTON_MODE_L_IS_A:
-        gCoreSys.buttonMode = BUTTON_MODE_L_IS_A;
+        gSystem.buttonMode = BUTTON_MODE_L_IS_A;
         break;
     case OPTIONS_BUTTON_MODE_NORMAL:
     default:
-        gCoreSys.buttonMode = BUTTON_MODE_NORMAL;
+        gSystem.buttonMode = BUTTON_MODE_NORMAL;
         break;
     }
 }
@@ -68,11 +69,11 @@ u8 Options_TextFrameDelay(const Options *options)
     int speed = Options_TextSpeed(options);
 
     if (speed == OPTIONS_TEXT_SPEED_SLOW) {
-        return 8;
+        return TEXT_SPEED_SLOW;
     } else if (speed == OPTIONS_TEXT_SPEED_NORMAL) {
-        return 4;
+        return TEXT_SPEED_NORMAL;
     } else {
-        return 1;
+        return TEXT_SPEED_FAST;
     }
 }
 

@@ -1,81 +1,69 @@
-    .include "macros/scrcmd.inc"
+#include "macros/scrcmd.inc"
+#include "res/text/bank/galactic_hq_3f.h"
+#include "res/field/events/events_galactic_hq_3f.h"
 
-    .data
 
-    ScriptEntry _000E
-    ScriptEntry _0021
-    ScriptEntry _00B8
-    .short 0xFD13
+    ScriptEntry GalacticHQ3F_GruntM
+    ScriptEntry GalacticHQ3F_Door
+    ScriptEntry GalacticHQ3F_BgSign
+    ScriptEntryEnd
 
-_000E:
-    PlayFanfare SEQ_SE_CONFIRM
+GalacticHQ3F_GruntM:
+    NPCMessage GalacticHQ3F_Text_DoorsOpenWithSpecialKey
+    End
+
+GalacticHQ3F_Door:
+    PlaySE SE_CONFIRM_sseq_3
     LockAll
     FacePlayer
-    Message 0
-    WaitABXPadPress
+    CheckItem ITEM_GALACTIC_KEY, 1, VAR_RESULT
+    GoToIfEq VAR_RESULT, TRUE, GalacticHQ3F_AskUseGalacticKey
+    Message GalacticHQ3F_Text_DoorIsLocked
+    WaitButton
     CloseMessage
     ReleaseAll
     End
 
-_0021:
-    PlayFanfare SEQ_SE_CONFIRM
-    LockAll
-    FacePlayer
-    ScrCmd_07E 0x1B8, 1, 0x800C
-    GoToIfEq 0x800C, 1, _0049
-    Message 1
-    WaitABXPadPress
-    CloseMessage
-    ReleaseAll
+GalacticHQ3F_AskUseGalacticKey:
+    Message GalacticHQ3F_Text_UseGalacticKey
+    ShowYesNoMenu VAR_RESULT
+    GoToIfEq VAR_RESULT, MENU_YES, GalacticHQ3F_UseGalacticKey
+    GoToIfEq VAR_RESULT, MENU_NO, GalacticHQ3F_DontUseKey
     End
 
-_0049:
-    Message 2
-    ScrCmd_03E 0x800C
-    GoToIfEq 0x800C, 0, _006C
-    GoToIfEq 0x800C, 1, _00A0
-    End
-
-_006C:
-    ScrCmd_0CD 0
-    Message 3
-    WaitABXPadPress
-    ScrCmd_04B 0x5DC
-    PlayFanfare SEQ_SE_DP_DOOR10
-    ApplyMovement 5, _00A8
-    ApplyMovement 6, _00B0
+GalacticHQ3F_UseGalacticKey:
+    BufferPlayerName 0
+    Message GalacticHQ3F_Text_DoorOpened
+    WaitButton
+    WaitSE SE_CONFIRM_sseq_3
+    PlaySE SEQ_SE_DP_DOOR10_sseq
+    ApplyMovement LOCALID_GALACTIC_HQ_DOOR_WEST, GalacticHQ3F_Movement_DoorWestMoveWest
+    ApplyMovement LOCALID_GALACTIC_HQ_DOOR_EAST, GalacticHQ3F_Movement_DoorEastMoveEast
     WaitMovement
-    SetFlag 0x225
-    ScrCmd_065 5
-    ScrCmd_065 6
+    SetFlag FLAG_HIDE_GALACTIC_HQ_3F_DOOR
+    RemoveObject LOCALID_GALACTIC_HQ_DOOR_WEST
+    RemoveObject LOCALID_GALACTIC_HQ_DOOR_EAST
     CloseMessage
     ReleaseAll
     End
 
-_00A0:
+GalacticHQ3F_DontUseKey:
     CloseMessage
     ReleaseAll
     End
 
     .balign 4, 0
-_00A8:
-    MoveAction_012
+GalacticHQ3F_Movement_DoorWestMoveWest:
+    WalkFastWest
     EndMovement
 
     .balign 4, 0
-_00B0:
-    MoveAction_013
+GalacticHQ3F_Movement_DoorEastMoveEast:
+    WalkFastEast
     EndMovement
 
-_00B8:
-    PlayFanfare SEQ_SE_CONFIRM
-    LockAll
-    Message 4
-    WaitABXPadPress
-    CloseMessage
-    ReleaseAll
+GalacticHQ3F_BgSign:
+    EventMessage GalacticHQ3F_Text_TeamGalacticCredo
     End
 
-    .byte 0
-    .byte 0
-    .byte 0
+    .balign 4, 0
